@@ -1,6 +1,11 @@
 FROM ubuntu:22.04
 
 # We are thanks to Duke University for the publicly available Stata installer.
+# Note: Stata 17+ is required for Stata-MCP.
+# Available versions:
+#   Stata 19: https://public.econ.duke.edu/stata/installers/19/StataNow19Linux64.tar.gz
+#   Stata 18: https://public.econ.duke.edu/stata/installers/18/Stata18Linux64.tar.gz
+#   Stata 17: https://public.econ.duke.edu/stata/installers/17/Stata17Linux64.tar.gz
 ARG STATA_INSTALL_URL=https://public.econ.duke.edu/stata/installers/19/StataNow19Linux64.tar.gz
 
 ADD ${STATA_INSTALL_URL} /tmp/stata.tar.gz
