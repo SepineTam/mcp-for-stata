@@ -60,13 +60,13 @@ jobs:
             tag: "2025-02-26"
           - capture_version: "18"
             basis: "mp"
-            tag: "2024-01-13"
+            tag: "2026-01-13"
           - capture_version: "18"
             basis: "se"
-            tag: "2024-01-13"
+            tag: "2026-01-13"
           - capture_version: "18"
             basis: "be"
-            tag: "2024-01-13"
+            tag: "2026-01-13"
 
     steps:
       - name: Checkout code
