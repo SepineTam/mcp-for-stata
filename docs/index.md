@@ -68,6 +68,7 @@ If you want to explore more [clients](clients.md) or [agents](agents/index.md), 
 
 ### Advanced Features
 
+- **[Docker](docker.md)**: Run Stata-MCP in containerized environments
 - **[Security Guard](security.md)**: Security validation system for dangerous commands
 - **[Monitoring System](monitoring.md)**: RAM monitoring and resource limits
 
