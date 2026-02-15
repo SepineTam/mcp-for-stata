@@ -9,6 +9,9 @@ LABEL description="Stata-MCP Official Docker image for running Stata-MCP in a sa
 LABEL url="https://www.statamcp.com"
 LABEL license="AGPL-3.0"
 
+# Set user to avoid permission issues
+USER root
+
 # Stata CLI, can be overridden at runtime with -e STATA_CLI=stata-se
 ENV STATA_CLI=stata-${BASIS}
 
