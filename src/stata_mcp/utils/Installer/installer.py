@@ -12,6 +12,7 @@ import os
 import sys
 import tomllib
 from pathlib import Path
+from typing import Optional
 
 from ...core.stata import StataFinder
 
@@ -21,6 +22,9 @@ class Installer:
         self.sys_os = sys_os or sys.platform
         self.is_env = is_env
 
+        self._post_init()
+
+    def _post_init(self):
         self.command = "uvx"
         self.args = ["stata-mcp"]
         self.env = {"STATA_CLI": self.STATA_CLI} if self.is_env else {}
@@ -207,3 +211,43 @@ class Installer:
     def install_to_codex(self):
         config_file = Path.home() / ".codex" / "config.toml"
         self.install_to_toml_config(config_file, key="mcp_servers")
+
+
+class InstallerDockerMode(Installer):
+    def __init__(self,
+                 license_file_path: Path,
+                 work_dir: Optional[Path] = None,
+                 cpus: Optional[float] = None,
+                 memory: Optional[str] = None,
+                 image: str = "ghcr.io/sepinetam/stata-mcp:latest"):
+        # Skip parent __init__ to avoid calling parent _post_init
+        self.license_file_path = Path(license_file_path)
+        self.work_dir = Path(work_dir) if work_dir else Path.cwd()
+        self.cpus = cpus
+        self.memory = memory
+        self.image = image
+
+        super().__init__(is_env=False)
+
+    def _post_init(self):
+        self.args = [
+            "run",
+            "--rm",
+            "-i",
+        ]
+
+        if self.cpus:
+            self.args.extend(["--cpus", str(self.cpus)])
+        if self.memory:
+            self.args.extend(["--memory", self.memory])
+
+        self.args.extend([
+            "-v",
+            f"{self.license_file_path.as_posix()}:/usr/local/stata/stata.lic",
+            "-v",
+            f"{self.work_dir.as_posix()}:/workspace",
+            self.image,
+        ])
+
+        self.command = "docker"
+        self.env = {}

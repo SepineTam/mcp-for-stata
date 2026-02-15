@@ -71,6 +71,47 @@ def main() -> None:
         help="Target client (default: claude)",
     )
 
+    # Sandbox-install subcommand
+    sandbox_parser = subparsers.add_parser(
+        "sandbox-install",
+        help="Install Docker-based Stata-MCP to MCP client"
+    )
+    sandbox_parser.add_argument(
+        "-c",
+        "--client",
+        choices=["claude", "cc", "cursor", "cline", "codex"],
+        default="claude",
+        help="Target client (default: claude)",
+    )
+    sandbox_parser.add_argument(
+        "-l",
+        "--license-file",
+        required=True,
+        help="Path to Stata license file (stata.lic)",
+    )
+    sandbox_parser.add_argument(
+        "--work-dir",
+        default="./",
+        help="Working directory for Stata operations (default: current directory)",
+    )
+    sandbox_parser.add_argument(
+        "--cpus",
+        type=float,
+        default=None,
+        help="CPU core limit for container (e.g., 2.0)",
+    )
+    sandbox_parser.add_argument(
+        "--memory",
+        type=str,
+        default=None,
+        help="Memory limit for container (e.g., 4g, 512m)",
+    )
+    sandbox_parser.add_argument(
+        "--image",
+        default="ghcr.io/sepinetam/stata-mcp",
+        help="Docker image to use (default: ghcr.io/sepinetam/stata-mcp)",
+    )
+
     args = parser.parse_args()
 
     # Handle --usable flag
@@ -91,6 +132,19 @@ def main() -> None:
         from ..utils.Installer import Installer
         Installer(sys_os=sys.platform).install(args.client)
         print(f"Stata-MCP has been installed to {args.client}.")
+        sys.exit(0)
+
+    elif args.command == "sandbox-install":
+        from ..utils.Installer.installer import InstallerDockerMode
+        installer = InstallerDockerMode(
+            license_file_path=args.license_file,
+            work_dir=args.work_dir,
+            cpus=args.cpus,
+            memory=args.memory,
+            image=args.image,
+        )
+        installer.install(args.client)
+        print(f"Docker-based Stata-MCP has been installed to {args.client}.")
         sys.exit(0)
 
     # Default: Start MCP server
