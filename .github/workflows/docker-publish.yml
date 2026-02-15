@@ -15,23 +15,28 @@ permissions:
   packages: write
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Get version
+        id: version
+        env:
+          RAW_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
+        run: |
+          # Remove 'v' prefix
+          VERSION="${RAW_VERSION#v}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
   build:
+    needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - stata-version: 19
-            install-url: https://public.econ.duke.edu/stata/installers/19/StataNow19Linux64.tar.gz
-            suffix: s19
-            latest: true
-          - stata-version: 18
-            install-url: https://public.econ.duke.edu/stata/installers/18/Stata18Linux64.tar.gz
-            suffix: s18
-            latest: false
-          - stata-version: 17
-            install-url: https://public.econ.duke.edu/stata/installers/17/Stata17Linux64.tar.gz
-            suffix: s17
-            latest: false
+        CAPTURE_VERSION: ["19_5", "18", "17"]
+        BASIS: ["mp", "se", "be"]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,32 +57,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Generate tags
-        id: tags
-        env:
-          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
-          SUFFIX: ${{ matrix.suffix }}
-          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
-          REPO_OWNER: ${{ github.repository_owner }}
-          IS_LATEST: ${{ matrix.latest }}
-        run: |
-          # Convert to lowercase (Docker requires lowercase repo names)
-          REPO_OWNER_LOWER=$(echo "${REPO_OWNER}" | tr '[:upper:]' '[:lower:]')
-          TAGS="ghcr.io/${REPO_OWNER_LOWER}/stata-mcp:${VERSION}-${SUFFIX}"
-          TAGS="${TAGS},${DOCKER_USER}/stata-mcp:${VERSION}-${SUFFIX}"
-
-          if [ "${IS_LATEST}" = "true" ]; then
-            TAGS="${TAGS},ghcr.io/${REPO_OWNER_LOWER}/stata-mcp:latest"
-            TAGS="${TAGS},${DOCKER_USER}/stata-mcp:latest"
-          fi
-
-          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           build-args: |
-            STATA_INSTALL_URL=${{ matrix.install-url }}
+            CAPTURE_VERSION=${{ matrix.CAPTURE_VERSION }}
+            BASIS=${{ matrix.BASIS }}
           push: true
-          tags: ${{ steps.tags.outputs.tags }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:${{ needs.prepare.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:${{ needs.prepare.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:latest
+
