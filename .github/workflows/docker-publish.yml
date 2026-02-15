@@ -39,8 +39,34 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        CAPTURE_VERSION: ["19_5", "18_5", "18"]
-        BASIS: ["mp", "se", "be"]
+        include:
+          - capture_version: "19_5"
+            basis: "mp"
+            tag: "2026-01-14"
+          - capture_version: "19_5"
+            basis: "se"
+            tag: "2026-01-14"
+          - capture_version: "19_5"
+            basis: "be"
+            tag: "2026-01-14"
+          - capture_version: "18_5"
+            basis: "mp"
+            tag: "2025-02-26"
+          - capture_version: "18_5"
+            basis: "se"
+            tag: "2025-02-26"
+          - capture_version: "18_5"
+            basis: "be"
+            tag: "2025-02-26"
+          - capture_version: "18"
+            basis: "mp"
+            tag: "2024-01-13"
+          - capture_version: "18"
+            basis: "se"
+            tag: "2024-01-13"
+          - capture_version: "18"
+            basis: "be"
+            tag: "2024-01-13"
 
     steps:
       - name: Checkout code
@@ -67,12 +93,13 @@ jobs:
         with:
           context: .
           build-args: |
-            CAPTURE_VERSION=${{ matrix.CAPTURE_VERSION }}
-            BASIS=${{ matrix.BASIS }}
+            CAPTURE_VERSION=${{ matrix.capture_version }}
+            BASIS=${{ matrix.basis }}
+            TAG=${{ matrix.tag }}
           push: true
           tags: |
-            ghcr.io/${{ needs.prepare.outputs.repo_owner }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:${{ needs.prepare.outputs.version }}
-            ghcr.io/${{ needs.prepare.outputs.repo_owner }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:${{ needs.prepare.outputs.version }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:latest
+            ghcr.io/${{ needs.prepare.outputs.repo_owner }}/stata-mcp_${{ matrix.capture_version }}_${{ matrix.basis }}:${{ needs.prepare.outputs.version }}
+            ghcr.io/${{ needs.prepare.outputs.repo_owner }}/stata-mcp_${{ matrix.capture_version }}_${{ matrix.basis }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/stata-mcp_${{ matrix.capture_version }}_${{ matrix.basis }}:${{ needs.prepare.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/stata-mcp_${{ matrix.capture_version }}_${{ matrix.basis }}:latest
 
