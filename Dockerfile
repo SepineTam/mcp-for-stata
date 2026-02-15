@@ -5,7 +5,7 @@ LABEL description="Stata-MCP Official Docker image for running Stata-MCP in a sa
 LABEL url="https://www.statamcp.com"
 LABEL license="AGPL-3.0"
 
-# We are thanks to Duke University for the publicly available Stata installer.
+# We are thanks to Duke University for the publicly available mirror of Stata installer.
 # Note: Stata 17+ is required for Stata-MCP.
 # Available versions:
 #   Stata 19: https://public.econ.duke.edu/stata/installers/19/StataNow19Linux64.tar.gz
@@ -39,8 +39,13 @@ RUN apt-get update && apt-get install -y curl && \
     curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
+# Install Stata-MCP to system
+COPY . /app
+WORKDIR /app
+RUN uv sync
+
 # Set working directory and environment
 WORKDIR /workspace
 ENV STATA_MCP__CWD=/workspace
 
-CMD ["uvx", "stata-mcp", "-t", "stdio"]
+CMD ["/app/.venv/bin/stata-mcp", "-t", "stdio"]
