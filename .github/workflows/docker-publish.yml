@@ -3,6 +3,12 @@ name: Build and Push Docker Images
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., 1.13.33)'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -45,7 +51,7 @@ jobs:
       - name: Generate tags
         id: tags
         env:
-          VERSION: ${{ github.event.release.tag_name }}
+          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
           SUFFIX: ${{ matrix.suffix }}
           DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           REPO_OWNER: ${{ github.repository_owner }}
