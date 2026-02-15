@@ -2,6 +2,34 @@
 
 
 <details>
+<summary>Click to expand v1.13.33 details</summary>
+
+## [1.13.33] - 2026-02-15
+
+### Added
+- **Docker Support**: Full Docker containerization support for Stata-MCP
+  - Added Dockerfile for containerized Stata-MCP deployment
+  - Added GitHub Actions workflow for Docker image build and push to GHCR
+  - Supports Stata 17/18/19 with configurable installer URL
+- **CLI**: New `sandbox-install` command for Docker-based installation
+  - Install Docker-based Stata-MCP to MCP clients (Claude, Cursor, Cline, etc.)
+  - Configurable options: license file, work directory, CPU/memory limits, image tag
+  - Usage: `stata-mcp sandbox-install -l /path/to/stata.lic -c claude`
+
+### Changed
+- **Dockerfile**: Use local source code instead of PyPI for development builds
+
+### Documentation
+- **Docker Guide**: Added comprehensive Docker documentation (docs/docker.md)
+  - Image pull instructions for GHCR and DockerHub
+  - Container running examples with parameter explanations
+  - MCP client configuration for Docker-based setup
+  - Building from source with local/remote installers
+- **Index**: Added Docker to Advanced Features section
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.32 details</summary>
 
 ## [1.13.32] - 2026-02-06
