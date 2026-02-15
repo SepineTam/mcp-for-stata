@@ -19,22 +19,27 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      repo_owner: ${{ steps.version.outputs.repo_owner }}
     steps:
       - name: Get version
         id: version
         env:
           RAW_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
+          REPO_OWNER: ${{ github.repository_owner }}
         run: |
           # Remove 'v' prefix
           VERSION="${RAW_VERSION#v}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          # Lowercase repo owner
+          REPO_OWNER_LOWER=$(echo "${REPO_OWNER}" | tr '[:upper:]' '[:lower:]')
+          echo "repo_owner=${REPO_OWNER_LOWER}" >> $GITHUB_OUTPUT
 
   build:
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        CAPTURE_VERSION: ["19_5", "18", "17"]
+        CAPTURE_VERSION: ["19_5", "18_5", "18"]
         BASIS: ["mp", "se", "be"]
 
     steps:
@@ -66,8 +71,8 @@ jobs:
             BASIS=${{ matrix.BASIS }}
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:${{ needs.prepare.outputs.version }}
-            ghcr.io/${{ github.repository_owner }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:latest
+            ghcr.io/${{ needs.prepare.outputs.repo_owner }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:${{ needs.prepare.outputs.version }}
+            ghcr.io/${{ needs.prepare.outputs.repo_owner }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:${{ needs.prepare.outputs.version }}
             ${{ secrets.DOCKERHUB_USERNAME }}/stata-mcp_${{ matrix.CAPTURE_VERSION }}_${{ matrix.BASIS }}:latest
 
