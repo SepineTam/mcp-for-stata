@@ -95,6 +95,47 @@ docker stop stata-mcp-task
 docker rm stata-mcp-task
 ```
 
+## MCP Client Configuration
+
+### General Configuration
+
+To use the Docker image with MCP clients (Claude Code, Cursor, Cline, etc.), configure your MCP settings:
+
+```json
+{
+  "mcpServers": {
+    "stata-mcp": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-v",
+        "/path/to/stata.lic:/usr/local/stata/stata.lic",
+        "-v",
+        "/path/to/workspace:/workspace",
+        "ghcr.io/sepinetam/stata-mcp"
+      ]
+    }
+  }
+}
+```
+
+Replace:
+- `/path/to/stata.lic` - Absolute path to your Stata license file
+- `/path/to/workspace` - Absolute path to your working directory
+
+### Claude Code CLI
+
+Or use Claude Code CLI to add the Docker-based MCP server:
+
+```bash
+claude mcp add stata-mcp -s local -- docker run --rm -i \
+  -v /path/to/stata.lic:/usr/local/stata/stata.lic \
+  -v $(pwd):/workspace \
+  ghcr.io/sepinetam/stata-mcp
+```
+
 ## Building from Source
 
 If you want to build the image locally (mainly for developers):
