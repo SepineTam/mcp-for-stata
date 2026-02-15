@@ -57,11 +57,13 @@ jobs:
           REPO_OWNER: ${{ github.repository_owner }}
           IS_LATEST: ${{ matrix.latest }}
         run: |
-          TAGS="ghcr.io/${REPO_OWNER}/stata-mcp:${VERSION}-${SUFFIX}"
+          # Convert to lowercase (Docker requires lowercase repo names)
+          REPO_OWNER_LOWER=$(echo "${REPO_OWNER}" | tr '[:upper:]' '[:lower:]')
+          TAGS="ghcr.io/${REPO_OWNER_LOWER}/stata-mcp:${VERSION}-${SUFFIX}"
           TAGS="${TAGS},${DOCKER_USER}/stata-mcp:${VERSION}-${SUFFIX}"
 
           if [ "${IS_LATEST}" = "true" ]; then
-            TAGS="${TAGS},ghcr.io/${REPO_OWNER}/stata-mcp:latest"
+            TAGS="${TAGS},ghcr.io/${REPO_OWNER_LOWER}/stata-mcp:latest"
             TAGS="${TAGS},${DOCKER_USER}/stata-mcp:latest"
           fi
 
