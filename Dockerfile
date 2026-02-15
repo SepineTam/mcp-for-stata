@@ -1,5 +1,10 @@
 FROM ubuntu:22.04
 
+LABEL author="sepinetam"
+LABEL description="Stata-MCP Official Docker image for running Stata-MCP in a sandboxed environment"
+LABEL url="https://www.statamcp.com"
+LABEL license="AGPL-3.0"
+
 # We are thanks to Duke University for the publicly available Stata installer.
 # Note: Stata 17+ is required for Stata-MCP.
 # Available versions:
