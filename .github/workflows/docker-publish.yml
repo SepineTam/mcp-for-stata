@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g., 1.13.33)'
+        description: 'Package version tag'
         required: true
         type: string
 
@@ -57,8 +57,8 @@ jobs:
           REPO_OWNER: ${{ github.repository_owner }}
           IS_LATEST: ${{ matrix.latest }}
         run: |
-          TAGS="ghcr.io/${REPO_OWNER}/stata-mcp:v${VERSION}-${SUFFIX}"
-          TAGS="${TAGS},${DOCKER_USER}/stata-mcp:v${VERSION}-${SUFFIX}"
+          TAGS="ghcr.io/${REPO_OWNER}/stata-mcp:${VERSION}-${SUFFIX}"
+          TAGS="${TAGS},${DOCKER_USER}/stata-mcp:${VERSION}-${SUFFIX}"
 
           if [ "${IS_LATEST}" = "true" ]; then
             TAGS="${TAGS},ghcr.io/${REPO_OWNER}/stata-mcp:latest"
