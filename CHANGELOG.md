@@ -2,6 +2,36 @@
 
 
 <details>
+<summary>Click to expand v1.13.34 details</summary>
+
+## [1.13.34] - 2026-02-16
+
+### Changed
+- **Docker Refactor**: Complete Docker image architecture redesign
+  - Now using [AEA Data Editor's Stata images](https://github.com/AEADataEditor/docker-stata) as base
+  - No longer distributes Stata installer - users only need to provide license file
+  - New image naming convention: `stata-mcp_{VERSION}_{EDITION}` (e.g., `stata-mcp_19_5_mp`)
+  - Supports StataNow 19.5, 18.5, and Stata 18 with mp/se/be editions
+  - 9 image variants built via GitHub Actions matrix
+
+### Added
+- **CLI**: Enhanced `sandbox-install` command with new options
+  - `--version` / `-V`: Specify Stata version (19_5, 18_5, 18)
+  - `--edition` / `-e`: Specify Stata edition (mp, se, be)
+  - `--tag`: Specify Docker image tag (default: latest)
+  - Example: `stata-mcp sandbox-install -V 19_5 -e mp -l /path/to/stata.lic`
+
+### Fixed
+- Docker build permissions and lowercase repository name issues in GitHub Actions
+
+### Documentation
+- Updated Docker guide with new image naming and CLI options
+- Added license notice acknowledging StataCorp and AEA Data Editor
+- Added recommendation note for Docker beginners
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.33 details</summary>
 
 ## [1.13.33] - 2026-02-15
