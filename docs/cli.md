@@ -72,6 +72,34 @@ stata-mcp install -c codex     # Codex
 - `cline` - Cline (VSCode extension)
 - `codex` - Codex
 
+### Docker-based Installation (sandbox-install)
+
+Install Docker-based Stata-MCP to AI clients. Requires Docker and a valid Stata license.
+
+```bash
+# Basic usage with default settings (StataNow 19.5 MP)
+uvx stata-mcp sandbox-install -l /path/to/stata.lic
+
+# Specify Stata version and edition
+uvx stata-mcp sandbox-install \
+  --version 19_5 \
+  --edition mp \
+  -l /path/to/stata.lic \
+  -c claude
+
+# With resource limits
+uvx stata-mcp sandbox-install \
+  -V 18 \
+  -e se \
+  -l /path/to/stata.lic \
+  --cpus 2 \
+  --memory 4g
+```
+
+**Stata Versions:** `19_5`, `18_5`, `18`
+
+**Stata Editions:** `mp` (Multi-processor), `se` (Standard), `be` (Basic)
+
 ## Options
 
 ### Global Options
@@ -94,6 +122,19 @@ stata-mcp install -c codex     # Codex
 | Option | Short | Description |
 |--------|-------|-------------|
 | `--client` | `-c` | Target client (default: claude) |
+
+### Sandbox-Install Options
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--version` | `-V` | `19_5` | Stata version (19_5, 18_5, 18) |
+| `--edition` | `-e` | `mp` | Stata edition (mp, se, be) |
+| `--tag` | | `latest` | Docker image tag |
+| `--license-file` | `-l` | (required) | Path to Stata license file |
+| `--client` | `-c` | `claude` | Target client |
+| `--work-dir` | | `./` | Working directory |
+| `--cpus` | | (none) | CPU core limit |
+| `--memory` | | (none) | Memory limit (e.g., 4g) |
 
 ## Examples
 
