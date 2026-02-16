@@ -15,13 +15,61 @@ theme:
     - navigation.expand
     # Enables annotations in code blocks
     - content.code.annotate
-  palette:
-    primary: black
+    # Shows previous/next page navigation at bottom
+    - navigation.footer
+    # Back to top button
+    - navigation.top
+  palette:  # The palette part is referred from opendatalab/MinerU
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      scheme: default
+      primary: black
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
   font:
     text: Inter
     code: JetBrains Mono
   logo: https://example-data.statamcp.com/android-chrome-512x512.png
   favicon: https://r2.statamcp.com/favicon.ico
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sepinetam/stata-mcp
+      name: GitHub
+    - icon: material/email
+      link: mailto:sepinetam@gmail.com
+      name: E-mail
+
+copyright: &copyright |
+  Copyright &copy; 2025 - present <a href="https://github.com/sepinetam">Sepine Tam</a>. All Right Reserved. 
+
+plugins:
+  - search
+  - i18n:
+      languages:
+        - locale: en
+          name: English
+          default: true
+        - locale: zh
+          name: 简体中文
 
 nav:
   - Home: index.md
