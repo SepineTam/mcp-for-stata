@@ -107,9 +107,23 @@ def main() -> None:
         help="Memory limit for container (e.g., 4g, 512m)",
     )
     sandbox_parser.add_argument(
-        "--image",
-        default="ghcr.io/sepinetam/stata-mcp",
-        help="Docker image to use (default: ghcr.io/sepinetam/stata-mcp)",
+        "-V",
+        "--version",
+        choices=["19_5", "18_5", "18"],
+        default="19_5",
+        help="Stata version (default: 19_5)",
+    )
+    sandbox_parser.add_argument(
+        "-e",
+        "--edition",
+        choices=["mp", "se", "be"],
+        default="mp",
+        help="Stata edition: mp (Multi-processor), se (Standard), be (Basic) (default: mp)",
+    )
+    sandbox_parser.add_argument(
+        "--tag",
+        default="latest",
+        help="Docker image tag (default: latest)",
     )
 
     args = parser.parse_args()
@@ -136,12 +150,13 @@ def main() -> None:
 
     elif args.command == "sandbox-install":
         from ..utils.Installer.installer import InstallerDockerMode
+        image = f"ghcr.io/sepinetam/stata-mcp_{args.version}_{args.edition}:{args.tag}"
         installer = InstallerDockerMode(
             license_file_path=args.license_file,
             work_dir=args.work_dir,
             cpus=args.cpus,
             memory=args.memory,
-            image=args.image,
+            image=image,
         )
         installer.install(args.client)
         print(f"Docker-based Stata-MCP has been installed to {args.client}.")
