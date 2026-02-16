@@ -8,6 +8,8 @@
 >
 > **You must possess a valid Stata license to use these images.** By using these Docker images, you agree to comply with StataCorp's [End-User License Agreement](https://www.stata.com/order/end-user-license-agreement/).
 
+> **Note**: If you are not familiar with Docker, we recommend using Stata-MCP directly with `uvx stata-mcp` instead.
+
 Stata-MCP provides official Docker images for running in sandboxed environments. This is useful for:
 
 - **Isolation**: Run Stata-MCP without affecting your local environment
