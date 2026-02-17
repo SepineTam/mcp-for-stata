@@ -1,6 +1,6 @@
 # 使用指南
 
-> **希望未来不再有[星球大战](https://www.aeaweb.org/articles?id=10.1257/app.20150044)。** - 让我们从回归猴子进化为因果思考者。
+> **希望未来不再有[star war](https://www.aeaweb.org/articles?id=10.1257/app.20150044)。** - 让科研从 reg monkeys 变成有价值的研究。
 
 本指南介绍如何在不同环境和智能体中集成和使用 Stata-MCP。
 
@@ -17,6 +17,8 @@ uvx stata-mcp --usable
 ```
 
 ## 新功能
+<details markdown="1">
+<summary><strong>点击展开</strong></summary>
 
 ### 🔒 安全守卫系统
 
@@ -111,6 +113,8 @@ MAX_RAM_MB = -1
 ```
 
 详情请参阅[配置文档](configuration.md)。
+
+</details>
 
 ## 在 Python 中使用
 

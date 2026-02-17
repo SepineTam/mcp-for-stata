@@ -98,3 +98,6 @@ nav:
 repo_name: stata-mcp
 repo_url: https://github.com/sepinetam/stata-mcp
 site_url: https://docs.statamcp.com/
+
+markdown_extensions:
+  - md_in_html

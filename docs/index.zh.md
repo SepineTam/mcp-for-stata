@@ -2,7 +2,7 @@
 
 **让 LLM 帮助你使用 Stata 完成回归分析。**
 
-> 声明：所有文档均由 AI 生成，除了 [Usage.md](https://github.com/sepinetam/stata-mcp/blob/master/source/docs/Usages/Usage.md) 是由作者编写的。
+> 声明：所有文档均由 AI 生成，除了 [Usage.md](usage.zh.md) 是由作者编写的。
 
 ## 快速开始
 

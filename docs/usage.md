@@ -17,6 +17,8 @@ uvx stata-mcp --usable
 ```
 
 ## New Features
+<details markdown="1">
+<summary><strong>Click to expand</strong></summary>
 
 ### 🔒 Security Guard System
 
@@ -111,6 +113,8 @@ MAX_RAM_MB = -1
 ```
 
 For details, see [Configuration Documentation](configuration.md).
+
+</details>
 
 ## Usage in Python
 
