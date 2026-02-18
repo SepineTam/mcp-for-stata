@@ -29,4 +29,5 @@ RUN uv sync
 WORKDIR /workspace
 ENV STATA_MCP__CWD=/workspace
 
-CMD ["/app/.venv/bin/stata-mcp", "-t", "stdio"]
+ENTRYPOINT ["/app/.venv/bin/stata-mcp"]
+CMD ["-t", "stdio"]
