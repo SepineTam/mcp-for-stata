@@ -4,6 +4,9 @@ ARG TAG=2026-01-14
 
 FROM dataeditors/stata${CAPTURE_VERSION}-${BASIS}:$TAG
 
+# Re-declare ARG after FROM to preserve value for ENV
+ARG BASIS=mp
+
 LABEL author="sepinetam"
 LABEL description="Stata-MCP Official Docker image for running Stata-MCP in a sandboxed environment"
 LABEL url="https://www.statamcp.com"
@@ -13,7 +16,7 @@ LABEL license="AGPL-3.0"
 USER root
 
 # Stata CLI, can be overridden at runtime with -e STATA_CLI=stata-se
-ENV STATA_CLI=stata-${BASIS}
+ENV STATA_CLI=/usr/local/stata/stata-${BASIS}
 
 # Install uv
 RUN apt-get update && apt-get install -y curl && \
