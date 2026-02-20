@@ -125,6 +125,13 @@ def main() -> None:
         default="latest",
         help="Docker image tag (default: latest)",
     )
+    sandbox_parser.add_argument(
+        "-s",
+        "--source",
+        choices=["github", "docker"],
+        default="github",
+        help="Docker image registry source: github (ghcr.io) or docker (DockerHub) (default: github)",
+    )
 
     args = parser.parse_args()
 
@@ -150,7 +157,13 @@ def main() -> None:
 
     elif args.command == "sandbox-install":
         from ..utils.Installer.installer import InstallerDockerMode
-        image = f"ghcr.io/sepinetam/stata-mcp_{args.version}_{args.edition}:{args.tag}"
+
+        # Build image name based on source
+        image_name = f"stata-mcp_{args.version}_{args.edition}:{args.tag}"
+        if args.source.lower() == "github":
+            image = f"ghcr.io/sepinetam/{image_name}"
+        else:  # docker
+            image = f"sepinetam/{image_name}"
         installer = InstallerDockerMode(
             license_file_path=args.license_file,
             work_dir=args.work_dir,

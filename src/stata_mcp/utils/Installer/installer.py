@@ -236,6 +236,10 @@ class InstallerDockerMode(Installer):
             "-i",
         ]
 
+        # Add platform flag for macOS to run linux/amd64 images
+        if sys.platform == "darwin":
+            self.args.extend(["--platform", "linux/amd64"])
+
         if self.cpus:
             self.args.extend(["--cpus", str(self.cpus)])
         if self.memory:
