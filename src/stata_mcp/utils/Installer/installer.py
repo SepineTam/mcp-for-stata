@@ -9,6 +9,7 @@
 
 import json
 import os
+import platform
 import sys
 import tomllib
 from pathlib import Path
@@ -236,8 +237,8 @@ class InstallerDockerMode(Installer):
             "-i",
         ]
 
-        # Add platform flag for macOS to run linux/amd64 images
-        if sys.platform == "darwin":
+        # Add platform flag for non-amd64 machines (amd64-only images)
+        if platform.machine() not in ("x86_64", "amd64"):
             self.args.extend(["--platform", "linux/amd64"])
 
         if self.cpus:
