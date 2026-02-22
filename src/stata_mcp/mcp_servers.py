@@ -369,6 +369,9 @@ def ado_package_install(package: str,
         if installer.check_installed_from_msg(install_msg):
             logging.info(f"{package} is installed successfully.")
         else:
+            if source == "github":
+                install_msg += ("Please check the GitHub repo URL, verify case sensitivity, "
+                                "and ensure the GitHub command is installed in Stata")
             logging.error(f"{package} installation failed.")
             logging.debug(f"Full installation message: {install_msg}")
 
