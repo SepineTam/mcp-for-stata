@@ -379,6 +379,8 @@ class DataInfoBase(ABC):
                 "var": var_name,
                 "summary": series_obj.get_summary()
             }
+            # Merge extra info from subclass
+            var_info.update(self._get_var_extra_info(var_name))
 
             vars_detail[var_name] = var_info
 
@@ -531,6 +533,18 @@ class DataInfoBase(ABC):
             return StringSeries(data=non_na_series, max_display=self.string_keep_number)
         else:  # float type
             return NumericSeries(data=non_na_series, max_decimal_places=self.decimal_places)
+
+    def _get_var_extra_info(self, var_name: str) -> Dict[str, Any]:
+        """
+        Get extra information for a variable. Override in subclasses.
+
+        Args:
+            var_name: Variable name
+
+        Returns:
+            Dict with extra fields to add to var_info
+        """
+        return {}
 
     @staticmethod
     def _determine_variable_type(series: pd.Series) -> str:

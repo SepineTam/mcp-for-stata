@@ -9,6 +9,7 @@
 
 from io import BytesIO
 from pathlib import Path
+from typing import Any, Dict
 
 import pandas as pd
 import requests
@@ -20,6 +21,7 @@ class DtaDataInfo(DataInfoBase):
     """Data info handler for Stata .dta files."""
 
     supported_extensions = ['dta']
+    _variable_labels: Dict[str, str] = {}
 
     def _read_data(self) -> pd.DataFrame:
         """
@@ -63,8 +65,16 @@ class DtaDataInfo(DataInfoBase):
                 resp.raise_for_status()
                 buffer = BytesIO(resp.content)
 
+            # Read variable labels using StataReader
+            with pd.io.stata.StataReader(buffer if buffer else file_path) as reader:
+                self._variable_labels = reader.variable_labels()
+
+            # Reset buffer position after reading labels
+            if buffer:
+                buffer.seek(0)
+
             df = pd.read_stata(
-                buffer or file_path,
+                buffer if buffer else file_path,
                 convert_categoricals=False,  # disable change data to mapped str.
                 convert_dates=True,
                 convert_missing=False,
@@ -74,3 +84,16 @@ class DtaDataInfo(DataInfoBase):
 
         except Exception as e:
             raise ValueError(f"Error reading Stata file {self.data_path}: {str(e)}")
+
+    def _get_var_extra_info(self, var_name: str) -> Dict[str, Any]:
+        """
+        Return variable label for dta files.
+
+        Args:
+            var_name: Variable name
+
+        Returns:
+            Dict with label field if the variable has a label
+        """
+        label = self._variable_labels.get(var_name, "")
+        return {"label": label} if label else {}
