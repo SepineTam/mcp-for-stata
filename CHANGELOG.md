@@ -2,6 +2,35 @@
 
 
 <details>
+<summary>Click to expand v1.13.35 details</summary>
+
+## [1.13.35] - 2026-02-22
+
+### Added
+- **Data Info**: Variable labels support for Stata .dta files
+  - `get_data_info` now returns variable labels in `vars_detail` for DTA files
+  - Added `_get_var_extra_info` hook method in base class for subclass extensibility
+
+### Fixed
+- **Data Info**: Unified extension validation across CSV and Excel handlers
+  - Both now use `self.suffix` and `self.supported_extensions` consistently
+  - Removed redundant `valid_extensions` local variables
+
+### Changed
+- **CLI**: Added `--source` option for Docker image registry selection
+- **Docker**: Detect architecture instead of OS for platform flag
+
+### Documentation
+- Enhanced mkdocs config with i18n and theme features
+- Added Chinese translations for i18n support
+- Added collapsible new features section and fixed usage links
+
+### CI
+- Added mkdocs-static-i18n to gh-pages workflow
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.34 details</summary>
 
 ## [1.13.34] - 2026-02-16
