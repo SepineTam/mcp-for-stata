@@ -8,7 +8,6 @@
 # @File   : xlsx.py
 
 from pathlib import Path
-from urllib.parse import urlparse
 
 import pandas as pd
 
@@ -33,12 +32,7 @@ class ExcelDataInfo(DataInfoBase):
             FileNotFoundError: If the local file does not exist
             ValueError: If the file is not a valid Excel file
         """
-        valid_extensions = {".xlsx", ".xls"}
-
         if self.is_url:
-            parsed_url = urlparse(str(self.data_path))
-            if Path(parsed_url.path).suffix.lower() not in valid_extensions:
-                raise ValueError(f"URL must point to an Excel file with extensions {valid_extensions}")
             source = str(self.data_path)
         else:
             file_path = Path(self.data_path)
@@ -46,8 +40,8 @@ class ExcelDataInfo(DataInfoBase):
             if not file_path.exists():
                 raise FileNotFoundError(f"Excel file not found: {file_path}")
 
-            if file_path.suffix.lower() not in valid_extensions:
-                raise ValueError(f"File must have extension in {valid_extensions}, got: {file_path.suffix}")
+            if self.suffix.lower() not in self.supported_extensions:
+                raise ValueError(f"File must have extension in {self.supported_extensions}, got: {self.suffix}")
 
             source = file_path
 

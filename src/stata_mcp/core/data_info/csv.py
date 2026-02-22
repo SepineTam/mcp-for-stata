@@ -42,9 +42,8 @@ class CsvDataInfo(DataInfoBase):
             raise FileNotFoundError(f"CSV file not found: {file_path}")
 
         # Check if it's a CSV file
-        valid_extensions = {'.csv', '.txt', '.tsv', '.psv'}
-        if self.suffix.lower() not in valid_extensions:
-            raise ValueError(f"File must have extension in {valid_extensions}, got: {self.suffix}")
+        if self.suffix.lower() not in self.supported_extensions:
+            raise ValueError(f"File must have extension in {self.supported_extensions}, got: {self.suffix}")
 
         try:
             # Auto-detect header if not explicitly specified
