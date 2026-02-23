@@ -2,6 +2,20 @@
 
 
 <details>
+<summary>Click to expand v1.13.36 details</summary>
+
+## [1.13.36] - 2026-02-23
+
+### Fixed
+- **Guard**: Fixed false positives in security validation
+  - Added line-start anchor (`^\s*`) to all DANGEROUS_PATTERNS to prevent matching commands in the middle of lines
+  - Fixed `describe`, `summarize`, and `capture confirm variable rm` being incorrectly flagged as dangerous
+  - Commands like `rm`, `do`, `shell` are now only matched at line start (allowing indentation)
+  - Removed duplicate `\bdo\s+.*` pattern
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.35 details</summary>
 
 ## [1.13.35] - 2026-02-22
