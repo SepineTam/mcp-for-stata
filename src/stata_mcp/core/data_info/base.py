@@ -178,14 +178,17 @@ class DataInfoBase(ABC):
 
         self.string_keep_number = string_keep_number or int(os.getenv("STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", 10))
         self.decimal_places = decimal_places or int(os.getenv("STATA_MCP_DATA_INFO_DECIMAL_PLACES", 3))
-        self.HASH_LENGTH = hash_length or os.getenv("HASH_LENGTH", 12)
+        self.HASH_LENGTH = hash_length or int(os.getenv("STATA_MCP_DATA_INFO_HASH_LENGTH", "12"))
 
         self.kwargs = kwargs  # Store additional keyword arguments for subclasses to use
 
     # Properties
     @property
     def hash(self) -> str:
-        # TODO: URL inputs cannot directly use read_bytes, low priority
+        if self.is_url:
+            import requests
+            resp = requests.get(self.data_path)
+            return hashlib.md5(resp.content).hexdigest()
         return hashlib.md5(self.data_path.read_bytes()).hexdigest()
 
     @property
