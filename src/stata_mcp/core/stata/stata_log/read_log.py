@@ -23,9 +23,9 @@ class StataLog:
     """
 
     @classmethod
-    def log(
+    def _generate_log(
         cls,
-        log_file_path: Path | str,
+        log_file_path: Path,
         encoding: str = "utf-8"
     ) -> Union[StataLogTEXT, StataLogSMCL]:
         """
@@ -67,6 +67,6 @@ class StataLog:
         """Alias for log() method for backward compatibility."""
         try:
             log_file_path = Path(log_file_path).resolve()
-            return cls.log(log_file_path, encoding)
+            return cls._generate_log(log_file_path, encoding)
         except Exception as e:
             raise ValueError(f"Invalid log file path: {log_file_path}") from e
