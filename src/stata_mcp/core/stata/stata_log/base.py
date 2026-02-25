@@ -12,13 +12,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 
 
 @dataclass
 class StataLogInfo:
     log_file_path: Path
-    command_result_mapping: Dict[str, str]  # {command: results}
+    command_result_list: List[Dict[str, str]]  # [{"command": cmd, "result": res}, ...]
     do_file_path: Path = None
 
 
