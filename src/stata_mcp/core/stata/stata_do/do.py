@@ -12,7 +12,7 @@ import os
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from ....utils import get_nowtime
 
@@ -52,10 +52,13 @@ class StataDo:
     def STATA_CLI(self):
         return self.stata_cli
 
-    def execute_dofile(self,
-                       dofile_path: Path,
-                       log_file_name: str = None,
-                       is_replace: bool = True) -> Path:
+    def execute_dofile(
+        self,
+        dofile_path: Path,
+        log_file_name: str = None,
+        is_replace: bool = True,
+        enable_smcl: bool = True
+    ) -> Dict[str, Path]:
         """
         Execute Stata do file and return log file path
 
@@ -63,9 +66,12 @@ class StataDo:
             dofile_path (Path): Path to do file
             log_file_name (str, optional): File name of log
             is_replace (bool): Whether replace the log file if exists before. Default is True
+            enable_smcl (bool): Whether enable .smcl format log. Default is True
 
         Returns:
-            Path: Path to generated log file
+            Dict[str, Path]: Dictionary of generated log file paths.
+                - "text": .log file path (always present)
+                - "smcl": .smcl file path (present if enable_smcl is True)
 
         Raises:
             ValueError: Unsupported operating system
@@ -76,17 +82,20 @@ class StataDo:
         log_file = self.log_file_path / f"{log_name}.log"
 
         if self.is_unix:
+            args = dofile_path, log_name, is_replace, enable_smcl
             if self.IS_MONITOR:
-                self._execute_unix_like_with_monitors(dofile_path, log_file, is_replace)
+                return self._execute_unix_like_with_monitors(*args)
             else:
-                self._execute_unix_like(dofile_path, log_file, is_replace)
+                return self._execute_unix_like(*args)
         else:
+            # As I do not have a Windows device, I can't test this feature.
+            # Therefore, Windows is not supported yet.
             if self.IS_MONITOR:
                 self._execute_windows_with_monitors(dofile_path, log_file, is_replace)
             else:
                 self._execute_windows(dofile_path, log_file, is_replace)
 
-        return log_file
+        return {"text": log_file}
 
     @staticmethod
     def set_fake_terminal_size_env(columns: str | int = '120',
@@ -96,14 +105,35 @@ class StataDo:
         env['LINES'] = str(lines)
         return env
 
-    def _execute_unix_like(self, dofile_path: Path, log_file: Path, is_replace: bool = True):
+    @staticmethod
+    def generate_log_command(log_file: Path, is_replace: bool = True, log_type: Literal['smcl', 'text'] = 'text'):
+        replace_clause = 'replace' if is_replace else ''
+        log_cmd = f'log using "{log_file.as_posix()}", {replace_clause} {log_type} name({log_type}_log)'
+        return log_cmd
+
+    def generate_log_file(self, log_name: str, extension: Literal['smcl', 'log'] = 'log'):
+        return self.log_file_path / f"{log_name}.{extension}"
+
+    def _execute_unix_like(
+        self,
+        dofile_path: Path,
+        log_name: str,
+        is_replace: bool = True,
+        enable_smcl: bool = True
+    ) -> Dict[str, Path]:
         """
         Execute Stata on macOS/Linux systems
 
         Args:
             dofile_path: Path to do file
-            log_file: Path to log file
+            log_name: name of log file
             is_replace: Whether replace the log file if exists.
+            enable_smcl: Whether to generate SMCL format log.
+
+        Returns:
+            Dict[str, Path]: Dictionary of generated log file paths.
+                - "text": .log file path (always present)
+                - "smcl": .smcl file path (present if enable_smcl is True)
 
         Raises:
             RuntimeError: Stata execution error
@@ -123,13 +153,15 @@ class StataDo:
         )
 
         # Execute commands sequentially in Stata
-        replace_clause = ", replace" if is_replace else ""
+        log_file = self.generate_log_file(log_name)
+        smcl_file = self.generate_log_file(log_name, 'smcl')
 
         commands = f"""
         capture log close
-        log using "{log_file}"{replace_clause}
+        {self.generate_log_command(log_file, is_replace)}
+        {self.generate_log_command(smcl_file, is_replace, 'smcl') if enable_smcl else ''}
         do "{dofile_path}"
-        log close
+        log close _all
         exit, STATA
         """
         _, stderr = proc.communicate(input=commands)  # Send commands and wait for completion
@@ -139,6 +171,11 @@ class StataDo:
             raise RuntimeError(f"Something went wrong: {stderr}")
         else:
             logging.info(f"Stata execution completed successfully. Log file: {log_file}")
+
+        log_path_mapping = {"text": log_file}
+        if enable_smcl:
+            log_path_mapping["smcl"] = smcl_file
+        return log_path_mapping
 
     def _execute_windows(self, dofile_path: Path, log_file: Path, is_replace: bool = True):
         """
@@ -191,14 +228,26 @@ class StataDo:
                 except Exception as e:
                     logging.warning(f"Failed to remove temporary batch file {batch_file}: {str(e)}")
 
-    def _execute_unix_like_with_monitors(self, dofile_path: Path, log_file: Path, is_replace: bool = True):
+    def _execute_unix_like_with_monitors(
+        self,
+        dofile_path: Path,
+        log_name: str,
+        is_replace: bool = True,
+        enable_smcl: bool = True
+    ) -> Dict[str, Path]:
         """
         Execute Stata on macOS/Linux systems with monitoring enabled.
 
         Args:
             dofile_path: Path to do file
-            log_file: Path to log file
+            log_name: name of log file
             is_replace: Whether replace the log file if exists.
+            enable_smcl: Whether to generate SMCL format log.
+
+        Returns:
+            Dict[str, Path]: Dictionary of generated log file paths.
+                - "text": .log file path (always present)
+                - "smcl": .smcl file path (present if enable_smcl is True)
 
         Raises:
             RuntimeError: Stata execution error
@@ -218,13 +267,15 @@ class StataDo:
         )
 
         # Execute commands sequentially in Stata
-        replace_clause = ", replace" if is_replace else ""
+        log_file = self.generate_log_file(log_name)
+        smcl_file = self.generate_log_file(log_name, 'smcl')
 
         commands = f"""
         capture log close
-        log using "{log_file}"{replace_clause}
+        {self.generate_log_command(log_file, is_replace)}
+        {self.generate_log_command(smcl_file, is_replace, 'smcl') if enable_smcl else ''}
         do "{dofile_path}"
-        log close
+        log close _all
         exit, STATA
         """
 
@@ -247,6 +298,11 @@ class StataDo:
             raise RuntimeError(f"Something went wrong: {stderr}")
         else:
             logging.info(f"Stata execution completed successfully. Log file: {log_file}")
+
+        generated_log_paths = {"text": log_file}
+        if enable_smcl:
+            generated_log_paths["smcl"] = smcl_file
+        return generated_log_paths
 
     def _execute_windows_with_monitors(self, dofile_path: Path, log_file: Path, is_replace: bool = True):
         """

@@ -150,9 +150,13 @@ if IS_UNIX:
 
 
 @stata_mcp.tool(name="stata_do", description="Run a stata-code via Stata")
-def stata_do(dofile_path: str,
-             log_file_name: str = None,
-             is_read_log: bool = True) -> Dict[str, Any]:
+def stata_do(
+    dofile_path: str,
+    log_file_name: str = None,
+    is_read_log: bool = True,
+    is_replace_log: bool = True,
+    enable_smcl: bool = True
+) -> Dict[str, Any]:
     """
     Execute a Stata do-file and return the log file path with optional log content.
 
@@ -206,6 +210,8 @@ def stata_do(dofile_path: str,
     # Convert dofile_path from str to Path
     try:
         dofile_path = Path(dofile_path)
+        if not dofile_path.exists():
+            return {"error": f"Dofile {dofile_path} does not exist"}
     except Exception as e:
         return {"error": f"Could not recognize dofile_path as pathlib.Path object: {e}"}
 
@@ -258,19 +264,34 @@ def stata_do(dofile_path: str,
     logging.info(f"Try to running file {dofile_path}")
 
     try:
-        log_file_path = stata_executor.execute_dofile(dofile_path, log_file_name)
-        logging.info(f"{dofile_path} is executed successfully. Log file path: {log_file_path}")
+        log_file_path_mapping: Dict[str, Path] = stata_executor.execute_dofile(
+            dofile_path, log_file_name, is_replace_log, enable_smcl
+        )
+        text_log = log_file_path_mapping.get("text").as_posix()
+        logging.info(f"{dofile_path} is executed successfully. Log file path: {text_log}")
     except RAMLimitExceededError as e:
+        logging.error(f"Out of max RAM limit: {e}")
         return {"error": f"Out of max RAM limit: {e}"}
     except Exception as e:
         logging.error(f"Failed to execute {dofile_path}. Error: {str(e)}")
         return {"error": str(e)}
 
-    result: Dict[str, Any] = {"log_file_path": log_file_path}
+    result: Dict[str, Any] = {
+        "log_file_path": {
+            k: v.as_posix()  # avoiding issues with some AI clients that may not recognize Path objects
+            for k, v in log_file_path_mapping.items()
+        },
+    }
 
     # Return log content based on user preference
     if is_read_log:
-        result["log_content"] = stata_executor.read_log(log_file_path)
+        log_content = {"text": stata_executor.read_log(text_log)}
+        if enable_smcl:
+            log_content["smcl"] = (
+                "Generally, text log is sufficient."
+                "If need to read smcl log, please use `mcp__stata-mcp__read_log` tool."
+            )
+        result["log_content"] = log_content
 
     return result
 
