@@ -258,38 +258,71 @@ Error logging writes structured messages to logging infrastructure prior to exce
 
 ---
 
-## read_file
+## read_log
 ```python
-def read_file(file_path: str, 
-              encoding: str = "utf-8") -> str:
+def read_log(file_path: str,
+             encoding: str = "utf-8",
+             is_beta: bool = False,
+             *,
+             output_format: Literal["full", "core", "dict"] = "dict") -> str:
     ...
 ```
 
 **Input Parameters**:
-- `file_path`: Absolute path to target file (required)
+- `file_path`: Absolute path to target log file (required, `.log` or `.smcl`)
 - `encoding`: Character encoding for text decoding (optional, defaults to UTF-8)
+- `is_beta`: Enable structured log parsing with StataLog module (optional, default: false)
+  - **macOS/Linux only** - Windows users should use default behavior
+  - Recommended for `.smcl` files with `dict` format
+- `output_format`: Output format when `is_beta=true` (optional, default: "dict")
+  - `full`: Raw log content without processing
+  - `core`: Cleaned content with framework lines removed
+  - `dict`: Structured command-result pairs (recommended)
 
 **Return Structure**:
-String containing complete file content decoded with specified encoding
+- Default mode (`is_beta=false`): Raw string content of the file
+- Beta mode (`is_beta=true`): Depends on `output_format`:
+  - `full`: Plain text log content
+  - `core`: Log content without framework (headers, footers, log commands)
+  - `dict`: String representation of command-result list
 
 **Operational Examples**:
 ```python
-# Read Stata log file
-read_file("/Users/project/stata-mcp-log/20250104153045.log")
+# Read log file (default mode)
+read_log("/Users/project/stata-mcp-log/20250104153045.log")
 
-# Read configuration with encoding
-read_file("~/.statamcp/config.toml", encoding="utf-8")
+# Read SMCL log with structured parsing (macOS/Linux)
+read_log("/Users/project/stata-mcp-log/20250104153045.smcl",
+         is_beta=True,
+         output_format="dict")
 
-# Read exported results
-read_file("~/analysis/tables/regression_results.txt")
+# Get cleaned log content without framework
+read_log("~/stata-mcp-log/session.log",
+         is_beta=True,
+         output_format="core")
+
+# Read with custom encoding
+read_log("~/analysis/tables/results.txt", encoding="utf-8")
 ```
 
 **Implementation Architecture**:
-The tool implements generic file reading via Python's built-in `open()` function with mode `"r"` and specified encoding parameter. Path validation checks file existence through `Path.exists()`; missing files raise `FileNotFoundError` with descriptive message including invalid path. File reading utilizes context manager (`with` statement) for automatic file handle closure and resource cleanup.
+The tool implements dual-mode log reading: traditional file reading and structured parsing via the `StataLog` module.
 
-Content reading performs single operation `file.read()` retrieving entire file content into memory as string. For large files exceeding available memory, this approach triggers `MemoryError`; however, typical use cases involve log files, configuration files, and result tables within reasonable size bounds.
+**Traditional Mode** (`is_beta=false`): Generic file reading via Python's `open()` function with mode `"r"`. Path validation checks file existence through `Path.exists()`. Content reading uses single `file.read()` operation for complete file retrieval.
 
-Error handling categorizes failures: `FileNotFoundError` for non-existent paths, `IOError` for I/O operation failures (permission denied, disk read error, filesystem corruption), and `UnicodeDecodeError` for encoding mismatches (though not explicitly caught, propagates to caller with encoding information). Success operations log structured messages including file path for audit trail.
+**Structured Parsing Mode** (`is_beta=true`, Unix only): Leverages the `stata_log` module which provides:
+- `StataLogTEXT`: Parser for `.log` (plain text) files
+- `StataLogSMCL`: Parser for `.smcl` (Stata Markup and Control Language) files
+- `StataLogInfo`: Dataclass containing `command_result_list` with structured command-output pairs
+
+The `StataLog` factory class (`from_path()` method) automatically detects file extension and returns the appropriate parser. Framework removal eliminates log headers/footers, `log using/close` commands, and do-file execution markers, preserving only actual Stata commands and their outputs.
+
+**Output Format Details**:
+- `full`: Equivalent to `read_plain_text()` - raw file content
+- `core`: Equivalent to `read_without_framework()` - cleaned content
+- `dict`: Returns `str(log_info.read_as_dict())` - structured mapping
+
+Error handling covers: `FileNotFoundError` for missing files, `IOError` for I/O failures, `ValueError` for invalid `output_format`, and `UnicodeDecodeError` for encoding mismatches.
 
 ---
 
