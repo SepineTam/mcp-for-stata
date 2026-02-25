@@ -165,17 +165,24 @@ def stata_do(
 
     Args:
         dofile_path (str): Absolute or relative path to the Stata do-file (.do) to execute.
-        log_file_name (str, optional): Set log file name without a time-string. If None, using nowtime as filename
+        log_file_name (str, optional): Set log file name without a time-string.
+            If None, using nowtime as filename. Recommand use default setting (nowtime).
         is_read_log (bool, optional): Whether to read and return the log file content.
-                                    Defaults to True.
+            Defaults to True.
+        is_replace_log (bool, optional): Whether to replace existing log file.
+            Defaults to True.
+        enable_smcl (bool, optional): Whether to generate SMCL format log (.smcl).
+            SMCL logs preserve hyperlink information from commands like findsj, getiref.
+            Defaults to True. (Unix only, Windows support pending)
 
     Returns:
         Dict[str, Any]: A dictionary containing:
-            - "log_file_path" (str): Path to the generated Stata log file (on success)
-            - "log_content" (str): Content of the log file if is_read_log is True (on success)
-            - "action" (str): Action taken when security check fails
-            - "warning" (str): Warning message when dangerous commands are detected
-            - "suggesting" (str): Suggestions for resolving security issues
+            - "log_file_path" (Dict[str, str]): Paths to generated log files.
+                - "text": Path to .log file
+                - "smcl": Path to .smcl file (if enable_smcl is True)
+            - "log_content" (Dict[str, str]): Content of log files if is_read_log is True.
+                - "text": Content of .log file
+                - "smcl": Message about reading smcl log
             - "error" (str): Error message if execution fails
 
     Raises:
@@ -184,27 +191,30 @@ def stata_do(
         PermissionError: If there are insufficient permissions to execute Stata or write log files
 
     Example:
-        >>> do_file_path: str | Path = ...
-        >>> result = stata_do(do_file_path, is_read_log=True)
-        >>> print(result[log_file_path])
-        /path/to/logs/analysis.log
-        >>> print(result[log_content])
-        Stata log content...
+        >>> result = stata_do("/path/to/analysis.do", is_read_log=True)
+        {
+            "log_file_path": {
+                "text": "/path/to/your/log/log_file_name.log",
+                "smcl": "/path/to/your/log/log_file_name.smcl"
+            },
+            "log_content": {
+                "text": "log content ...",
+                ...
+            }
+        }
+        >>> print(result["log_file_path"]["text"])
+        /path/to/your/log/log_file_name.log
+        >>> print(result["log_file_path"]["smcl"])
+        /path/to/your/log/log_file_name.smcl
 
-        >>> result = stata_do(do_file_path, log_file_name="experience")  # Not suggest to use log_file_name arg.
-        >>> print(result[log_file_path])
-        /log/file/base/experience.log
-
-        >>> not_exist_dofile = ...
-        >>> result = stata_do(not_exist_dofile)
-        >>> print(result)
-        {"error": "error content..."}
+        >>> result = stata_do("/not/exist/file.do")
+        {'error': 'Dofile /not/exist/file.do does not exist'}
 
     Note:
         - The log file is automatically created in the configured log_file_path directory
         - Supports multiple operating systems through the StataDo executor
-        - Log file naming follows Stata conventions with .log extension
-        - Security guard blocks execution when dangerous commands are detected (blacklist mode)
+        - SMCL format preserves hyperlinks from findsj, getiref commands
+        - Security guard blocks execution when dangerous commands are detected
         - To disable security guard, set environment variable STATA_MCP__IS_GUARD=false
     """
     # Convert dofile_path from str to Path
