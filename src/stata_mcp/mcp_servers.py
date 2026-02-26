@@ -7,6 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : mcp_servers.py
 
+import json
 import logging
 import logging.handlers
 from datetime import datetime
@@ -308,10 +309,12 @@ def stata_do(
 
 
 @stata_mcp.tool(name="ado_package_install", description="Install ado package from ssc or github")
-def ado_package_install(package: str,
-                        source: str = "ssc",
-                        is_replace: bool = True,
-                        package_source_from: str = None) -> str:
+def ado_package_install(
+    package: str,
+    source: str = "ssc",
+    is_replace: bool = True,
+    package_source_from: str = None
+) -> str:
     """
     Install a package from SSC or GitHub
 
@@ -423,9 +426,11 @@ def ado_package_install(package: str,
     name="get_data_info",
     description="Get descriptive statistics for the data file"
 )
-def get_data_info(data_path: str,
-                  vars_list: List[str] | None = None,
-                  encoding: str = "utf-8") -> str:
+def get_data_info(
+    data_path: str,
+    vars_list: List[str] | None = None,
+    encoding: str = "utf-8"
+) -> str:
     """
     Get descriptive statistics for the data file.
 
@@ -517,7 +522,7 @@ def get_data_info(data_path: str,
             logging.info(f"Successfully generated data summary for {data_path}, saved to {saved_path}")
         else:
             logging.info(f"Successfully generated data summary for {data_path}")
-        return str(info)
+        return json.dumps(info, ensure_ascii=False)
     except Exception as e:
         logging.error(f"Failed to generate data summary for {data_path}: {str(e)}")
         return f"Failed to generate data summary for {data_path}: {str(e)}"

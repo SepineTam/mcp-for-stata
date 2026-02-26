@@ -3,6 +3,7 @@ from typing import Type
 from .base import DATA_INFO_REGISTRY, DataInfoBase
 from .csv import CsvDataInfo
 from .dta import DtaDataInfo
+from .spss import SpssDataInfo
 from .xlsx import ExcelDataInfo
 
 
@@ -23,6 +24,7 @@ __all__ = [
     "CsvDataInfo",
     "DtaDataInfo",
     "ExcelDataInfo",
+    "SpssDataInfo",
     "DataInfoBase",
     "DATA_INFO_REGISTRY",
     "get_data_handler",
