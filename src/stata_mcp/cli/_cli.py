@@ -61,14 +61,20 @@ def main() -> None:
     # Install subcommand
     install_parser = subparsers.add_parser(
         "install",
-        help="Install Stata-MCP to Claude Desktop"
+        help="Install Stata-MCP to MCP clients"
     )
     install_parser.add_argument(
         "-c",
         "--client",
-        choices=["claude", "cc", "cursor", "cline", "codex"],
+        choices=["claude", "cc", "cursor", "cline", "codex", "opencode"],
         default="claude",
         help="Target client (default: claude)",
+    )
+    install_parser.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Install to all supported clients",
     )
 
     # Sandbox-install subcommand
@@ -79,7 +85,7 @@ def main() -> None:
     sandbox_parser.add_argument(
         "-c",
         "--client",
-        choices=["claude", "cc", "cursor", "cline", "codex"],
+        choices=["claude", "cc", "claude-code", "cursor", "cline", "codex", "opencode"],
         default="claude",
         help="Target client (default: claude)",
     )
@@ -151,7 +157,11 @@ def main() -> None:
 
     elif args.command == "install":
         from ..utils.Installer import Installer
-        Installer(sys_os=sys.platform).install(args.client)
+        installer = Installer(sys_os=sys.platform)
+        if args.all:
+            installer.install("all")
+            sys.exit(0)  # if all clients are installed, exit with 0
+        installer.install(args.client)
         print(f"Stata-MCP has been installed to {args.client}.")
         sys.exit(0)
 

@@ -13,7 +13,7 @@ import platform
 import sys
 import tomllib
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Dict, Optional
 
 from ...core.stata import StataFinder
 
@@ -44,22 +44,38 @@ class Installer:
             }
         }
 
-    def install(self, to: str):
-        client_function_mapping = {
+    @property
+    def client_function_mapping(self) -> Dict[str, Callable]:
+        return {
             "claude": self.install_to_claude_desktop,
             "cc": self.install_to_claude_code,
+            "claude-code": self.install_to_claude_code,
             "cursor": self.install_to_cursor,
             "cline": self.install_to_cline,
             "codex": self.install_to_codex,
+            "opencode": self.install_to_opencode,
         }
-        if to in client_function_mapping.keys():
-            client_function_mapping[to]()
+
+    def install_all(self):
+        func = self.client_function_mapping.values()
+        for func in func:
+            func()
+
+    def install(self, to: str):
+        install_func = self.client_function_mapping.get(to, None)
+        if install_func:
+            install_func()
         else:
             print(f"{to} is not a valid client.")
-            print(f"Please choose a valid client from {client_function_mapping.keys()}")
+            print(f"Please choose a valid client from {self.client_function_mapping.keys()}")
             sys.exit(1)
 
-    def install_to_json_config(self, config_path: Path, key: str = "mcpServers"):
+    def install_to_json_config(
+        self,
+        config_path: Path,
+        key: str = "mcpServers",
+        custom_config: dict = None
+    ):
         config_path = Path(config_path)
         config_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -84,7 +100,7 @@ class Installer:
             print("stata-mcp is already installed.")
             sys.exit(0)
 
-        servers.update(self.STATA_MCP_COMMON_CONFIG)
+        servers.update(custom_config or self.STATA_MCP_COMMON_CONFIG)
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(config, f, ensure_ascii=False, indent=2)
 
@@ -208,6 +224,21 @@ class Installer:
             sys.exit(1)
 
         self.install_to_json_config(config_file)
+
+    def install_to_opencode(self):
+        config_file = Path.home() / ".config" / "opencode" / "opencode.json"
+        opencode_config = {
+            "stata-mcp": {
+                "type": "local",
+                "command": [self.command] + self.args,
+                **({"env": self.env} if self.is_env and self.env else {})
+            }
+        }
+        self.install_to_json_config(
+            config_file,
+            key="mcp",
+            custom_config=opencode_config
+        )
 
     def install_to_codex(self):
         config_file = Path.home() / ".codex" / "config.toml"
