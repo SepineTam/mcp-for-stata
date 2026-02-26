@@ -50,6 +50,7 @@ class Installer:
             "claude": self.install_to_claude_desktop,
             "cc": self.install_to_claude_code,
             "claude-code": self.install_to_claude_code,
+            "gemini": self.install_to_gemini,
             "cursor": self.install_to_cursor,
             "cline": self.install_to_cline,
             "codex": self.install_to_codex,
@@ -196,6 +197,10 @@ class Installer:
             sys.exit(1)
 
         self.install_to_json_config(Path(config_file_path))
+
+    def install_to_gemini(self):
+        gemini_user_settings_file = Path.home() / ".gemini" / "settings.json"
+        self.install_to_json_config(gemini_user_settings_file)
 
     def install_to_cursor(self):
         config_file = Path.home() / ".cursor" / "mcp.json"  # Only works on macOS as not other device to test

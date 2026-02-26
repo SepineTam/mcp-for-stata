@@ -66,7 +66,7 @@ def main() -> None:
     install_parser.add_argument(
         "-c",
         "--client",
-        choices=["claude", "cc", "cursor", "cline", "codex", "opencode"],
+        choices=["claude", "cc", "gemini", "cursor", "cline", "codex", "opencode"],
         default="claude",
         help="Target client (default: claude)",
     )
@@ -75,6 +75,11 @@ def main() -> None:
         "--all",
         action="store_true",
         help="Install to all supported clients",
+    )
+    install_parser.add_argument(
+        "--json-file",
+        type=str,
+        help="Custom target client config file path",
     )
 
     # Sandbox-install subcommand
@@ -85,7 +90,7 @@ def main() -> None:
     sandbox_parser.add_argument(
         "-c",
         "--client",
-        choices=["claude", "cc", "claude-code", "cursor", "cline", "codex", "opencode"],
+        choices=["claude", "cc", "claude-code", "gemini", "cursor", "cline", "codex", "opencode"],
         default="claude",
         help="Target client (default: claude)",
     )
@@ -161,6 +166,9 @@ def main() -> None:
         if args.all:
             installer.install("all")
             sys.exit(0)  # if all clients are installed, exit with 0
+        if args.json_file:
+            installer.install_to_json_config(args.json_file)
+            sys.exit(0)
         installer.install(args.client)
         print(f"Stata-MCP has been installed to {args.client}.")
         sys.exit(0)
