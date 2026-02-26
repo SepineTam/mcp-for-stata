@@ -1,6 +1,6 @@
 [project]
 name = "stata-mcp"
-version = "1.13.36"
+version = "1.13.37"
 description = "Let LLM help you achieve your regression analysis with Stata"
 readme = "README.md"
 authors = [
@@ -21,6 +21,8 @@ dependencies = [
     "openai-api-polling>=0.1.2",
     "psutil>=6.0.0",
     "mcp-ui-server>=1.0.0",
+    "pyreadstat>=1.2.0",
+    "requests>=2.28.0",
 ]
 
 [project.scripts]

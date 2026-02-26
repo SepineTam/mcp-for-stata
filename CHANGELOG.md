@@ -2,6 +2,41 @@
 
 
 <details>
+<summary>Click to expand v1.13.37 details</summary>
+
+## [1.13.37] - 2026-02-26
+
+### Added
+- **CLI**: Enhanced `install` command with multi-client support
+  - Added `--all` flag for one-click installation to all supported clients
+  - Added `--json-file` option to read installation config from JSON file
+  - Added Gemini client support via `--client gemini`
+  - Added OpenCode client support via `--client opencode`
+- **Log System**: New `stata_log` module for Stata log file parsing
+  - `StataLogTEXT`: Parser for plain text `.log` files
+  - `StataLogSMCL`: Parser for SMCL (Stata Markup and Control Language) `.smcl` files
+  - Factory pattern with `StataLog` class for automatic format detection
+  - Closes #37
+- **Data Info**: Added SPSS file support (`.sav`, `.zsav`)
+- **Dependencies**: Added `pyreadstat>=1.2.0` and `requests>=2.28.0` for SPSS support
+
+### Changed
+- **MCP Tools**: Renamed `read_file` to `read_log` with StataLog integration
+- **Dependencies**: Upgraded pandas to `>=3.0.0,<4.0.0` (closes #36)
+- **Style**: Unified function parameter formatting in mcp_servers.py
+
+### Fixed
+- **Data Info**: Fixed `HASH_LENGTH` type error and URL hash bug
+- **CLI**: Fixed `--all` flag using `install_all()` instead of `install("all")`
+
+### Documentation
+- Added CI/CD status badges (PyPI publish, Docker build) to README
+- Updated tool docs for `read_log` with StataLog integration
+- Updated `stata_do` docstring for SMCL support
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.36 details</summary>
 
 ## [1.13.36] - 2026-02-23
