@@ -164,8 +164,8 @@ def main() -> None:
         from ..utils.Installer import Installer
         installer = Installer(sys_os=sys.platform)
         if args.all:
-            installer.install("all")
-            sys.exit(0)  # if all clients are installed, exit with 0
+            installer.install_all()
+            sys.exit(0)
         if args.json_file:
             installer.install_to_json_config(args.json_file)
             sys.exit(0)
