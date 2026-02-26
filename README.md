@@ -13,6 +13,8 @@
 
 [![en](https://img.shields.io/badge/lang-English-red.svg)](README.md)
 [![cn](https://img.shields.io/badge/语言-中文-yellow.svg)](source/docs/README/cn/README.md)
+[![Publish to PyPI](https://github.com/SepineTam/stata-mcp/actions/workflows/python-package.yml/badge.svg)](https://github.com/SepineTam/stata-mcp/actions/workflows/python-package.yml)
+[![Build and Push Docker Images](https://github.com/SepineTam/stata-mcp/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/SepineTam/stata-mcp/actions/workflows/docker-publish.yml)
 [![PyPI version](https://img.shields.io/pypi/v/stata-mcp.svg)](https://pypi.org/project/stata-mcp/)
 [![PyPI Downloads](https://static.pepy.tech/badge/stata-mcp)](https://pepy.tech/projects/stata-mcp)
 [![License: AGPL 3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](LICENSE)
