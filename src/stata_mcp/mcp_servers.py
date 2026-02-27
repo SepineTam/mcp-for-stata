@@ -93,9 +93,11 @@ tmp_base_path = WORKING_DIR.get("tmp_base", output_base_path / "stata-mcp-tmp")
 logging.info(f"Using {output_base_path.as_posix()} as output base folder")
 
 # Initialize MCP Server, avoiding FastMCP server timeout caused by Icon src fetch
-instructions = ("Stata-MCP provides a set of tools to operate Stata locally. "
-                "Typically, it writes code to do-file and executes them. "
-                "The minimum operation unit should be the do-file; there is no session config.")
+instructions = (
+    "Stata-MCP provides a set of tools to operate Stata locally. "
+    "Typically, it writes code to do-file and executes them. "
+    "The minimum operation unit should be the do-file; there is no session config."
+)
 try:
     stata_mcp = FastMCP(
         name="stata-mcp",
@@ -121,9 +123,11 @@ except Exception:
 
 if IS_UNIX:
     # Config help class
-    help_cls = Help(stata_cli=STATA_CLI,
-                    project_tmp_dir=tmp_base_path,
-                    cache_dir=STATA_MCP_DIRECTORY / "help")
+    help_cls = Help(
+        stata_cli=STATA_CLI,
+        project_tmp_dir=tmp_base_path,
+        cache_dir=STATA_MCP_DIRECTORY / "help"
+    )
 
     # As AI-Client does not support Resource at a board yet, we still keep the resource
     @stata_mcp.resource(
@@ -251,8 +255,10 @@ def stata_do(
             return {
                 "action": "Security check, dofile not executed",
                 "warning": warning_msg,
-                "suggesting": ("Modify the dofile to ensure safety\n"
-                               "or set environment variable `STATA_MCP__IS_GUARD` to `false` (not recommended)")
+                "suggesting": (
+                    "Modify the dofile to ensure safety\n"
+                    "or set environment variable `STATA_MCP__IS_GUARD` to `false` (not recommended)"
+                )
             }
         else:
             logging.info(f"✅ {dofile_path} - Security check passed")
@@ -405,8 +411,10 @@ def ado_package_install(
             logging.info(f"{package} is installed successfully.")
         else:
             if source == "github":
-                install_msg += ("Please check the GitHub repo URL, verify case sensitivity, "
-                                "and ensure the GitHub command is installed in Stata")
+                install_msg += (
+                    "Please check the GitHub repo URL, verify case sensitivity, "
+                    "and ensure the GitHub command is installed in Stata"
+                )
             logging.error(f"{package} installation failed.")
             logging.debug(f"Full installation message: {install_msg}")
 
