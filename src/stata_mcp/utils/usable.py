@@ -20,13 +20,21 @@ import sys
 import time
 from typing import Dict, Optional, Tuple
 
+from ..config import Config
 from ..core.stata import StataFinder
+
+config = Config()
 
 
 def print_status(message: str, status: bool) -> None:
     """Print a message with status indicator"""
     status_str = "✅ PASSED" if status else "❌ FAILED"
     print(f"{message}: {status_str}")
+
+
+def print_info(message: str) -> None:
+    """Print an info message"""
+    print(f"{message}: ℹ️ INFO")
 
 
 def check_uv() -> Tuple[Optional[str], bool]:
@@ -37,10 +45,9 @@ def check_uv() -> Tuple[Optional[str], bool]:
 
 def check_os() -> Tuple[str, bool]:
     """Check current operating system"""
-    os_name = platform.system()
     os_mapping = {"Darwin": "macOS", "Windows": "Windows", "Linux": "Linux"}
-    detected_os = os_mapping.get(os_name, "unknown")
-    is_supported = detected_os in ["macOS", "Windows", "Linux"]
+    detected_os = os_mapping.get(platform.system(), "unknown")
+    is_supported = detected_os in os_mapping.values()
 
     return detected_os, is_supported
 
@@ -60,10 +67,10 @@ def test_stata_execution(stata_cli_path: Optional[str]) -> bool:
     if not stata_cli_path or not os.path.exists(stata_cli_path):
         return False
 
-    sys_os = platform.system()
+    commands = 'display "Stata-MCP Test"\nexit, STATA\n'
 
     try:
-        if sys_os == "Darwin" or sys_os == "Linux":  # macOS or Linux
+        if config.IS_UNIX:  # macOS or Linux
             proc = subprocess.Popen(
                 [stata_cli_path],
                 stdin=subprocess.PIPE,
@@ -72,37 +79,28 @@ def test_stata_execution(stata_cli_path: Optional[str]) -> bool:
                 text=True,
                 shell=True,
             )
-            # Send a simple command and exit
-            commands = """
-            display "Stata-MCP test successful"
-            exit, STATA
-            """
             proc.communicate(input=commands, timeout=10)
             return proc.returncode == 0
 
-        elif sys_os == "Windows":  # Windows
+        else:  # Windows
             # Create a temporary do-file for testing
-            temp_dir = os.path.dirname(os.path.abspath(__file__))
-            temp_do_file = os.path.join(temp_dir, "temp_test.do")
+            temp_do_file = config.STATA_MCP_DIRECTORY / "temp_test.do"
 
-            with open(temp_do_file, "w") as f:
-                f.write('display "Stata-MCP test successful"\nexit, STATA\n')
+            temp_do_file.write_text(commands)
 
             # Run Stata with the temp do-file
             cmd = f'"{stata_cli_path}" /e do "{temp_do_file}"'
             result = subprocess.run(cmd, shell=True, timeout=10)
 
             # Clean up
-            if os.path.exists(temp_do_file):
-                os.remove(temp_do_file)
+            if temp_do_file.exists():
+                temp_do_file.unlink()
 
             return result.returncode == 0
 
     except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
         print(f"  Error testing Stata: {e}")
         return False
-
-    return False
 
 
 def check_directories() -> Dict[str, Tuple[str, bool]]:
@@ -167,8 +165,7 @@ def usable() -> int:
     if uv_installed:
         print_status(f"uv (Path: {uv_path})", True)
     else:
-        print_status("uv", False)
-        print("  Info: uv not found, checking Python version instead.")
+        print_info("uv (not found, will check Python instead)")
         # Check Python version
         python_version, python_compatible = check_python_version()
         print_status(
@@ -238,7 +235,7 @@ def usable() -> int:
                 "\nTo manually specify your Stata path, add this to your MCP configuration:"
             )
             print('  "env": {')
-            print('    "stata_cli": "/path/to/your/stata/executable"')
+            print('    "STATA_CLI": "/path/to/your/stata/executable"')
             print("  }")
 
     return 0 if all_passed else 1
