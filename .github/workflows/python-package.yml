@@ -1,4 +1,4 @@
-name: Publish to PyPI
+name: Publish to PyPI and MCP Registry
 
 on:
   release:
@@ -7,6 +7,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC authentication
+      contents: read
 
     steps:
     - name: Checkout code
@@ -17,6 +20,7 @@ jobs:
       with:
         python-version: '3.11'
 
+    ### Publish to PyPI
     - name: Install uv
       uses: astral-sh/setup-uv@v3
 
@@ -28,3 +32,21 @@ jobs:
 
     - name: Publish to PyPI
       run: uv publish --token ${{ secrets.PYPI_TOKEN }}
+
+    ### Publish MCP server:
+
+    - name: Install mcp-publisher
+      run: |
+        curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+    - name: Authenticate to MCP Registry
+      run: ./mcp-publisher login github-oidc
+
+    # Optional:
+    - name: Set version in server.json
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        jq --arg v "$VERSION" '.version = $v' server.json > server.tmp && mv server.tmp server.json
+
+    - name: Publish server to MCP Registry
+      run: ./mcp-publisher publish
