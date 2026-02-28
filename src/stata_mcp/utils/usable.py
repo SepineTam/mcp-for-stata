@@ -14,10 +14,11 @@ This script automatically checks if your Stata MCP configuration is correct
 
 import os
 import platform
+import shutil
 import subprocess
 import sys
 import time
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 from ..core.stata import StataFinder
 
@@ -28,16 +29,18 @@ def print_status(message: str, status: bool) -> None:
     print(f"{message}: {status_str}")
 
 
+def check_uv() -> Tuple[Optional[str], bool]:
+    """Check if uv is installed"""
+    uv_path = shutil.which("uv")
+    return uv_path, uv_path is not None
+
+
 def check_os() -> Tuple[str, bool]:
     """Check current operating system"""
     os_name = platform.system()
     os_mapping = {"Darwin": "macOS", "Windows": "Windows", "Linux": "Linux"}
     detected_os = os_mapping.get(os_name, "unknown")
-    is_supported = detected_os in [
-        "macOS",
-        "Windows",
-        "Linux",
-    ]  # All three are now supported
+    is_supported = detected_os in ["macOS", "Windows", "Linux"]
 
     return detected_os, is_supported
 
@@ -52,7 +55,7 @@ def check_python_version() -> Tuple[str, bool]:
     return current_version, is_compatible
 
 
-def test_stata_execution(stata_cli_path: str) -> bool:
+def test_stata_execution(stata_cli_path: Optional[str]) -> bool:
     """Test if Stata can be executed"""
     if not stata_cli_path or not os.path.exists(stata_cli_path):
         return False
@@ -133,16 +136,6 @@ def check_directories() -> Dict[str, Tuple[str, bool]]:
     return dirs
 
 
-def check_mcp_installation() -> bool:
-    """Check if MCP library is installed"""
-    try:
-        pass
-
-        return True
-    except ImportError:
-        return False
-
-
 def animate_loading(seconds: int) -> None:
     """Display an animated loading spinner"""
     chars = "|/-\\"
@@ -155,7 +148,7 @@ def animate_loading(seconds: int) -> None:
     sys.stdout.flush()
 
 
-def usable():
+def usable() -> int:
     """Main function to check Stata MCP configuration"""
     print("\n===== Stata MCP Configuration Check =====\n")
 
@@ -167,19 +160,22 @@ def usable():
             "  Warning: Your operating system may not be fully supported by Stata-MCP."
         )
 
-    # Check Python version
-    python_version, python_compatible = check_python_version()
-    print_status(
-        f"Python version (Current: {python_version})",
-        python_compatible)
-    if not python_compatible:
-        print("  Warning: Python 3.11+ is recommended for Stata-MCP.")
+    # Check uv first, then fall back to Python
+    uv_path, uv_installed = check_uv()
+    python_compatible = True  # Default to True, will be set to False if no uv and Python < 3.11
 
-    # Check MCP library
-    mcp_installed = check_mcp_installation()
-    print_status("MCP library installation", mcp_installed)
-    if not mcp_installed:
-        print("  Please install MCP library: pip install mcp[cli]")
+    if uv_installed:
+        print_status(f"uv (Path: {uv_path})", True)
+    else:
+        print_status("uv", False)
+        print("  Info: uv not found, checking Python version instead.")
+        # Check Python version
+        python_version, python_compatible = check_python_version()
+        print_status(
+            f"Python version (Current: {python_version})",
+            python_compatible)
+        if not python_compatible:
+            print("  Warning: Python 3.11+ is required for Stata-MCP without uv.")
 
     # Find Stata CLI
     print("Locating Stata CLI...")
@@ -216,10 +212,13 @@ def usable():
 
     # Overall summary
     print("\n===== Summary =====")
+
+    # Environment is OK if: (uv installed) OR (Python >= 3.11)
+    env_ok = uv_installed or python_compatible
+
     all_passed = (
         os_supported
-        and python_compatible
-        and mcp_installed
+        and env_ok
         and stata_found
         and stata_works
         and all_dirs_ok
