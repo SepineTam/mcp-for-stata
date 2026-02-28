@@ -2,6 +2,26 @@
 
 
 <details>
+<summary>Click to expand v1.13.38 details</summary>
+
+## [1.13.38] - 2026-02-28
+
+### Added
+- **CLI**: Enhanced `usable` command with uv check support
+  - Added `check_uv()` to detect uv installation and prioritize it over Python version check
+  - Added `print_info()` for non-failure info messages
+- **Documentation**: Added MCP registry signature badge to README
+
+### Changed
+- **CLI**: Refactored `usable` command with config integration
+  - Uses `config.IS_UNIX` instead of platform detection
+  - Simplified `check_os()` implementation
+  - Fixed env var name: `stata_cli` -> `STATA_CLI`
+- **Style**: Improved multi-line string formatting in mcp_servers.py
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.37 details</summary>
 
 ## [1.13.37] - 2026-02-26
