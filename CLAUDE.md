@@ -83,7 +83,7 @@ uvx stata-mcp --usable
    - FastMCP-based server providing Stata tools and resources
    - Main entry point for LLM interactions
    - Handles cross-platform Stata execution
-   - Configurable working directory via `STATA_MCP_CWD` environment variable
+   - Configurable working directory via `STATA_MCP__CWD` environment variable
 
 2. **Stata Integration (`src/stata_mcp/core/stata/`)**
    - `StataFinder`: Locates Stata executable on different platforms (macOS, Windows, Linux)
@@ -129,13 +129,13 @@ uvx stata-mcp --usable
 - `write_dofile`: Create Stata do-files from code
 - `append_dofile`: Append code to existing do-files
 - `get_data_info`: Analyze data files (CSV, DTA, XLSX)
-- `read_file`: Read file contents
+- `read_log`: Read log file contents
 - `ado_package_install`: Install Stata packages from SSC, GitHub, or net sources
 - `load_figure`: Load Stata-generated figures
 
 ### File Structure Conventions
 
-Working directory is configurable via `STATA_MCP_CWD` environment variable.
+Working directory is configurable via `STATA_MCP__CWD` environment variable.
 - If not set, tries current directory (if writable) or falls back to `~/Documents`
 
 ```
@@ -176,8 +176,7 @@ IS_DEBUG = false
 LOGGING_ON = true
 LOGGING_CONSOLE_HANDLER_ON = false
 LOGGING_FILE_HANDLER_ON = true
-LOG_FILE = "~/"
-
+LOG_FILE = "~/.statamcp/stata_mcp_debug.log"
 MAX_BYTES = 10_000_000
 BACKUP_COUNT = 5
 
@@ -195,18 +194,23 @@ MAX_RAM_MB = -1  # -1 means no limit
 #### Environment Variables
 
 **Working Directory:**
-- `STATA_MCP_CWD`: Working directory (defaults to current directory or `~/Documents`)
+- `STATA_MCP__CWD`: Working directory (defaults to current directory or `~/Documents`)
+- `STATA_MCP_CWD`: Legacy alias for backward compatibility
 
 **Logging:**
-- `STATA_MCP_LOGGING_ON`: Enable/disable logging (default: true)
-- `STATA_MCP_LOGGING_CONSOLE_HANDLER`: Enable console logging (default: false)
-- `STATA_MCP_LOGGING_FILE_HANDLER`: Enable file logging (default: true)
-- `STATA_MCP_LOG_FILE`: Custom log file path
+- `STATA_MCP__LOGGING_ON`: Enable/disable logging (default: true)
+- `STATA_MCP__LOGGING_CONSOLE_HANDLER_ON`: Enable console logging (default: false)
+- `STATA_MCP__LOGGING_FILE_HANDLER_ON`: Enable file logging (default: true)
+- `STATA_MCP__LOG_FILE`: Custom log file path
+- `STATA_MCP__LOGGING__MAX_BYTES`: Max log file size in bytes (default: 10_000_000)
+- `STATA_MCP__LOGGING__BACKUP_COUNT`: Number of backup log files (default: 5)
 
 **Data Processing:**
-- `STATA_MCP_CACHE_HELP`: Enable help caching (default: true)
-- `STATA_MCP_DATA_INFO_DECIMAL_PLACES`: Decimal places for data info output
-- `STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER`: Max string values to display
+- `STATA_MCP_CACHE_HELP`: Enable help caching (default: false)
+- `STATA_MCP_SAVE_HELP`: Save help text to cache (default: true)
+- `STATA_MCP_DATA_INFO_DECIMAL_PLACES`: Decimal places for data info output (default: 3)
+- `STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER`: Max string values to display (default: 10)
+- `STATA_MCP_DATA_INFO_HASH_LENGTH`: Hash length for cache filename (default: 12)
 
 **Security:**
 - `STATA_MCP__IS_GUARD`: Enable security guard validation (default: true)
@@ -214,6 +218,11 @@ MAX_RAM_MB = -1  # -1 means no limit
 **Monitoring:**
 - `STATA_MCP__IS_MONITOR`: Enable RAM monitoring (default: false)
 - `STATA_MCP__RAM_LIMIT`: Maximum RAM in MB (default: -1, no limit)
+
+**Agent Mode:**
+- `STATA_MCP_API_KEY`: API key for LLM (falls back to `OPENAI_API_KEY`)
+- `STATA_MCP_API_BASE_URL`: API base URL for LLM
+- `STATA_MCP_MODEL`: Model name for LLM
 
 **Stata Path:**
 - Stata executable path detection via `StataFinder` (or set platform-specific environment variable)
@@ -253,5 +262,5 @@ A standard git workflow follows:
 - Use descriptive variable names
 - Maintain proper code indentation
 - The project requires a valid Stata license
-- Default data output is in `<STATA_MCP_CWD>/stata-mcp-folder/` (or auto-detected location)
+- Default data output is in `<STATA_MCP__CWD>/stata-mcp-folder/` (or auto-detected location)
 - For comprehensive documentation, see the `docs/` directory
