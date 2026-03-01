@@ -2,6 +2,21 @@
 
 
 <details>
+<summary>Click to expand v1.13.39 details</summary>
+
+## [1.13.39] - 2026-03-01
+
+### Added
+- **CI**: Added MCP registry publishing step to PyPI workflow
+
+### Changed
+- **MCP Tools**: Removed `mk_dir` tool from MCP server
+- **MCP Tools**: Added error notes for non-vision model
+- **Documentation**: Updated CLAUDE.md environment variables to match actual code
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.38 details</summary>
 
 ## [1.13.38] - 2026-02-28
