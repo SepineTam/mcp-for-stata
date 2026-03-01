@@ -732,6 +732,10 @@ def load_figure(figure_path: str) -> Image:
 
     Returns:
         Image: the figure thumbnail
+
+    Notes:
+        If it is a text-text model, could not use the tools, there will be an error like:
+        API Error: 400 {"error":{"message":"Failed to deserialize the JSON body into the target type: ..."}}
     """
     if not Path(figure_path).exists():
         logging.error(f"Try to load figure {figure_path} but not found.")
