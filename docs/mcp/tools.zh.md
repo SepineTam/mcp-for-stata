@@ -191,44 +191,6 @@ summarize residuals
 
 ---
 
-## mk_dir
-```python
-def mk_dir(path: str) -> bool:
-    ...
-```
-
-**输入参数**：
-- `path`：目录路径规范（字符串，必填，非空）
-
-**返回结构**：
-表示创建后目录存在验证的布尔值（true：存在，false：创建失败）
-
-**操作示例**：
-```python
-# 单个目录创建
-mk_dir("/Users/project/outputs")
-# 返回：True
-
-# 递归层级创建
-mk_dir("~/analysis/2025/q1/january")
-# 创建：analysis/, analysis/2025/, analysis/2025/q1/, analysis/2025/q1/january/
-
-# 跨平台路径
-mk_dir("C:\\Users\\project\\data")  # Windows
-mk_dir("/home/user/analysis")       # Unix
-```
-
-**实现架构**：
-该工具通过 `pathvalidate` 库的 `sanitize_filepath()` 函数实现安全目录创建，具有平台特定验证。清理阶段移除目录遍历序列、规范化路径分隔符并验证字符编码。路径解析通过 `Path.resolve()` 将清理后的输入转换为绝对形式，消除符号链接和相对路径组件。
-
-目录创建使用 `Path.mkdir()` 及参数 `mode=0o755`（rwxr-xr-x：所有者读/写/执行，组/其他读/执行）、`exist_ok=True`（幂等操作）和 `parents=True`（递归创建）。权限配置遵循 Unix 文件系统约定，组和他人具有读/执行权限以启用目录遍历和列表。
-
-异常层次提供细粒度的失败诊断：通过清理阶段的 `ValidationError` 检测无效路径时抛出 `ValueError`；OS 检测到目录创建权限不足时抛出 `PermissionError`；文件系统级故障（磁盘满、配额超限、只读文件系统）时抛出 `OSError`。所有异常向调用者传播并附带描述性消息。
-
-创建后验证通过 `Path.exists()` 结合 `Path.is_dir()` 执行布尔存在检查，以确认目录成功创建并区分同名目录和文件。
-
----
-
 ## load_figure
 ```python
 def load_figure(figure_path: str) -> Image:

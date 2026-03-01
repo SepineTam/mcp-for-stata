@@ -62,7 +62,6 @@ Stata-MCP 通过四个架构层运行：
 | `ssc_install` | 从 SSC/GitHub/net 源安装包 |
 | `load_figure` | 加载 Stata 生成的图形以供显示 |
 | `read_file` | 带编码支持的通用文件读取 |
-| `mk_dir` | 带验证的安全目录创建 |
 
 #### **智能体模式**（`agent run` 命令）
 用于对话分析的交互式 REPL 智能体：

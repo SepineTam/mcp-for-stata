@@ -132,7 +132,6 @@ uvx stata-mcp --usable
 - `read_file`: Read file contents
 - `ado_package_install`: Install Stata packages from SSC, GitHub, or net sources
 - `load_figure`: Load Stata-generated figures
-- `mk_dir`: Create directories safely
 
 ### File Structure Conventions
 

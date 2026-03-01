@@ -190,43 +190,6 @@ The tool does not perform syntactic coherence validation between original and ap
 Platform-specific path resolution utilizes `pathlib.Path` for cross-platform compatibility. File read operations employ specified encoding parameter with fallback to UTF-8 default. Error handling wraps I/O operations with silent failure on read errors, treating read exceptions equivalent to missing source files.
 
 ---
-## mk_dir
-```python
-def mk_dir(path: str) -> bool:
-    ...
-```
-
-**Input Parameters**:
-- `path`: Directory path specification (string, required, non-empty)
-
-**Return Structure**:
-Boolean indicating directory existence verification post-creation (true: exists, false: creation failed)
-
-**Operational Examples**:
-```python
-# Single directory creation
-mk_dir("/Users/project/outputs")
-# Returns: True
-
-# Recursive hierarchy creation
-mk_dir("~/analysis/2025/q1/january")
-# Creates: analysis/, analysis/2025/, analysis/2025/q1/, analysis/2025/q1/january/
-
-# Cross-platform paths
-mk_dir("C:\\Users\\project\\data")  # Windows
-mk_dir("/home/user/analysis")       # Unix
-```
-
-**Implementation Architecture**:
-The tool implements secure directory creation through the `pathvalidate` library's `sanitize_filepath()` function with platform-specific validation. Sanitization phase removes directory traversal sequences, normalizes path separators, and validates character encoding. Path resolution converts sanitized input to absolute form via `Path.resolve()`, eliminating symbolic links and relative path components.
-
-Directory creation employs `Path.mkdir()` with parameters `mode=0o755` (rwxr-xr-x: owner read/write/execute, group/others read/execute), `exist_ok=True` (idempotent operation), and `parents=True` (recursive creation). Permission configuration follows Unix filesystem conventions with read/execute for group and others enabling directory traversal and listing.
-
-Exception hierarchy provides granular failure diagnostics: `ValueError` raised for invalid path detection via `ValidationError` from sanitization phase; `PermissionError` raised for insufficient directory creation permissions detected by OS; `OSError` raised for filesystem-level failures (disk full, quota exceeded, readonly filesystem). All exceptions propagate to caller with descriptive messages.
-
-Post-creation verification performs boolean existence check via `Path.exists()` combined with `Path.is_dir()` to confirm successful directory creation and differentiate between directories and files with identical names.
-
----
 
 ## load_figure
 ```python

@@ -741,68 +741,6 @@ def load_figure(figure_path: str) -> Image:
     return Image(figure_path)
 
 
-# =============================================================================
-# STATA_MCP.TOOLS: System Tools
-# =============================================================================
-
-@stata_mcp.tool(name="mk_dir")
-def mk_dir(path: str) -> bool:
-    """
-    Safely create a directory using pathvalidate for security validation.
-
-    Args:
-        path (str): the path you want to create
-
-    Returns:
-        bool: the state of the new path,
-              if True -> the path exists now;
-              else -> not success
-
-    Raises:
-        ValueError: if path is invalid or contains unsafe components
-        PermissionError: if insufficient permissions to create directory
-    """
-    from pathvalidate import ValidationError, sanitize_filepath
-
-    # Input validation
-    if not path or not isinstance(path, str):
-        raise ValueError("Path must be a non-empty string")
-
-    try:
-        # Use pathvalidate to sanitize and validate path
-        safe_path = sanitize_filepath(path, platform="auto")
-
-        # Get absolute path for further validation
-        absolute_path = Path(safe_path).resolve()
-
-        # Check if directory already exists
-        if absolute_path.exists():
-            logging.info(f"Directory already exists: {absolute_path}")
-        else:
-            # Create directory with reasonable permissions
-            absolute_path.mkdir(mode=0o755, exist_ok=True, parents=True)
-            logging.info(f"Successfully created directory: {absolute_path}")
-
-        # Verify successful creation
-        success = absolute_path.exists() and absolute_path.is_dir()
-        if success:
-            logging.info(f"Directory creation verified: {absolute_path}")
-        else:
-            logging.error(f"Directory creation failed: {absolute_path}")
-
-        return success
-
-    except ValidationError as e:
-        logging.error(f"Invalid path for directory creation: {path} - {str(e)}")
-        raise ValueError(f"Invalid path detected: {e}")
-    except PermissionError:
-        logging.error(f"Permission denied when creating directory: {path}")
-        raise PermissionError(f"Insufficient permissions to create directory: {path}")
-    except OSError as e:
-        logging.error(f"OS error when creating directory {path}: {str(e)}")
-        raise OSError(f"Failed to create directory {path}: {str(e)}")
-
-
 __all__ = [
     "stata_mcp",
 
@@ -813,7 +751,6 @@ __all__ = [
     "append_dofile",
 
     # Utilities
-    "mk_dir",
     "load_figure",
     "read_log",
     "ado_package_install",
