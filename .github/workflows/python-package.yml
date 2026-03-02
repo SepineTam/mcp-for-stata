@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write # Required for OIDC authentication
+      attestations: write # Required for provenance-based publish flows
+      actions: read # Required for workflow metadata access
       contents: read
 
     steps:
