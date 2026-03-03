@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.SepineTam/stata-mcp",
+  "description": "Let LLM help you achieve your regression analysis with Stata",
+  "repository": {
+    "url": "https://github.com/SepineTam/stata-mcp",
+    "source": "github"
+  },
+  "version": "1.13.38",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "stata-mcp",
+      "version": "1.13.38",
+      "transport": {
+        "type": "stdio"
+      },
+    "environmentVariables": []
+    }
+  ]
+}
