@@ -2,6 +2,18 @@
 
 
 <details>
+<summary>Click to expand v1.13.40 details</summary>
+
+## [1.13.40] - 2026-03-03
+
+### Changed
+- **MCP Tools**: Removed `load_figure` tool from MCP server (unused and causes errors for non-vision models)
+- **CI**: Added missing GitHub Actions permissions (`attestations: write`, `actions: read`) for provenance-based publish flows
+- **Documentation**: Updated tools and overview docs to reflect `load_figure` removal
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.39 details</summary>
 
 ## [1.13.39] - 2026-03-01
