@@ -191,36 +191,6 @@ Platform-specific path resolution utilizes `pathlib.Path` for cross-platform com
 
 ---
 
-## load_figure
-```python
-def load_figure(figure_path: str) -> Image:
-    ...
-```
-
-**Input Parameters**:
-- `figure_path`: Absolute path to image file (required)
-
-**Return Structure**:
-FastMCP `Image` object containing image data for MCP transport and display
-
-**Operational Examples**:
-```python
-# Load Stata-generated graph
-load_figure("/Users/project/exports/regression_results.png")
-
-# Load exported figure
-load_figure("~/analysis/timeseries_plot.jpg")
-```
-
-**Implementation Architecture**:
-The tool implements image asset loading from the local filesystem using FastMCP's native `Image` class wrapper. Path validation checks file existence via `Path.exists()` probe; missing assets trigger `FileNotFoundError` exception with descriptive message. Successful invocations construct `Image` object with file path as initialization parameter, enabling automatic file reading and MIME type detection by the underlying MCP framework.
-
-Supported formats depend on FastMCP implementation but typically include PNG (Portable Network Graphics) and JPEG (Joint Photographic Experts Group). The tool performs no format validation or conversion; unsupported formats generate errors during Image object construction or transport phase.
-
-Error logging writes structured messages to logging infrastructure prior to exception propagation, enabling audit trail of failed load attempts. The tool performs no image processing, resizing, or format conversion—operations occur at display/rendering time by the MCP client application.
-
----
-
 ## read_log
 ```python
 def read_log(file_path: str,

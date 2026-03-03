@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Literal
 
-from mcp.server.fastmcp import FastMCP, Icon, Image
+from mcp.server.fastmcp import FastMCP, Icon
 
 from .config import Config
 from .core.data_info import get_data_handler
@@ -715,36 +715,6 @@ def append_dofile(original_dofile_path: str, content: str, encoding: str = None)
     return new_file_path.as_posix()
 
 
-# =============================================================================
-# STATA_MCP.TOOLS: Result Processing Tools
-# =============================================================================
-
-@stata_mcp.tool(
-    name="load_figure",
-    description="Load figure from local path"
-)
-def load_figure(figure_path: str) -> Image:
-    """
-    Load figure from device
-
-    Args:
-        figure_path (str): the figure file path, only support png and jpg format
-
-    Returns:
-        Image: the figure thumbnail
-
-    Notes:
-        If it is a text-text model, could not use the tools, there will be an error like:
-        API Error: 400 {"error":{"message":"Failed to deserialize the JSON body into the target type: ..."}}
-    """
-    if not Path(figure_path).exists():
-        logging.error(f"Try to load figure {figure_path} but not found.")
-        raise FileNotFoundError(f"{figure_path} not found")
-
-    logging.info(f"Successfully loaded figure from {figure_path}")
-    return Image(figure_path)
-
-
 __all__ = [
     "stata_mcp",
 
@@ -755,7 +725,6 @@ __all__ = [
     "append_dofile",
 
     # Utilities
-    "load_figure",
     "read_log",
     "ado_package_install",
 ]

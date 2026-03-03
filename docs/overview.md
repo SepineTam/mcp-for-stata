@@ -60,7 +60,6 @@ Operates as a stdio/HTTP/SSE server, responding to tool invocation requests from
 | `get_data_info` | Analyze CSV/DTA files with statistical summaries |
 | `help` | Retrieve Stata command documentation (cached) |
 | `ssc_install` | Install packages from SSC/GitHub/net sources |
-| `load_figure` | Load Stata-generated graphics for display |
 | `read_file` | Generic file reading with encoding support |
 
 #### **Agent Mode** (`agent run` command)

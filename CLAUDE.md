@@ -131,7 +131,6 @@ uvx stata-mcp --usable
 - `get_data_info`: Analyze data files (CSV, DTA, XLSX)
 - `read_log`: Read log file contents
 - `ado_package_install`: Install Stata packages from SSC, GitHub, or net sources
-- `load_figure`: Load Stata-generated figures
 
 ### File Structure Conventions
 

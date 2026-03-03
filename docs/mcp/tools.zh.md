@@ -191,36 +191,6 @@ summarize residuals
 
 ---
 
-## load_figure
-```python
-def load_figure(figure_path: str) -> Image:
-    ...
-```
-
-**输入参数**：
-- `figure_path`：图像文件的绝对路径（必填）
-
-**返回结构**：
-包含用于 MCP 传输和显示的图像数据的 FastMCP `Image` 对象
-
-**操作示例**：
-```python
-# 加载 Stata 生成的图形
-load_figure("/Users/project/exports/regression_results.png")
-
-# 加载导出的图形
-load_figure("~/analysis/timeseries_plot.jpg")
-```
-
-**实现架构**：
-该工具使用 FastMCP 的原生 `Image` 类包装器从本地文件系统实现图像资产加载。路径验证通过 `Path.exists()` 探测检查文件是否存在；缺失资产触发带描述性消息的 `FileNotFoundError` 异常。成功调用时，以文件路径作为初始化参数构造 `Image` 对象，使底层 MCP 框架能够自动读取文件和检测 MIME 类型。
-
-支持的格式取决于 FastMCP 实现，但通常包括 PNG（Portable Network Graphics）和 JPEG（Joint Photographic Experts Group）。该工具不执行格式验证或转换；不支持的格式在 Image 对象构造或传输阶段生成错误。
-
-错误日志记录在异常传播之前将结构化消息写入日志基础设施，使失败加载尝试的审计跟踪成为可能。该工具不执行图像处理、调整大小或格式转换——操作在 MCP 客户端应用的显示/渲染时进行。
-
----
-
 ## read_file
 ```python
 def read_file(file_path: str,

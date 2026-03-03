@@ -60,7 +60,6 @@ Stata-MCP 通过四个架构层运行：
 | `get_data_info` | 分析 CSV/DTA 文件并生成统计摘要 |
 | `help` | 检索 Stata 命令文档（缓存） |
 | `ssc_install` | 从 SSC/GitHub/net 源安装包 |
-| `load_figure` | 加载 Stata 生成的图形以供显示 |
 | `read_file` | 带编码支持的通用文件读取 |
 
 #### **智能体模式**（`agent run` 命令）
