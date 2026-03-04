@@ -655,66 +655,6 @@ def write_dofile(content: str, encoding: str = None) -> str:
     return file_path.as_posix()
 
 
-@stata_mcp.tool(
-    name="append_dofile",
-    description="append stata-code to an existing dofile or create a new one",
-)
-def append_dofile(original_dofile_path: str, content: str, encoding: str = None) -> str:
-    """
-    Append stata code to an existing dofile or create a new one if the original doesn't exist.
-
-    Args:
-        original_dofile_path (str): Path to the original dofile to append to.
-            If empty or invalid, a new file will be created.
-        content (str): The stata code content which will be appended to the designated do-file.
-        encoding (str): The encoding method for the dofile, default -> 'utf-8'
-
-    Returns:
-        The new do-file path (either the modified original or a newly created file)
-
-    Notes:
-        When appending to an existing file, the content will be added at the end of the file.
-        If the original file doesn't exist or path is empty, a new file will be created with the content.
-        Please be careful about the syntax coherence when appending code to an existing file.
-        For avoiding mistakes, you can generate stata-code with the function from `StataCommandGenerator` class.
-        Please avoid writing any code that draws graphics or requires human intervention for uncertainty bug.
-        If you find something went wrong about the code, you can use the function from `StataCommandGenerator` class.
-    """
-    # Set encoding if None
-    encoding = encoding or "utf-8"
-
-    # Create a new file path for the output
-    new_file_path = dofile_base_path / f"{datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')}.do"
-
-    # Check if original file exists and is valid
-    original_exists = False
-    original_content = ""
-    if original_dofile_path and Path(original_dofile_path).exists():
-        try:
-            with open(original_dofile_path, "r", encoding=encoding) as f:
-                original_content = f.read()
-            original_exists = True
-        except Exception:
-            # If there's any error reading the file, we'll create a new one
-            original_exists = False
-
-    # Write to the new file (either copying original content + new content, or
-    # just new content)
-    with open(new_file_path, "w", encoding=encoding) as f:
-        if original_exists:
-            f.write(original_content)
-            # Add a newline if the original file doesn't end with one
-            if original_content and not original_content.endswith("\n"):
-                f.write("\n")
-            logging.info(f"Successfully appended content to {new_file_path} from {original_dofile_path}")
-        else:
-            logging.info(f"Created new dofile {new_file_path} with content (original file not found)")
-        f.write(content)
-
-    logging.info(f"Successfully wrote dofile to {new_file_path}")
-    return new_file_path.as_posix()
-
-
 __all__ = [
     "stata_mcp",
 
@@ -722,7 +662,6 @@ __all__ = [
     "get_data_info",
     "stata_do",
     "write_dofile",
-    "append_dofile",
 
     # Utilities
     "read_log",

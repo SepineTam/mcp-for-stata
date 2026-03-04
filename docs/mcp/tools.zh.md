@@ -137,57 +137,7 @@ xtreg diff_income log_gdp, fe
 
 该工具不执行 Stata 代码内容的语法验证或语义分析。代码正确性、命令序列和宏展开有效性仍然是调用上下文的责任。错误处理将文件 I/O 操作包装在 try-except 块中，并进行结构化日志记录以跟踪成功/失败。
 
----
-
-## append_dofile
-```python
-def append_dofile(original_dofile_path: str,
-                  content: str,
-                  encoding: str | None = None) -> str:
-    ...
-```
-
-**输入参数**：
-- `original_dofile_path`：用于内容扩展的源文件路径（可能无效或为空）
-- `content`：要追加的 Stata 代码（必填）
-- `encoding`：字符编码（可选，默认为 UTF-8）
-
-**返回结构**：
-包含新 do 文件绝对路径的字符串（修改后的副本或新创建的产物）
-
-**操作示例**：
-```python
-# 扩展现有分析
-append_dofile(
-    "/Users/project/stata-mcp-dofile/base_analysis.do",
-    "xtreg y x1 x2, fe robust"
-)
-
-# 源文件缺失时的故障安全创建
-append_dofile(
-    "/nonexistent/path.do",
-    "regress y x"
-)
-# 返回包含提供内容的新文件路径
-
-# 迭代分析的代码组合
-append_dofile(
-    previous_dofile_path,
-    """
-predict residuals, residuals
-summarize residuals
-"""
-)
-```
-
-**实现架构**：
-该工具通过三阶段操作实现故障安全组合策略：验证阶段通过 `Path.exists()` 探测检查 `original_dofile_path` 是否存在和可访问；组合阶段执行条件内容组装，有效源文件触发读取操作后进行连接，而无效路径触发新文件创建；持久化阶段将组合内容写入 `stata-mcp-dofile/` 层级中新的带时间戳产物。
-
-关键设计特征：源文件保持不变。所有组合操作创建带有新时间戳的新产物，确保源不可变性和保留来源。换行完整性维护检查源文件终止；如果源内容缺少尾随换行符，则在内容追加前插入分隔符。
-
-该工具不执行原始内容和追加内容之间的语法一致性验证。宏变量作用域、临时变量命名冲突和命令序列有效性需要调用者手动协调。与 `write_dofile` 类似，输出重定向路径管理需要在需要显式输出文件规范的命令之前调用 `results_doc_path`。
-
-平台特定路径解析使用 `pathlib.Path` 实现跨平台兼容性。文件读取操作使用指定的编码参数，回退到 UTF-8 默认值。错误处理将 I/O 操作包装起来，读取错误时静默失败，将读取异常视为等同于缺失源文件。
+> **⚠️ 弃用通知**：此工具将在未来版本中移除。请考虑使用标准文件写入方法替代。
 
 ---
 

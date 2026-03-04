@@ -368,7 +368,6 @@ The Security Guard is automatically integrated with:
 
 - `stata_do`: Execute Stata do-files (validated by default)
 - `write_dofile`: Create do-files (not validated until execution)
-- `append_dofile`: Append to do-files (not validated until execution)
 
 ### Validation Flow
 

@@ -56,7 +56,6 @@ Operates as a stdio/HTTP/SSE server, responding to tool invocation requests from
 |------|---------|
 | `stata_do` | Execute do-files with log retrieval |
 | `write_dofile` | Create timestamped do-files |
-| `append_dofile` | Extend existing do-files immutably |
 | `get_data_info` | Analyze CSV/DTA files with statistical summaries |
 | `help` | Retrieve Stata command documentation (cached) |
 | `ssc_install` | Install packages from SSC/GitHub/net sources |

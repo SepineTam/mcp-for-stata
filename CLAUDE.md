@@ -127,7 +127,6 @@ uvx stata-mcp --usable
 - `help`: Get Stata command documentation (macOS and Linux only)
 - `stata_do`: Execute Stata do-files
 - `write_dofile`: Create Stata do-files from code
-- `append_dofile`: Append code to existing do-files
 - `get_data_info`: Analyze data files (CSV, DTA, XLSX)
 - `read_log`: Read log file contents
 - `ado_package_install`: Install Stata packages from SSC, GitHub, or net sources

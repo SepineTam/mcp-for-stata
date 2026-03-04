@@ -137,57 +137,7 @@ Integration with output redirection commands (`outreg2`, `esttab`) requires coor
 
 The tool does not perform syntactic validation or semantic analysis of the Stata code content. Code correctness, command sequencing, and macro expansion validity remain the responsibility of the calling context. Error handling wraps file I/O operations in try-except blocks with structured logging for success/failure tracking.
 
----
-
-## append_dofile
-```python
-def append_dofile(original_dofile_path: str,
-                  content: str,
-                  encoding: str | None = None) -> str:
-    ...
-```
-
-**Input Parameters**:
-- `original_dofile_path`: Source file path for content extension (may be invalid or empty)
-- `content`: Stata code to append (required)
-- `encoding`: Character encoding (optional, defaults to UTF-8)
-
-**Return Structure**:
-String containing absolute path to new do-file (either modified copy or newly created artifact)
-
-**Operational Examples**:
-```python
-# Extend existing analysis
-append_dofile(
-    "/Users/project/stata-mcp-dofile/base_analysis.do",
-    "xtreg y x1 x2, fe robust"
-)
-
-# Fail-safe creation when source missing
-append_dofile(
-    "/nonexistent/path.do",
-    "regress y x"
-)
-# Returns new file path with provided content
-
-# Code composition for iterative analysis
-append_dofile(
-    previous_dofile_path,
-    """
-predict residuals, residuals
-summarize residuals
-"""
-)
-```
-
-**Implementation Architecture**:
-The tool implements a fail-safe composition strategy through three-phase operation: validation phase checks `original_dofile_path` existence and accessibility via `Path.exists()` probe; composition phase performs conditional content assembly where valid source files trigger read operations followed by concatenation, while invalid paths trigger new file creation; persistence phase writes combined content to a new timestamped artifact in `stata-mcp-dofile/` hierarchy.
-
-Critical design characteristic: source files remain unmodified. All composition operations create new artifacts with fresh timestamps, ensuring source immutability and preserving provenance. Newline integrity maintenance examines source file termination; if source content lacks trailing newline, separator insertion occurs before content append.
-
-The tool does not perform syntactic coherence validation between original and appended content. Macro variable scoping, temporary variable naming conflicts, and command sequence validity require manual coordination by the caller. Similar to `write_dofile`, output redirection path management necessitates prior `results_doc_path` invocation for commands requiring explicit output file specification.
-
-Platform-specific path resolution utilizes `pathlib.Path` for cross-platform compatibility. File read operations employ specified encoding parameter with fallback to UTF-8 default. Error handling wraps I/O operations with silent failure on read errors, treating read exceptions equivalent to missing source files.
+> **⚠️ Deprecation Notice**: This tool will be removed in a future version. Consider using standard file writing methods instead.
 
 ---
 

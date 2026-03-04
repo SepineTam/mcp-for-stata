@@ -56,7 +56,6 @@ Stata-MCP 通过四个架构层运行：
 |------|---------|
 | `stata_do` | 执行 do 文件并获取日志 |
 | `write_dofile` | 创建带时间戳的 do 文件 |
-| `append_dofile` | 不可变地扩展现有 do 文件 |
 | `get_data_info` | 分析 CSV/DTA 文件并生成统计摘要 |
 | `help` | 检索 Stata 命令文档（缓存） |
 | `ssc_install` | 从 SSC/GitHub/net 源安装包 |

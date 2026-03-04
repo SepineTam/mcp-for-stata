@@ -368,7 +368,6 @@ validator.dangerous_commands.add("another_command")
 
 - `stata_do`：执行 Stata do 文件（默认验证）
 - `write_dofile`：创建 do 文件（执行时验证）
-- `append_dofile`：追加到 do 文件（执行时验证）
 
 ### 验证流程
 
