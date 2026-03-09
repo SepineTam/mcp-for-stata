@@ -95,7 +95,10 @@ class FinderMacOS(FinderBase):
             for stata_app in applications_dir.glob("Stata *"):
                 _version = None
                 if stata_app.is_dir():
-                    _version = eval(stata_app.name.split()[-1])
+                    try:
+                        _version = float(stata_app.name.split()[-1])
+                    except (ValueError, TypeError):
+                        continue  # Skip invalid version format
                     if stata_app_config := self._application_find_base(stata_app, version=_version):
                         found_executables.append(stata_app_config)
 

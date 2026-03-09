@@ -60,11 +60,8 @@ class AdoInstallBase(ABC):
     @staticmethod
     def check_installed_from_msg(msg: str) -> bool:
         state_with_prompt = msg.split("\n")[0]
-        state_str = state_with_prompt.split(":")[-1].strip()
-        if isinstance(state := eval(state_str), bool):
-            return state
-        else:
-            return False
+        state_str = state_with_prompt.split(":")[-1].strip().lower()
+        return state_str in ("true", "1", "yes")
 
     def _install_msg_template(self, runner_result: str) -> str:
         return f"Installation State: {self.check_install(runner_result)}\n" + runner_result
