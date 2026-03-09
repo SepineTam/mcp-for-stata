@@ -14,13 +14,16 @@ import os
 import tomllib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from functools import cached_property
+from io import BytesIO
 from os import PathLike
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 from urllib.parse import urlparse
 
 import numpy as np
 import pandas as pd
+import requests
 
 # Global registry for data info classes
 # Maps file extensions to their corresponding DataInfoBase subclass
@@ -124,16 +127,19 @@ class DataInfoBase(ABC):
     """Base class for data info handlers."""
 
     # Registry of supported file extensions (to be overridden by subclasses)
-    supported_extensions: list[str] = []
+    supported_extensions: List[str] = []
 
     CFG_FILE = Path.home() / ".statamcp" / "config.toml"
-    DEFAULT_METRICS = [
+    DEFAULT_METRICS: List[str] = [
         'obs', 'mean', 'stderr', 'min', 'max'
     ]
-    ALLOWED_METRICS = DEFAULT_METRICS.extend([
+    ALLOWED_METRICS: List[str] = DEFAULT_METRICS + [
         # Additional metrics
         'q1', 'q3', 'skewness', 'kurtosis'
-    ])
+    ]
+
+    # Request timeout
+    DEFAULT_TIMEOUT = (5, 30)
 
     def __init_subclass__(cls, **kwargs):
         """
@@ -148,17 +154,19 @@ class DataInfoBase(ABC):
         for ext in cls.supported_extensions:
             DATA_INFO_REGISTRY[ext.lower()] = cls
 
-    def __init__(self,
-                 data_path: str | PathLike | Path,
-                 vars_list: List[str] | str = None,
-                 *,
-                 encoding: str = "utf-8",
-                 is_cache: bool = True,
-                 cache_dir: str | Path = None,
-                 string_keep_number: int = None,
-                 decimal_places: int = None,
-                 hash_length: int = None,
-                 **kwargs):
+    def __init__(
+        self,
+        data_path: str | PathLike | Path,
+        vars_list: List[str] | str = None,
+        *,
+        encoding: str = "utf-8",
+        is_cache: bool = True,
+        cache_dir: str | Path = None,
+        string_keep_number: int = None,
+        decimal_places: int = None,
+        hash_length: int = None,
+        **kwargs
+    ):
         if isinstance(data_path, str):
             self.is_url = self._is_url(data_path)
             if not self.is_url:  # if it is a local file, convert it to a Path object
@@ -186,13 +194,16 @@ class DataInfoBase(ABC):
         self.kwargs = kwargs  # Store additional keyword arguments for subclasses to use
 
     # Properties
+    @cached_property
+    def bytes_io_data(self) -> BytesIO:
+        if self.is_url:
+            return self._fetch_data()
+        else:
+            return self._load_data()
+
     @property
     def hash(self) -> str:
-        if self.is_url:
-            import requests
-            resp = requests.get(self.data_path)
-            return hashlib.md5(resp.content).hexdigest()
-        return hashlib.md5(self.data_path.read_bytes()).hexdigest()
+        return hashlib.md5(self.bytes_io_data.getvalue()).hexdigest()
 
     @property
     def name(self) -> str:
@@ -259,6 +270,41 @@ class DataInfoBase(ABC):
     def _read_data(self) -> pd.DataFrame:
         """Read data from the source file. Must be implemented by subclasses."""
         ...
+
+    def _fetch_data(
+        self,
+        timeout: Tuple[int, int] = None
+    ) -> BytesIO:
+        """
+        Fetch data from URL into memory.
+
+        Args:
+            timeout: (connect_timeout, read_timeout) in seconds.
+                     Defaults to (5, 30) if not specified.
+
+        Returns:
+            BytesIO: In-memory byte buffer containing the downloaded data.
+
+        Raises:
+            requests.RequestException: If the request fails or times out.
+        """
+        request_timeout = timeout or self.DEFAULT_TIMEOUT
+
+        response = requests.get(
+            str(self.data_path),
+            timeout=request_timeout
+        )
+        response.raise_for_status()
+        return BytesIO(response.content)
+
+    def _load_data(self) -> BytesIO:
+        """
+        Load data from local file into memory.
+
+        Returns:
+            BytesIO: In-memory byte buffer containing the file data.
+        """
+        return BytesIO(self.data_path.read_bytes())
 
     # Public methods
     def summary(self) -> Dict[str, Any]:
