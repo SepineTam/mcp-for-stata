@@ -200,8 +200,7 @@ class StataDo:
                 f.write("exit, STATA\n")
 
             # Run Stata on Windows using /e to execute the batch file
-            # Use double quotes to handle spaces in the path
-            cmd = f'"{self.STATA_CLI}" /e do "{batch_file}"'
+            cmd = [self.STATA_CLI, "/e", "do", batch_file.as_posix()]
             result = subprocess.run(
                 cmd,
                 shell=True,
@@ -209,7 +208,6 @@ class StataDo:
                 text=True,
                 cwd=self.cwd
             )
-
             if result.returncode != 0:
                 logging.error(f"Stata execution failed on Windows: {result.stderr}")
                 raise RuntimeError(f"Windows Stata execution failed: {result.stderr}")
@@ -330,10 +328,8 @@ class StataDo:
                 f.write("exit, STATA\n")
 
             # Run Stata on Windows using /e to execute the batch file
-            # Use double quotes to handle spaces in the path
-            cmd = f'"{self.STATA_CLI}" /e do "{batch_file}"'
-
             # Use Popen instead of run to enable monitoring
+            cmd = [self.STATA_CLI, "/e", "do", str(batch_file)]
             proc = subprocess.Popen(
                 cmd,
                 shell=True,
