@@ -8,11 +8,9 @@
 # @File   : dta.py
 
 from io import BytesIO
-from pathlib import Path
 from typing import Any, Dict
 
 import pandas as pd
-import requests
 
 from .base import DataInfoBase
 
@@ -31,50 +29,26 @@ class DtaDataInfo(DataInfoBase):
             pd.DataFrame: The data from the Stata file
 
         Raises:
-            FileNotFoundError: If the file does not exist
             ValueError: If the file is not a valid Stata file
         """
-        # Check if it's a URL first
-        if self.is_url:
-            # For URLs, validate the file extension from the URL string
-            from urllib.parse import urlparse
-            parsed_url = urlparse(str(self.data_path))
-            url_path = parsed_url.path
-            if not url_path.lower().endswith('.dta'):
-                raise ValueError(f"URL must point to a .dta file, got: {url_path}")
-            file_path = None  # Not used for URLs
-        else:
-            # For local files, convert to Path object and validate
-            file_path = Path(self.data_path)
-
-            # Check if file exists
-            if not file_path.exists():
-                raise FileNotFoundError(f"Stata file not found: {file_path}")
-
-            # Check if it's a .dta file
-            if file_path.suffix.lower() != '.dta':
-                raise ValueError(f"File must have .dta extension, got: {file_path.suffix}")
+        # Get data as BytesIO (handles both URL and local file)
+        # Note: StataReader consumes the buffer, so we need to work with copies
+        buffer = self.bytes_io_data
 
         try:
-            # Read the Stata file
-            # Using read_stata with convert_categoricals=False to avoid converting labels to categories
-            # This preserves the original data structure without converting value labels
-            buffer = None
-            if self.is_url:
-                resp = requests.get(self.data_path)
-                resp.raise_for_status()
-                buffer = BytesIO(resp.content)
+            # StataReader needs its own buffer copy as it modifies the stream
+            # Create a copy for reading labels
+            label_buffer = BytesIO(buffer.getvalue())
 
             # Read variable labels using StataReader
-            with pd.io.stata.StataReader(buffer if buffer else file_path) as reader:
+            with pd.io.stata.StataReader(label_buffer) as reader:
                 self._variable_labels = reader.variable_labels()
 
-            # Reset buffer position after reading labels
-            if buffer:
-                buffer.seek(0)
+            # Create another copy for reading the DataFrame
+            data_buffer = BytesIO(buffer.getvalue())
 
             df = pd.read_stata(
-                buffer if buffer else file_path,
+                data_buffer,
                 convert_categoricals=False,  # disable change data to mapped str.
                 convert_dates=True,
                 convert_missing=False,

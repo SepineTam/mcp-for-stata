@@ -179,6 +179,9 @@ class DataInfoBase(ABC):
             raise TypeError("data_path must be a string or PathLike object.")
 
         self.data_path = data_path
+        if not self.is_url:
+            if not self.data_path.exists():
+                raise FileNotFoundError(f"Data file not found: {self.data_path}")
 
         self.encoding = encoding
         self._pre_vars_list = vars_list
