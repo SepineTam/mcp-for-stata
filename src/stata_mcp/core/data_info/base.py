@@ -127,10 +127,13 @@ class DataInfoBase(ABC):
     supported_extensions: list[str] = []
 
     CFG_FILE = Path.home() / ".statamcp" / "config.toml"
-    DEFAULT_METRICS = ['obs', 'mean', 'stderr', 'min', 'max']
-    ALLOWED_METRICS = ['obs', 'mean', 'stderr', 'min', 'max',
-                       # Additional metrics
-                       'q1', 'q3', 'skewness', 'kurtosis']
+    DEFAULT_METRICS = [
+        'obs', 'mean', 'stderr', 'min', 'max'
+    ]
+    ALLOWED_METRICS = DEFAULT_METRICS.extend([
+        # Additional metrics
+        'q1', 'q3', 'skewness', 'kurtosis'
+    ])
 
     def __init_subclass__(cls, **kwargs):
         """
