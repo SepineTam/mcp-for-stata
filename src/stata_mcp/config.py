@@ -12,7 +12,7 @@ import platform
 import sys
 import tomllib
 from pathlib import Path
-from typing import Dict
+from typing import Any, Dict
 
 from .core.stata import StataFinder
 from .core.types import StataCLINotFoundError
@@ -30,6 +30,87 @@ class Config:
         except Exception:
             config = {}
         return config
+
+    def read_config_text(self) -> str:
+        """Return raw configuration file content."""
+        if not self.config_file.exists():
+            return ""
+        return self.config_file.read_text(encoding="utf-8")
+
+    @staticmethod
+    def _escape_toml_string(value: str) -> str:
+        """Escape special characters for TOML basic strings."""
+        return value.replace("\\", "\\\\").replace('"', '\\"')
+
+    def _write_toml(self, data: dict[str, Any]) -> None:
+        """Write TOML content with support for top-level keys and nested tables."""
+        lines: list[str] = []
+
+        scalar_keys = [k for k, v in data.items() if not isinstance(v, dict)]
+        for key in scalar_keys:
+            lines.append(f"{key} = {self._toml_value(data[key])}")
+
+        if scalar_keys and any(isinstance(v, dict) for v in data.values()):
+            lines.append("")
+
+        for section, value in data.items():
+            if not isinstance(value, dict):
+                continue
+            self._dump_toml_section(lines=lines, section_name=section, section_data=value)
+
+        self.config_file.parent.mkdir(parents=True, exist_ok=True)
+        content = "\n".join(lines).strip() + "\n"
+        self.config_file.write_text(content, encoding="utf-8")
+
+    def _dump_toml_section(self, lines: list[str], section_name: str, section_data: dict[str, Any]) -> None:
+        """Dump a TOML section recursively."""
+        lines.append(f"[{section_name}]")
+
+        scalar_keys = [k for k, v in section_data.items() if not isinstance(v, dict)]
+        for key in scalar_keys:
+            lines.append(f"{key} = {self._toml_value(section_data[key])}")
+
+        if scalar_keys and any(isinstance(v, dict) for v in section_data.values()):
+            lines.append("")
+
+        nested_keys = [k for k, v in section_data.items() if isinstance(v, dict)]
+        for index, key in enumerate(nested_keys):
+            nested_section = f"{section_name}.{key}"
+            self._dump_toml_section(lines=lines, section_name=nested_section, section_data=section_data[key])
+            if index != len(nested_keys) - 1:
+                lines.append("")
+
+    def _toml_value(self, value: Any) -> str:
+        """Convert Python values into TOML literals."""
+        if isinstance(value, bool):
+            return str(value).lower()
+        if isinstance(value, int):
+            return str(value)
+        if isinstance(value, float):
+            return str(value)
+        if value is None:
+            return '""'
+        if isinstance(value, Path):
+            value = str(value)
+        return f'"{self._escape_toml_string(str(value))}"'
+
+    def set_stata_cli(self, value: str | None = None) -> str:
+        """Persist STATA_CLI to config file and return the saved value."""
+        cleaned_value = self._clean_string_value(value)
+        if cleaned_value is None:
+            cleaned_value = StataFinder(None).STATA_CLI
+
+        if cleaned_value is None:
+            raise StataCLINotFoundError()
+
+        updated = self.config
+        stata_section = updated.get("STATA", {})
+        if not isinstance(stata_section, dict):
+            stata_section = {}
+        stata_section["STATA_CLI"] = cleaned_value
+        updated["STATA"] = stata_section
+        self._write_toml(updated)
+        return cleaned_value
 
     @staticmethod
     def _clean_string_value(value):

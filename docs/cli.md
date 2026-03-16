@@ -49,6 +49,21 @@ stata-mcp agent run
 stata-mcp agent run --work-dir /path/to/project
 ```
 
+### Config Management
+
+Inspect and update local CLI configuration:
+
+```bash
+# Print current config file content (~/.statamcp/config.toml)
+stata-mcp config
+
+# Set STATA_CLI explicitly
+stata-mcp config cli set /path/to/stata
+
+# Auto-detect STATA_CLI via StataFinder and persist it
+stata-mcp config cli set
+```
+
 ### Install to AI Clients
 
 Install Stata-MCP to various AI coding assistants:
@@ -116,6 +131,13 @@ uvx stata-mcp sandbox-install \
 | Option | Description |
 |--------|-------------|
 | `--work-dir` | Working directory for agent (default: current directory) |
+
+### Config Options
+
+| Command | Description |
+|---------|-------------|
+| `stata-mcp config` | Print raw config file content |
+| `stata-mcp config cli set [value]` | Set `STATA.STATA_CLI` in config, auto-detect when value is omitted |
 
 ### Install Options
 
