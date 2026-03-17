@@ -23,6 +23,7 @@ dependencies = [
     "mcp-ui-server>=1.0.0",
     "pyreadstat>=1.2.0",
     "requests>=2.28.0",
+    "tomli-w>=1.2.0",
 ]
 
 [project.scripts]
