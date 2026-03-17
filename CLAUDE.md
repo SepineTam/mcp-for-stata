@@ -244,15 +244,25 @@ fix(api): resolve null response issue
 docs: update installation guide
 ```
 
-A standard git workflow follows:
+## Branch Protection Policy
 
-1. **Lint code**: Run lint tools on your code
-2. **Check status**: Run `git status` to see current changes
-3. **Stage files**: Run `git add <files>` to stage changes
-4. **Review changes**: Run `git diff --staged` to review staged changes
-5. **Commit**: Run `git commit -m "type: description"` with conventional commit message
-6. **Pull rebase**: Before pushing, run `git pull --rebase` to integrate remote changes
-7. **Push**: Run `git push` to push changes to remote
+**All changes MUST be submitted via Pull Request.** Direct commits to `master` are NOT allowed.
+
+### Branch Naming
+
+- Feature: `feat/feature-name` or `dev/v1.2.3`
+- Fix: `fix/bug-name`
+- Docs: `docs/doc-name`
+
+### Standard Workflow
+
+1. **Create branch**: `git checkout -b dev/v1.13.42`
+2. **Lint code**: Run `precommit`
+3. **Stage files**: `git add <files>`
+4. **Review changes**: `git diff --staged`
+5. **Commit**: `git commit -m "type: description"`
+6. **Push branch**: `git push -u origin dev/v1.13.42`
+7. **Create PR**: `gh pr create --title "..." --body "..."`
 
 ## Important Notes
 

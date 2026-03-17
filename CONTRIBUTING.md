@@ -1,6 +1,43 @@
 # CONTRIBUTING
 Thank you for your interest in contributing to this project! We welcome contributions from everyone. Please follow the guidelines below to ensure a smooth process.
 
+## Branch Protection Policy
+
+**All changes MUST be submitted via Pull Request.** Direct commits to `master` branch are NOT allowed.
+
+### Branch Naming Convention
+
+Create a feature branch before making changes:
+- **Feature branches**: `feat/feature-name` or `dev/v1.2.3`
+- **Bug fix branches**: `fix/bug-name`
+- **Docs branches**: `docs/doc-name`
+
+### PR Workflow
+
+1. Create a new branch from `master`
+2. Make your changes and commit
+3. Push the branch to remote
+4. Create a Pull Request
+5. Wait for review (if applicable)
+6. Merge PR when approved
+
+### Example
+
+```bash
+# Create and switch to new branch
+git checkout -b dev/v1.13.42
+
+# Make changes, stage and commit
+git add .
+git commit -m "feat: add new feature"
+
+# Push branch to remote
+git push -u origin dev/v1.13.42
+
+# Create PR via GitHub CLI or web interface
+gh pr create --title "feat: add new feature" --body "Description here"
+```
+
 ## Git Commit Standards
 
 We follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification for all commit messages. This creates a structured commit history that is both human and machine readable.
