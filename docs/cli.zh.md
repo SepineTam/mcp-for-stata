@@ -49,6 +49,21 @@ stata-mcp agent run
 stata-mcp agent run --work-dir /path/to/project
 ```
 
+### 配置管理
+
+查看和更新本地 CLI 配置：
+
+```bash
+# 打印当前配置文件内容（~/.statamcp/config.toml）
+stata-mcp config
+
+# 手动设置 STATA_CLI 路径
+stata-mcp config cli set /path/to/stata
+
+# 自动检测 STATA_CLI 并持久化保存
+stata-mcp config cli set
+```
+
 ### 安装到 AI 客户端
 
 将 Stata-MCP 安装到各种 AI 编程助手：
@@ -116,6 +131,13 @@ uvx stata-mcp sandbox-install \
 | 选项 | 描述 |
 |--------|-------------|
 | `--work-dir` | 智能体的工作目录（默认：当前目录） |
+
+### 配置选项
+
+| 命令 | 描述 |
+|--------|-------------|
+| `stata-mcp config` | 打印原始配置文件内容 |
+| `stata-mcp config cli set [value]` | 设置 `STATA.STATA_CLI`，省略 value 时自动检测 |
 
 ### 安装选项
 
