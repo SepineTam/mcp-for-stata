@@ -17,14 +17,14 @@ from typing import Any, Dict, List, Literal
 from mcp.server.fastmcp import FastMCP, Icon
 
 from .config import Config
-from .core.stata import StataDo
-from .core.stata.builtin_tools.ado_install import GITHUB_Install, NET_Install, SSC_Install
-from .core.stata.builtin_tools.help import StataHelp as Help
-from .core.stata.stata_log import StataLog
 from .core.types import RAMLimitExceededError
 from .data_info import get_data_handler
 from .guard import GuardValidator
 from .monitor import RAMMonitor
+from .stata import StataDo
+from .stata.builtin_tools.ado_install import GITHUB_Install, NET_Install, SSC_Install
+from .stata.builtin_tools.help import StataHelp as Help
+from .stata.stata_log import StataLog
 
 # Init project config
 config = Config()

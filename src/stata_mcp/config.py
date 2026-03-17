@@ -16,8 +16,8 @@ from typing import Dict
 
 import tomli_w
 
-from .core.stata import StataFinder
 from .core.types import StataCLINotFoundError
+from .stata import StataFinder
 
 
 class Config:

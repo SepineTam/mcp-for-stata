@@ -14,7 +14,7 @@ import tempfile
 from pathlib import Path
 from typing import Dict, List, Literal, Optional
 
-from ....utils import get_nowtime
+from ...utils import get_nowtime
 
 
 class StataDo:
@@ -39,7 +39,7 @@ class StataDo:
         if is_unix is not None:
             self.is_unix = is_unix
         else:
-            from ....utils import get_os
+            from ...utils import get_os
             self.is_unix = get_os() in ["Darwin", "Linux"]
         self.cwd = cwd or Path.cwd()
         self.monitors = monitors or []
