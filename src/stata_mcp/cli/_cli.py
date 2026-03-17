@@ -11,6 +11,8 @@ import argparse
 import sys
 from importlib.metadata import version
 
+from ..config import Config
+
 
 def main() -> None:
     """Entry point for the command line interface."""
@@ -56,6 +58,30 @@ def main() -> None:
         "--work-dir",
         default="./",
         help="Working directory for agent (default: current directory)",
+    )
+
+    # Config subcommand
+    config_parser = subparsers.add_parser(
+        "config",
+        help="Show and manage Stata-MCP configuration"
+    )
+    config_subparsers = config_parser.add_subparsers(dest="config_target")
+
+    config_cli_parser = config_subparsers.add_parser(
+        "cli",
+        help="Manage Stata CLI executable path"
+    )
+    config_cli_subparsers = config_cli_parser.add_subparsers(dest="config_cli_action")
+
+    config_cli_set_parser = config_cli_subparsers.add_parser(
+        "set",
+        help="Set STATA_CLI path in config file"
+    )
+    config_cli_set_parser.add_argument(
+        "value",
+        nargs="?",
+        default=None,
+        help="Optional STATA_CLI path. If omitted, auto-detect from StataFinder.",
     )
 
     # Install subcommand
@@ -159,6 +185,27 @@ def main() -> None:
             agent.run()
         else:
             agent_parser.print_help()
+
+    elif args.command == "config":
+        cfg = Config()
+        if args.config_target is None:
+            content = cfg.read_config_text()
+            if content:
+                print(content, end="" if content.endswith("\n") else "\n")
+            else:
+                print(f"No config file found at: {cfg.config_file}")
+            sys.exit(0)
+
+        if args.config_target == "cli":
+            if args.config_cli_action == "set":
+                value = cfg.set_stata_cli(args.value)
+                print(f"Set STATA.STATA_CLI = {value}")
+                sys.exit(0)
+            config_cli_parser.print_help()
+            sys.exit(2)
+
+        config_parser.print_help()
+        sys.exit(2)
 
     elif args.command == "install":
         from ..utils.Installer import Installer
