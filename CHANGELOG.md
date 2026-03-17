@@ -2,6 +2,28 @@
 
 
 <details>
+<summary>Click to expand v1.13.41 details</summary>
+
+## [1.13.41] - 2026-03-17
+
+### Added
+- **CLI**: Added config inspect and STATA_CLI set commands
+  - New `stata-mcp config inspect` command to view configuration
+  - New `stata-mcp config set stata_cli <path>` command to set Stata CLI path
+- **Data Info**: Added unified URL fetch with timeout support
+- **Registry**: Added server.json for MCP registry
+
+### Changed
+- **Config**: Use tomli-w for TOML serialization (replacing manual string formatting)
+- **Data Info**: Unified URL and local file handling with bytes_io_data
+- **Data Info**: Reorganized metrics for better code structure
+- **Security**: Removed unsafe code execution calls in ado_install and macos finder
+- **MCP Tools**: Removed append_dofile tool and deprecated write_dofile
+- **Windows**: Use list args with shell=True for safer path handling
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.40 details</summary>
 
 ## [1.13.40] - 2026-03-03
