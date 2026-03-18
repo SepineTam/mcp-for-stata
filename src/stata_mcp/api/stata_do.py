@@ -14,7 +14,7 @@ from ..core.types import RAMLimitExceededError
 from ..guard import GuardValidator
 from ..monitor import RAMMonitor
 from ..stata import StataDo
-from . import create_runtime_context
+from ._runtime import create_runtime_context
 
 
 def stata_do(

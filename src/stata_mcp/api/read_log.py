@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Literal
 
 from ..stata import StataLog
-from . import create_runtime_context
+from ._runtime import create_runtime_context
 
 
 def read_log(

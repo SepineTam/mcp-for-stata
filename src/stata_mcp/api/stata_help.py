@@ -10,7 +10,7 @@
 from pathlib import Path
 
 from ..stata import StataHelp
-from . import create_runtime_context
+from ._runtime import create_runtime_context
 
 
 def stata_help(cmd: str, config_file: str | Path | None = None) -> str:

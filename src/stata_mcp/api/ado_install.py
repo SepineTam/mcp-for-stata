@@ -10,7 +10,7 @@
 from pathlib import Path
 
 from ..stata import GITHUB_Install, NET_Install, SSC_Install
-from . import create_runtime_context
+from ._runtime import create_runtime_context
 from .stata_do import stata_do
 from .write_dofile import write_dofile
 

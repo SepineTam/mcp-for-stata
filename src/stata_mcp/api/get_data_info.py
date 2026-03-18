@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import List
 
 from ..data_info import get_data_handler
-from . import create_runtime_context
+from ._runtime import create_runtime_context
 
 
 def get_data_info(
