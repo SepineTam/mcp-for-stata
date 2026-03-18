@@ -164,6 +164,16 @@ class Config:
         )
 
     @property
+    def ENABLE_WRITE_DOFILE(self) -> bool:
+        return self._get_config_value(
+            config_keys=["BETA", "ENABLE_WRITE_DOFILE"],
+            env_var="STATA_MCP__ENABLE_WRITE_DOFILE",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool)
+        )
+
+    @property
     def LOGGING_ON(self) -> bool:
         return self._get_config_value(
             config_keys=["DEBUG", "logging", "LOGGING_ON"],
