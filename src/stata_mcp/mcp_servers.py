@@ -34,6 +34,7 @@ STATA_MCP_DIRECTORY = config.STATA_MCP_DIRECTORY
 # Whatever, left a controller switch `logging STATA_MCP_LOGGING_ON`. Turn off all logging with setting it as false.
 # Default Logging Status: File (on), Console (off).
 IS_DEBUG = config.IS_DEBUG
+ENABLE_WRITE_DOFILE = config.ENABLE_WRITE_DOFILE
 
 if config.LOGGING_ON:
     # Configure logging
@@ -622,10 +623,6 @@ def read_log(
         raise IOError(f"An error occurred while reading the file: {e}")
 
 
-@stata_mcp.tool(
-    name="write_dofile",
-    description="write the stata-code to dofile"
-)
 def write_dofile(content: str, encoding: str = None) -> str:
     """
     Write stata code to a dofile and return the do-file path.
@@ -643,6 +640,12 @@ def write_dofile(content: str, encoding: str = None) -> str:
         Please avoid writing any code that draws graphics or requires human intervention for uncertainty bug.
         If you find something went wrong about the code, you can use the function from `StataCommandGenerator` class.
 
+    Warnings:
+        This tool will be removed in an upcoming version because modern coding agents
+        (Claude Code, Codex, Cursor, etc.) have native file writing capabilities.
+        If you are using such agents, consider creating a 'code' directory to manage
+        your Stata do-files directly.
+
     """
     file_path = dofile_base_path / f"{datetime.strftime(datetime.now(), '%Y%m%d%H%M%S%f')}.do"
     encoding = encoding or "utf-8"
@@ -653,6 +656,18 @@ def write_dofile(content: str, encoding: str = None) -> str:
     except Exception as e:
         logging.error(f"Failed to write dofile to {file_path}: {str(e)}")
     return file_path.as_posix()
+
+
+if ENABLE_WRITE_DOFILE:
+    # When stata-mcp was first developed, agent capabilities were still immature.
+    # However, modern agents like Claude Code, Codex, and Cursor now have native
+    # file modification capabilities with better implementations. Additionally,
+    # with Claude Code's LSP support, write_dofile has become obsolete.
+    # This tool will be completely removed in a few versions.
+    stata_mcp.tool(
+        name="write_dofile",
+        description="write the stata-code to dofile"
+    )(write_dofile)
 
 
 __all__ = [
