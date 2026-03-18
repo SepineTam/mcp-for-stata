@@ -2,6 +2,20 @@
 
 
 <details>
+<summary>Click to expand v1.13.42 details</summary>
+
+## [1.13.42] - 2026-03-19
+
+### Changed
+- **MCP Tools**: Made write_dofile tool optional via ENABLE_WRITE_DOFILE flag (default: False)
+  - Added ENABLE_WRITE_DOFILE config property for conditional tool registration
+  - Converted write_dofile from decorator to conditional registration pattern
+  - Added deprecation warning in tool docstring
+  - Tool only registers when ENABLE_WRITE_DOFILE=True
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.41 details</summary>
 
 ## [1.13.41] - 2026-03-17
