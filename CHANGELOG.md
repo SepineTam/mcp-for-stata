@@ -2,6 +2,30 @@
 
 
 <details>
+<summary>Click to expand v1.14.0 details</summary>
+
+## [1.14.0] - 2026-03-20
+
+### Added
+- **API Module**: Created new API package with standalone functions for CLI and external use
+  - Added `stata_do`, `stata_help`, `read_log`, `get_data_info`, `ado_install`, `write_dofile` API functions
+  - Added `_runtime.py` for shared runtime utilities
+- **CLI**: Added API-backed CLI tool commands (`stata-mcp help`, `stata-mcp do`, `stata-mcp log`, `stata-mcp data-info`, `stata-mcp install`)
+  - CLI tools now behave like one-shot helpers with proper exit codes
+
+### Changed
+- **Architecture**: Promoted core modules to top-level
+  - Moved `stata_mcp/core/stata` to `stata_mcp/stata`
+  - Moved `stata_mcp/core/data_info` to `stata_mcp/data_info`
+- **CLI**: Refactored CLI code structure for better maintainability
+  - Split `_cli.py` into `_parsers.py` (argument parsing) and `_handlers.py` (command handlers)
+  - Reduced `_cli.py` from 458 lines to a thinner orchestrator
+- **Stata**: Moved `stata_log` module to `builtin_tools` directory
+- **Ado Install**: Increased default timeout to 300s for package installation
+
+</details>
+
+<details>
 <summary>Click to expand v1.13.42 details</summary>
 
 ## [1.13.42] - 2026-03-19
