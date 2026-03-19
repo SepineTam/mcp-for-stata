@@ -17,14 +17,18 @@ from typing import Any, Dict, List, Literal
 from mcp.server.fastmcp import FastMCP, Icon
 
 from .config import Config
-from .core.data_info import get_data_handler
-from .core.stata import StataDo
-from .core.stata.builtin_tools.ado_install import GITHUB_Install, NET_Install, SSC_Install
-from .core.stata.builtin_tools.help import StataHelp as Help
-from .core.stata.stata_log import StataLog
 from .core.types import RAMLimitExceededError
+from .data_info import get_data_handler
 from .guard import GuardValidator
 from .monitor import RAMMonitor
+from .stata import (
+    GITHUB_Install,
+    NET_Install,
+    SSC_Install,
+    StataDo,
+    StataHelp,
+    StataLog,
+)
 
 # Init project config
 config = Config()
@@ -124,7 +128,7 @@ except Exception:
 
 if IS_UNIX:
     # Config help class
-    help_cls = Help(
+    help_cls = StataHelp(
         stata_cli=STATA_CLI,
         project_tmp_dir=tmp_base_path,
         cache_dir=STATA_MCP_DIRECTORY / "help"
@@ -406,7 +410,7 @@ def ado_package_install(
 
         # set the args for the special cases
         args = [package, package_source_from] if source == "net" else [package]
-        install_msg = installer(STATA_CLI, is_replace).install(*args)
+        install_msg = installer(STATA_CLI, is_replace, timeout=300).install(*args)
 
         if installer.check_installed_from_msg(install_msg):
             logging.info(f"{package} is installed successfully.")

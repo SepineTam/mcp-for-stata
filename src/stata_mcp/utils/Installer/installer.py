@@ -15,7 +15,7 @@ import tomllib
 from pathlib import Path
 from typing import Callable, Dict, Optional
 
-from ...core.stata import StataFinder
+from ...stata import StataFinder
 
 
 class Installer:

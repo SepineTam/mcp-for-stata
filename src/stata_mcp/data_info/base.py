@@ -318,7 +318,7 @@ class DataInfoBase(ABC):
             Dict[str, Any]: the summary of provided data (vars)
 
         Examples:
-            >>> from stata_mcp.core.data_info import DtaDataInfo
+            >>> from stata_mcp.data_info import DtaDataInfo
             >>> data_info = DtaDataInfo("/Applications/Stata/auto.dta")
             >>> summary_data = data_info.summary()
             >>> print(summary_data)

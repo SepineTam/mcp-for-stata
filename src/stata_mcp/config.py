@@ -12,17 +12,18 @@ import platform
 import sys
 import tomllib
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional, Union
 
 import tomli_w
 
-from .core.stata import StataFinder
 from .core.types import StataCLINotFoundError
+from .stata import StataFinder
 
 
 class Config:
-    def __init__(self, config_file: Path = None):
-        self.config_file = config_file or self.STATA_MCP_DIRECTORY / "config.toml"
+    def __init__(self, config_file: Optional[Union[str, Path]] = None):
+        self.config_file = config_file if config_file else self.STATA_MCP_DIRECTORY / "config.toml"
+        self.config_file = Path(self.config_file)
 
     @property
     def config(self) -> Dict:

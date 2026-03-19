@@ -15,9 +15,11 @@ from ...stata_controller import StataController
 class AdoInstallBase(ABC):
     def __init__(self,
                  stata_cli,
-                 is_replace: bool = True):
+                 is_replace: bool = True,
+                 timeout: int = 300):
         self.stata_cli = stata_cli
         self.is_replace = is_replace
+        self.timeout = timeout
         self.__post_initialization()
 
     def __post_initialization(self):
@@ -40,7 +42,7 @@ class AdoInstallBase(ABC):
 
     @property
     def controller(self) -> StataController:
-        return StataController(self.stata_cli)
+        return StataController(self.stata_cli, timeout=self.timeout)
 
     @property
     def REPLACE_MESSAGE(self) -> str:

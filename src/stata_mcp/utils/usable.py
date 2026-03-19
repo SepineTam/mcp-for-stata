@@ -21,7 +21,7 @@ import time
 from typing import Dict, Optional, Tuple
 
 from ..config import Config
-from ..core.stata import StataFinder
+from ..stata import StataFinder
 
 config = Config()
 

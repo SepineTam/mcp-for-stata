@@ -49,6 +49,34 @@ stata-mcp agent run
 stata-mcp agent run --work-dir /path/to/project
 ```
 
+### 本地工具命令
+
+直接从 CLI 运行由 API 模块驱动的 Stata 工具：
+
+```bash
+# 从 SSC 安装 ado 包（默认源）
+stata-mcp tool ado-install reghdfe
+
+# 运行 do-file 并打印生成的日志输出
+stata-mcp tool do /path/to/analysis.do
+
+# 通过一次性的 API helper 读取 Stata help
+stata-mcp tool help regress --is-read-log true --enable-smcl true
+
+# 查看支持的数据集元信息
+stata-mcp tool data-info /path/to/data.dta
+
+# 读取生成的日志文件
+stata-mcp tool read-log /path/to/output.log
+```
+
+工具子命令：
+- `stata-mcp tool ado-install <package_name> [--source ssc|net|github]`
+- `stata-mcp tool do <dofile_path> [--is-read-log true|false] [--enable-smcl true|false]`
+- `stata-mcp tool help <command> [--is-read-log true|false] [--enable-smcl true|false]`
+- `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
+- `stata-mcp tool read-log <log_path> [--output-format full|core|dict]`
+
 ### 配置管理
 
 查看和更新本地 CLI 配置：
