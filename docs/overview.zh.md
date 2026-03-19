@@ -1,5 +1,25 @@
 # Stata-MCP 概述
 
+## 🆕 Stata-MCP 现已支持 OpenClaw
+
+**Stata-MCP 现已支持 OpenClaw！** Stata-MCP 提供独立的 CLI 工具：
+
+```bash
+# 执行 do 文件
+stata-mcp tool do /path/to/analysis.do
+
+# 获取数据信息
+stata-mcp tool data-info /path/to/data.dta
+
+# 安装包
+stata-mcp tool ado-install outreg2
+
+# 读取日志文件
+stata-mcp tool read-log /path/to/output.log
+```
+
+完整文档请参阅 [OpenClaw 集成指南](agents/openclaw.md)。
+
 ## 什么是 Stata-MCP 和 Stata？
 
 **Stata-MCP** 是一个模型上下文协议（Model Context Protocol, MCP）服务器，它将大语言模型（LLM）与 Stata 连接起来，实现自主计量经济学分析和统计计算。基于 FastMCP 框架构建，Stata-MCP 将 Stata 全面分析能力作为结构化工具暴露出来，供 LLM 以编程方式调用，将自然语言查询转换为可复现的 Stata 工作流程。
@@ -172,25 +192,6 @@ from stata_mcp.agent_as import REPLAgent
 agent = REPLAgent(work_dir="~/analysis")
 agent.run()  # 启动交互式 REPL
 ```
-
-### **OpenClaw 支持** 🦞
-Stata-MCP 现已支持 OpenClaw！对于不支持 MCP 协议的 AI 客户端，Stata-MCP 提供独立的 CLI 工具：
-
-```bash
-# 执行 do 文件
-stata-mcp tool do /path/to/analysis.do
-
-# 获取数据信息
-stata-mcp tool data-info /path/to/data.dta
-
-# 安装包
-stata-mcp tool ado-install outreg2
-
-# 读取日志文件
-stata-mcp tool read-log /path/to/output.log
-```
-
-完整文档请参阅 [OpenClaw 集成指南](agents/openclaw.md)。
 
 ## 跨平台支持
 

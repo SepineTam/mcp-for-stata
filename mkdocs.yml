@@ -88,6 +88,7 @@ nav:
   - Agents:
       - Summary: agents/index.md
       - Claude Code: agents/claude_code.md
+      - OpenClaw: agents/openclaw.md
 
   - CoreTech:
       - Stata Finder: core/stata/finder.md

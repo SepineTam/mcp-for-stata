@@ -1,5 +1,25 @@
 # Stata-MCP Overview
 
+## 🆕 Stata-MCP Now Supports OpenClaw
+
+**Stata-MCP now supports OpenClaw!** Stata-MCP provides standalone CLI tools:
+
+```bash
+# Execute do-files
+stata-mcp tool do /path/to/analysis.do
+
+# Get data information
+stata-mcp tool data-info /path/to/data.dta
+
+# Install packages
+stata-mcp tool ado-install outreg2
+
+# Read log files
+stata-mcp tool read-log /path/to/output.log
+```
+
+See [OpenClaw Integration Guide](agents/openclaw.md) for complete documentation.
+
 ## What is Stata-MCP and Stata?
 
 **Stata-MCP** is a Model Context Protocol (MCP) server that bridges Large Language Models (LLMs) with Stata, enabling autonomous econometric analysis and statistical computation. Built on the FastMCP framework, Stata-MCP exposes Stata's comprehensive analytical capabilities as structured tools that LLMs can invoke programmatically, transforming natural language queries into reproducible Stata workflows.
@@ -172,25 +192,6 @@ from stata_mcp.agent_as import REPLAgent
 agent = REPLAgent(work_dir="~/analysis")
 agent.run()  # Starts interactive REPL
 ```
-
-### **OpenClaw Support** 🦞
-Stata-MCP now supports OpenClaw! For AI clients that don't natively support MCP protocol, Stata-MCP provides standalone CLI tools:
-
-```bash
-# Execute do-files
-stata-mcp tool do /path/to/analysis.do
-
-# Get data information
-stata-mcp tool data-info /path/to/data.dta
-
-# Install packages
-stata-mcp tool ado-install outreg2
-
-# Read log files
-stata-mcp tool read-log /path/to/output.log
-```
-
-See [OpenClaw Integration Guide](agents/openclaw.md) for complete documentation.
 
 ## Cross-Platform Support
 
