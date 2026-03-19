@@ -49,6 +49,34 @@ stata-mcp agent run
 stata-mcp agent run --work-dir /path/to/project
 ```
 
+### Local Tool Commands
+
+Run API-backed Stata tools directly from the CLI:
+
+```bash
+# Install an ado package from SSC (default source)
+stata-mcp tool ado-install reghdfe
+
+# Run a do-file and print generated log output
+stata-mcp tool do /path/to/analysis.do
+
+# Read Stata help through the API-backed tool flow
+stata-mcp tool help regress --is-read-log true --enable-smcl true
+
+# Inspect a supported dataset
+stata-mcp tool data-info /path/to/data.dta
+
+# Read a generated log file
+stata-mcp tool read-log /path/to/output.log
+```
+
+Tool subcommands:
+- `stata-mcp tool ado-install <package_name> [--source ssc|net|github]`
+- `stata-mcp tool do <dofile_path> [--is-read-log true|false] [--enable-smcl true|false]`
+- `stata-mcp tool help <command> [--is-read-log true|false] [--enable-smcl true|false]`
+- `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
+- `stata-mcp tool read-log <log_path> [--is-beta true|false] [--output-format full|core|dict]`
+
 ### Config Management
 
 Inspect and update local CLI configuration:
