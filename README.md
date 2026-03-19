@@ -43,15 +43,9 @@
 
 ---
 **News**:
+- 🦞 **OpenClaw Support**: Standalone CLI tools for OpenClaw integration (`stata-mcp tool`), see [OpenClaw guide](https://docs.statamcp.com/agents/openclaw.md)
 - ✨ **Claude Code Plugin Support**: Official plugin package with MCP server and Stata LSP integration
-- ✨ **Security Guard System**: Automatic validation against dangerous commands (shell execution, file deletion, etc.)
-- ✨ **RAM Monitoring System**: Real-time monitoring with automatic process termination when memory limits exceeded
-- ✨ **Unified Configuration**: TOML-based config file with environment variable overrides
-- 📚 **Complete Documentation**: New [Configuration](docs/configuration.md), [Security](docs/security.md), and [Monitoring](docs/monitoring.md) guides
 - Use Stata-MCP in Claude Code, look [here](#use-stata-mcp-in-claude-code)
-- Try to use agent mode as tool? Now it is supported more easily [here](source/docs/Usages/agent_as/agent_as_tool.md).
-- Want to evaluate your LLM? Look [here](source/docs/Usages/Evaluation.md).
-- Update `StataFinder`, it could locate your Stata executable file automatically. 
 
 > Finding our **newest research**? Click [here](source/reports/README.md) or visit [reports website](https://www.statamcp.com/reports).
 

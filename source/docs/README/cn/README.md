@@ -30,11 +30,9 @@
 
 ---
 **新闻**：
-- 编码智能体中的一站式原生插件支持: 一步安装与 Stata 有关的全部可添加项，无需再繁琐添加 MCP 和 LSP 等内容
+- 🦞 **OpenClaw 支持**：独立 CLI 工具用于 OpenClaw 集成（`stata-mcp tool`），详见 [OpenClaw 指南](https://docs.statamcp.com/agents/openclaw.md)
+- ✨ **Claude Code 插件支持**：官方插件包，集成 MCP 服务器和 Stata LSP
 - 在Claude Code中使用Stata-MCP，请查看[此处](#在claude-code中使用stata-mcp)
-- 尝试将代理模式用作工具？现在更容易支持了，请查看[此处](../../Usages/agent_as/agent_as_tool.md)。
-- 想要评估您的LLM？请查看[此处](../../Usages/Evaluation.md)。
-- 更新了`StataFinder`，但它还不稳定，请在您的环境中配置`STATA_CLI`。
 
 > 寻找我们的**最新研究**？点击[此处](../../../reports/README.md)或访问[报告网站](https://www.statamcp.com/reports)。
 
