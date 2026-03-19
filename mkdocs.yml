@@ -85,6 +85,8 @@ nav:
   - Tools: mcp/tools.md
   - Resources: mcp/resources.md
 
+  - API: api/overview.md
+
   - Agents:
       - Summary: agents/index.md
       - Claude Code: agents/claude_code.md
