@@ -60,7 +60,7 @@ stata-mcp tool ado-install reghdfe
 # Run a do-file and print generated log output
 stata-mcp tool do /path/to/analysis.do
 
-# Read Stata help through the API-backed tool flow
+# Read Stata help through the one-shot API helper
 stata-mcp tool help regress --is-read-log true --enable-smcl true
 
 # Inspect a supported dataset
@@ -75,7 +75,7 @@ Tool subcommands:
 - `stata-mcp tool do <dofile_path> [--is-read-log true|false] [--enable-smcl true|false]`
 - `stata-mcp tool help <command> [--is-read-log true|false] [--enable-smcl true|false]`
 - `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
-- `stata-mcp tool read-log <log_path> [--is-beta true|false] [--output-format full|core|dict]`
+- `stata-mcp tool read-log <log_path> [--output-format full|core|dict]`
 
 ### Config Management
 

@@ -33,6 +33,11 @@ def _print_cli_result(result) -> None:
         return
 
     if isinstance(result, dict):
+        if "log_content" in result and isinstance(result["log_content"], dict):
+            preferred_content = result["log_content"].get("text") or result["log_content"].get("smcl")
+            if preferred_content:
+                print(preferred_content)
+                return
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return
 
@@ -193,17 +198,11 @@ def main() -> None:
         default="utf-8",
         help="Log file encoding (default: utf-8)",
     )
-    _add_bool_argument(
-        tool_read_log_parser,
-        "--is-beta",
-        default=False,
-        help_text="Use the structured beta log reader",
-    )
     tool_read_log_parser.add_argument(
         "--output-format",
         choices=["full", "core", "dict"],
-        default="dict",
-        help="Structured output format when --is-beta true (default: dict)",
+        default="core",
+        help="Output format for supported .log and .smcl files (default: core)",
     )
 
     # Config subcommand
@@ -367,7 +366,6 @@ def main() -> None:
                 result = read_log(
                     file_path=args.file_path,
                     encoding=args.encoding,
-                    is_beta=args.is_beta,
                     output_format=args.output_format,
                 )
             else:
