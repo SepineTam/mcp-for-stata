@@ -8,10 +8,44 @@
 # @File   : _cli.py
 
 import argparse
+import json
 import sys
 from importlib.metadata import version
 
 from ..config import Config
+
+
+def _add_bool_argument(parser: argparse.ArgumentParser, name: str, default: bool, help_text: str) -> None:
+    """Add a CLI boolean flag that accepts explicit true or false values."""
+    parser.add_argument(
+        name,
+        type=lambda value: str(value).lower() == "true",
+        choices=[True, False],
+        default=default,
+        metavar="{true,false}",
+        help=f"{help_text} (default: {str(default).lower()})",
+    )
+
+
+def _print_cli_result(result) -> None:
+    """Print API results consistently for CLI usage."""
+    if result is None:
+        return
+
+    if isinstance(result, dict):
+        if "log_content" in result and isinstance(result["log_content"], dict):
+            preferred_content = result["log_content"].get("text") or result["log_content"].get("smcl")
+            if preferred_content:
+                print(preferred_content)
+                return
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+
+    if isinstance(result, (list, tuple)):
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+
+    print(result)
 
 
 def main() -> None:
@@ -58,6 +92,117 @@ def main() -> None:
         "--work-dir",
         default="./",
         help="Working directory for agent (default: current directory)",
+    )
+
+    # Tool subcommand
+    tool_parser = subparsers.add_parser(
+        "tool",
+        help="Run local Stata tools through the API module"
+    )
+    tool_subparsers = tool_parser.add_subparsers(dest="tool_action")
+
+    tool_ado_install_parser = tool_subparsers.add_parser(
+        "ado-install",
+        help="Install an ado package through the API module"
+    )
+    tool_ado_install_parser.add_argument("package_name", help="Ado package name")
+    tool_ado_install_parser.add_argument(
+        "--source",
+        choices=["ssc", "net", "github"],
+        default="ssc",
+        help="Package source (default: ssc)",
+    )
+    tool_ado_install_parser.add_argument(
+        "--package-source-from",
+        default=None,
+        help="Net install source URL used when --source net",
+    )
+    _add_bool_argument(
+        tool_ado_install_parser,
+        "--is-replace",
+        default=True,
+        help_text="Replace existing package files when supported",
+    )
+
+    tool_do_parser = tool_subparsers.add_parser(
+        "do",
+        help="Run a do-file through the API module"
+    )
+    tool_do_parser.add_argument("dofile_path", help="Path to the do-file")
+    tool_do_parser.add_argument(
+        "--log-file-name",
+        default=None,
+        help="Optional log file name without extension",
+    )
+    _add_bool_argument(
+        tool_do_parser,
+        "--is-read-log",
+        default=True,
+        help_text="Read log content after execution",
+    )
+    _add_bool_argument(
+        tool_do_parser,
+        "--is-replace-log",
+        default=True,
+        help_text="Replace the existing log file",
+    )
+    _add_bool_argument(
+        tool_do_parser,
+        "--enable-smcl",
+        default=True,
+        help_text="Generate the SMCL log file",
+    )
+
+    tool_help_parser = tool_subparsers.add_parser(
+        "help",
+        help="Read Stata help output through the API module"
+    )
+    tool_help_parser.add_argument("stata_command", help="Stata command name")
+    _add_bool_argument(
+        tool_help_parser,
+        "--is-read-log",
+        default=True,
+        help_text="Read log content after execution",
+    )
+    _add_bool_argument(
+        tool_help_parser,
+        "--enable-smcl",
+        default=True,
+        help_text="Generate the SMCL log file",
+    )
+
+    tool_data_info_parser = tool_subparsers.add_parser(
+        "data-info",
+        help="Read dataset metadata through the API module"
+    )
+    tool_data_info_parser.add_argument("data_path", help="Path to the data file")
+    tool_data_info_parser.add_argument(
+        "--encoding",
+        default="utf-8",
+        help="Text encoding for supported text-based data files (default: utf-8)",
+    )
+    tool_data_info_parser.add_argument(
+        "--vars-list",
+        nargs="+",
+        default=None,
+        help="Optional variable names to inspect",
+    )
+
+    tool_read_log_parser = tool_subparsers.add_parser(
+        "read-log",
+        help="Read a Stata log through the API module"
+    )
+    tool_read_log_parser.add_argument("file_path", help="Path to the log file")
+    tool_read_log_parser.add_argument(
+        "--encoding",
+        default="utf-8",
+        help="Log file encoding (default: utf-8)",
+    )
+    tool_read_log_parser.add_argument(
+        "--output-format",
+        choices=["full", "core", "dict"],
+        default="core",
+        help="Output format for supported .log and .smcl files (default: core)",
     )
 
     # Config subcommand
@@ -185,6 +330,53 @@ def main() -> None:
             agent.run()
         else:
             agent_parser.print_help()
+
+    elif args.command == "tool":
+        from ..api import ado_package_install, get_data_info, read_log, stata_do, stata_help
+
+        try:
+            if args.tool_action == "ado-install":
+                result = ado_package_install(
+                    package=args.package_name,
+                    source=args.source,
+                    is_replace=args.is_replace,
+                    package_source_from=args.package_source_from,
+                )
+            elif args.tool_action == "do":
+                result = stata_do(
+                    dofile_path=args.dofile_path,
+                    log_file_name=args.log_file_name,
+                    is_read_log=args.is_read_log,
+                    is_replace_log=args.is_replace_log,
+                    enable_smcl=args.enable_smcl,
+                )
+            elif args.tool_action == "help":
+                result = stata_help(
+                    cmd=args.stata_command,
+                    is_read_log=args.is_read_log,
+                    enable_smcl=args.enable_smcl,
+                )
+            elif args.tool_action == "data-info":
+                result = get_data_info(
+                    data_path=args.data_path,
+                    vars_list=args.vars_list,
+                    encoding=args.encoding,
+                )
+            elif args.tool_action == "read-log":
+                result = read_log(
+                    file_path=args.file_path,
+                    encoding=args.encoding,
+                    output_format=args.output_format,
+                )
+            else:
+                tool_parser.print_help()
+                sys.exit(2)
+        except Exception as error:
+            print(error, file=sys.stderr)
+            sys.exit(1)
+
+        _print_cli_result(result)
+        sys.exit(0)
 
     elif args.command == "config":
         cfg = Config()

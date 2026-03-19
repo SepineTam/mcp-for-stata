@@ -13,9 +13,15 @@ from ..stata import StataHelp
 from ._runtime import create_runtime_context
 
 
-def stata_help(cmd: str, config_file: str | Path | None = None) -> str:
-    """Return Stata help content for a command."""
+def stata_help(
+    cmd: str,
+    is_read_log: bool = True,
+    enable_smcl: bool = True,
+    config_file: str | Path | None = None,
+) -> str:
+    """Return help content for a Stata command through a one-shot helper."""
     runtime = create_runtime_context(config_file=config_file, require_stata=True)
+    _ = (is_read_log, enable_smcl)
     help_reader = StataHelp(
         stata_cli=runtime.stata_cli,
         project_tmp_dir=runtime.tmp_base_path,

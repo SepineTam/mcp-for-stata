@@ -13,7 +13,7 @@ from typing import Any, Dict
 from ..core.types import RAMLimitExceededError
 from ..guard import GuardValidator
 from ..monitor import RAMMonitor
-from ..stata import StataDo
+from ..stata import StataDo, StataLog
 from ._runtime import create_runtime_context
 
 
@@ -88,12 +88,10 @@ def stata_do(
     }
 
     if is_read_log:
-        log_content = {"text": stata_executor.read_log(text_log_path.as_posix())}
-        if enable_smcl:
-            log_content["smcl"] = (
-                "Generally, text log is sufficient."
-                "If you need to read an smcl log, please use the read_log API."
-            )
+        text_log_reader = StataLog.from_path(text_log_path)
+        log_content = {"text": text_log_reader.read_without_framework()}
+        if enable_smcl and "smcl" in log_file_path_mapping:
+            log_content["smcl"] = log_file_path_mapping["smcl"].as_posix()
         result["log_content"] = log_content
 
     return result
