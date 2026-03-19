@@ -410,7 +410,7 @@ def ado_package_install(
 
         # set the args for the special cases
         args = [package, package_source_from] if source == "net" else [package]
-        install_msg = installer(STATA_CLI, is_replace).install(*args)
+        install_msg = installer(STATA_CLI, is_replace, timeout=300).install(*args)
 
         if installer.check_installed_from_msg(install_msg):
             logging.info(f"{package} is installed successfully.")

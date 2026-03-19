@@ -14,7 +14,6 @@ from ._runtime import create_runtime_context
 from .stata_do import stata_do
 from .write_dofile import write_dofile
 
-
 SOURCE_MAPPING = {
     "github": GITHUB_Install,
     "net": NET_Install,
@@ -28,6 +27,7 @@ def ado_package_install(
     is_replace: bool = True,
     package_source_from: str = None,
     config_file: str | Path | None = None,
+    timeout: int = 300,
 ) -> str:
     """Install an ado package from SSC, net, or GitHub."""
     runtime = create_runtime_context(config_file=config_file, require_stata=True)
@@ -36,7 +36,7 @@ def ado_package_install(
     if runtime.is_unix:
         installer_cls = SOURCE_MAPPING.get(source, SSC_Install)
         install_args = [package, package_source_from] if source == "net" else [package]
-        install_message = installer_cls(runtime.stata_cli, is_replace).install(*install_args)
+        install_message = installer_cls(runtime.stata_cli, is_replace, timeout=timeout).install(*install_args)
 
         if not installer_cls.check_installed_from_msg(install_message) and source == "github":
             install_message += (
