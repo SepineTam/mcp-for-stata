@@ -47,6 +47,10 @@ MAX_RAM_MB = -1
 [STATA]
 # 可选：覆盖自动 Stata 检测
 # STATA_CLI = "/path/to/stata-mp"
+
+[BETA]
+# Beta 功能 - 谨慎使用
+ENABLE_WRITE_DOFILE = false  # 控制 write_dofile MCP 工具是否注册
 ```
 
 ## 配置分区
@@ -220,6 +224,28 @@ MAX_RAM_MB = -1
   ```bash
   export STATA_MCP__RAM_LIMIT=8192  # 8 GB 限制
   ```
+
+### BETA 分区
+
+控制 Beta/实验性功能。
+
+#### `BETA.ENABLE_WRITE_DOFILE`
+
+控制 `write_dofile` MCP 工具是否注册。
+
+- **类型**：Boolean
+- **默认值**：`false`
+- **环境变量**：`STATA_MCP__ENABLE_WRITE_DOFILE`
+- **描述**：
+  - 当为 `false`（默认）时，`write_dofile` MCP 工具不会注册
+  - 现代 AI 智能体具有原生文件写入能力，使该工具变得多余
+  - 仅在需要与旧工作流程向后兼容时设置为 `true`
+- **示例**：
+  ```bash
+  export STATA_MCP__ENABLE_WRITE_DOFILE=true
+  ```
+
+> **注意**：此配置标记为 BETA，可能在未来版本中移除。
 
 ### STATA 分区
 

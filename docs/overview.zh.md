@@ -76,8 +76,9 @@ Stata-MCP 实现了支持多种格式的多态数据分析系统：
 ### **DataInfo 架构**
 抽象基类 `DataInfoBase` 及其格式特定实现：
 - **`DtaDataInfo`**：原生 Stata `.dta` 格式，带元数据提取
-- **`CsvDataInfo`**：CSV 文件，带编码检测和类型推断
-- **`ExcelDataInfo`**：Excel 工作簿，带工作表选择
+- **`CsvDataInfo`**：CSV/TSV/PSV 文件，带编码检测和类型推断
+- **`ExcelDataInfo`**：Excel 工作簿（`.xlsx`、`.xls`），带工作表选择
+- **`SpssDataInfo`**：SPSS 数据文件（`.sav`、`.zsav`）- *v1.14.0 新增*
 
 ### **统计指标**
 可配置的指标计算（通过 `~/.statamcp/config.toml` 或环境变量）：
@@ -171,6 +172,25 @@ from stata_mcp.agent_as import REPLAgent
 agent = REPLAgent(work_dir="~/analysis")
 agent.run()  # 启动交互式 REPL
 ```
+
+### **OpenClaw 支持** 🦞
+Stata-MCP 现已支持 OpenClaw！对于不支持 MCP 协议的 AI 客户端，Stata-MCP 提供独立的 CLI 工具：
+
+```bash
+# 执行 do 文件
+stata-mcp tool do /path/to/analysis.do
+
+# 获取数据信息
+stata-mcp tool data-info /path/to/data.dta
+
+# 安装包
+stata-mcp tool ado-install outreg2
+
+# 读取日志文件
+stata-mcp tool read-log /path/to/output.log
+```
+
+完整文档请参阅 [OpenClaw 集成指南](agents/openclaw.md)。
 
 ## 跨平台支持
 

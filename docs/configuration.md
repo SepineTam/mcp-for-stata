@@ -47,6 +47,10 @@ MAX_RAM_MB = -1
 [STATA]
 # Optional: Override automatic Stata detection
 # STATA_CLI = "/path/to/stata-mp"
+
+[BETA]
+# Beta features - use with caution
+ENABLE_WRITE_DOFILE = false  # Control write_dofile MCP tool registration
 ```
 
 ## Configuration Sections
@@ -220,6 +224,28 @@ Maximum RAM limit in megabytes.
   ```bash
   export STATA_MCP__RAM_LIMIT=8192  # 8 GB limit
   ```
+
+### BETA Section
+
+Controls beta/experimental features.
+
+#### `BETA.ENABLE_WRITE_DOFILE`
+
+Control whether the `write_dofile` MCP tool is registered.
+
+- **Type**: Boolean
+- **Default**: `false`
+- **Environment Variable**: `STATA_MCP__ENABLE_WRITE_DOFILE`
+- **Description**:
+  - When `false` (default), the `write_dofile` MCP tool is not registered
+  - Modern AI agents have native file writing capabilities, making this tool redundant
+  - Set to `true` only if you need backward compatibility with older workflows
+- **Example**:
+  ```bash
+  export STATA_MCP__ENABLE_WRITE_DOFILE=true
+  ```
+
+> **Note**: This configuration is marked as BETA and may be removed in future versions.
 
 ### STATA Section
 

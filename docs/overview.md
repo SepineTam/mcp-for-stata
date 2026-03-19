@@ -76,8 +76,9 @@ Stata-MCP implements a polymorphic data analysis system supporting multiple form
 ### **DataInfo Architecture**
 Abstract base class `DataInfoBase` with format-specific implementations:
 - **`DtaDataInfo`**: Native Stata `.dta` format with metadata extraction
-- **`CsvDataInfo`**: CSV files with encoding detection and type inference
-- **`ExcelDataInfo`**: Excel workbooks with sheet selection
+- **`CsvDataInfo`**: CSV/TSV/PSV files with encoding detection and type inference
+- **`ExcelDataInfo`**: Excel workbooks (`.xlsx`, `.xls`) with sheet selection
+- **`SpssDataInfo`**: SPSS data files (`.sav`, `.zsav`) - *New in v1.14.0*
 
 ### **Statistical Metrics**
 Configurable metric computation (via `~/.statamcp/config.toml` or environment variables):
@@ -171,6 +172,25 @@ from stata_mcp.agent_as import REPLAgent
 agent = REPLAgent(work_dir="~/analysis")
 agent.run()  # Starts interactive REPL
 ```
+
+### **OpenClaw Support** 🦞
+Stata-MCP now supports OpenClaw! For AI clients that don't natively support MCP protocol, Stata-MCP provides standalone CLI tools:
+
+```bash
+# Execute do-files
+stata-mcp tool do /path/to/analysis.do
+
+# Get data information
+stata-mcp tool data-info /path/to/data.dta
+
+# Install packages
+stata-mcp tool ado-install outreg2
+
+# Read log files
+stata-mcp tool read-log /path/to/output.log
+```
+
+See [OpenClaw Integration Guide](agents/openclaw.md) for complete documentation.
 
 ## Cross-Platform Support
 

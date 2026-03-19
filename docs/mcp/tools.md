@@ -38,8 +38,14 @@ get_data_info("https://repository.org/datasets/panel_data.xlsx")
 get_data_info("/data/legacy/latin1_data.csv", encoding="latin1")
 ```
 
+**Supported Formats**:
+- **Stata**: `.dta`
+- **CSV/Text**: `.csv`, `.tsv`, `.psv`
+- **Excel**: `.xlsx`, `.xls`
+- **SPSS**: `.sav`, `.zsav`
+
 **Implementation Architecture**:
-The tool operates through a multi-layered abstraction cascade. At the foundation lies a polymorphic class hierarchy where `DataInfoBase` defines the abstract interface for format-specific handlers (`DtaDataInfo`, `CsvDataInfo`, `ExcelDataInfo`). Content integrity verification employs MD5 hashing with configurable suffix length for cache identification. Configuration propagation follows a precedence chain: runtime parameters override environment variables (`STATA_MCP_DATA_INFO_DECIMAL_PLACES`, `STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER`), which in turn override TOML-based configuration at `~/.statamcp/config.toml`.
+The tool operates through a multi-layered abstraction cascade. At the foundation lies a polymorphic class hierarchy where `DataInfoBase` defines the abstract interface for format-specific handlers (`DtaDataInfo`, `CsvDataInfo`, `ExcelDataInfo`, `SpssDataInfo`). Content integrity verification employs MD5 hashing with configurable suffix length for cache identification. Configuration propagation follows a precedence chain: runtime parameters override environment variables (`STATA_MCP_DATA_INFO_DECIMAL_PLACES`, `STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER`), which in turn override TOML-based configuration at `~/.statamcp/config.toml`.
 
 Statistical computation leverages pandas DataFrame operations with NumPy backend. The metrics system implements a configurable computation pipeline where default metrics (`obs`, `mean`, `stderr`, `min`, `max`) can be extended through configuration to include quartiles (`q1`, `q3`) and distribution shape measures (`skewness`, `kurtosis`). Type dispatch separates string variables (observation counting with unique value sampling under `max_display` threshold) from numeric variables (central tendency, dispersion, and distribution shape computation with `decimal_places` precision rounding).
 
@@ -92,8 +98,13 @@ Exception handling categorizes failures into three tiers: `FileNotFoundError` fo
 ---
 
 ## write_dofile
+> **⚠️ Disabled by Default**: This tool requires `ENABLE_WRITE_DOFILE=true` configuration.
+>
+> Modern AI agents have native file writing capabilities, making this tool redundant.
+> To enable, set `STATA_MCP__ENABLE_WRITE_DOFILE=true` or add `[BETA] ENABLE_WRITE_DOFILE = true` to your config.
+
 ```python
-def write_dofile(content: str, 
+def write_dofile(content: str,
                  encoding: str | None = None) -> str:
     ...
 ```
@@ -137,7 +148,7 @@ Integration with output redirection commands (`outreg2`, `esttab`) requires coor
 
 The tool does not perform syntactic validation or semantic analysis of the Stata code content. Code correctness, command sequencing, and macro expansion validity remain the responsibility of the calling context. Error handling wraps file I/O operations in try-except blocks with structured logging for success/failure tracking.
 
-> **⚠️ Deprecation Notice**: This tool will be removed in a future version. Consider using standard file writing methods instead.
+> **⚠️ Deprecation Notice**: This tool is disabled by default and will be removed in a future version. Modern AI agents have native file writing capabilities - use those instead.
 
 ---
 
