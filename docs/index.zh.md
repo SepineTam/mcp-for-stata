@@ -2,7 +2,15 @@
 
 **让 LLM 帮助你使用 Stata 完成回归分析。**
 
-> 声明：所有文档均由 AI 生成，除了 [Usage.md](usage.zh.md) 是由作者编写的。
+## 🆕 Stata-MCP 现已支持 OpenClaw
+
+**Stata-MCP 现已支持 OpenClaw！** Stata-MCP 提供独立的 CLI 工具，将以下命令粘贴到你的 OpenClaw 中，它会自动安装 skill。
+
+```text
+Install `stata-skill` from ClawHub by @SepineTam.
+```
+
+完整文档请参阅 [OpenClaw 集成指南](agents/openclaw.md)。
 
 ## 快速开始
 
