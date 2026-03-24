@@ -67,3 +67,30 @@ class AdoInstallBase(ABC):
 
     def _install_msg_template(self, runner_result: str) -> str:
         return f"Installation State: {self.check_install(runner_result)}\n" + runner_result
+
+    @staticmethod
+    def extract_error_summary(message: str) -> str:
+        lines = [line.strip() for line in str(message).splitlines() if line.strip()]
+        if not lines:
+            return "Unknown installation failure."
+
+        error_keywords = (
+            "r(",
+            "not found",
+            "could not",
+            "failed",
+            "error",
+            "invalid",
+            "unable",
+            "permission denied",
+            "connection",
+            "timed out",
+        )
+        matched_lines = [
+            line for line in lines
+            if any(keyword in line.lower() for keyword in error_keywords)
+        ]
+
+        if matched_lines:
+            return " | ".join(matched_lines[-3:])
+        return lines[-1]

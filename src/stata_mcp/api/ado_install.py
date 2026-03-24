@@ -38,11 +38,17 @@ def ado_package_install(
         install_args = [package, package_source_from] if source == "net" else [package]
         install_message = installer_cls(runtime.stata_cli, is_replace, timeout=timeout).install(*install_args)
 
-        if not installer_cls.check_installed_from_msg(install_message) and source == "github":
+        if not installer_cls.check_installed_from_msg(install_message):
+            error_summary = installer_cls.extract_error_summary(install_message)
             install_message += (
-                "Please check the GitHub repository URL, verify case sensitivity, "
-                "and ensure the github command is installed in Stata."
+                f"\nError: Failed to install package '{package}' from source '{source}'. "
+                f"Details: {error_summary}"
             )
+            if source == "github":
+                install_message += (
+                    "\nPlease check the GitHub repository URL, verify case sensitivity, "
+                    "and ensure the github command is installed in Stata."
+                )
         return install_message
 
     from_message = f"from({package_source_from})" if (package_source_from and source == "net") else ""
