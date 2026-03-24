@@ -2,6 +2,18 @@
 
 
 <details>
+<summary>Click to expand v1.14.1 details</summary>
+
+## [1.14.1] - 2026-03-24
+
+### Fixed
+- **Ado Install**: Fixed SSC install success detection to be case-insensitive for better reliability
+- **Ado Install**: Added explicit error summary extraction when installation fails for clearer feedback
+- **Ado Install**: Improved error messages for all package sources (SSC, GitHub, net)
+
+</details>
+
+<details>
 <summary>Click to expand v1.14.0 details</summary>
 
 ## [1.14.0] - 2026-03-20
