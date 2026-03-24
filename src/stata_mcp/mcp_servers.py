@@ -415,9 +415,14 @@ def ado_package_install(
         if installer.check_installed_from_msg(install_msg):
             logging.info(f"{package} is installed successfully.")
         else:
+            error_summary = installer.extract_error_summary(install_msg)
+            install_msg += (
+                f"\nError: Failed to install package '{package}' from source '{source}'. "
+                f"Details: {error_summary}"
+            )
             if source == "github":
                 install_msg += (
-                    "Please check the GitHub repo URL, verify case sensitivity, "
+                    "\nPlease check the GitHub repo URL, verify case sensitivity, "
                     "and ensure the GitHub command is installed in Stata"
                 )
             logging.error(f"{package} installation failed.")
