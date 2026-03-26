@@ -106,6 +106,24 @@ class StataDo:
         return env
 
     @staticmethod
+    def _cleanup_process(proc: Optional[subprocess.Popen]) -> None:
+        """
+        Ensure subprocess is terminated and reaped to prevent resource leaks.
+
+        Args:
+            proc: The subprocess to clean up, or None if not created
+        """
+        if proc is None:
+            return
+        if proc.poll() is None:  # Process still running
+            proc.terminate()
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait()
+
+    @staticmethod
     def generate_log_command(log_file: Path, is_replace: bool = True, log_type: Literal['smcl', 'text'] = 'text'):
         replace_clause = 'replace' if is_replace else ''
         log_cmd = f'log using "{log_file.as_posix()}", {replace_clause} {log_type} name({log_type}_log)'
@@ -152,30 +170,33 @@ class StataDo:
             cwd=self.cwd  # Set cwd for more friendly control output
         )
 
-        # Execute commands sequentially in Stata
-        log_file = self.generate_log_file(log_name)
-        smcl_file = self.generate_log_file(log_name, 'smcl')
+        try:
+            # Execute commands sequentially in Stata
+            log_file = self.generate_log_file(log_name)
+            smcl_file = self.generate_log_file(log_name, 'smcl')
 
-        commands = f"""
-        capture log close
-        {self.generate_log_command(log_file, is_replace)}
-        {self.generate_log_command(smcl_file, is_replace, 'smcl') if enable_smcl else ''}
-        do "{dofile_path}"
-        log close _all
-        exit, STATA
-        """
-        _, stderr = proc.communicate(input=commands)  # Send commands and wait for completion
+            commands = f"""
+            capture log close
+            {self.generate_log_command(log_file, is_replace)}
+            {self.generate_log_command(smcl_file, is_replace, 'smcl') if enable_smcl else ''}
+            do "{dofile_path}"
+            log close _all
+            exit, STATA
+            """
+            _, stderr = proc.communicate(input=commands)  # Send commands and wait for completion
 
-        if proc.returncode != 0:
-            logging.error(f"Stata execution failed: {stderr}")
-            raise RuntimeError(f"Something went wrong: {stderr}")
-        else:
-            logging.info(f"Stata execution completed successfully. Log file: {log_file}")
+            if proc.returncode != 0:
+                logging.error(f"Stata execution failed: {stderr}")
+                raise RuntimeError(f"Something went wrong: {stderr}")
+            else:
+                logging.info(f"Stata execution completed successfully. Log file: {log_file}")
 
-        log_path_mapping = {"text": log_file}
-        if enable_smcl:
-            log_path_mapping["smcl"] = smcl_file
-        return log_path_mapping
+            log_path_mapping = {"text": log_file}
+            if enable_smcl:
+                log_path_mapping["smcl"] = smcl_file
+            return log_path_mapping
+        finally:
+            self._cleanup_process(proc)
 
     def _execute_windows(self, dofile_path: Path, log_file: Path, is_replace: bool = True):
         """
@@ -264,43 +285,53 @@ class StataDo:
             cwd=self.cwd  # Set cwd for more friendly control output
         )
 
-        # Execute commands sequentially in Stata
-        log_file = self.generate_log_file(log_name)
-        smcl_file = self.generate_log_file(log_name, 'smcl')
+        try:
+            # Execute commands sequentially in Stata
+            log_file = self.generate_log_file(log_name)
+            smcl_file = self.generate_log_file(log_name, 'smcl')
 
-        commands = f"""
-        capture log close
-        {self.generate_log_command(log_file, is_replace)}
-        {self.generate_log_command(smcl_file, is_replace, 'smcl') if enable_smcl else ''}
-        do "{dofile_path}"
-        log close _all
-        exit, STATA
-        """
+            commands = f"""
+            capture log close
+            {self.generate_log_command(log_file, is_replace)}
+            {self.generate_log_command(smcl_file, is_replace, 'smcl') if enable_smcl else ''}
+            do "{dofile_path}"
+            log close _all
+            exit, STATA
+            """
 
-        # Start all monitors
-        if self.monitors:
-            logging.info(f"Starting {len(self.monitors)} monitor(s)")
-        for monitor in self.monitors:
-            monitor.start(proc)
+            # Start all monitors
+            if self.monitors:
+                logging.info(f"Starting {len(self.monitors)} monitor(s)")
+            for monitor in self.monitors:
+                monitor.start(proc)
 
-        _, stderr = proc.communicate(input=commands)  # Send commands and wait for completion
+            _, stderr = proc.communicate(input=commands)  # Send commands and wait for completion
 
-        # Stop all monitors (this will raise exceptions if limits were exceeded)
-        if self.monitors:
-            logging.info("Stopping all monitors")
-        for monitor in self.monitors:
-            monitor.stop()
+            # Stop all monitors (this will raise exceptions if limits were exceeded)
+            if self.monitors:
+                logging.info("Stopping all monitors")
+            for monitor in self.monitors:
+                monitor.stop()
 
-        if proc.returncode != 0:
-            logging.error(f"Stata execution failed: {stderr}")
-            raise RuntimeError(f"Something went wrong: {stderr}")
-        else:
-            logging.info(f"Stata execution completed successfully. Log file: {log_file}")
+            if proc.returncode != 0:
+                logging.error(f"Stata execution failed: {stderr}")
+                raise RuntimeError(f"Something went wrong: {stderr}")
+            else:
+                logging.info(f"Stata execution completed successfully. Log file: {log_file}")
 
-        generated_log_paths = {"text": log_file}
-        if enable_smcl:
-            generated_log_paths["smcl"] = smcl_file
-        return generated_log_paths
+            generated_log_paths = {"text": log_file}
+            if enable_smcl:
+                generated_log_paths["smcl"] = smcl_file
+            return generated_log_paths
+        finally:
+            # Stop monitors first
+            for monitor in self.monitors:
+                try:
+                    monitor.stop()
+                except Exception as e:
+                    logging.warning(f"Monitor stop failed: {e}")
+            # Then cleanup process
+            self._cleanup_process(proc)
 
     def _execute_windows_with_monitors(self, dofile_path: Path, log_file: Path, is_replace: bool = True):
         """
@@ -317,6 +348,7 @@ class StataDo:
         # Windows approach - use the /e flag to run a batch command
         # Create a temporary batch file in system temp directory
         batch_file = Path(tempfile.gettempdir()) / f"stata_batch__{dofile_path.stem}.do"
+        proc: Optional[subprocess.Popen] = None
 
         replace_clause = ", replace" if is_replace else ""
         try:
@@ -367,6 +399,8 @@ class StataDo:
             logging.error(f"Error during Windows Stata execution: {str(e)}")
             raise RuntimeError(f"Windows Stata execution error: {str(e)}")
         finally:
+            # Cleanup process first
+            self._cleanup_process(proc)
             # Clean up temporary batch file
             if batch_file.exists():
                 try:
