@@ -374,12 +374,6 @@ class StataDo:
             # Wait for process to complete
             _, stderr = proc.communicate()
 
-            # Stop all monitors (this will raise exceptions if limits were exceeded)
-            if self.monitors:
-                logging.info("Stopping all monitors on Windows")
-            for monitor in self.monitors:
-                monitor.stop()
-
             if proc.returncode != 0:
                 logging.error(f"Stata execution failed on Windows: {stderr}")
                 raise RuntimeError(f"Windows Stata execution failed: {stderr}")
@@ -393,7 +387,13 @@ class StataDo:
             logging.error(f"Error during Windows Stata execution: {str(e)}")
             raise RuntimeError(f"Windows Stata execution error: {str(e)}")
         finally:
-            # Cleanup process first
+            # Stop monitors first
+            for monitor in self.monitors:
+                try:
+                    monitor.stop()
+                except Exception as e:
+                    logging.warning(f"Monitor stop failed: {e}")
+            # Cleanup process
             self._cleanup_process(proc)
             # Clean up temporary batch file
             if batch_file.exists():
