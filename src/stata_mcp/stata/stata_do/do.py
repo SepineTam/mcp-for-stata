@@ -307,12 +307,6 @@ class StataDo:
 
             _, stderr = proc.communicate(input=commands)  # Send commands and wait for completion
 
-            # Stop all monitors (this will raise exceptions if limits were exceeded)
-            if self.monitors:
-                logging.info("Stopping all monitors")
-            for monitor in self.monitors:
-                monitor.stop()
-
             if proc.returncode != 0:
                 logging.error(f"Stata execution failed: {stderr}")
                 raise RuntimeError(f"Something went wrong: {stderr}")

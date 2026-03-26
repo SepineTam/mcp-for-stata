@@ -79,8 +79,17 @@ def test_stata_execution(stata_cli_path: Optional[str]) -> bool:
                 text=True,
                 shell=True,
             )
-            proc.communicate(input=commands, timeout=10)
-            return proc.returncode == 0
+            try:
+                proc.communicate(input=commands, timeout=10)
+                return proc.returncode == 0
+            finally:
+                if proc.poll() is None:
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+                        proc.wait()
 
         else:  # Windows
             # Create a temporary do-file for testing
