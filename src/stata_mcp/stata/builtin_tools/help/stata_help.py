@@ -18,6 +18,8 @@ class StataHelp:
         self.help_cache_dir = cache_dir or Path.home() / ".statamcp" / "help"
         self.help_cache_dir.mkdir(parents=True, exist_ok=True)
         self.project_tmp_dir = project_tmp_dir
+        if self.project_tmp_dir is not None:
+            self.project_tmp_dir.mkdir(parents=True, exist_ok=True)
         self.controller = StataController(stata_cli)
 
     @property
@@ -52,7 +54,7 @@ class StataHelp:
                     f.write(content)
             except Exception:
                 pass
-        if self.IS_SAVE:
+        if self.IS_SAVE and self.project_tmp_dir is not None:
             try:
                 with open(self.project_tmp_dir / f"help__{cmd}.txt", "w", encoding="utf-8") as f:
                     f.write(content)
@@ -73,6 +75,8 @@ class StataHelp:
         return self._load_from_file(cached_cmd_help_file)
 
     def load_from_project(self, cmd: str):
+        if self.project_tmp_dir is None:
+            return None
         project_help_file = self.project_tmp_dir / f"help__{cmd}.txt"
         return self._load_from_file(project_help_file)
 
