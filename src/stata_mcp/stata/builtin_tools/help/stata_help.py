@@ -54,7 +54,7 @@ class StataHelp:
                     f.write(content)
             except Exception:
                 pass
-        if self.IS_SAVE:
+        if self.IS_SAVE and self.project_tmp_dir is not None:
             try:
                 with open(self.project_tmp_dir / f"help__{cmd}.txt", "w", encoding="utf-8") as f:
                     f.write(content)
