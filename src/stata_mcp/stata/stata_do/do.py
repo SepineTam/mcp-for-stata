@@ -284,6 +284,7 @@ class StataDo:
             env=env,  # Use environment with terminal size settings
             cwd=self.cwd  # Set cwd for more friendly control output
         )
+        execution_error: Optional[Exception] = None
 
         try:
             # Execute commands sequentially in Stata
@@ -317,15 +318,24 @@ class StataDo:
             if enable_smcl:
                 generated_log_paths["smcl"] = smcl_file
             return generated_log_paths
+        except Exception as exc:
+            execution_error = exc
         finally:
+            monitor_error: Optional[Exception] = None
             # Stop monitors first
             for monitor in self.monitors:
                 try:
                     monitor.stop()
                 except Exception as e:
+                    if monitor_error is None:
+                        monitor_error = e
                     logging.warning(f"Monitor stop failed: {e}")
             # Then cleanup process
             self._cleanup_process(proc)
+            if execution_error is not None:
+                raise execution_error
+            if monitor_error is not None:
+                raise monitor_error
 
     def _execute_windows_with_monitors(self, dofile_path: Path, log_file: Path, is_replace: bool = True):
         """
@@ -343,6 +353,7 @@ class StataDo:
         # Create a temporary batch file in system temp directory
         batch_file = Path(tempfile.gettempdir()) / f"stata_batch__{dofile_path.stem}.do"
         proc: Optional[subprocess.Popen] = None
+        execution_error: Optional[Exception] = None
 
         replace_clause = ", replace" if is_replace else ""
         try:
@@ -380,18 +391,21 @@ class StataDo:
             else:
                 logging.info(f"Stata execution completed successfully on Windows. Log file: {log_file}")
 
-        except RuntimeError:
+        except RuntimeError as exc:
             # Re-raise RuntimeError (includes monitor errors)
-            raise
+            execution_error = exc
         except Exception as e:
             logging.error(f"Error during Windows Stata execution: {str(e)}")
-            raise RuntimeError(f"Windows Stata execution error: {str(e)}")
+            execution_error = RuntimeError(f"Windows Stata execution error: {str(e)}")
         finally:
+            monitor_error: Optional[Exception] = None
             # Stop monitors first
             for monitor in self.monitors:
                 try:
                     monitor.stop()
                 except Exception as e:
+                    if monitor_error is None:
+                        monitor_error = e
                     logging.warning(f"Monitor stop failed: {e}")
             # Cleanup process
             self._cleanup_process(proc)
@@ -402,6 +416,10 @@ class StataDo:
                     logging.debug(f"Temporary batch file removed: {batch_file}")
                 except Exception as e:
                     logging.warning(f"Failed to remove temporary batch file {batch_file}: {str(e)}")
+            if execution_error is not None:
+                raise execution_error
+            if monitor_error is not None:
+                raise monitor_error
 
     @staticmethod
     def read_log(log_file_path, mode="r", encoding="utf-8") -> str:
