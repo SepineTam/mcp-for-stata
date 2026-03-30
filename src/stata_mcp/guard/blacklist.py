@@ -13,7 +13,25 @@ This module defines dangerous commands and patterns that should be blocked
 when executing Stata dofiles, unless dangerous mode is explicitly enabled.
 """
 
-from typing import List, Set
+from typing import List, Set, Tuple
+
+# ============================================================================
+# Stata Command Prefixes
+# ============================================================================
+
+#: Stata prefixes that can precede commands and must be stripped before
+#: validation. Includes full names and minimum abbreviations.
+STATA_PREFIXES: Tuple[str, ...] = (
+    "capture",
+    "cap",
+    "quietly",
+    "qui",
+    "noisily",
+    "noi",
+    "by",
+    "byable",
+    "sort",
+)
 
 # ============================================================================
 # Dangerous Commands
@@ -64,4 +82,5 @@ DANGEROUS_PATTERNS: List[str] = [
 __all__ = [
     "DANGEROUS_COMMANDS",
     "DANGEROUS_PATTERNS",
+    "STATA_PREFIXES",
 ]

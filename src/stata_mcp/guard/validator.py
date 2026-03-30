@@ -17,7 +17,7 @@ import re
 from dataclasses import dataclass, field
 from typing import List
 
-from .blacklist import DANGEROUS_COMMANDS, DANGEROUS_PATTERNS
+from .blacklist import DANGEROUS_COMMANDS, DANGEROUS_PATTERNS, STATA_PREFIXES
 
 # ============================================================================
 # Data Structures
@@ -81,6 +81,26 @@ class GuardValidator:
         """Initialize the validator with default blacklist."""
         self.dangerous_commands = DANGEROUS_COMMANDS
         self.dangerous_patterns = DANGEROUS_PATTERNS
+        self.stata_prefixes = set(STATA_PREFIXES)
+
+    @staticmethod
+    def _strip_prefixes(line: str, prefixes: set) -> str:
+        """Remove Stata command prefixes from a line.
+
+        Stata allows stacking prefixes (e.g., ``cap qui shell ...``),
+        so we loop until no more prefixes remain.
+
+        Args:
+            line: The code line to strip
+            prefixes: Set of prefix strings to remove
+
+        Returns:
+            The line with all leading prefixes removed
+        """
+        words = line.split()
+        while words and words[0].lower() in prefixes:
+            words.pop(0)
+        return " ".join(words) if words else ""
 
     def validate(self, code: str) -> SecurityReport:
         """Validate Stata dofile code for security risks.
@@ -102,12 +122,17 @@ class GuardValidator:
             if not stripped_line or stripped_line.startswith("*"):
                 continue
 
+            # Strip Stata prefixes (capture, quietly, etc.) before checking
+            cleaned_line = self._strip_prefixes(stripped_line, self.stata_prefixes)
+            if not cleaned_line:
+                continue
+
             # Check for dangerous commands
-            command_items = self._check_dangerous_commands(stripped_line, line_num)
+            command_items = self._check_dangerous_commands(cleaned_line, line_num)
             dangerous_items.extend(command_items)
 
             # Check for dangerous patterns
-            pattern_items = self._check_dangerous_patterns(stripped_line, line_num)
+            pattern_items = self._check_dangerous_patterns(cleaned_line, line_num)
             dangerous_items.extend(pattern_items)
 
         # Generate report
