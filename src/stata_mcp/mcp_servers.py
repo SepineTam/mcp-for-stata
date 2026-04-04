@@ -31,7 +31,6 @@ from .stata import (
 
 # Init project config
 config = Config()
-STATA_MCP_DIRECTORY = config.STATA_MCP_DIRECTORY
 
 # Maybe somebody does not like logging.
 # Whatever, left a controller switch `logging STATA_MCP_LOGGING_ON`. Turn off all logging with setting it as false.
@@ -76,22 +75,7 @@ else:
     # Disable all logging by setting level above CRITICAL
     logging.disable(logging.CRITICAL + 1)
 
-# Initialize optional parameters
-SYSTEM_OS = config.SYSTEM_OS
-IS_UNIX = config.IS_UNIX
-
-# Get working directory from environment variable (fallback: auto-detect writable directory)
-WORKING_DIR = config.WORKING_DIR
-cwd = WORKING_DIR.get("cwd")
-
-# Use configured output path if available
-output_base_path = WORKING_DIR.get("output_base", cwd / "stata-mcp-folder")
-
-log_base_path = WORKING_DIR.get("log_base", output_base_path / "stata-mcp-log")
-dofile_base_path = WORKING_DIR.get("dofile_base", output_base_path / "stata-mcp-dofile")
-tmp_base_path = WORKING_DIR.get("tmp_base", output_base_path / "stata-mcp-tmp")
-
-logging.info(f"Using {output_base_path.as_posix()} as output base folder")
+logging.info(f"Using {config.WORKING_DIR.as_posix()} as working directory")
 
 # Initialize MCP Server, avoiding FastMCP server timeout caused by Icon src fetch
 instructions = (
@@ -121,7 +105,7 @@ except Exception:
 # STATA_MCP.TOOLS: Stata Core Tools
 # =============================================================================
 
-if IS_UNIX:
+if config.IS_UNIX:
     _help_cls = None
 
     def _load_help_cls():
@@ -131,8 +115,8 @@ if IS_UNIX:
             # Config help class
             _help_cls = StataHelp(
                 stata_cli=config.STATA_CLI,
-                project_tmp_dir=tmp_base_path,
-                cache_dir=STATA_MCP_DIRECTORY / "help"
+                project_tmp_dir=config.STATA_MCP_FOLDER.TMP,
+                cache_dir=config.STATA_MCP_DIRECTORY / "help"
             )
 
         return _help_cls
@@ -281,9 +265,9 @@ def stata_do(
     # Initialize Stata executor with system configuration
     stata_executor = StataDo(
         stata_cli=config.STATA_CLI,  # Path to Stata executable
-        log_file_path=log_base_path,  # Directory for log files
-        is_unix=IS_UNIX,  # Whether the OS is Unix-like
-        cwd=cwd,
+        log_file_path=config.STATA_MCP_FOLDER.LOG,  # Directory for log files
+        is_unix=config.IS_UNIX,  # Whether the OS is Unix-like
+        cwd=config.WORKING_DIR,
         monitors=monitors
     )
 
@@ -402,7 +386,7 @@ def ado_package_install(
     """
     source = source.lower()
 
-    if IS_UNIX:
+    if config.IS_UNIX:
         SOURCE_MAPPING: Dict = {
             "github": GITHUB_Install,
             "net": NET_Install,
@@ -539,7 +523,7 @@ def get_data_info(
         logging.error(f"Unsupported file extension: {data_extension} for data file: {data_path}")
         return f"Unsupported file extension now: {data_extension}"
 
-    data_info = data_info_cls(data_path, vars_list, encoding=encoding, cache_dir=tmp_base_path)
+    data_info = data_info_cls(data_path, vars_list, encoding=encoding, cache_dir=config.STATA_MCP_FOLDER.TMP)
     try:
         info = data_info.info
         if data_info.is_cache:
@@ -599,9 +583,9 @@ def read_log(
 
     # Security check: ensure the file is within the allowed directory
     try:
-        path.relative_to(output_base_path.resolve())
+        path.relative_to(config.STATA_MCP_FOLDER.path.resolve())
     except ValueError:
-        allowed_path = output_base_path.resolve()
+        allowed_path = config.STATA_MCP_FOLDER.path.resolve()
         # Log security violation for audit purposes.
         # If this security warning appears, it may indicate that the current model has been compromised/poisoned.
         logging.warning(
@@ -618,7 +602,7 @@ def read_log(
     if not path.exists():
         raise FileNotFoundError(f"The file at {file_path} does not exist.")
 
-    if is_beta and IS_UNIX:
+    if is_beta and config.IS_UNIX:
         loger = StataLog.from_path(file_path, encoding=encoding)
         if output_format not in ["full", "core", "dict"]:
             raise ValueError(f"Invalid output_format: {output_format}")
@@ -663,7 +647,7 @@ def write_dofile(content: str, encoding: str = None) -> str:
         your Stata do-files directly.
 
     """
-    file_path = dofile_base_path / f"{datetime.strftime(datetime.now(), '%Y%m%d%H%M%S%f')}.do"
+    file_path = config.STATA_MCP_FOLDER.DO / f"{datetime.strftime(datetime.now(), '%Y%m%d%H%M%S%f')}.do"
     encoding = encoding or "utf-8"
     try:
         with open(file_path, "w", encoding=encoding) as f:
@@ -674,7 +658,7 @@ def write_dofile(content: str, encoding: str = None) -> str:
     return file_path.as_posix()
 
 
-if ENABLE_WRITE_DOFILE:
+if config.ENABLE_WRITE_DOFILE:
     # When stata-mcp was first developed, agent capabilities were still immature.
     # However, modern agents like Claude Code, Codex, and Cursor now have native
     # file modification capabilities with better implementations. Additionally,
@@ -698,7 +682,7 @@ __all__ = [
     "ado_package_install",
 ]
 
-if IS_UNIX:
+if config.IS_UNIX:
     __all__.extend([
         "help"
     ])

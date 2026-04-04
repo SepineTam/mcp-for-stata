@@ -31,15 +31,14 @@ def create_runtime_context(
     require_stata: bool = False,
 ) -> RuntimeContext:
     config = Config(config_file=config_file)
-    working_dir = config.WORKING_DIR
     stata_cli = config.STATA_CLI if require_stata else None
     return RuntimeContext(
         config=config,
-        output_base_path=working_dir["output_base"],
-        log_base_path=working_dir["log_base"],
-        dofile_base_path=working_dir["dofile_base"],
-        tmp_base_path=working_dir["tmp_base"],
-        cwd=working_dir["cwd"],
+        output_base_path=config.STATA_MCP_FOLDER.path,
+        log_base_path=config.STATA_MCP_FOLDER.LOG,
+        dofile_base_path=config.STATA_MCP_FOLDER.DO,
+        tmp_base_path=config.STATA_MCP_FOLDER.TMP,
+        cwd=config.WORKING_DIR,
         stata_cli=stata_cli,
         is_unix=config.IS_UNIX,
     )

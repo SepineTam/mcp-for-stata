@@ -13,12 +13,51 @@ import sys
 import tomllib
 from functools import cached_property
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Any, Optional, Union
 
 import tomli_w
 
 from .core.types import StataCLINotFoundError
 from .stata import StataFinder
+
+
+class StataMcpFolder:
+    """Lazy-create stata-mcp-folder sub-directories on first property access."""
+
+    def __init__(self, base: Path):
+        self._base = base
+
+    def _ensure_base(self):
+        self._base.mkdir(exist_ok=True, parents=True)
+        gitignore = self._base / ".gitignore"
+        if not gitignore.exists():
+            gitignore.write_text("*", encoding="utf-8")
+
+    @cached_property
+    def LOG(self) -> Path:
+        self._ensure_base()
+        p = self._base / "stata-mcp-log"
+        p.mkdir(exist_ok=True)
+        return p
+
+    @cached_property
+    def DO(self) -> Path:
+        self._ensure_base()
+        p = self._base / "stata-mcp-dofile"
+        p.mkdir(exist_ok=True)
+        return p
+
+    @cached_property
+    def TMP(self) -> Path:
+        self._ensure_base()
+        p = self._base / "stata-mcp-tmp"
+        p.mkdir(exist_ok=True)
+        return p
+
+    @property
+    def path(self) -> Path:
+        """Return base path without triggering directory creation."""
+        return self._base
 
 
 class Config:
@@ -27,7 +66,7 @@ class Config:
         self.config_file = Path(self.config_file)
 
     @property
-    def config(self) -> Dict:
+    def config(self) -> dict[str, Any]:
         try:
             with open(self.config_file, "rb") as f:
                 config = tomllib.load(f)
@@ -287,19 +326,14 @@ class Config:
         )
 
     @property
-    def WORKING_DIR(self) -> Dict[str, Path]:
+    def WORKING_DIR(self) -> Path:
         cwd = self._get_config_value(
             config_keys=["PROJECT", "WORKING_DIR"],
             env_var="STATA_MCP__CWD",
-            default=None,
+            # Backward compatibility support
+            default=os.getenv("STATA_MCP_CWD", Path.cwd()),
             converter=self._to_path,
         )
-
-        if cwd is None:
-            # Backward compatibility support
-            cwd = os.getenv("STATA_MCP_CWD", Path.cwd())
-
-        cwd = self._to_path(cwd)
 
         try:
             cwd.mkdir(parents=True, exist_ok=True)
@@ -309,33 +343,15 @@ class Config:
         except (OSError, PermissionError):
             cwd = Path.home() / "Documents"
 
-        output_base_path = cwd / "stata-mcp-folder"
-        output_base_path.mkdir(exist_ok=True, parents=True)  # make sure this folder exists
+        return cwd
 
-        # sub-based path
-        log_base_path = output_base_path / "stata-mcp-log"
-        log_base_path.mkdir(exist_ok=True)
-        dofile_base_path = output_base_path / "stata-mcp-dofile"
-        dofile_base_path.mkdir(exist_ok=True)
-        tmp_base_path = output_base_path / "stata-mcp-tmp"
-        tmp_base_path.mkdir(exist_ok=True)
-
-        # Config gitignore in STATA_MCP_FOLDER
-        if not (GITIGNORE_FILE := output_base_path / ".gitignore").exists():
-            with open(GITIGNORE_FILE, "w", encoding="utf-8") as f:
-                f.write("*")
-
-        return {
-            "cwd": cwd,
-            "output_base": output_base_path,
-            "log_base": log_base_path,
-            "dofile_base": dofile_base_path,
-            "tmp_base": tmp_base_path
-        }
+    @cached_property
+    def STATA_MCP_FOLDER(self) -> StataMcpFolder:
+        return StataMcpFolder(self.WORKING_DIR / "stata-mcp-folder")
 
     @property
     def PROJECT_NAME(self) -> str:
-        return self.WORKING_DIR.get("cwd").name
+        return self.WORKING_DIR.name
 
     @property
     def MAX_RAM_MB(self) -> int | None:
