@@ -118,20 +118,28 @@ except Exception:
         website_url="https://www.statamcp.com",
     )
 
-
 # =============================================================================
 # STATA_MCP.TOOLS: Stata Core Tools
 # =============================================================================
 
 if IS_UNIX:
-    # Config help class
-    help_cls = StataHelp(
-        stata_cli=config.STATA_CLI,
-        project_tmp_dir=tmp_base_path,
-        cache_dir=STATA_MCP_DIRECTORY / "help"
-    )
+    _help_cls = None
+
+    def _load_help_cls():
+        global _help_cls
+
+        if _help_cls is None:
+            # Config help class
+            _help_cls = StataHelp(
+                stata_cli=config.STATA_CLI,
+                project_tmp_dir=tmp_base_path,
+                cache_dir=STATA_MCP_DIRECTORY / "help"
+            )
+
+        return _help_cls
 
     # As AI-Client does not support Resource at a board yet, we still keep the resource
+
     @stata_mcp.resource(
         uri="help://stata/{cmd}",
         name="help",
@@ -154,16 +162,16 @@ if IS_UNIX:
             doesn't exist or you believe the cached content is incorrect, and you're certain the command exists,
             set the environment variable STATA_MCP_CACHE_HELP to false. STATA_MCP_SAVE_HELP is same working method.
         """
-        return help_cls.help(cmd)
+        return _load_help_cls().help(cmd)
 
 
 @stata_mcp.tool(name="stata_do", description="Run a stata-code via Stata")
 def stata_do(
-    dofile_path: str,
-    log_file_name: str = None,
-    is_read_log: bool = True,
-    is_replace_log: bool = True,
-    enable_smcl: bool = True
+        dofile_path: str,
+        log_file_name: str = None,
+        is_read_log: bool = True,
+        is_replace_log: bool = True,
+        enable_smcl: bool = True
 ) -> Dict[str, Any]:
     """
     Execute a Stata do-file and return the log file path with optional log content.
@@ -318,10 +326,10 @@ def stata_do(
 
 @stata_mcp.tool(name="ado_package_install", description="Install ado package from ssc or github")
 def ado_package_install(
-    package: str,
-    source: str = "ssc",
-    is_replace: bool = True,
-    package_source_from: str = None
+        package: str,
+        source: str = "ssc",
+        is_replace: bool = True,
+        package_source_from: str = None
 ) -> str:
     """
     Install a package from SSC or GitHub
@@ -442,9 +450,9 @@ def ado_package_install(
     description="Get descriptive statistics for the data file"
 )
 def get_data_info(
-    data_path: str,
-    vars_list: List[str] | None = None,
-    encoding: str = "utf-8"
+        data_path: str,
+        vars_list: List[str] | None = None,
+        encoding: str = "utf-8"
 ) -> str:
     """
     Get descriptive statistics for the data file.
@@ -552,11 +560,11 @@ def get_data_info(
     description="Reads a log file and returns its content as a string"
 )
 def read_log(
-    file_path: str,
-    encoding: str = "utf-8",
-    is_beta: bool = False,
-    *,
-    output_format: Literal["full", "core", "dict"] = "dict",
+        file_path: str,
+        encoding: str = "utf-8",
+        is_beta: bool = False,
+        *,
+        output_format: Literal["full", "core", "dict"] = "dict",
 ) -> str:
     """
     Reads a log file and returns its content as a string.
@@ -674,7 +682,6 @@ if ENABLE_WRITE_DOFILE:
         name="write_dofile",
         description="write the stata-code to dofile"
     )(write_dofile)
-
 
 __all__ = [
     "stata_mcp",
