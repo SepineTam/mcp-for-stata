@@ -2,6 +2,30 @@
 
 
 <details>
+<summary>Click to expand v1.14.2 details</summary>
+
+## [1.14.2] - 2026-04-04
+
+### Performance
+- **Startup**: Delay STATA_CLI resolution and cache found path to config
+- **Startup**: Lazy-load help_cls to avoid resolving Stata path at import time
+- **Startup**: Lazy-import data_info to avoid loading pandas/numpy at startup
+- **Startup**: Lazy-create stata-mcp-folder on tool invocation instead of at import
+
+### Fixed
+- **Guard**: Strip Stata prefixes before security validation
+- **Help**: Guard help save path when project temp directory is unset
+- **Help**: Fix help cache lookup when project temp directory is unset
+- **Monitor**: Ensure monitors are stopped in `_execute_windows_with_monitors` finally block
+- **Monitor**: Remove redundant `monitor.stop()` calls and ensure process cleanup
+- **StataDo**: Prevent subprocess resource leaks in execution methods
+
+### Docs
+- Fix tool name reference from `ssc_install` to `ado_package_install`
+
+</details>
+
+<details>
 <summary>Click to expand v1.14.1 details</summary>
 
 ## [1.14.1] - 2026-03-24
