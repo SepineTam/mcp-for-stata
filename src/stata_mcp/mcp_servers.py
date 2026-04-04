@@ -81,9 +81,6 @@ else:
 SYSTEM_OS = config.SYSTEM_OS
 IS_UNIX = config.IS_UNIX
 
-# Set stata_cli
-STATA_CLI = config.STATA_CLI
-
 # Get working directory from environment variable (fallback: auto-detect writable directory)
 WORKING_DIR = config.WORKING_DIR
 cwd = WORKING_DIR.get("cwd")
@@ -129,7 +126,7 @@ except Exception:
 if IS_UNIX:
     # Config help class
     help_cls = StataHelp(
-        stata_cli=STATA_CLI,
+        stata_cli=config.STATA_CLI,
         project_tmp_dir=tmp_base_path,
         cache_dir=STATA_MCP_DIRECTORY / "help"
     )
@@ -276,7 +273,7 @@ def stata_do(
 
     # Initialize Stata executor with system configuration
     stata_executor = StataDo(
-        stata_cli=STATA_CLI,  # Path to Stata executable
+        stata_cli=config.STATA_CLI,  # Path to Stata executable
         log_file_path=log_base_path,  # Directory for log files
         is_unix=IS_UNIX,  # Whether the OS is Unix-like
         cwd=cwd,
@@ -410,7 +407,7 @@ def ado_package_install(
 
         # set the args for the special cases
         args = [package, package_source_from] if source == "net" else [package]
-        install_msg = installer(STATA_CLI, is_replace, timeout=300).install(*args)
+        install_msg = installer(config.STATA_CLI, is_replace, timeout=300).install(*args)
 
         if installer.check_installed_from_msg(install_msg):
             logging.info(f"{package} is installed successfully.")

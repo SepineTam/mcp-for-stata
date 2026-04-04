@@ -11,6 +11,7 @@ import os
 import platform
 import sys
 import tomllib
+from functools import cached_property
 from pathlib import Path
 from typing import Dict, Optional, Union
 
@@ -249,12 +250,20 @@ class Config:
     def IS_UNIX(self) -> bool:
         return self.SYSTEM_OS.lower() in ["darwin", "linux"]
 
-    @property
+    @cached_property
     def STATA_CLI(self) -> str:
-        finder = StataFinder(self.config.get("STATA", {}).get("STATA_CLI", None))
+        cached = self.config.get("STATA", {}).get("STATA_CLI", None)
+        if cached:
+            return cached
+
+        finder = StataFinder(None)
         cli = finder.STATA_CLI
         if cli is None:
             raise StataCLINotFoundError()
+
+        # Cache the found path for faster startup next time
+        if not cached:
+            self.set_stata_cli(cli)
         return cli
 
     @property
