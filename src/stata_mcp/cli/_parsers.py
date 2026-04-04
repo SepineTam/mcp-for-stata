@@ -6,7 +6,6 @@ import argparse
 from importlib.metadata import version
 from typing import Callable
 
-
 BoolConverter = Callable[[str], bool]
 
 

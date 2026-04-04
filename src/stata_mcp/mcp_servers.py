@@ -18,7 +18,6 @@ from mcp.server.fastmcp import FastMCP, Icon
 
 from .config import Config
 from .core.types import RAMLimitExceededError
-from .data_info import get_data_handler
 from .guard import GuardValidator
 from .monitor import RAMMonitor
 from .stata import (
@@ -529,6 +528,9 @@ def get_data_info(
     """
     data_path = Path(data_path).expanduser().resolve()
     data_extension = data_path.suffix.lower().strip(".")
+
+    # Lazy import: pandas/numpy/requests are heavy, only load when needed
+    from .data_info import get_data_handler
 
     # Get the appropriate data handler class from the registry
     data_info_cls = get_data_handler(data_extension)
