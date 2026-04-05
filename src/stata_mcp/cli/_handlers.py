@@ -233,6 +233,9 @@ def handle_update(args: Namespace) -> int:
         success, message = execute_update(selected_method)
         print(message)
         return 0 if success else 1
+    except ImportError as error:
+        print(f"Failed to load update dependencies: {error}", file=sys.stderr)
+        return 1
     except Exception as error:
         print(error, file=sys.stderr)
         return 1

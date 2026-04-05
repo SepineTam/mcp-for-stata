@@ -148,8 +148,6 @@ def build_update_command(method: InstallMethod) -> Optional[list[str]]:
         return [sys.executable, "-m", "pip", "install", "--upgrade", "stata-mcp"]
     if method == InstallMethod.HOMEBREW:
         return ["brew", "upgrade", "stata-mcp"]
-    if method == InstallMethod.UNKNOWN:
-        return [sys.executable, "-m", "pip", "install", "--upgrade", "stata-mcp"]
     return None
 
 
@@ -172,6 +170,10 @@ def _run_update_command(command: list[str]) -> tuple[bool, str]:
         return False, detail
     except subprocess.TimeoutExpired:
         detail = "Update command timed out."
+        logging.error(detail)
+        return False, detail
+    except OSError as error:
+        detail = f"Failed to execute update command due to OS error: {error}"
         logging.error(detail)
         return False, detail
 
