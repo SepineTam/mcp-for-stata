@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sys
 from argparse import Namespace
+from importlib.metadata import PackageNotFoundError
 
 from ..config import Config
 
@@ -162,6 +163,7 @@ def handle_server(args: Namespace) -> None:
         transport = "streamable-http"
     mcp.run(transport=transport)
 
+
 def handle_update(args: Namespace) -> int:
     """Handle the update subcommand."""
     from ..utils.update import (
@@ -173,44 +175,64 @@ def handle_update(args: Namespace) -> int:
         get_latest_version,
     )
 
-    if args.check:
-        current = get_current_version()
-        latest = get_latest_version()
-        if latest is None:
-            print("Failed to check for updates (PyPI unreachable)")
-            return 1
+    try:
+        if args.check:
+            try:
+                current = get_current_version()
+            except PackageNotFoundError:
+                print("stata-mcp is not installed in this Python environment.")
+                return 1
 
-        print(f"Current: v{current}")
-        print(f"Latest:  v{latest}")
-        if current == latest:
-            print("Up to date")
-        else:
-            print(f"Update available: v{current} → v{latest}")
-        return 0
+            latest, latest_error = get_latest_version()
+            if latest is None:
+                print(latest_error or "Failed to check for updates.")
+                return 1
 
-    selected_method = None
-    if args.method != "auto":
-        selected_method = InstallMethod(args.method)
+            print(f"Current: v{current}")
+            print(f"Latest:  v{latest}")
+            if current == latest:
+                print("Up to date")
+            else:
+                print(f"Update available: v{current} → v{latest}")
+            return 0
 
-    if args.dry_run:
-        current = get_current_version()
-        latest = get_latest_version() or "unknown"
-        detected_method = selected_method or detect_install_method()
+        selected_method = None
+        if args.method != "auto":
+            selected_method = InstallMethod(args.method)
 
-        print(f"Current version: {current}")
-        print(f"Latest version:  {latest}")
-        print(f"Install method:  {detected_method.value}")
+        if args.dry_run:
+            try:
+                current = get_current_version()
+            except PackageNotFoundError:
+                print("stata-mcp is not installed in this Python environment.")
+                return 1
 
-        update_command = build_update_command(detected_method)
-        if update_command:
-            print(f"Update command:  {' '.join(update_command)}")
-        elif detected_method == InstallMethod.UVX:
-            print("Note: uvx always uses latest, no update needed")
-        elif detected_method == InstallMethod.EDITABLE:
-            print("Note: editable install, use git pull + pip install -e .")
+            latest, latest_error = get_latest_version()
+            detected_method = selected_method or detect_install_method()
 
-        return 0
+            print(f"Current version: {current}")
+            if latest is None:
+                print("Latest version:  unavailable")
+                print(f"Latest check:    {latest_error or 'Unknown error'}")
+            else:
+                print(f"Latest version:  {latest}")
+            print(f"Install method:  {detected_method.value}")
 
-    success, message = execute_update(selected_method)
-    print(message)
-    return 0 if success else 1
+            update_command = build_update_command(detected_method)
+            if update_command:
+                print(f"Update command:  {' '.join(update_command)}")
+            elif detected_method == InstallMethod.UVX:
+                print("Note: uvx always uses latest, no update needed")
+            elif detected_method == InstallMethod.EDITABLE:
+                print("Note: editable install, use git pull + pip install -e .")
+            elif detected_method == InstallMethod.UNKNOWN:
+                print("Note: unknown install method; auto update is blocked for safety.")
+
+            return 0
+
+        success, message = execute_update(selected_method)
+        print(message)
+        return 0 if success else 1
+    except Exception as error:
+        print(error, file=sys.stderr)
+        return 1

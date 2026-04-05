@@ -11,6 +11,7 @@ from enum import Enum
 from importlib.metadata import PackageNotFoundError, distribution, version
 from pathlib import Path
 from typing import Optional
+from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 
@@ -72,6 +73,7 @@ def detect_install_method() -> InstallMethod:
     try:
         dist = distribution("stata-mcp")
     except PackageNotFoundError:
+        logging.warning("Package metadata for stata-mcp was not found while detecting install method.")
         return InstallMethod.UNKNOWN
 
     python_path = Path(sys.executable).resolve()
@@ -88,8 +90,12 @@ def detect_install_method() -> InstallMethod:
             direct_url = json.loads(direct_url_raw)
             if direct_url.get("dir_info", {}).get("editable", False):
                 return InstallMethod.EDITABLE
-    except Exception:
-        pass
+    except json.JSONDecodeError as error:
+        logging.warning("Failed to parse direct_url.json while detecting editable install: %s", error)
+    except PermissionError as error:
+        logging.warning("Permission denied while reading direct_url.json: %s", error)
+    except Exception as error:
+        logging.debug("Ignored direct_url.json read failure: %s", error)
 
     try:
         install_root = Path(dist.locate_file(""))
@@ -98,8 +104,10 @@ def detect_install_method() -> InstallMethod:
             return InstallMethod.HOMEBREW
         if "site-packages" in install_root_text or "dist-packages" in install_root_text:
             return InstallMethod.PIP
-    except Exception:
-        pass
+    except PermissionError as error:
+        logging.warning("Permission denied while resolving package install root: %s", error)
+    except Exception as error:
+        logging.debug("Ignored install root resolution failure: %s", error)
 
     return InstallMethod.UNKNOWN
 
@@ -109,14 +117,27 @@ def get_current_version() -> str:
     return version("stata-mcp")
 
 
-def get_latest_version() -> Optional[str]:
-    """Fetch latest version from PyPI."""
+def get_latest_version() -> tuple[Optional[str], Optional[str]]:
+    """Fetch latest version from PyPI with a user-facing error message."""
     try:
         with urlopen(PYPI_API_URL, timeout=10) as response:
             payload = json.loads(response.read())
-        return payload["info"]["version"]
-    except Exception:
-        return None
+        latest = payload["info"]["version"]
+        if not isinstance(latest, str) or not latest:
+            return None, "PyPI response did not include a valid version string."
+        return latest, None
+    except HTTPError as error:
+        return None, f"PyPI request failed with HTTP {error.code}."
+    except URLError as error:
+        return None, f"Failed to reach PyPI: {error.reason}."
+    except TimeoutError:
+        return None, "Timed out while requesting latest version from PyPI."
+    except json.JSONDecodeError as error:
+        return None, f"Failed to parse PyPI response JSON: {error}."
+    except KeyError as error:
+        return None, f"PyPI response format changed, missing key: {error}."
+    except Exception as error:
+        return None, f"Unexpected error while checking latest version: {error}."
 
 
 def build_update_command(method: InstallMethod) -> Optional[list[str]]:
@@ -132,30 +153,43 @@ def build_update_command(method: InstallMethod) -> Optional[list[str]]:
     return None
 
 
-def _run_update_command(command: list[str]) -> bool:
-    """Run update command and return True on success."""
+def _run_update_command(command: list[str]) -> tuple[bool, str]:
+    """Run update command and return success plus a detail message."""
     try:
         result = subprocess.run(command, capture_output=True, text=True, timeout=180, check=False)
         if result.returncode == 0:
-            return True
-        logging.error("Update command failed: %s", result.stderr.strip())
-        return False
+            detail = result.stdout.strip() or "Command completed successfully."
+            return True, detail
+
+        stderr = result.stderr.strip()
+        stdout = result.stdout.strip()
+        detail = stderr or stdout or f"Command exited with status {result.returncode}."
+        logging.error("Update command failed: %s", detail)
+        return False, detail
     except FileNotFoundError:
-        logging.error("Update command not found: %s", command[0])
-        return False
+        detail = f"Command not found: {command[0]}"
+        logging.error(detail)
+        return False, detail
     except subprocess.TimeoutExpired:
-        logging.error("Update command timed out")
-        return False
+        detail = "Update command timed out."
+        logging.error(detail)
+        return False, detail
 
 
 def execute_update(method: Optional[InstallMethod] = None) -> tuple[bool, str]:
     """Execute update and return (success, message)."""
     resolved_method = method or detect_install_method()
-    current = get_current_version()
-    latest = get_latest_version()
+    try:
+        current = get_current_version()
+    except PackageNotFoundError:
+        return False, "stata-mcp is not installed in this Python environment."
+    except Exception as error:
+        return False, f"Failed to determine current installed version: {error}"
+
+    latest, latest_error = get_latest_version()
 
     if latest is None:
-        return False, "Failed to fetch latest version from PyPI"
+        return False, latest_error or "Failed to fetch latest version from PyPI."
 
     if current == latest:
         return True, f"stata-mcp v{current} (already latest)"
@@ -172,6 +206,13 @@ def execute_update(method: Optional[InstallMethod] = None) -> tuple[bool, str]:
             "   Use git pull to update, or pip install -e . to reinstall."
         )
 
+    if resolved_method == InstallMethod.UNKNOWN and method is None:
+        return False, (
+            "⚠️  Could not determine installation method automatically.\n"
+            "   Refusing to run fallback update to avoid unexpected double installation.\n"
+            "   Re-run with --method pip or --method uv-tool."
+        )
+
     command = build_update_command(resolved_method)
     if command is None:
         return False, f"No supported update command for install method: {resolved_method.value}"
@@ -182,9 +223,11 @@ def execute_update(method: Optional[InstallMethod] = None) -> tuple[bool, str]:
         f"Running: {' '.join(command)}",
     ]
 
-    if _run_update_command(command):
+    success, detail = _run_update_command(command)
+    if success:
         message_lines.append("✅ Updated successfully")
+        message_lines.append(f"Details: {detail}")
         return True, "\n".join(message_lines)
 
-    message_lines.append("❌ Update failed")
+    message_lines.append(f"❌ Update failed: {detail}")
     return False, "\n".join(message_lines)
