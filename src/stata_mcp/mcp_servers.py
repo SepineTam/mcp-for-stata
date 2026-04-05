@@ -17,17 +17,6 @@ from typing import Any, Dict, List, Literal
 from mcp.server.fastmcp import FastMCP, Icon
 
 from .config import Config
-from .core.types import RAMLimitExceededError
-from .guard import GuardValidator
-from .monitor import RAMMonitor
-from .stata import (
-    GITHUB_Install,
-    NET_Install,
-    SSC_Install,
-    StataDo,
-    StataHelp,
-    StataLog,
-)
 
 # Init project config
 config = Config()
@@ -112,6 +101,8 @@ if config.IS_UNIX:
         global _help_cls
 
         if _help_cls is None:
+            from .stata import StataHelp
+
             # Config help class
             _help_cls = StataHelp(
                 stata_cli=config.STATA_CLI,
@@ -226,6 +217,8 @@ def stata_do(
 
     # Security check: validate dofile before execution
     if config.IS_GUARD:
+        from .guard import GuardValidator
+
         # Read dofile content
         try:
             with open(dofile_path, 'r', encoding='utf-8') as f:
@@ -260,9 +253,11 @@ def stata_do(
     monitors = []
     if config.IS_MONITOR:
         if config.MAX_RAM_MB is not None:
+            from .monitor import RAMMonitor
             monitors.append(RAMMonitor(max_ram_mb=config.MAX_RAM_MB))
 
     # Initialize Stata executor with system configuration
+    from .stata import StataDo
     stata_executor = StataDo(
         stata_cli=config.STATA_CLI,  # Path to Stata executable
         log_file_path=config.STATA_MCP_FOLDER.LOG,  # Directory for log files
@@ -273,6 +268,8 @@ def stata_do(
 
     # Execute the do-file and get log file path
     logging.info(f"Try to running file {dofile_path}")
+
+    from .core.types import RAMLimitExceededError
 
     try:
         log_file_path_mapping: Dict[str, Path] = stata_executor.execute_dofile(
@@ -387,6 +384,8 @@ def ado_package_install(
     source = source.lower()
 
     if config.IS_UNIX:
+        from .stata import GITHUB_Install, NET_Install, SSC_Install
+
         SOURCE_MAPPING: Dict = {
             "github": GITHUB_Install,
             "net": NET_Install,
@@ -603,6 +602,7 @@ def read_log(
         raise FileNotFoundError(f"The file at {file_path} does not exist.")
 
     if is_beta and config.IS_UNIX:
+        from .stata import StataLog
         loger = StataLog.from_path(file_path, encoding=encoding)
         if output_format not in ["full", "core", "dict"]:
             raise ValueError(f"Invalid output_format: {output_format}")
