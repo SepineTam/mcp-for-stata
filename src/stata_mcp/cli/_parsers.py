@@ -293,3 +293,25 @@ def add_sandbox_parser(subparsers: argparse._SubParsersAction) -> argparse.Argum
         help="Docker image registry source: github (ghcr.io) or docker (DockerHub) (default: github)",
     )
     return sandbox_parser
+
+
+def add_update_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
+    """Add the update subcommand parser."""
+    update_parser = subparsers.add_parser("update", help="Update stata-mcp to latest version")
+    update_parser.add_argument(
+        "--method",
+        choices=["auto", "pip", "uv-tool", "homebrew"],
+        default="auto",
+        help="Force specific update method (default: auto-detect)",
+    )
+    update_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show detected method and available update without executing",
+    )
+    update_parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Only check if a newer version is available",
+    )
+    return update_parser
