@@ -154,7 +154,7 @@ def check_uv() -> CheckResult:
             return CheckResult(
                 name="uv",
                 status=CheckStatus.WARN,
-                message=f"installed but version probe failed ({uv_path})",
+                message=f"found but version detection failed ({uv_path})",
                 details={"path": uv_path, "version": uv_version},
                 hint="Reinstall uv or verify that `uv --version` works in your shell.",
             )
@@ -162,7 +162,7 @@ def check_uv() -> CheckResult:
         return CheckResult(
             name="uv",
             status=CheckStatus.WARN,
-            message=f"installed but version probe failed ({uv_path})",
+            message=f"found but version detection failed ({uv_path})",
             details={"path": uv_path, "version": uv_version},
             hint="Reinstall uv or verify that `uv --version` works in your shell.",
         )
@@ -338,7 +338,7 @@ def check_stata_execution(config: Any, stata_cli_path: str | None) -> CheckResul
                 return CheckResult(
                     name="stata_execution",
                     status=CheckStatus.FAIL,
-                    message=f"cannot write temporary do-file: {error}",
+                    message=f"temp file write failed: {error}",
                     details={"temp_do_file": str(temp_do_file)},
                     hint="Set STATA_MCP__CWD to a writable directory.",
                 )
