@@ -24,9 +24,6 @@ config = Config()
 # Maybe somebody does not like logging.
 # Whatever, left a controller switch `logging STATA_MCP_LOGGING_ON`. Turn off all logging with setting it as false.
 # Default Logging Status: File (on), Console (off).
-IS_DEBUG = config.IS_DEBUG
-ENABLE_WRITE_DOFILE = config.ENABLE_WRITE_DOFILE
-
 if config.LOGGING_ON:
     # Configure logging
     logging_handlers = []
@@ -40,7 +37,6 @@ if config.LOGGING_ON:
 
     if config.LOGGING_FILE_HANDLER_ON:
         # Add file-handler with rotation support if enabled.
-        IS_DEBUG = True
         stata_mcp_dot_log_file_path = config.LOG_FILE
 
         # Use RotatingFileHandler to limit file size and implement log rotation
@@ -51,7 +47,9 @@ if config.LOGGING_ON:
             backupCount=config.BACKUP_COUNT,
             encoding='utf-8'
         )
-        file_handler.setLevel(logging.DEBUG)
+        file_handler.setLevel(
+            logging.DEBUG if config.IS_DEBUG else logging.INFO
+        )
 
         logging_handlers.append(file_handler)
 
