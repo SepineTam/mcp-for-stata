@@ -65,14 +65,13 @@ class Config:
         self.config_file = config_file if config_file else self.STATA_MCP_DIRECTORY / "config.toml"
         self.config_file = Path(self.config_file)
 
-    @property
+    @cached_property
     def config(self) -> dict[str, Any]:
         try:
             with open(self.config_file, "rb") as f:
-                config = tomllib.load(f)
+                return tomllib.load(f)
         except Exception:
-            config = {}
-        return config
+            return {}
 
     def read_config_text(self) -> str:
         """Return raw configuration file content."""
@@ -85,6 +84,8 @@ class Config:
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
         content = tomli_w.dumps(data)
         self.config_file.write_text(content, encoding="utf-8")
+        # Invalidate cached config so next access re-reads the file
+        self.__dict__.pop("config", None)
 
     def set_stata_cli(self, value: str | None = None) -> str:
         """Persist STATA_CLI to config file and return the saved value."""
