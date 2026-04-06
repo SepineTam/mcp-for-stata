@@ -14,15 +14,11 @@ import sys
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from importlib.metadata import version as pkg_version
+from importlib.metadata import PackageNotFoundError, version as pkg_version
 from pathlib import Path
 from typing import Any
 from urllib.error import URLError
 from urllib.request import Request, urlopen
-
-from ..config import Config
-from ..guard import GuardValidator
-from ..stata import StataFinder
 
 
 class CheckStatus(Enum):
@@ -154,8 +150,22 @@ def check_uv() -> CheckResult:
         candidate = command_result.stdout.strip() or command_result.stderr.strip()
         if candidate:
             uv_version = candidate
+        if command_result.returncode != 0:
+            return CheckResult(
+                name="uv",
+                status=CheckStatus.WARN,
+                message=f"installed but version probe failed ({uv_path})",
+                details={"path": uv_path, "version": uv_version},
+                hint="Reinstall uv or verify that `uv --version` works in your shell.",
+            )
     except (OSError, subprocess.TimeoutExpired):
-        pass
+        return CheckResult(
+            name="uv",
+            status=CheckStatus.WARN,
+            message=f"installed but version probe failed ({uv_path})",
+            details={"path": uv_path, "version": uv_version},
+            hint="Reinstall uv or verify that `uv --version` works in your shell.",
+        )
 
     return CheckResult(
         name="uv",
@@ -227,7 +237,7 @@ def check_dependencies() -> CheckResult:
     )
 
 
-def _resolve_stata_cli(config: Config) -> tuple[str | None, str | None]:
+def _resolve_stata_cli(config: Any) -> tuple[str | None, str | None]:
     """Resolve Stata CLI path and source."""
     env_cli = os.getenv("STATA_CLI")
     if env_cli:
@@ -241,16 +251,21 @@ def _resolve_stata_cli(config: Config) -> tuple[str | None, str | None]:
         if config_path.exists():
             return str(config_path), "config"
 
-    finder_cli = StataFinder(None).STATA_CLI
-    if finder_cli:
-        finder_path = Path(finder_cli).expanduser()
-        if finder_path.exists():
-            return str(finder_path), "finder"
+    try:
+        from ..stata import StataFinder
+
+        finder_cli = StataFinder(None).STATA_CLI
+        if finder_cli:
+            finder_path = Path(finder_cli).expanduser()
+            if finder_path.exists():
+                return str(finder_path), "finder"
+    except (OSError, PermissionError, RuntimeError, ValueError):
+        return None, None
 
     return None, None
 
 
-def check_stata_cli(config: Config) -> CheckResult:
+def check_stata_cli(config: Any) -> CheckResult:
     """Check whether Stata CLI can be located."""
     stata_cli, source = _resolve_stata_cli(config)
     if stata_cli is None:
@@ -271,7 +286,7 @@ def check_stata_cli(config: Config) -> CheckResult:
     )
 
 
-def check_stata_execution(config: Config, stata_cli_path: str | None) -> CheckResult:
+def check_stata_execution(config: Any, stata_cli_path: str | None) -> CheckResult:
     """Check whether Stata executable can run commands."""
     if not stata_cli_path:
         return CheckResult(
@@ -292,22 +307,41 @@ def check_stata_execution(config: Config, stata_cli_path: str | None) -> CheckRe
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                shell=True,
+                shell=False,
             )
             try:
                 process.communicate(input=commands, timeout=15)
                 return_code = process.returncode
             finally:
                 if process.poll() is None:
-                    process.terminate()
+                    try:
+                        process.terminate()
+                    except OSError:
+                        pass
+
                     try:
                         process.wait(timeout=5)
                     except subprocess.TimeoutExpired:
-                        process.kill()
-                        process.wait()
+                        try:
+                            process.kill()
+                        except OSError:
+                            pass
+                        try:
+                            process.wait(timeout=5)
+                        except (subprocess.TimeoutExpired, OSError):
+                            pass
         else:
             temp_do_file = config.STATA_MCP_DIRECTORY / "doctor_test.do"
-            temp_do_file.write_text(commands, encoding="utf-8")
+            try:
+                temp_do_file.write_text(commands, encoding="utf-8")
+            except (OSError, PermissionError) as error:
+                return CheckResult(
+                    name="stata_execution",
+                    status=CheckStatus.FAIL,
+                    message=f"cannot write temporary do-file: {error}",
+                    details={"temp_do_file": str(temp_do_file)},
+                    hint="Set STATA_MCP__CWD to a writable directory.",
+                )
             try:
                 win_result = subprocess.run(
                     f'"{stata_cli_path}" /e do "{temp_do_file}"',
@@ -348,7 +382,7 @@ def check_stata_execution(config: Config, stata_cli_path: str | None) -> CheckRe
     )
 
 
-def check_config(config: Config) -> CheckResult:
+def check_config(config: Any) -> CheckResult:
     """Check configuration file availability and readability."""
     config_path = config.config_file
     if not config_path.exists():
@@ -373,7 +407,7 @@ def check_config(config: Config) -> CheckResult:
                 "sections": sorted(config_data.keys()),
             },
         )
-    except OSError as error:
+    except Exception as error:
         return CheckResult(
             name="config",
             status=CheckStatus.FAIL,
@@ -383,10 +417,19 @@ def check_config(config: Config) -> CheckResult:
         )
 
 
-def check_working_dir(config: Config) -> CheckResult:
+def check_working_dir(config: Any) -> CheckResult:
     """Check working directory and required subdirectories."""
-    work_dir = config.WORKING_DIR
-    folder = config.STATA_MCP_FOLDER
+    try:
+        work_dir = config.WORKING_DIR
+        folder = config.STATA_MCP_FOLDER
+    except Exception as error:
+        return CheckResult(
+            name="working_dir",
+            status=CheckStatus.FAIL,
+            message=f"configuration access error: {error}",
+            details={},
+            hint="Fix WORKING_DIR-related configuration values.",
+        )
     directories = {
         "working_dir": work_dir,
         "stata_mcp_folder": folder.path,
@@ -419,10 +462,12 @@ def check_working_dir(config: Config) -> CheckResult:
     )
 
 
-def check_guard(config: Config) -> CheckResult:
+def check_guard(config: Any) -> CheckResult:
     """Check guard initialization and blacklist availability."""
     guard_enabled = config.IS_GUARD
     try:
+        from ..guard import GuardValidator
+
         validator = GuardValidator()
         rules_count = len(validator.dangerous_commands) + len(validator.dangerous_patterns)
         return CheckResult(
@@ -438,14 +483,14 @@ def check_guard(config: Config) -> CheckResult:
     except Exception as error:
         return CheckResult(
             name="guard",
-            status=CheckStatus.WARN,
+            status=CheckStatus.FAIL,
             message=f"load error: {error}",
             details={"enabled": guard_enabled},
             hint="Guard module failed to initialize. Reinstall stata-mcp if needed.",
         )
 
 
-def check_monitor(config: Config) -> CheckResult:
+def check_monitor(config: Any) -> CheckResult:
     """Check monitor settings and psutil availability."""
     try:
         import psutil  # noqa: F401
@@ -514,7 +559,7 @@ def check_pypi() -> CheckResult:
         )
 
 
-def _all_checks(config: Config) -> list[tuple[str, Any]]:
+def _all_checks(config: Any) -> list[tuple[str, Any]]:
     return [
         ("os", check_os),
         ("python", check_python),
@@ -530,24 +575,22 @@ def _all_checks(config: Config) -> list[tuple[str, Any]]:
     ]
 
 
-AVAILABLE_CHECKS = [
-    "os",
-    "python",
-    "uv",
-    "dependencies",
-    "stata_cli",
-    "stata_execution",
-    "config",
-    "working_dir",
-    "guard",
-    "monitor",
-    "pypi",
-]
+def get_available_checks() -> list[str]:
+    """Return available check names."""
+    return [name for name, _ in _all_checks(config=None)]
 
 
-def run_doctor(config: Config, only_checks: list[str] | None = None) -> DoctorReport:
+AVAILABLE_CHECKS = get_available_checks()
+
+
+def run_doctor(config: Any, only_checks: list[str] | None = None) -> DoctorReport:
     """Run selected checks and return a report."""
-    report = DoctorReport(version=pkg_version("stata-mcp"))
+    try:
+        version_text = pkg_version("stata-mcp")
+    except PackageNotFoundError:
+        version_text = "unknown"
+
+    report = DoctorReport(version=version_text)
     selected = set(only_checks) if only_checks else None
     stata_cli_path: str | None = None
 
@@ -555,17 +598,26 @@ def run_doctor(config: Config, only_checks: list[str] | None = None) -> DoctorRe
         if selected is not None and check_name not in selected:
             continue
 
-        if check_name == "stata_execution":
-            if stata_cli_path is None and (
-                selected is not None and "stata_cli" not in selected
-            ):
-                stata_cli_result = check_stata_cli(config)
-                stata_cli_path = stata_cli_result.details.get("path")
-            result = check_stata_execution(config, stata_cli_path)
-        else:
-            result = check_func()
-            if check_name == "stata_cli":
-                stata_cli_path = result.details.get("path")
+        try:
+            if check_name == "stata_execution":
+                if stata_cli_path is None and (
+                    selected is not None and "stata_cli" not in selected
+                ):
+                    stata_cli_result = check_stata_cli(config)
+                    stata_cli_path = stata_cli_result.details.get("path")
+                result = check_stata_execution(config, stata_cli_path)
+            else:
+                result = check_func()
+                if check_name == "stata_cli":
+                    stata_cli_path = result.details.get("path")
+        except Exception as error:
+            result = CheckResult(
+                name=check_name,
+                status=CheckStatus.FAIL,
+                message=f"unexpected error: {error}",
+                details={},
+                hint="Run with --verbose and inspect environment-specific configuration.",
+            )
         report.checks.append(result)
 
     return report
