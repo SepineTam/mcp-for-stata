@@ -7,6 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : _base.py
 
+import copy
 import hashlib
 import json
 import logging
@@ -259,7 +260,7 @@ class DataInfoBase(ABC):
     def info(self) -> Dict[str, Any]:
         """Get comprehensive information about the data."""
         summary = self.summary()
-        return self._filter(summary)
+        return self._filter(self._filter_var(copy.deepcopy(summary)))
 
     @property
     def data_source(self) -> str:
@@ -402,16 +403,16 @@ class DataInfoBase(ABC):
         if self.is_cache:
             cached_summary = self.load_cached_summary()
             if cached_summary:
-                return self._filter(cached_summary)
+                return cached_summary
         df = self.df
-        selected_vars = self.vars_list
+        all_vars = list(df.columns)
 
-        # Basic information
+        # Basic information (full overview with all vars)
         overview = {
             "source": self.data_source,
             "obs": len(df),
-            "var_numbers": len(selected_vars),
-            "var_list": selected_vars,
+            "var_numbers": len(all_vars),
+            "var_list": all_vars,
             "hash": self.hash,
         }
         info_config = {
@@ -421,7 +422,7 @@ class DataInfoBase(ABC):
         }
         vars_detail = {}
 
-        for var_name in selected_vars:
+        for var_name in all_vars:
             var_series = df[var_name]
             series_obj = self._get_variable_info(var_series)
 
@@ -463,10 +464,10 @@ class DataInfoBase(ABC):
 
     def load_cached_summary(self) -> Dict[str, Any] | None:
         """
-        Load summary from cache if available and matching the requested variables.
+        Load summary from cache if available and hash matches.
 
         Returns:
-            Dict[str, Any] | None: Filtered summary from cache or None when unavailable.
+            Dict[str, Any] | None: Full summary from cache or None when unavailable.
         """
         if not self.cached_file.exists():
             return None
@@ -482,14 +483,7 @@ class DataInfoBase(ABC):
         if cached_hash != self.hash:
             return None
 
-        cached_var_list = cached_summary.get("overview", {}).get("var_list")
-        if not cached_var_list:
-            return None
-
-        if not set(self.vars_list).issubset(set(cached_var_list)):
-            return None
-
-        return self._filter_var(cached_summary)
+        return cached_summary
 
     # Private helper methods
     def _filter(self, summary: Dict[str, Any]) -> Dict[str, Any]:
