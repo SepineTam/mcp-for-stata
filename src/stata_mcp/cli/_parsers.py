@@ -77,6 +77,35 @@ def add_agent_parser(subparsers: argparse._SubParsersAction) -> argparse.Argumen
     return agent_parser
 
 
+def add_server_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
+    """Add the server subcommand parser."""
+    server_parser = subparsers.add_parser(
+        "server",
+        help="Start MCP server (default behavior when no subcommand is given)",
+    )
+    profile_group = server_parser.add_mutually_exclusive_group()
+    profile_group.add_argument(
+        "--core",
+        action="store_true",
+        dest="core_profile",
+        help="Register only core tools (stata_do, get_data_info, help)",
+    )
+    profile_group.add_argument(
+        "--all",
+        action="store_true",
+        dest="all_profile",
+        help="Register all tools (default)",
+    )
+    server_parser.add_argument(
+        "-t",
+        "--transport",
+        choices=["stdio", "sse", "http"],
+        default="stdio",
+        help="MCP server transport method (default: stdio)",
+    )
+    return server_parser
+
+
 def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     """Add the tool subcommand parser."""
     tool_parser = subparsers.add_parser("tool", help="Run local Stata tools through the API module")

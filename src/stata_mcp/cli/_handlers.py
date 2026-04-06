@@ -198,7 +198,10 @@ def handle_sandbox(args: Namespace) -> int:
 
 def handle_server(args: Namespace) -> None:
     """Handle the default behavior of starting the MCP server."""
-    from ..mcp_servers import stata_mcp as mcp
+    from ..mcp_servers import register_tools, stata_mcp as mcp
+
+    profile = "core" if getattr(args, "core_profile", False) else "all"
+    register_tools(mcp, profile=profile)
 
     transport = args.transport
     if transport == "http":
