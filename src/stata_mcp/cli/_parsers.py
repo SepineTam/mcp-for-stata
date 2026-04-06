@@ -58,7 +58,7 @@ def create_root_parser() -> argparse.ArgumentParser:
         "-u",
         "--usable",
         action="store_true",
-        help="Check whether Stata-MCP can be used on this computer",
+        help="(Deprecated) Check whether Stata-MCP can be used on this computer",
     )
     return parser
 
@@ -183,6 +183,33 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
         help="Output format for supported .log and .smcl files (default: core)",
     )
     return tool_parser
+
+
+def add_doctor_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
+    """Add the doctor subcommand parser."""
+    doctor_parser = subparsers.add_parser(
+        "doctor",
+        help="Run diagnostics to check stata-mcp health status",
+    )
+    doctor_parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Output report in JSON format",
+    )
+    doctor_parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show detailed information for each check",
+    )
+    doctor_parser.add_argument(
+        "--check",
+        action="append",
+        dest="checks",
+        default=None,
+        help="Run only specified check names (repeatable)",
+    )
+    return doctor_parser
 
 
 def add_config_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
