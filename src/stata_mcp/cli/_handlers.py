@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+import warnings
 from argparse import Namespace
 from importlib.metadata import PackageNotFoundError
 
@@ -33,9 +34,45 @@ def print_cli_result(result: object) -> None:
 
 def handle_usable() -> int:
     """Handle the --usable flag."""
-    from ..utils.usable import usable
+    warnings.simplefilter("default", DeprecationWarning)
+    warnings.warn(
+        "'--usable' is deprecated and will be removed in v1.16.0. "
+        "Use 'stata-mcp doctor' instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    from ..utils.doctor import format_report_text, run_doctor
 
-    return usable()
+    config = Config()
+    report = run_doctor(config)
+    print(format_report_text(report))
+    return 1 if report.has_failures else 0
+
+
+def handle_doctor(args: Namespace) -> int:
+    """Handle the doctor subcommand."""
+    from ..utils.doctor import AVAILABLE_CHECKS, format_report_text, run_doctor
+
+    if args.checks:
+        invalid_checks = sorted(set(args.checks) - set(AVAILABLE_CHECKS))
+        if invalid_checks:
+            print(
+                "Unknown check name(s): "
+                + ", ".join(invalid_checks)
+                + f". Available checks: {', '.join(AVAILABLE_CHECKS)}",
+                file=sys.stderr,
+            )
+            return 2
+
+    config = Config()
+    report = run_doctor(config, only_checks=args.checks)
+
+    if args.output_json:
+        print(report.to_json())
+    else:
+        print(format_report_text(report, verbose=args.verbose))
+
+    return 1 if report.has_failures else 0
 
 
 def handle_agent(args: Namespace) -> None:
