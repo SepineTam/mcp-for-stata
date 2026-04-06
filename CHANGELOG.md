@@ -2,6 +2,22 @@
 
 
 <details>
+<summary>Click to expand v1.14.3 details</summary>
+
+## [1.14.3] - 2026-04-06
+
+### Performance
+- **MCP Server**: Lazy import heavy dependencies (StataDo, StataHelp, GuardValidator, RAMMonitor, etc.) inside tool functions to reduce startup time
+- **Config**: Cache parsed TOML config with `@cached_property` and invalidate on write via `save_config()`
+
+### Changed
+- **Logging**: Use `config.IS_DEBUG` to control file log level instead of hardcoded `logging.DEBUG`
+- **Logging**: Remove dead `IS_DEBUG` variable assignment and redundant `ENABLE_WRITE_DOFILE` module-level constant
+- **Config**: Invalidate cached config after `save_config()` to ensure fresh reads
+
+</details>
+
+<details>
 <summary>Click to expand v1.14.2 details</summary>
 
 ## [1.14.2] - 2026-04-04
