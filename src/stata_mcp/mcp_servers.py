@@ -92,41 +92,45 @@ except Exception:
 # STATA_MCP.TOOLS: Stata Core Tools
 # =============================================================================
 
-if config.IS_UNIX:
-    _help_cls = None
+_help_cls = None
 
-    def _load_help_cls():
-        global _help_cls
 
-        if _help_cls is None:
-            from .stata import StataHelp
+def _load_help_cls():
+    """Lazy-load and cache the Stata help provider."""
+    global _help_cls
 
-            # Config help class
-            _help_cls = StataHelp(
-                stata_cli=config.STATA_CLI,
-                project_tmp_dir=config.STATA_MCP_FOLDER.TMP,
-                cache_dir=config.STATA_MCP_DIRECTORY / "help"
-            )
+    if not config.IS_UNIX:
+        raise RuntimeError("The help tool is only available on Unix-like platforms.")
 
-        return _help_cls
+    if _help_cls is None:
+        from .stata import StataHelp
 
-    def help(cmd: str) -> str:
-        """
-        Execute the Stata 'help' command and return its output.
+        _help_cls = StataHelp(
+            stata_cli=config.STATA_CLI,
+            project_tmp_dir=config.STATA_MCP_FOLDER.TMP,
+            cache_dir=config.STATA_MCP_DIRECTORY / "help"
+        )
 
-        Args:
-            cmd (str): The name of the Stata command to query, e.g., "regress" or "describe".
+    return _help_cls
 
-        Returns:
-            str: The help text returned by Stata for the specified command,
-                 or a message indicating that no help was found.
 
-        Notes:
-            If the returned content starts with 'Cached result for {cmd}', but the output shows the command
-            doesn't exist or you believe the cached content is incorrect, and you're certain the command exists,
-            set the environment variable STATA_MCP_CACHE_HELP to false. STATA_MCP_SAVE_HELP is same working method.
-        """
-        return _load_help_cls().help(cmd)
+def help(cmd: str) -> str:
+    """
+    Execute the Stata 'help' command and return its output.
+
+    Args:
+        cmd (str): The name of the Stata command to query, e.g., "regress" or "describe".
+
+    Returns:
+        str: The help text returned by Stata for the specified command,
+             or a message indicating that no help was found.
+
+    Notes:
+        If the returned content starts with 'Cached result for {cmd}', but the output shows the command
+        does not exist or you believe the cached content is incorrect, and you are certain the command exists,
+        set the environment variable STATA_MCP_CACHE_HELP to false. STATA_MCP_SAVE_HELP works similarly.
+    """
+    return _load_help_cls().help(cmd)
 
 
 def stata_do(
@@ -653,7 +657,7 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
     },
     "help": {
         "description": "Get help for a Stata command",
-        "func": help if config.IS_UNIX else None,
+        "func": help,
         "profiles": {"core", "all"},
         "unix_only": True,
     },

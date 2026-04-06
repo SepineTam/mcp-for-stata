@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from importlib.metadata import version
+from importlib.metadata import PackageNotFoundError, version
 from typing import Callable
 
 BoolConverter = Callable[[str], bool]
@@ -35,6 +35,11 @@ def add_bool_argument(
 
 def create_root_parser() -> argparse.ArgumentParser:
     """Create the root parser with global options."""
+    try:
+        package_version = version("stata-mcp")
+    except PackageNotFoundError:
+        package_version = "0.0.0"
+
     parser = argparse.ArgumentParser(
         prog="stata-mcp",
         description="Stata-MCP command line interface",
@@ -44,7 +49,7 @@ def create_root_parser() -> argparse.ArgumentParser:
         "-v",
         "--version",
         action="version",
-        version=f"%(prog)s {version('stata-mcp')}",
+        version=f"%(prog)s {package_version}",
         help="show version information",
     )
     parser.add_argument(
