@@ -64,7 +64,12 @@ def handle_doctor(args: Namespace) -> int:
             )
             return 2
 
-    config = Config()
+    try:
+        config = Config()
+    except Exception as error:
+        print(f"Failed to initialize configuration for doctor: {error}", file=sys.stderr)
+        return 1
+
     report = run_doctor(config, only_checks=args.checks)
 
     if args.output_json:

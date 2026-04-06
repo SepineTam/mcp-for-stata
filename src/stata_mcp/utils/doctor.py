@@ -1,5 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2026 - Present Sepine Tam, Inc. All Rights Reserved
+#
+# @Author : Sepine Tam (Song Tan)
+# @Email  : sepinetam@gmail.com
+# @File   : doctor.py
 
 """Diagnostic checks for stata-mcp health status."""
 
@@ -12,6 +18,7 @@ import shutil
 import subprocess
 import sys
 import time
+import tomllib
 from dataclasses import dataclass, field
 from enum import Enum
 from importlib.metadata import PackageNotFoundError, version as pkg_version
@@ -85,7 +92,7 @@ class DoctorReport:
 
     def to_json(self) -> str:
         """Convert report to pretty JSON."""
-        return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
+        return json.dumps(self.to_dict(), ensure_ascii=False, indent=2, default=str)
 
 
 def check_os() -> CheckResult:
@@ -351,7 +358,10 @@ def check_stata_execution(config: Any, stata_cli_path: str | None) -> CheckResul
                 )
             finally:
                 if temp_do_file.exists():
-                    temp_do_file.unlink()
+                    try:
+                        temp_do_file.unlink()
+                    except OSError:
+                        pass
             return_code = win_result.returncode
     except subprocess.TimeoutExpired:
         return CheckResult(
@@ -407,13 +417,29 @@ def check_config(config: Any) -> CheckResult:
                 "sections": sorted(config_data.keys()),
             },
         )
-    except Exception as error:
+    except tomllib.TOMLDecodeError as error:
+        return CheckResult(
+            name="config",
+            status=CheckStatus.FAIL,
+            message=f"invalid TOML: {error}",
+            details={"path": str(config_path), "exists": True},
+            hint="Fix invalid TOML syntax in config.toml.",
+        )
+    except OSError as error:
         return CheckResult(
             name="config",
             status=CheckStatus.FAIL,
             message=f"read error: {error}",
             details={"path": str(config_path), "exists": True},
-            hint="Fix file permissions or file content encoding.",
+            hint="Fix file permissions or file accessibility for config.toml.",
+        )
+    except Exception as error:
+        return CheckResult(
+            name="config",
+            status=CheckStatus.FAIL,
+            message=f"config parse error: {error}",
+            details={"path": str(config_path), "exists": True},
+            hint="Inspect config.toml content and remove unsupported values.",
         )
 
 
@@ -542,6 +568,14 @@ def check_pypi() -> CheckResult:
         with urlopen(request, timeout=5) as response:
             status_code = response.status
         elapsed = round(time.monotonic() - start_time, 2)
+        if status_code >= 400:
+            return CheckResult(
+                name="pypi",
+                status=CheckStatus.WARN,
+                message=f"reachable but returned HTTP {status_code} ({elapsed}s)",
+                details={"url": url, "status_code": status_code, "elapsed_s": elapsed},
+                hint="PyPI responded with an error status. `stata-mcp update` may fail.",
+            )
         return CheckResult(
             name="pypi",
             status=CheckStatus.PASS,
@@ -577,10 +611,22 @@ def _all_checks(config: Any) -> list[tuple[str, Any]]:
 
 def get_available_checks() -> list[str]:
     """Return available check names."""
-    return [name for name, _ in _all_checks(config=None)]
+    return list(AVAILABLE_CHECKS)
 
 
-AVAILABLE_CHECKS = get_available_checks()
+AVAILABLE_CHECKS = [
+    "os",
+    "python",
+    "uv",
+    "dependencies",
+    "stata_cli",
+    "stata_execution",
+    "config",
+    "working_dir",
+    "guard",
+    "monitor",
+    "pypi",
+]
 
 
 def run_doctor(config: Any, only_checks: list[str] | None = None) -> DoctorReport:
@@ -614,7 +660,7 @@ def run_doctor(config: Any, only_checks: list[str] | None = None) -> DoctorRepor
             result = CheckResult(
                 name=check_name,
                 status=CheckStatus.FAIL,
-                message=f"unexpected error: {error}",
+                message=f"unexpected error ({type(error).__name__}): {error}",
                 details={},
                 hint="Run with --verbose and inspect environment-specific configuration.",
             )
