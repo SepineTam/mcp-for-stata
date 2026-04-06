@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import json
+import logging
 import sys
 import warnings
 from argparse import Namespace
 from importlib.metadata import PackageNotFoundError
-
-from ..config import Config
 
 
 def print_cli_result(result: object) -> None:
@@ -34,6 +33,8 @@ def print_cli_result(result: object) -> None:
 
 def handle_usable() -> int:
     """Handle the --usable flag."""
+    from ..config import Config
+
     warnings.simplefilter("default", DeprecationWarning)
     warnings.warn(
         "'--usable' is deprecated and will be removed in v1.16.0. "
@@ -52,6 +53,7 @@ def handle_usable() -> int:
 def handle_doctor(args: Namespace) -> int:
     """Handle the doctor subcommand."""
     from ..utils.doctor import AVAILABLE_CHECKS, format_report_text, run_doctor
+    from ..config import Config
 
     if args.checks:
         invalid_checks = sorted(set(args.checks) - set(AVAILABLE_CHECKS))
@@ -139,6 +141,8 @@ def handle_tool(args: Namespace) -> int:
 
 def handle_config(args: Namespace) -> int:
     """Handle the config subcommand."""
+    from ..config import Config
+
     cfg = Config()
 
     if args.config_target is None:
@@ -200,7 +204,14 @@ def handle_server(args: Namespace) -> None:
     """Handle the default behavior of starting the MCP server."""
     from ..mcp_servers import register_tools, stata_mcp as mcp
 
-    profile = "core" if getattr(args, "core_profile", False) else "all"
+    if getattr(args, "core_profile", False):
+        profile = "core"
+    elif getattr(args, "all_profile", False):
+        profile = "all"
+    else:
+        profile = "all"
+
+    logging.info("Starting server with tool profile: %s", profile)
     register_tools(mcp, profile=profile)
 
     transport = args.transport

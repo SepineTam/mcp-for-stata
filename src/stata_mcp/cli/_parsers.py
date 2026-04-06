@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import warnings
 from importlib.metadata import PackageNotFoundError, version
 from typing import Callable
 
@@ -39,6 +40,11 @@ def create_root_parser() -> argparse.ArgumentParser:
         package_version = version("stata-mcp")
     except PackageNotFoundError:
         package_version = "0.0.0"
+        warnings.warn(
+            "Package metadata for 'stata-mcp' is unavailable. Falling back to version '0.0.0'.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
 
     parser = argparse.ArgumentParser(
         prog="stata-mcp",

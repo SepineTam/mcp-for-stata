@@ -707,6 +707,7 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
 
         tool_func: ToolFunc | None = meta.get("func")
         if tool_func is None:
+            logging.warning("Skipping tool '%s' because its registry entry has no callable func.", name)
             continue
         server.tool(name=name, description=meta["description"])(tool_func)
 
