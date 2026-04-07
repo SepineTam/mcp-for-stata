@@ -7,6 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : _base.py
 
+import copy
 import hashlib
 import json
 import logging
@@ -165,6 +166,7 @@ class DataInfoBase(ABC):
         string_keep_number: int = None,
         decimal_places: int = None,
         hash_length: int = None,
+        head: int = 5,
         **kwargs
     ):
         if isinstance(data_path, str):
@@ -193,6 +195,7 @@ class DataInfoBase(ABC):
         self.string_keep_number = string_keep_number or int(os.getenv("STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", 10))
         self.decimal_places = decimal_places or int(os.getenv("STATA_MCP_DATA_INFO_DECIMAL_PLACES", 3))
         self.HASH_LENGTH = hash_length or int(os.getenv("STATA_MCP_DATA_INFO_HASH_LENGTH", "12"))
+        self._head = head
 
         self.kwargs = kwargs  # Store additional keyword arguments for subclasses to use
 
@@ -259,7 +262,15 @@ class DataInfoBase(ABC):
     def info(self) -> Dict[str, Any]:
         """Get comprehensive information about the data."""
         summary = self.summary()
-        return self._filter(summary)
+        result = self._filter(self._filter_var(copy.deepcopy(summary)))
+        head_data = self._get_head()
+        if head_data is not None:
+            result["head"] = head_data
+            requested = abs(self._head)
+            actual = len(head_data)
+            if actual < requested:
+                result["head_warning"] = f"Requested {requested} rows but data has only {actual}"
+        return result
 
     @property
     def data_source(self) -> str:
@@ -402,16 +413,16 @@ class DataInfoBase(ABC):
         if self.is_cache:
             cached_summary = self.load_cached_summary()
             if cached_summary:
-                return self._filter(cached_summary)
+                return cached_summary
         df = self.df
-        selected_vars = self.vars_list
+        all_vars = list(df.columns)
 
-        # Basic information
+        # Basic information (full overview with all vars)
         overview = {
             "source": self.data_source,
             "obs": len(df),
-            "var_numbers": len(selected_vars),
-            "var_list": selected_vars,
+            "var_numbers": len(all_vars),
+            "var_list": all_vars,
             "hash": self.hash,
         }
         info_config = {
@@ -421,7 +432,7 @@ class DataInfoBase(ABC):
         }
         vars_detail = {}
 
-        for var_name in selected_vars:
+        for var_name in all_vars:
             var_series = df[var_name]
             series_obj = self._get_variable_info(var_series)
 
@@ -463,10 +474,10 @@ class DataInfoBase(ABC):
 
     def load_cached_summary(self) -> Dict[str, Any] | None:
         """
-        Load summary from cache if available and matching the requested variables.
+        Load summary from cache if available and hash matches.
 
         Returns:
-            Dict[str, Any] | None: Filtered summary from cache or None when unavailable.
+            Dict[str, Any] | None: Full summary from cache or None when unavailable.
         """
         if not self.cached_file.exists():
             return None
@@ -482,14 +493,7 @@ class DataInfoBase(ABC):
         if cached_hash != self.hash:
             return None
 
-        cached_var_list = cached_summary.get("overview", {}).get("var_list")
-        if not cached_var_list:
-            return None
-
-        if not set(self.vars_list).issubset(set(cached_var_list)):
-            return None
-
-        return self._filter_var(cached_summary)
+        return cached_summary
 
     # Private helper methods
     def _filter(self, summary: Dict[str, Any]) -> Dict[str, Any]:
@@ -588,6 +592,15 @@ class DataInfoBase(ABC):
             return StringSeries(data=non_na_series, max_display=self.string_keep_number)
         else:  # float type
             return NumericSeries(data=non_na_series, max_decimal_places=self.decimal_places)
+
+    def _get_head(self) -> List[Dict[str, Any]] | None:
+        """Get preview rows from the DataFrame, filtered by vars_list."""
+        if self._head == 0:
+            return None
+        df = self.df[self.vars_list]
+        if self._head > 0:
+            return df.head(self._head).to_dict(orient="records")
+        return df.tail(abs(self._head)).to_dict(orient="records")
 
     def _get_var_extra_info(self, var_name: str) -> Dict[str, Any]:
         """

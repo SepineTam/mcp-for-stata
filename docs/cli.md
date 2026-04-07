@@ -10,11 +10,13 @@ Verify your installation:
 stata-mcp --version
 ```
 
-Check system compatibility:
+Run diagnostics to check system health:
 
 ```bash
-stata-mcp --usable
+stata-mcp doctor
 ```
+
+> **Note:** `--usable` is deprecated since v1.14.3 and will be removed in v1.16.0. Use `stata-mcp doctor` instead.
 
 ## Commands
 
@@ -32,6 +34,28 @@ stata-mcp -t sse
 stata-mcp -t http
 ```
 
+#### Server Subcommand
+
+Use the `server` subcommand to control which MCP tools are registered:
+
+```bash
+# All tools, stdio transport (same as bare command)
+stata-mcp server
+
+# Core tools only (stata_do, get_data_info, help)
+stata-mcp server --core
+
+# All tools with HTTP transport
+stata-mcp server --all -t http
+
+# Core tools with SSE transport
+stata-mcp server --core -t sse
+```
+
+**Tool Profiles:**
+- `--all` - Register all available tools (default)
+- `--core` - Register only core tools: `stata_do`, `get_data_info`, `help`
+
 **Transport Options:**
 - `stdio` - Standard input/output (default)
 - `sse` - Server-Sent Events
@@ -48,6 +72,48 @@ stata-mcp agent run
 # Start agent in specific directory
 stata-mcp agent run --work-dir /path/to/project
 ```
+
+### Local Tool Commands
+
+### Doctor Diagnostics
+
+Run health checks to diagnose potential issues:
+
+```bash
+# Run all checks
+stata-mcp doctor
+
+# Show detailed information for each check
+stata-mcp doctor --verbose
+
+# Output in JSON format
+stata-mcp doctor --json
+
+# Run only specific checks (repeatable)
+stata-mcp doctor --check stata --check python
+```
+
+### Update
+
+Update stata-mcp to the latest version:
+
+```bash
+# Auto-detect install method and update
+stata-mcp update
+
+# Check if a newer version is available
+stata-mcp update --check
+
+# Show detected method and available update without executing
+stata-mcp update --dry-run
+
+# Force specific update method
+stata-mcp update --method pip       # pip install
+stata-mcp update --method uv-tool   # uv tool upgrade
+stata-mcp update --method homebrew  # brew upgrade
+```
+
+**Update Methods:** `auto` (default), `pip`, `uv-tool`, `homebrew`
 
 ### Local Tool Commands
 
@@ -103,17 +169,27 @@ stata-mcp install
 # Install to specific client
 stata-mcp install -c claude    # Claude Desktop
 stata-mcp install -c cc        # Claude Code
+stata-mcp install -c gemini    # Gemini CLI
 stata-mcp install -c cursor    # Cursor
 stata-mcp install -c cline     # Cline
 stata-mcp install -c codex     # Codex
+stata-mcp install -c opencode  # OpenCode
+
+# Install to all supported clients
+stata-mcp install --all
+
+# Install to custom config file
+stata-mcp install --json-file /path/to/config.json
 ```
 
 **Supported Clients:**
 - `claude` - Claude Desktop
 - `cc` - Claude Code
+- `gemini` - Gemini CLI
 - `cursor` - Cursor Editor
 - `cline` - Cline (VSCode extension)
 - `codex` - Codex
+- `opencode` - OpenCode
 
 ### Docker-based Installation (sandbox-install)
 
@@ -145,13 +221,21 @@ uvx stata-mcp sandbox-install \
 
 ## Options
 
+### Server Options
+
+| Option | Description |
+|--------|-------------|
+| `--core` | Register only core tools (stata_do, get_data_info, help) |
+| `--all` | Register all tools (default) |
+| `--transport` | `-t` | MCP transport method (stdio/sse/http) |
+
 ### Global Options
 
 | Option | Short | Description |
 |--------|-------|-------------|
 | `--version` | `-v` | Show version information |
 | `--help` | `-h` | Show help message |
-| `--usable` | `-u` | Check system compatibility |
+| `--usable` | `-u` | *(Deprecated)* Check system compatibility, use `stata-mcp doctor` instead |
 | `--transport` | `-t` | MCP transport method (stdio/sse/http) |
 
 ### Agent Options
@@ -172,6 +256,24 @@ uvx stata-mcp sandbox-install \
 | Option | Short | Description |
 |--------|-------|-------------|
 | `--client` | `-c` | Target client (default: claude) |
+| `--all` | `-a` | Install to all supported clients |
+| `--json-file` | | Custom target client config file path |
+
+### Doctor Options
+
+| Option | Description |
+|--------|-------------|
+| `--verbose` | Show detailed information for each check |
+| `--json` | Output report in JSON format |
+| `--check` | Run only specified check names (repeatable) |
+
+### Update Options
+
+| Option | Description |
+|--------|-------------|
+| `--method` | Force specific update method (auto/pip/uv-tool/homebrew) |
+| `--dry-run` | Show detected method without updating |
+| `--check` | Only check if a newer version is available |
 
 ### Sandbox-Install Options
 
@@ -192,7 +294,7 @@ uvx stata-mcp sandbox-install \
 
 ```bash
 # Check if Stata-MCP can run on your system
-stata-mcp --usable
+stata-mcp doctor
 
 # Start MCP server for Claude Desktop
 stata-mcp
@@ -204,8 +306,8 @@ stata-mcp -t sse
 ### Development Workflow
 
 ```bash
-# 1. Check system compatibility
-stata-mcp --usable
+# 1. Run diagnostics
+stata-mcp doctor
 
 # 2. Install to Claude Desktop
 stata-mcp install
@@ -222,8 +324,8 @@ If you prefer not to install Stata-MCP globally, you can use `uvx`:
 # Check version
 uvx stata-mcp --version
 
-# Check compatibility
-uvx stata-mcp --usable
+# Run diagnostics
+uvx stata-mcp doctor
 
 # Run agent
 uvx stata-mcp agent run
@@ -258,10 +360,10 @@ See the [Configuration](configuration.md) document for the complete list.
 Ensure Stata is installed and accessible:
 
 ```bash
-stata-mcp --usable
+stata-mcp doctor
 ```
 
-This will check if Stata can be found on your system.
+This will run diagnostics and check if Stata can be found on your system.
 
 ### Permission Errors
 

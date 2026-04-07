@@ -2,6 +2,57 @@
 
 
 <details>
+<summary>Click to expand v1.15.0 details</summary>
+
+## [1.15.0] - 2026-04-07
+
+### Performance
+- **MCP Server**: Refactor to tool registry pattern with lazy imports for faster MCP server startup (🚀 🐰 💨 Yes, I have seen you say it is slow 👀)
+  - New `_TOOL_REGISTRY` dict maps tool names to metadata (description, func, profiles, unix_only, deprecated)
+  - `register_tools()` function registers tools based on selected profile (`core` or `all`)
+  - `core` profile registers: stata_do, get_data_info, help
+  - `all` profile registers all tools including read_log, ado_package_install, write_dofile
+  - Tools no longer registered at import time; `register_tools()` must be called explicitly
+- **MCP Server**: Improved tool descriptions for better LLM tool selection accuracy
+- **Package Init**: Lazy `__getattr__` access to `stata_mcp` server and `main` entry point
+  - Avoids eager import of heavy MCP server dependencies at package import time
+  - Graceful `PackageNotFoundError` fallback for development environments
+
+### Added
+- **Data Info**: `head` parameter in `get_data_info` for data preview rows
+  - Positive values return first N rows, negative values return last |N| rows, 0 disables
+  - `head_warning` added when requested rows exceed actual data size
+- **Data Info**: Cache full variables/dimensions in summary, filter on demand
+  - Summary now computes all variables regardless of `vars_list`; filtering applied in `info` property
+  - Cache lookup simplified to hash-only comparison (no longer checks var_list subset)
+- **Read Log**: `lines` parameter for content trimming
+  - Positive values return first N items, negative values return last |N| items, 0 returns all
+  - `dict` format trims by entry count instead of text lines for consistent behavior
+- **CLI**: `stata-mcp server` subcommand with `--core` / `--all` profile flags
+  - Supports `-t/--transport` option for stdio/sse/http
+- **CLI**: `stata-mcp doctor` diagnostics subcommand
+  - Comprehensive health checks for Stata CLI, Python version, OS, config, dependencies
+  - Supports `--json`, `--verbose`, `--check` options for selective checks
+  - Replaces deprecated `--usable` flag
+- **CLI**: `stata-mcp update` subcommand for one-command package updates
+  - Auto-detects install method (pip, uv-tool, uvx, homebrew, editable)
+  - Supports `--check` for version comparison, `--dry-run` for preview, `--method` for override
+- **Tests**: Added `test_server_parser.py` (4 cases) and `test_server_registration.py` (7 cases)
+
+### Changed
+- **MCP Server**: Help function moved out of `if config.IS_UNIX:` conditional block with lazy-load guard
+- **MCP Server**: Help resource registration moved into `register_tools()` for consistency
+- **CLI**: `--usable` flag now deprecated with `DeprecationWarning` (will be removed in v1.16.0)
+- **CLI**: `__init__.py` modules use lazy imports to avoid heavy dependency loading at startup
+- **Data Info**: `load_cached_summary()` returns full summary (no longer applies `_filter_var`)
+
+### Documentation
+- **Docs**: Update CLI docs (cli.md, cli.zh.md), CLAUDE.md for server profiles, doctor, update commands
+- **Docs**: Update tool descriptions in `_TOOL_REGISTRY` for all MCP tools
+
+</details>
+
+<details>
 <summary>Click to expand v1.14.3 details</summary>
 
 ## [1.14.3] - 2026-04-06

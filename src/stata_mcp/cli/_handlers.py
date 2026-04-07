@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import json
+import logging
 import sys
+import warnings
 from argparse import Namespace
-
-from ..config import Config
+from importlib.metadata import PackageNotFoundError
 
 
 def print_cli_result(result: object) -> None:
@@ -32,9 +33,53 @@ def print_cli_result(result: object) -> None:
 
 def handle_usable() -> int:
     """Handle the --usable flag."""
-    from ..utils.usable import usable
+    from ..config import Config
 
-    return usable()
+    warnings.simplefilter("default", DeprecationWarning)
+    warnings.warn(
+        "'--usable' is deprecated and will be removed in v1.16.0. "
+        "Use 'stata-mcp doctor' instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    from ..utils.doctor import format_report_text, run_doctor
+
+    config = Config()
+    report = run_doctor(config)
+    print(format_report_text(report))
+    return 1 if report.has_failures else 0
+
+
+def handle_doctor(args: Namespace) -> int:
+    """Handle the doctor subcommand."""
+    from ..config import Config
+    from ..utils.doctor import AVAILABLE_CHECKS, format_report_text, run_doctor
+
+    if args.checks:
+        invalid_checks = sorted(set(args.checks) - set(AVAILABLE_CHECKS))
+        if invalid_checks:
+            print(
+                "Unknown check name(s): "
+                + ", ".join(invalid_checks)
+                + f". Available checks: {', '.join(AVAILABLE_CHECKS)}",
+                file=sys.stderr,
+            )
+            return 2
+
+    try:
+        config = Config()
+    except Exception as error:
+        print(f"Failed to initialize configuration for doctor: {error}", file=sys.stderr)
+        return 1
+
+    report = run_doctor(config, only_checks=args.checks)
+
+    if args.output_json:
+        print(report.to_json())
+    else:
+        print(format_report_text(report, verbose=args.verbose))
+
+    return 1 if report.has_failures else 0
 
 
 def handle_agent(args: Namespace) -> None:
@@ -96,6 +141,8 @@ def handle_tool(args: Namespace) -> int:
 
 def handle_config(args: Namespace) -> int:
     """Handle the config subcommand."""
+    from ..config import Config
+
     cfg = Config()
 
     if args.config_target is None:
@@ -155,9 +202,97 @@ def handle_sandbox(args: Namespace) -> int:
 
 def handle_server(args: Namespace) -> None:
     """Handle the default behavior of starting the MCP server."""
+    from ..mcp_servers import register_tools
     from ..mcp_servers import stata_mcp as mcp
+
+    if getattr(args, "core_profile", False):
+        profile = "core"
+    elif getattr(args, "all_profile", False):
+        profile = "all"
+    else:
+        profile = "all"
+
+    logging.info("Starting server with tool profile: %s", profile)
+    register_tools(mcp, profile=profile)
 
     transport = args.transport
     if transport == "http":
         transport = "streamable-http"
     mcp.run(transport=transport)
+
+
+def handle_update(args: Namespace) -> int:
+    """Handle the update subcommand."""
+    from ..utils.update import (
+        InstallMethod,
+        build_update_command,
+        detect_install_method,
+        execute_update,
+        get_current_version,
+        get_latest_version,
+    )
+
+    try:
+        if args.check:
+            try:
+                current = get_current_version()
+            except PackageNotFoundError:
+                print("stata-mcp is not installed in this Python environment.")
+                return 1
+
+            latest, latest_error = get_latest_version()
+            if latest is None:
+                print(latest_error or "Failed to check for updates.")
+                return 1
+
+            print(f"Current: v{current}")
+            print(f"Latest:  v{latest}")
+            if current == latest:
+                print("Up to date")
+            else:
+                print(f"Update available: v{current} → v{latest}")
+            return 0
+
+        selected_method = None
+        if args.method != "auto":
+            selected_method = InstallMethod(args.method)
+
+        if args.dry_run:
+            try:
+                current = get_current_version()
+            except PackageNotFoundError:
+                print("stata-mcp is not installed in this Python environment.")
+                return 1
+
+            latest, latest_error = get_latest_version()
+            detected_method = selected_method or detect_install_method()
+
+            print(f"Current version: {current}")
+            if latest is None:
+                print("Latest version:  unavailable")
+                print(f"Latest check:    {latest_error or 'Unknown error'}")
+            else:
+                print(f"Latest version:  {latest}")
+            print(f"Install method:  {detected_method.value}")
+
+            update_command = build_update_command(detected_method)
+            if update_command:
+                print(f"Update command:  {' '.join(update_command)}")
+            elif detected_method == InstallMethod.UVX:
+                print("Note: uvx always uses latest, no update needed")
+            elif detected_method == InstallMethod.EDITABLE:
+                print("Note: editable install, use git pull + pip install -e .")
+            elif detected_method == InstallMethod.UNKNOWN:
+                print("Note: unknown install method; auto update is blocked for safety.")
+
+            return 0
+
+        success, message = execute_update(selected_method)
+        print(message)
+        return 0 if success else 1
+    except ImportError as error:
+        print(f"Failed to load update dependencies: {error}", file=sys.stderr)
+        return 1
+    except Exception as error:
+        print(error, file=sys.stderr)
+        return 1

@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import argparse
-from importlib.metadata import version
+import warnings
+from importlib.metadata import PackageNotFoundError, version
 from typing import Callable
 
 BoolConverter = Callable[[str], bool]
@@ -35,6 +36,16 @@ def add_bool_argument(
 
 def create_root_parser() -> argparse.ArgumentParser:
     """Create the root parser with global options."""
+    try:
+        package_version = version("stata-mcp")
+    except PackageNotFoundError:
+        package_version = "0.0.0"
+        warnings.warn(
+            "Package metadata for 'stata-mcp' is unavailable. Falling back to version '0.0.0'.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
     parser = argparse.ArgumentParser(
         prog="stata-mcp",
         description="Stata-MCP command line interface",
@@ -44,7 +55,7 @@ def create_root_parser() -> argparse.ArgumentParser:
         "-v",
         "--version",
         action="version",
-        version=f"%(prog)s {version('stata-mcp')}",
+        version=f"%(prog)s {package_version}",
         help="show version information",
     )
     parser.add_argument(
@@ -58,7 +69,7 @@ def create_root_parser() -> argparse.ArgumentParser:
         "-u",
         "--usable",
         action="store_true",
-        help="Check whether Stata-MCP can be used on this computer",
+        help="(Deprecated) Check whether Stata-MCP can be used on this computer",
     )
     return parser
 
@@ -75,6 +86,35 @@ def add_agent_parser(subparsers: argparse._SubParsersAction) -> argparse.Argumen
         help="Working directory for agent (default: current directory)",
     )
     return agent_parser
+
+
+def add_server_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
+    """Add the server subcommand parser."""
+    server_parser = subparsers.add_parser(
+        "server",
+        help="Start MCP server (default behavior when no subcommand is given)",
+    )
+    profile_group = server_parser.add_mutually_exclusive_group()
+    profile_group.add_argument(
+        "--core",
+        action="store_true",
+        dest="core_profile",
+        help="Register only core tools (stata_do, get_data_info, help)",
+    )
+    profile_group.add_argument(
+        "--all",
+        action="store_true",
+        dest="all_profile",
+        help="Register all tools (default)",
+    )
+    server_parser.add_argument(
+        "-t",
+        "--transport",
+        choices=["stdio", "sse", "http"],
+        default="stdio",
+        help="MCP server transport method (default: stdio)",
+    )
+    return server_parser
 
 
 def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
@@ -185,6 +225,33 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
     return tool_parser
 
 
+def add_doctor_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
+    """Add the doctor subcommand parser."""
+    doctor_parser = subparsers.add_parser(
+        "doctor",
+        help="Run diagnostics to check stata-mcp health status",
+    )
+    doctor_parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Output report in JSON format",
+    )
+    doctor_parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show detailed information for each check",
+    )
+    doctor_parser.add_argument(
+        "--check",
+        action="append",
+        dest="checks",
+        default=None,
+        help="Run only specified check names (repeatable)",
+    )
+    return doctor_parser
+
+
 def add_config_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     """Add the config subcommand parser."""
     config_parser = subparsers.add_parser("config", help="Show and manage Stata-MCP configuration")
@@ -293,3 +360,25 @@ def add_sandbox_parser(subparsers: argparse._SubParsersAction) -> argparse.Argum
         help="Docker image registry source: github (ghcr.io) or docker (DockerHub) (default: github)",
     )
     return sandbox_parser
+
+
+def add_update_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
+    """Add the update subcommand parser."""
+    update_parser = subparsers.add_parser("update", help="Update stata-mcp to latest version")
+    update_parser.add_argument(
+        "--method",
+        choices=["auto", "pip", "uv-tool", "homebrew"],
+        default="auto",
+        help="Force specific update method (default: auto-detect)",
+    )
+    update_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show detected method and available update without executing",
+    )
+    update_parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Only check if a newer version is available",
+    )
+    return update_parser

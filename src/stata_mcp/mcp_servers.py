@@ -12,7 +12,7 @@ import logging
 import logging.handlers
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Literal
+from typing import Any, Callable, Dict, List, Literal
 
 from mcp.server.fastmcp import FastMCP, Icon
 
@@ -92,52 +92,47 @@ except Exception:
 # STATA_MCP.TOOLS: Stata Core Tools
 # =============================================================================
 
-if config.IS_UNIX:
-    _help_cls = None
-
-    def _load_help_cls():
-        global _help_cls
-
-        if _help_cls is None:
-            from .stata import StataHelp
-
-            # Config help class
-            _help_cls = StataHelp(
-                stata_cli=config.STATA_CLI,
-                project_tmp_dir=config.STATA_MCP_FOLDER.TMP,
-                cache_dir=config.STATA_MCP_DIRECTORY / "help"
-            )
-
-        return _help_cls
-
-    # As AI-Client does not support Resource at a board yet, we still keep the resource
-
-    @stata_mcp.resource(
-        uri="help://stata/{cmd}",
-        name="help",
-        description="Get help for a Stata command"
-    )
-    @stata_mcp.tool(name="help", description="Get help for a Stata command")
-    def help(cmd: str) -> str:
-        """
-        Execute the Stata 'help' command and return its output.
-
-        Args:
-            cmd (str): The name of the Stata command to query, e.g., "regress" or "describe".
-
-        Returns:
-            str: The help text returned by Stata for the specified command,
-                 or a message indicating that no help was found.
-
-        Notes:
-            If the returned content starts with 'Cached result for {cmd}', but the output shows the command
-            doesn't exist or you believe the cached content is incorrect, and you're certain the command exists,
-            set the environment variable STATA_MCP_CACHE_HELP to false. STATA_MCP_SAVE_HELP is same working method.
-        """
-        return _load_help_cls().help(cmd)
+_help_cls = None
 
 
-@stata_mcp.tool(name="stata_do", description="Run a stata-code via Stata")
+def _load_help_cls():
+    """Lazy-load and cache the Stata help provider."""
+    global _help_cls
+
+    if not config.IS_UNIX:
+        raise RuntimeError("The help tool is only available on Unix-like platforms.")
+
+    if _help_cls is None:
+        from .stata import StataHelp
+
+        _help_cls = StataHelp(
+            stata_cli=config.STATA_CLI,
+            project_tmp_dir=config.STATA_MCP_FOLDER.TMP,
+            cache_dir=config.STATA_MCP_DIRECTORY / "help"
+        )
+
+    return _help_cls
+
+
+def help(cmd: str) -> str:
+    """
+    Retrieve documentation and usage information for a Stata command.
+
+    Args:
+        cmd (str): The name of the Stata command to query, e.g., "regress" or "describe".
+
+    Returns:
+        str: The help text returned by Stata for the specified command,
+             or a message indicating that no help was found.
+
+    Notes:
+        If the returned content starts with 'Cached result for {cmd}', but the output shows the command
+        does not exist or you believe the cached content is incorrect, and you are certain the command exists,
+        set the environment variable STATA_MCP_CACHE_HELP to false. STATA_MCP_SAVE_HELP works similarly.
+    """
+    return _load_help_cls().help(cmd)
+
+
 def stata_do(
         dofile_path: str,
         log_file_name: str = None,
@@ -146,7 +141,7 @@ def stata_do(
         enable_smcl: bool = True
 ) -> Dict[str, Any]:
     """
-    Execute a Stata do-file and return the log file path with optional log content.
+    Execute a Stata do-file and return the execution log.
 
     This function runs a Stata do-file using the configured Stata executable and
     generates a log file. It supports cross-platform execution (macOS, Windows, Linux).
@@ -302,7 +297,6 @@ def stata_do(
     return result
 
 
-@stata_mcp.tool(name="ado_package_install", description="Install ado package from ssc or github")
 def ado_package_install(
         package: str,
         source: str = "ssc",
@@ -310,7 +304,7 @@ def ado_package_install(
         package_source_from: str = None
 ) -> str:
     """
-    Install a package from SSC or GitHub
+    Install a Stata ado package from SSC, GitHub, or net sources.
 
     Args:
         package (str): The name of the package to be installed.
@@ -425,17 +419,14 @@ def ado_package_install(
 # STATA_MCP.TOOLS: Data Operation Tools
 # =============================================================================
 
-@stata_mcp.tool(
-    name="get_data_info",
-    description="Get descriptive statistics for the data file"
-)
 def get_data_info(
         data_path: str,
         vars_list: List[str] | None = None,
-        encoding: str = "utf-8"
+        encoding: str = "utf-8",
+        head: int = 5,
 ) -> str:
     """
-    Get descriptive statistics for the data file.
+    Get descriptive statistics and a data preview for a data file (dta, csv, xlsx).
 
     Args:
         data_path (str): the data file's absolutely path.
@@ -520,7 +511,7 @@ def get_data_info(
         logging.error(f"Unsupported file extension: {data_extension} for data file: {data_path}")
         return f"Unsupported file extension now: {data_extension}"
 
-    data_info = data_info_cls(data_path, vars_list, encoding=encoding, cache_dir=config.STATA_MCP_FOLDER.TMP)
+    data_info = data_info_cls(data_path, vars_list, encoding=encoding, cache_dir=config.STATA_MCP_FOLDER.TMP, head=head)
     try:
         info = data_info.info
         if data_info.is_cache:
@@ -538,19 +529,16 @@ def get_data_info(
 # STATA_MCP.TOOLS: File Management Tools
 # =============================================================================
 
-@stata_mcp.tool(
-    name="read_log",
-    description="Reads a log file and returns its content as a string"
-)
 def read_log(
         file_path: str,
         encoding: str = "utf-8",
         is_beta: bool = False,
         *,
         output_format: Literal["full", "core", "dict"] = "dict",
+        lines: int = 0,
 ) -> str:
     """
-    Reads a log file and returns its content as a string.
+    Read a Stata log file (.log or .smcl) and return its content.
 
     Args:
         file_path (str): The full path to the file to be read.
@@ -563,6 +551,10 @@ def read_log(
             - full: all the original content;
             - core: remove useless information, saving content;
             - dict (default): structure format to quickly match command and result.
+        lines (int): Content trimming control for output.
+            - 0 (default): return all content.
+            - > 0: return first N items (lines for full/core, entries for dict).
+            - < 0: return last |N| items (lines for full/core, entries for dict).
 
     Returns:
         str: The content of the file as a string.
@@ -605,20 +597,36 @@ def read_log(
         if output_format not in ["full", "core", "dict"]:
             raise ValueError(f"Invalid output_format: {output_format}")
         elif output_format == "full":
-            return loger.read_plain_text()
+            return _trim_lines(loger.read_plain_text(), lines)
         elif output_format == "core":
-            return loger.read_without_framework()
+            return _trim_lines(loger.read_without_framework(), lines)
         elif output_format == "dict":
-            return str(loger.read_as_dict())
+            dict_data = loger.read_as_dict()
+            if lines == 0:
+                return str(dict_data)
+            if lines > 0:
+                return str(dict_data[:lines])
+            return str(dict_data[-abs(lines):])
     # if not beta version and Windows user using read file text directly.
     try:
         with open(path, "r", encoding=encoding) as file:
             log_content = file.read()
         logging.info(f"Successfully read file: {file_path}")
-        return log_content
+        return _trim_lines(log_content, lines)
     except IOError as e:
         logging.error(f"Failed to read file {file_path}: {str(e)}")
         raise IOError(f"An error occurred while reading the file: {e}")
+
+
+def _trim_lines(content: str, lines: int) -> str:
+    """Trim content to requested line range."""
+    if lines == 0:
+        return content
+
+    all_lines = content.splitlines()
+    if lines > 0:
+        return "\n".join(all_lines[:lines])
+    return "\n".join(all_lines[-abs(lines):])
 
 
 def write_dofile(content: str, encoding: str = None) -> str:
@@ -656,16 +664,104 @@ def write_dofile(content: str, encoding: str = None) -> str:
     return file_path.as_posix()
 
 
-if config.ENABLE_WRITE_DOFILE:
-    # When stata-mcp was first developed, agent capabilities were still immature.
-    # However, modern agents like Claude Code, Codex, and Cursor now have native
-    # file modification capabilities with better implementations. Additionally,
-    # with Claude Code's LSP support, write_dofile has become obsolete.
-    # This tool will be completely removed in a few versions.
-    stata_mcp.tool(
-        name="write_dofile",
-        description="write the stata-code to dofile"
-    )(write_dofile)
+ToolFunc = Callable[..., Any]
+
+_TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
+    "stata_do": {
+        "description": (
+            "Execute a Stata do-file and return the execution log. "
+            "Accepts a do-file path, runs it via the configured Stata executable, "
+            "and optionally returns the log content."
+        ),
+        "func": stata_do,
+        "profiles": {"core", "all"},
+    },
+    "get_data_info": {
+        "description": (
+            "Get descriptive statistics and a data preview for a data file "
+            "(dta, csv, xlsx). Returns overview, variable details, "
+            "and optional head rows filtered by requested variables."
+        ),
+        "func": get_data_info,
+        "profiles": {"core", "all"},
+    },
+    "help": {
+        "description": (
+            "Retrieve documentation and usage information for a Stata command. "
+            "Use when you need to understand a command's syntax, options, "
+            "or troubleshoot errors before running it."
+        ),
+        "func": help,
+        "profiles": {"core", "all"},
+        "unix_only": True,
+    },
+    "read_log": {
+        "description": (
+            "Read a Stata log file (.log or .smcl) and return its content. "
+            "Supports full, core, and dict output formats. "
+            "Use `lines` to return only the first/last N lines."
+        ),
+        "func": read_log,
+        "profiles": {"all"},
+    },
+    "ado_package_install": {
+        "description": (
+            "Install a Stata ado package from SSC, GitHub, or net sources. "
+            "Use before running commands that require third-party packages."
+        ),
+        "func": ado_package_install,
+        "profiles": {"all"},
+    },
+    "write_dofile": {
+        "description": "write the stata-code to dofile",
+        "func": write_dofile,
+        "profiles": {"all"},
+        "deprecated": True,
+    },
+}
+
+_registered_profile: str | None = None
+
+
+def register_tools(server: FastMCP, profile: str = "all") -> None:
+    """Register tools and resources based on a selected profile."""
+    global _registered_profile
+
+    if profile not in {"core", "all"}:
+        raise ValueError(f"Unsupported profile: {profile}")
+
+    if _registered_profile == profile:
+        return
+    if _registered_profile is not None and _registered_profile != profile:
+        raise RuntimeError(
+            "Tools are already registered with a different profile. "
+            "Create a new process to switch profile."
+        )
+
+    for name, meta in _TOOL_REGISTRY.items():
+        if meta.get("unix_only") and not config.IS_UNIX:
+            continue
+        if meta.get("deprecated") and not config.ENABLE_WRITE_DOFILE:
+            continue
+        if profile not in meta["profiles"]:
+            continue
+
+        tool_func: ToolFunc | None = meta.get("func")
+        if tool_func is None:
+            logging.warning("Skipping tool '%s' because its registry entry has no callable func.", name)
+            continue
+        server.tool(name=name, description=meta["description"])(tool_func)
+
+    # Keep help as both tool and resource on Unix platforms.
+    if config.IS_UNIX and profile in {"core", "all"}:
+        server.resource(
+            uri="help://stata/{cmd}",
+            name="help",
+            description="Get help for a Stata command"
+        )(help)
+
+    _registered_profile = profile
+
 
 __all__ = [
     "stata_mcp",
@@ -673,6 +769,7 @@ __all__ = [
     # Functions (Core)
     "get_data_info",
     "stata_do",
+    "register_tools",
     "write_dofile",
 
     # Utilities

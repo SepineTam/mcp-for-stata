@@ -5,7 +5,8 @@
 ```python
 def get_data_info(data_path: str | Path,
                   vars_list: List[str] | None = None,
-                  encoding: str = "utf-8") -> str:
+                  encoding: str = "utf-8",
+                  head: int = 5) -> str:
     ...
 ```
 
@@ -13,6 +14,7 @@ def get_data_info(data_path: str | Path,
 - `data_path`: Absolute filesystem path or URL to data file (required)
 - `vars_list`: Optional variable subset specification for selective analysis (default: null, all variables)
 - `encoding`: Character encoding for text-based formats (default: UTF-8, ignored for .dta)
+- `head`: Number of preview rows to display from the dataset (default: 5, set to 0 to disable preview)
 
 **Return Structure**:
 Serialized JSON string containing multi-layered metadata:
@@ -157,6 +159,7 @@ The tool does not perform syntactic validation or semantic analysis of the Stata
 def read_log(file_path: str,
              encoding: str = "utf-8",
              is_beta: bool = False,
+             lines: int = 0,
              *,
              output_format: Literal["full", "core", "dict"] = "dict") -> str:
     ...
@@ -168,6 +171,10 @@ def read_log(file_path: str,
 - `is_beta`: Enable structured log parsing with StataLog module (optional, default: false)
   - **macOS/Linux only** - Windows users should use default behavior
   - Recommended for `.smcl` files with `dict` format
+- `lines`: Content trimming control (default: 0, no trimming)
+  - `> 0`: return first N items (lines for full/core, entries for dict)
+  - `< 0`: return last |N| items (lines for full/core, entries for dict)
+  - `0`: return full content
 - `output_format`: Output format when `is_beta=true` (optional, default: "dict")
   - `full`: Raw log content without processing
   - `core`: Cleaned content with framework lines removed
@@ -299,7 +306,7 @@ The tool implements Stata command documentation retrieval through CLI invocation
 
 Caching architecture maintains help text cache at `~/.statamcp/help/` directory with file-based storage keyed by command name. Cache behavior controllable via environment variables: `STATA_MCP_CACHE_HELP` (default: true) enables/disables caching; `STATA_MCP_SAVE_HELP` controls cache persistence. Cached results include prefix message indicating cache status: "Cached result for {cmd}: ..." versus live help text.
 
-Dual decoration pattern registers tool as both MCP resource and executable function. Resource URI pattern `help://stata/{cmd}` enables URI-based access through MCP resource protocol, while function decorator `@stata_mcp.tool()` enables direct invocation. This dual registration provides flexible access patterns for different MCP client implementations.
+Dual registration registers `help` as both an MCP tool and resource via the `_TOOL_REGISTRY` system. Resource URI pattern `help://stata/{cmd}` enables URI-based access through MCP resource protocol, while tool registration enables direct invocation. This dual registration provides flexible access patterns for different MCP client implementations. The tool is gated by the `unix_only` flag in `_TOOL_REGISTRY` and is only available on macOS and Linux.
 
 Cache invalidation requires manual deletion of cache files or environment variable configuration; no TTL-based expiration exists. Help text language depends on Stata installation locale; multilingual support requires separate Stata installations or locale reconfiguration.
 

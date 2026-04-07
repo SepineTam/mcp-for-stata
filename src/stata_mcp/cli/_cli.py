@@ -14,18 +14,23 @@ import sys
 from ._handlers import (
     handle_agent,
     handle_config,
+    handle_doctor,
     handle_install,
     handle_sandbox,
     handle_server,
     handle_tool,
+    handle_update,
     handle_usable,
 )
 from ._parsers import (
     add_agent_parser,
     add_config_parser,
+    add_doctor_parser,
     add_install_parser,
     add_sandbox_parser,
+    add_server_parser,
     add_tool_parser,
+    add_update_parser,
     create_root_parser,
 )
 
@@ -36,10 +41,13 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     agent_parser = add_agent_parser(subparsers)
+    add_doctor_parser(subparsers)
+    add_server_parser(subparsers)
     tool_parser = add_tool_parser(subparsers)
     config_parser = add_config_parser(subparsers)
     add_install_parser(subparsers)
     add_sandbox_parser(subparsers)
+    add_update_parser(subparsers)
 
     args = parser.parse_args()
 
@@ -59,6 +67,13 @@ def main() -> None:
             tool_parser.print_help()
         sys.exit(exit_code)
 
+    if args.command == "doctor":
+        sys.exit(handle_doctor(args))
+
+    if args.command == "server":
+        handle_server(args)
+        return
+
     if args.command == "config":
         exit_code = handle_config(args)
         if exit_code != 0:
@@ -70,5 +85,8 @@ def main() -> None:
 
     if args.command == "sandbox-install":
         sys.exit(handle_sandbox(args))
+
+    if args.command == "update":
+        sys.exit(handle_update(args))
 
     handle_server(args)
