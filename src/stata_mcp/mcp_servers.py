@@ -116,7 +116,7 @@ def _load_help_cls():
 
 def help(cmd: str) -> str:
     """
-    Execute the Stata 'help' command and return its output.
+    Retrieve documentation and usage information for a Stata command.
 
     Args:
         cmd (str): The name of the Stata command to query, e.g., "regress" or "describe".
@@ -141,7 +141,7 @@ def stata_do(
         enable_smcl: bool = True
 ) -> Dict[str, Any]:
     """
-    Execute a Stata do-file and return the log file path with optional log content.
+    Execute a Stata do-file and return the execution log.
 
     This function runs a Stata do-file using the configured Stata executable and
     generates a log file. It supports cross-platform execution (macOS, Windows, Linux).
@@ -304,7 +304,7 @@ def ado_package_install(
         package_source_from: str = None
 ) -> str:
     """
-    Install a package from SSC or GitHub
+    Install a Stata ado package from SSC, GitHub, or net sources.
 
     Args:
         package (str): The name of the package to be installed.
@@ -426,7 +426,7 @@ def get_data_info(
         head: int = 5,
 ) -> str:
     """
-    Get descriptive statistics for the data file.
+    Get descriptive statistics and a data preview for a data file (dta, csv, xlsx).
 
     Args:
         data_path (str): the data file's absolutely path.
@@ -538,7 +538,7 @@ def read_log(
         lines: int = 0,
 ) -> str:
     """
-    Reads a log file and returns its content as a string.
+    Read a Stata log file (.log or .smcl) and return its content.
 
     Args:
         file_path (str): The full path to the file to be read.
@@ -663,28 +663,47 @@ ToolFunc = Callable[..., Any]
 
 _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
     "stata_do": {
-        "description": "Run a stata-code via Stata",
+        "description": (
+            "Execute a Stata do-file and return the execution log. "
+            "Accepts a do-file path, runs it via the configured Stata executable, "
+            "and optionally returns the log content."
+        ),
         "func": stata_do,
         "profiles": {"core", "all"},
     },
     "get_data_info": {
-        "description": "Get descriptive statistics for the data file",
+        "description": (
+            "Get descriptive statistics and a data preview for a data file "
+            "(dta, csv, xlsx). Returns overview, variable details, "
+            "and optional head rows filtered by requested variables."
+        ),
         "func": get_data_info,
         "profiles": {"core", "all"},
     },
     "help": {
-        "description": "Get help for a Stata command",
+        "description": (
+            "Retrieve documentation and usage information for a Stata command. "
+            "Use when you need to understand a command's syntax, options, "
+            "or troubleshoot errors before running it."
+        ),
         "func": help,
         "profiles": {"core", "all"},
         "unix_only": True,
     },
     "read_log": {
-        "description": "Reads a log file and returns its content as a string; use `lines` to return only first/last N lines",
+        "description": (
+            "Read a Stata log file (.log or .smcl) and return its content. "
+            "Supports full, core, and dict output formats. "
+            "Use `lines` to return only the first/last N lines."
+        ),
         "func": read_log,
         "profiles": {"all"},
     },
     "ado_package_install": {
-        "description": "Install ado package from ssc or github",
+        "description": (
+            "Install a Stata ado package from SSC, GitHub, or net sources. "
+            "Use before running commands that require third-party packages."
+        ),
         "func": ado_package_install,
         "profiles": {"all"},
     },
