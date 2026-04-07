@@ -18,7 +18,11 @@ uv pip install -e .
 
 # Verify installation
 stata-mcp --version
-stata-mcp --usable
+
+# Run diagnostics to check system health
+stata-mcp doctor
+
+# NOTE: --usable is deprecated since v1.14.3, use "stata-mcp doctor" instead
 ```
 
 ### Building and Distribution
@@ -44,6 +48,12 @@ stata-mcp
 # Start with specific transport
 stata-mcp -t http    # HTTP transport
 stata-mcp -t sse     # SSE transport
+
+# Start with tool profile selection
+stata-mcp server                     # All tools, stdio (same as bare command)
+stata-mcp server --core              # Core tools only (stata_do, get_data_info, help)
+stata-mcp server --all -t http       # All tools, HTTP transport
+stata-mcp server --core -t http      # Core tools, HTTP transport
 ```
 
 #### Agent Mode
@@ -57,11 +67,44 @@ uvx stata-mcp agent run
 
 #### Utility Commands
 ```bash
-# Check system compatibility
-stata-mcp --usable
+# Run diagnostics to check system health (replaces deprecated --usable)
+stata-mcp doctor
+stata-mcp doctor --verbose          # Detailed output
+stata-mcp doctor --json             # JSON output
+stata-mcp doctor --check stata      # Run specific check(s)
 
-# Install to Claude Desktop
-stata-mcp install
+# Update stata-mcp to latest version
+stata-mcp update
+stata-mcp update --check            # Check if update is available
+stata-mcp update --dry-run          # Show detected method without updating
+stata-mcp update --method pip       # Force specific update method (auto/pip/uv-tool/homebrew)
+
+# Manage configuration
+stata-mcp config                    # Show current config
+stata-mcp config cli set            # Auto-detect and set STATA_CLI path
+stata-mcp config cli set /path/to/stata  # Set specific STATA_CLI path
+
+# Run local Stata tools via CLI
+stata-mcp tool ado-install <package> [--source ssc|net|github]
+stata-mcp tool do <dofile_path> [--log-file-name NAME]
+stata-mcp tool help <command>
+stata-mcp tool data-info <data_path> [--vars-list var1 var2]
+stata-mcp tool read-log <file_path> [--output-format full|core|dict]
+
+# Install to MCP clients
+stata-mcp install                   # Default: Claude Desktop
+stata-mcp install -c cc             # Claude Code
+stata-mcp install -c gemini         # Gemini CLI
+stata-mcp install -c cursor         # Cursor
+stata-mcp install -c cline          # Cline
+stata-mcp install -c codex          # Codex
+stata-mcp install -c opencode       # OpenCode
+stata-mcp install --all             # Install to all supported clients
+stata-mcp install --json-file PATH  # Install to custom config file
+
+# Docker-based sandbox installation
+stata-mcp sandbox-install -l /path/to/stata.lic
+stata-mcp sandbox-install -l /path/to/stata.lic -c cursor --cpus 2 --memory 4g
 
 # Check version
 stata-mcp --version
@@ -72,7 +115,7 @@ stata-mcp --version
 # Run without local installation
 uvx stata-mcp --version
 uvx stata-mcp agent run
-uvx stata-mcp --usable
+uvx stata-mcp doctor
 ```
 
 ## Architecture Overview
@@ -84,6 +127,9 @@ uvx stata-mcp --usable
    - Main entry point for LLM interactions
    - Handles cross-platform Stata execution
    - Configurable working directory via `STATA_MCP__CWD` environment variable
+   - Tool registration via `_TOOL_REGISTRY` + `register_tools(server, profile)` pattern
+   - Two profiles: `core` (stata_do, get_data_info, help) and `all` (all tools)
+   - Tools are no longer registered at import time; `register_tools()` must be called explicitly
 
 2. **Stata Integration (`src/stata_mcp/core/stata/`)**
    - `StataFinder`: Locates Stata executable on different platforms (macOS, Windows, Linux)
@@ -101,8 +147,11 @@ uvx stata-mcp --usable
    - Automatic data type detection and summary statistics
 
 4. **CLI Interface (`src/stata_mcp/cli/`)**
-   - Command-line interface for running stata-mcp
-   - Support for multiple modes: server, agent, install, version check
+   - Command-line interface with modular parser/handler architecture
+   - `_cli.py`: Entry point and subcommand routing
+   - `_parsers.py`: Argument parser definitions for all subcommands
+   - `_handlers.py`: Command handler implementations
+   - Subcommands: `agent`, `server`, `doctor`, `tool`, `config`, `install`, `sandbox-install`, `update`
 
 5. **Configuration System (`src/stata_mcp/config.py`)**
    - Unified configuration management via TOML config file
@@ -124,12 +173,16 @@ uvx stata-mcp --usable
 
 ### MCP Tools Provided
 
-- `help`: Get Stata command documentation (macOS and Linux only)
-- `stata_do`: Execute Stata do-files
-- `write_dofile`: Create Stata do-files from code
-- `get_data_info`: Analyze data files (CSV, DTA, XLSX)
-- `read_log`: Read log file contents
-- `ado_package_install`: Install Stata packages from SSC, GitHub, or net sources
+Tools are registered based on profile selection (`--core` / `--all`):
+
+| Profile | Tool | Description |
+|---------|------|-------------|
+| core, all | `stata_do` | Execute Stata do-files |
+| core, all | `get_data_info` | Analyze data files (CSV, DTA, XLSX) |
+| core, all | `help` | Get Stata command documentation (Unix only) |
+| all | `read_log` | Read log file contents |
+| all | `ado_package_install` | Install Stata packages from SSC, GitHub, or net sources |
+| all | `write_dofile` | Create Stata do-files from code (deprecated) |
 
 ### File Structure Conventions
 

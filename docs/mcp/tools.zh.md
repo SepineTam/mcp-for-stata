@@ -5,7 +5,8 @@
 ```python
 def get_data_info(data_path: str | Path,
                   vars_list: List[str] | None = None,
-                  encoding: str = "utf-8") -> str:
+                  encoding: str = "utf-8",
+                  head: int = 5) -> str:
     ...
 ```
 
@@ -13,6 +14,7 @@ def get_data_info(data_path: str | Path,
 - `data_path`：数据文件的绝对文件系统路径或 URL（必填）
 - `vars_list`：可选变量子集规范，用于选择性分析（默认：null，所有变量）
 - `encoding`：文本格式文件的字符编码（默认：UTF-8，.dta 格式忽略）
+- `head`：预览数据集时显示的行数（默认：5，设为 0 禁用预览）
 
 **返回结构**：
 包含多层元数据的序列化 JSON 字符串：
@@ -152,38 +154,82 @@ xtreg diff_income log_gdp, fe
 
 ---
 
-## read_file
+## read_log
 ```python
-def read_file(file_path: str,
-              encoding: str = "utf-8") -> str:
+def read_log(file_path: str,
+             encoding: str = "utf-8",
+             is_beta: bool = False,
+             lines: int = 0,
+             *,
+             output_format: Literal["full", "core", "dict"] = "dict") -> str:
     ...
 ```
 
 **输入参数**：
-- `file_path`：目标文件的绝对路径（必填）
+- `file_path`：目标日志文件的绝对路径（必填，`.log` 或 `.smcl`）
 - `encoding`：文本解码的字符编码（可选，默认为 UTF-8）
+- `is_beta`：启用结构化日志解析（可选，默认：false）
+  - **仅限 macOS/Linux** - Windows 用户请使用默认行为
+  - 推荐用于 `.smcl` 文件配合 `dict` 格式
+- `lines`：内容裁剪控制（默认：0，不裁剪）
+  - `> 0`：返回前 N 项（full/core 模式为行数，dict 模式为条目数）
+  - `< 0`：返回后 |N| 项
+  - `0`：返回完整内容
+- `output_format`：`is_beta=true` 时的输出格式（可选，默认："dict"）
+  - `full`：未经处理的原始日志内容
+  - `core`：去除框架行的清洁内容
+  - `dict`：结构化的命令-结果对（推荐）
 
 **返回结构**：
-包含使用指定编码解码的完整文件内容的字符串
+- 默认模式（`is_beta=false`）：文件的原始字符串内容
+- Beta 模式（`is_beta=true`）：取决于 `output_format`：
+  - `full`：纯文本日志内容
+  - `core`：不含框架（页眉、页脚、日志命令）的日志内容
+  - `dict`：命令-结果列表的字符串表示
 
 **操作示例**：
 ```python
-# 读取 Stata 日志文件
-read_file("/Users/project/stata-mcp-log/20250104153045.log")
+# 读取日志文件（默认模式）
+read_log("/Users/project/stata-mcp-log/20250104153045.log")
 
-# 带编码读取配置
-read_file("~/.statamcp/config.toml", encoding="utf-8")
+# 使用结构化解析读取 SMCL 日志（macOS/Linux）
+read_log("/Users/project/stata-mcp-log/20250104153045.smcl",
+         is_beta=True,
+         output_format="dict")
 
-# 读取导出的结果
-read_file("~/analysis/tables/regression_results.txt")
+# 获取去除框架的清洁日志内容
+read_log("~/stata-mcp-log/session.log",
+         is_beta=True,
+         output_format="core")
+
+# 仅读取前 50 行
+read_log("~/stata-mcp-log/session.log", lines=50)
+
+# 读取最后 20 个命令结果（dict 格式）
+read_log("~/stata-mcp-log/session.log",
+         is_beta=True,
+         output_format="dict",
+         lines=-20)
+
+# 使用自定义编码读取
+read_log("~/analysis/tables/results.txt", encoding="utf-8")
 ```
 
 **实现架构**：
-该工具使用 Python 内置的 `open()` 函数实现通用文件读取，模式为 `"r"` 和指定的编码参数。路径验证通过 `Path.exists()` 检查文件是否存在；缺失文件抛出带描述性消息（包含无效路径）的 `FileNotFoundError`。文件读取使用上下文管理器（`with` 语句）以实现自动文件句柄关闭和资源清理。
+该工具实现双模式日志读取：传统文件读取和通过 `StataLog` 模块的结构化解析。
 
-内容读取执行单次 `file.read()` 操作，将整个文件内容作为字符串检索到内存中。对于超过可用内存的大文件，此方法触发 `MemoryError`；但典型用例涉及合理大小范围内的日志文件、配置文件和结果表。
+**传统模式**（`is_beta=false`）：通过 Python 的 `open()` 函数进行通用文件读取，模式为 `"r"`。路径验证通过 `Path.exists()` 检查文件是否存在。内容读取使用单次 `file.read()` 操作获取完整文件内容。
 
-错误处理将失败分类：不存在的路径为 `FileNotFoundError`，I/O 操作失败（权限被拒绝、磁盘读取错误、文件系统损坏）为 `IOError`，编码不匹配为 `UnicodeDecodeError`（虽未显式捕获，但会向调用者传播并附带编码信息）。成功操作记录包含文件路径的结构化消息以供审计跟踪。
+**结构化解析模式**（`is_beta=true`，仅 Unix）：利用 `stata_log` 模块，提供：
+- `StataLogTEXT`：`.log`（纯文本）文件解析器
+- `StataLogSMCL`：`.smcl`（Stata 标记与控制语言）文件解析器
+- `StataLogInfo`：包含 `command_result_list` 结构化命令-输出对的数据类
+
+`StataLog` 工厂类（`from_path()` 方法）自动检测文件扩展名并返回相应的解析器。框架移除消除日志页眉/页脚、`log using/close` 命令和 do 文件执行标记，仅保留实际的 Stata 命令及其输出。
+
+**`lines` 裁剪**：通过 `_trim_lines()` 辅助函数实现。正数取前 N 项，负数取后 |N| 项，0 返回完整内容。对于 `dict` 格式，裁剪作用于列表条目而非文本行。
+
+错误处理覆盖：缺失文件的 `FileNotFoundError`、I/O 失败的 `IOError`、无效 `output_format` 的 `ValueError`，以及编码不匹配的 `UnicodeDecodeError`。
 
 ---
 
@@ -266,6 +312,6 @@ help("reshape")
 
 缓存架构在 `~/.statamcp/help/` 目录维护帮助文本缓存，使用基于命令名的文件存储。缓存行为可通过环境变量控制：`STATA_MCP_CACHE_HELP`（默认：true）启用/禁用缓存；`STATA_MCP_SAVE_HELP` 控制缓存持久化。缓存结果包含指示缓存状态的前缀消息："Cached result for {cmd}: ..." 与实时帮助文本。
 
-双重装饰模式将工具注册为 MCP 资源和可执行函数。资源 URI 模式 `help://stata/{cmd}` 通过 MCP 资源协议启用基于 URI 的访问，而函数装饰器 `@stata_mcp.tool()` 启用直接调用。这种双重注册为不同的 MCP 客户端实现提供灵活的访问模式。
+双重注册将 `help` 同时注册为 MCP 工具和资源，通过 `_TOOL_REGISTRY` 系统实现。资源 URI 模式 `help://stata/{cmd}` 通过 MCP 资源协议启用基于 URI 的访问，工具注册启用直接调用。这种双重注册为不同的 MCP 客户端实现提供灵活的访问模式。该工具通过 `_TOOL_REGISTRY` 中的 `unix_only` 标志进行限制，仅在 macOS 和 Linux 上可用。
 
 缓存失效需要手动删除缓存文件或环境变量配置；不存在基于 TTL 的过期。帮助文本语言取决于 Stata 安装区域设置；多语言支持需要单独的 Stata 安装或区域设置重新配置。
