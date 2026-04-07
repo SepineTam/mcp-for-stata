@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import argparse
-from importlib.metadata import version
+import warnings
+from importlib.metadata import PackageNotFoundError, version
 from typing import Callable
 
 BoolConverter = Callable[[str], bool]
@@ -35,6 +36,16 @@ def add_bool_argument(
 
 def create_root_parser() -> argparse.ArgumentParser:
     """Create the root parser with global options."""
+    try:
+        package_version = version("stata-mcp")
+    except PackageNotFoundError:
+        package_version = "0.0.0"
+        warnings.warn(
+            "Package metadata for 'stata-mcp' is unavailable. Falling back to version '0.0.0'.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
     parser = argparse.ArgumentParser(
         prog="stata-mcp",
         description="Stata-MCP command line interface",
@@ -44,7 +55,7 @@ def create_root_parser() -> argparse.ArgumentParser:
         "-v",
         "--version",
         action="version",
-        version=f"%(prog)s {version('stata-mcp')}",
+        version=f"%(prog)s {package_version}",
         help="show version information",
     )
     parser.add_argument(
@@ -75,6 +86,35 @@ def add_agent_parser(subparsers: argparse._SubParsersAction) -> argparse.Argumen
         help="Working directory for agent (default: current directory)",
     )
     return agent_parser
+
+
+def add_server_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
+    """Add the server subcommand parser."""
+    server_parser = subparsers.add_parser(
+        "server",
+        help="Start MCP server (default behavior when no subcommand is given)",
+    )
+    profile_group = server_parser.add_mutually_exclusive_group()
+    profile_group.add_argument(
+        "--core",
+        action="store_true",
+        dest="core_profile",
+        help="Register only core tools (stata_do, get_data_info, help)",
+    )
+    profile_group.add_argument(
+        "--all",
+        action="store_true",
+        dest="all_profile",
+        help="Register all tools (default)",
+    )
+    server_parser.add_argument(
+        "-t",
+        "--transport",
+        choices=["stdio", "sse", "http"],
+        default="stdio",
+        help="MCP server transport method (default: stdio)",
+    )
+    return server_parser
 
 
 def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
