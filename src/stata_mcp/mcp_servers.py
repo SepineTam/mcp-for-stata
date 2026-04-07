@@ -535,6 +535,7 @@ def read_log(
         is_beta: bool = False,
         *,
         output_format: Literal["full", "core", "dict"] = "dict",
+        lines: int = 0,
 ) -> str:
     """
     Reads a log file and returns its content as a string.
@@ -550,6 +551,10 @@ def read_log(
             - full: all the original content;
             - core: remove useless information, saving content;
             - dict (default): structure format to quickly match command and result.
+        lines (int): Line trimming control for output.
+            - 0 (default): return all lines.
+            - > 0: return first N lines.
+            - < 0: return last |N| lines.
 
     Returns:
         str: The content of the file as a string.
@@ -592,20 +597,31 @@ def read_log(
         if output_format not in ["full", "core", "dict"]:
             raise ValueError(f"Invalid output_format: {output_format}")
         elif output_format == "full":
-            return loger.read_plain_text()
+            return _trim_lines(loger.read_plain_text(), lines)
         elif output_format == "core":
-            return loger.read_without_framework()
+            return _trim_lines(loger.read_without_framework(), lines)
         elif output_format == "dict":
-            return str(loger.read_as_dict())
+            return _trim_lines(str(loger.read_as_dict()), lines)
     # if not beta version and Windows user using read file text directly.
     try:
         with open(path, "r", encoding=encoding) as file:
             log_content = file.read()
         logging.info(f"Successfully read file: {file_path}")
-        return log_content
+        return _trim_lines(log_content, lines)
     except IOError as e:
         logging.error(f"Failed to read file {file_path}: {str(e)}")
         raise IOError(f"An error occurred while reading the file: {e}")
+
+
+def _trim_lines(content: str, lines: int) -> str:
+    """Trim content to requested line range."""
+    if lines == 0:
+        return content
+
+    all_lines = content.splitlines()
+    if lines > 0:
+        return "\n".join(all_lines[:lines])
+    return "\n".join(all_lines[-abs(lines):])
 
 
 def write_dofile(content: str, encoding: str = None) -> str:
@@ -663,7 +679,7 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
         "unix_only": True,
     },
     "read_log": {
-        "description": "Reads a log file and returns its content as a string",
+        "description": "Reads a log file and returns its content as a string; use `lines` to return only first/last N lines",
         "func": read_log,
         "profiles": {"all"},
     },
