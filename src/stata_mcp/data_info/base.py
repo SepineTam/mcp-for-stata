@@ -266,6 +266,10 @@ class DataInfoBase(ABC):
         head_data = self._get_head()
         if head_data is not None:
             result["head"] = head_data
+            requested = abs(self._head)
+            actual = len(head_data)
+            if actual < requested:
+                result["head_warning"] = f"Requested {requested} rows but data has only {actual}"
         return result
 
     @property
