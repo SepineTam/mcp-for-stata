@@ -166,6 +166,7 @@ class DataInfoBase(ABC):
         string_keep_number: int = None,
         decimal_places: int = None,
         hash_length: int = None,
+        head: int = 5,
         **kwargs
     ):
         if isinstance(data_path, str):
@@ -194,6 +195,7 @@ class DataInfoBase(ABC):
         self.string_keep_number = string_keep_number or int(os.getenv("STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", 10))
         self.decimal_places = decimal_places or int(os.getenv("STATA_MCP_DATA_INFO_DECIMAL_PLACES", 3))
         self.HASH_LENGTH = hash_length or int(os.getenv("STATA_MCP_DATA_INFO_HASH_LENGTH", "12"))
+        self._head = head
 
         self.kwargs = kwargs  # Store additional keyword arguments for subclasses to use
 
@@ -260,7 +262,11 @@ class DataInfoBase(ABC):
     def info(self) -> Dict[str, Any]:
         """Get comprehensive information about the data."""
         summary = self.summary()
-        return self._filter(self._filter_var(copy.deepcopy(summary)))
+        result = self._filter(self._filter_var(copy.deepcopy(summary)))
+        head_data = self._get_head()
+        if head_data is not None:
+            result["head"] = head_data
+        return result
 
     @property
     def data_source(self) -> str:
@@ -582,6 +588,15 @@ class DataInfoBase(ABC):
             return StringSeries(data=non_na_series, max_display=self.string_keep_number)
         else:  # float type
             return NumericSeries(data=non_na_series, max_decimal_places=self.decimal_places)
+
+    def _get_head(self) -> List[Dict[str, Any]] | None:
+        """Get preview rows from the DataFrame, filtered by vars_list."""
+        if self._head == 0:
+            return None
+        df = self.df[self.vars_list]
+        if self._head > 0:
+            return df.head(self._head).to_dict(orient="records")
+        return df.tail(abs(self._head)).to_dict(orient="records")
 
     def _get_var_extra_info(self, var_name: str) -> Dict[str, Any]:
         """

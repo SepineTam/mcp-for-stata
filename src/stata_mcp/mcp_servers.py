@@ -422,7 +422,8 @@ def ado_package_install(
 def get_data_info(
         data_path: str,
         vars_list: List[str] | None = None,
-        encoding: str = "utf-8"
+        encoding: str = "utf-8",
+        head: int = 5,
 ) -> str:
     """
     Get descriptive statistics for the data file.
@@ -510,7 +511,7 @@ def get_data_info(
         logging.error(f"Unsupported file extension: {data_extension} for data file: {data_path}")
         return f"Unsupported file extension now: {data_extension}"
 
-    data_info = data_info_cls(data_path, vars_list, encoding=encoding, cache_dir=config.STATA_MCP_FOLDER.TMP)
+    data_info = data_info_cls(data_path, vars_list, encoding=encoding, cache_dir=config.STATA_MCP_FOLDER.TMP, head=head)
     try:
         info = data_info.info
         if data_info.is_cache:
