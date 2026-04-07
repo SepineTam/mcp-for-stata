@@ -21,7 +21,8 @@ import time
 import tomllib
 from dataclasses import dataclass, field
 from enum import Enum
-from importlib.metadata import PackageNotFoundError, version as pkg_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as pkg_version
 from pathlib import Path
 from typing import Any
 from urllib.error import URLError

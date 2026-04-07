@@ -722,6 +722,7 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
 
     _registered_profile = profile
 
+
 __all__ = [
     "stata_mcp",
 

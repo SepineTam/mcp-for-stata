@@ -52,8 +52,8 @@ def handle_usable() -> int:
 
 def handle_doctor(args: Namespace) -> int:
     """Handle the doctor subcommand."""
-    from ..utils.doctor import AVAILABLE_CHECKS, format_report_text, run_doctor
     from ..config import Config
+    from ..utils.doctor import AVAILABLE_CHECKS, format_report_text, run_doctor
 
     if args.checks:
         invalid_checks = sorted(set(args.checks) - set(AVAILABLE_CHECKS))
@@ -202,7 +202,8 @@ def handle_sandbox(args: Namespace) -> int:
 
 def handle_server(args: Namespace) -> None:
     """Handle the default behavior of starting the MCP server."""
-    from ..mcp_servers import register_tools, stata_mcp as mcp
+    from ..mcp_servers import register_tools
+    from ..mcp_servers import stata_mcp as mcp
 
     if getattr(args, "core_profile", False):
         profile = "core"

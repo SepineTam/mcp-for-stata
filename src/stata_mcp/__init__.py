@@ -23,7 +23,8 @@ def _get_default_server():
         return _default_server_cache
 
     try:
-        from .mcp_servers import register_tools, stata_mcp as server
+        from .mcp_servers import register_tools
+        from .mcp_servers import stata_mcp as server
 
         register_tools(server, profile="all")
     except AttributeError as error:
