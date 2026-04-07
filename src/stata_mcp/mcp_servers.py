@@ -551,10 +551,10 @@ def read_log(
             - full: all the original content;
             - core: remove useless information, saving content;
             - dict (default): structure format to quickly match command and result.
-        lines (int): Line trimming control for output.
-            - 0 (default): return all lines.
-            - > 0: return first N lines.
-            - < 0: return last |N| lines.
+        lines (int): Content trimming control for output.
+            - 0 (default): return all content.
+            - > 0: return first N items (lines for full/core, entries for dict).
+            - < 0: return last |N| items (lines for full/core, entries for dict).
 
     Returns:
         str: The content of the file as a string.
@@ -601,7 +601,12 @@ def read_log(
         elif output_format == "core":
             return _trim_lines(loger.read_without_framework(), lines)
         elif output_format == "dict":
-            return _trim_lines(str(loger.read_as_dict()), lines)
+            dict_data = loger.read_as_dict()
+            if lines == 0:
+                return str(dict_data)
+            if lines > 0:
+                return str(dict_data[:lines])
+            return str(dict_data[-abs(lines):])
     # if not beta version and Windows user using read file text directly.
     try:
         with open(path, "r", encoding=encoding) as file:
