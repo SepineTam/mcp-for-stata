@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import logging
 import sys
 from argparse import Namespace
@@ -9,13 +10,13 @@ from types import ModuleType, SimpleNamespace
 
 import pytest
 
-if "tomli_w" not in sys.modules:
-    sys.modules["tomli_w"] = SimpleNamespace(dump=lambda *args, **kwargs: None)
 
-if "pexpect" not in sys.modules:
-    sys.modules["pexpect"] = ModuleType("pexpect")
+@pytest.fixture
+def loaded_modules(monkeypatch: pytest.MonkeyPatch):
+    """Load target modules with isolated dependency stubs."""
+    monkeypatch.setitem(sys.modules, "tomli_w", SimpleNamespace(dump=lambda *args, **kwargs: None))
+    monkeypatch.setitem(sys.modules, "pexpect", ModuleType("pexpect"))
 
-if "mcp.server.fastmcp" not in sys.modules:
     fastmcp_module = ModuleType("mcp.server.fastmcp")
 
     class _FastMCP:
@@ -53,13 +54,16 @@ if "mcp.server.fastmcp" not in sys.modules:
     mcp_server_module.fastmcp = fastmcp_module
     mcp_module.server = mcp_server_module
 
-    sys.modules["mcp"] = mcp_module
-    sys.modules["mcp.server"] = mcp_server_module
-    sys.modules["mcp.server.fastmcp"] = fastmcp_module
+    monkeypatch.setitem(sys.modules, "mcp", mcp_module)
+    monkeypatch.setitem(sys.modules, "mcp.server", mcp_server_module)
+    monkeypatch.setitem(sys.modules, "mcp.server.fastmcp", fastmcp_module)
 
-import stata_mcp.mcp_servers as mcp_servers
+    monkeypatch.delitem(sys.modules, "stata_mcp.mcp_servers", raising=False)
+    monkeypatch.delitem(sys.modules, "stata_mcp.cli._handlers", raising=False)
 
-from stata_mcp.cli import _handlers as handlers
+    mcp_servers = importlib.import_module("stata_mcp.mcp_servers")
+    handlers = importlib.import_module("stata_mcp.cli._handlers")
+    return mcp_servers, handlers
 
 
 class _DummyServer:
@@ -82,7 +86,7 @@ class _DummyServer:
         return _decorator
 
 
-def _set_registry(monkeypatch: pytest.MonkeyPatch, *, unix: bool, enable_write: bool) -> None:
+def _set_registry(monkeypatch: pytest.MonkeyPatch, mcp_servers, *, unix: bool, enable_write: bool) -> None:
     registry = {
         "stata_do": {"description": "d", "func": lambda: None, "profiles": {"core", "all"}},
         "get_data_info": {"description": "d", "func": lambda: None, "profiles": {"core", "all"}},
@@ -106,8 +110,9 @@ def _set_registry(monkeypatch: pytest.MonkeyPatch, *, unix: bool, enable_write: 
     )
 
 
-def test_register_tools_core_only_registers_core(monkeypatch: pytest.MonkeyPatch):
-    _set_registry(monkeypatch, unix=True, enable_write=False)
+def test_register_tools_core_only_registers_core(monkeypatch: pytest.MonkeyPatch, loaded_modules):
+    mcp_servers, _ = loaded_modules
+    _set_registry(monkeypatch, mcp_servers, unix=True, enable_write=False)
     server = _DummyServer()
 
     mcp_servers.register_tools(server, profile="core")
@@ -116,8 +121,12 @@ def test_register_tools_core_only_registers_core(monkeypatch: pytest.MonkeyPatch
     assert server.resources == ["help"]
 
 
-def test_register_tools_all_applies_platform_and_deprecated_filters(monkeypatch: pytest.MonkeyPatch):
-    _set_registry(monkeypatch, unix=False, enable_write=False)
+def test_register_tools_all_applies_platform_and_deprecated_filters(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    mcp_servers, _ = loaded_modules
+    _set_registry(monkeypatch, mcp_servers, unix=False, enable_write=False)
     server = _DummyServer()
 
     mcp_servers.register_tools(server, profile="all")
@@ -126,8 +135,9 @@ def test_register_tools_all_applies_platform_and_deprecated_filters(monkeypatch:
     assert server.resources == []
 
 
-def test_register_tools_prevents_profile_switch(monkeypatch: pytest.MonkeyPatch):
-    _set_registry(monkeypatch, unix=True, enable_write=True)
+def test_register_tools_prevents_profile_switch(monkeypatch: pytest.MonkeyPatch, loaded_modules):
+    mcp_servers, _ = loaded_modules
+    _set_registry(monkeypatch, mcp_servers, unix=True, enable_write=True)
     server = _DummyServer()
 
     mcp_servers.register_tools(server, profile="core")
@@ -138,8 +148,10 @@ def test_register_tools_prevents_profile_switch(monkeypatch: pytest.MonkeyPatch)
 def test_register_tools_logs_warning_for_missing_func(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
+    loaded_modules,
 ):
-    _set_registry(monkeypatch, unix=True, enable_write=True)
+    mcp_servers, _ = loaded_modules
+    _set_registry(monkeypatch, mcp_servers, unix=True, enable_write=True)
     server = _DummyServer()
 
     with caplog.at_level(logging.WARNING):
@@ -148,7 +160,11 @@ def test_register_tools_logs_warning_for_missing_func(
     assert any("broken_tool" in message for message in caplog.messages)
 
 
-def test_handle_server_defaults_to_all_when_profile_flags_are_missing(monkeypatch: pytest.MonkeyPatch):
+def test_handle_server_defaults_to_all_when_profile_flags_are_missing(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    _, handlers = loaded_modules
     calls: dict[str, str] = {}
 
     class _McpRun:
@@ -165,3 +181,23 @@ def test_handle_server_defaults_to_all_when_profile_flags_are_missing(monkeypatc
 
     assert calls["profile"] == "all"
     assert calls["transport"] == "streamable-http"
+
+
+def test_handle_server_respects_core_profile_flag(monkeypatch: pytest.MonkeyPatch, loaded_modules):
+    _, handlers = loaded_modules
+    calls: dict[str, str] = {}
+
+    class _McpRun:
+        def run(self, transport: str) -> None:
+            calls["transport"] = transport
+
+    fake_module = SimpleNamespace(
+        register_tools=lambda server, profile: calls.setdefault("profile", profile),
+        stata_mcp=_McpRun(),
+    )
+    monkeypatch.setitem(sys.modules, "stata_mcp.mcp_servers", fake_module)
+
+    handlers.handle_server(Namespace(transport="stdio", core_profile=True, all_profile=False))
+
+    assert calls["profile"] == "core"
+    assert calls["transport"] == "stdio"
