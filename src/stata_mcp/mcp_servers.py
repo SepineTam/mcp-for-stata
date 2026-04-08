@@ -653,7 +653,7 @@ def write_dofile(content: str, encoding: str = None) -> str:
         your Stata do-files directly.
 
     """
-    file_path = config.STATA_MCP_FOLDER.DO / f"{datetime.strftime(datetime.now(), '%Y%m%d%H%M%S%f')}.do"
+    file_path = config.STATA_MCP_FOLDER.DO / f"{datetime.now().strftime('%Y%m%d%H%M%S%f')}.do"
     encoding = encoding or "utf-8"
     try:
         with open(file_path, "w", encoding=encoding) as f:
