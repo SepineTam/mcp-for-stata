@@ -6,7 +6,7 @@
 def get_data_info(data_path: str | Path,
                   vars_list: List[str] | None = None,
                   encoding: str = "utf-8",
-                  head: int = 5) -> str:
+                  head: int = 0) -> str:
     ...
 ```
 
@@ -14,7 +14,7 @@ def get_data_info(data_path: str | Path,
 - `data_path`: Absolute filesystem path or URL to data file (required)
 - `vars_list`: Optional variable subset specification for selective analysis (default: null, all variables)
 - `encoding`: Character encoding for text-based formats (default: UTF-8, ignored for .dta)
-- `head`: Number of preview rows to display from the dataset (default: 5, set to 0 to disable preview)
+- `head`: Number of preview rows to display from the dataset (default: 0, disabled to avoid context overflow on large datasets)
 
 **Return Structure**:
 Serialized JSON string containing multi-layered metadata:

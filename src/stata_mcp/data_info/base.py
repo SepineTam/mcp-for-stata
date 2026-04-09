@@ -166,7 +166,7 @@ class DataInfoBase(ABC):
         string_keep_number: int = None,
         decimal_places: int = None,
         hash_length: int = None,
-        head: int = 5,
+        head: int = 0,
         **kwargs
     ):
         if isinstance(data_path, str):
