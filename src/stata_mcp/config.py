@@ -196,6 +196,12 @@ class Config:
         return base_dir
 
     @property
+    def HELP_CACHE_DIR(self) -> Path:
+        cache_dir = self.STATA_MCP_DIRECTORY / "help"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return cache_dir
+
+    @property
     def IS_DEBUG(self) -> bool:
         return self._get_config_value(
             config_keys=["DEBUG", "IS_DEBUG"],
@@ -211,6 +217,26 @@ class Config:
             config_keys=["BETA", "ENABLE_WRITE_DOFILE"],
             env_var="STATA_MCP__ENABLE_WRITE_DOFILE",
             default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool)
+        )
+
+    @property
+    def IS_CACHE_HELP(self) -> bool:
+        return self._get_config_value(
+            config_keys=["HELP", "IS_CACHE"],
+            env_var="STATA_MCP__CACHE_HELP",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool)
+        )
+
+    @property
+    def IS_SAVE_HELP(self) -> bool:
+        return self._get_config_value(
+            config_keys=["HELP", "IS_SAVE"],
+            env_var="STATA_MCP__SAVE_HELP",
+            default=True,
             converter=self._to_bool,
             validator=lambda x: isinstance(x, bool)
         )
