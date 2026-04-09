@@ -257,8 +257,8 @@ MAX_RAM_MB = -1  # -1 means no limit
 - `STATA_MCP__LOGGING__BACKUP_COUNT`: Number of backup log files (default: 5)
 
 **Data Processing:**
-- `STATA_MCP_CACHE_HELP`: Enable help caching (default: false)
-- `STATA_MCP_SAVE_HELP`: Save help text to cache (default: true)
+- `STATA_MCP__CACHE_HELP`: Enable help caching (default: true)
+- `STATA_MCP__SAVE_HELP`: Save help text to cache (default: true)
 - `STATA_MCP_DATA_INFO_DECIMAL_PLACES`: Decimal places for data info output (default: 3)
 - `STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER`: Max string values to display (default: 10)
 - `STATA_MCP_DATA_INFO_HASH_LENGTH`: Hash length for cache filename (default: 12)

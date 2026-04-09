@@ -58,12 +58,12 @@ help("varsoc")
 
 `StataHelp` 类通过三层缓存策略管理帮助文本检索：
 
-1. **项目级缓存**（`STATA_MCP_SAVE_HELP`，默认：`true`）：
+1. **项目级缓存**（`STATA_MCP__SAVE_HELP`，默认：`true`）：
    - 将帮助文本存储在 `stata-mcp-tmp/help__{cmd}.txt`
    - 在项目目录内跨会话持久化
    - 检索优先级最高
 
-2. **全局缓存**（`STATA_MCP_CACHE_HELP`，默认：`false`）：
+2. **全局缓存**（`STATA_MCP__CACHE_HELP`，默认：`true`）：
    - 将帮助文本存储在 `~/.statamcp/help/help__{cmd}.txt`
    - 在所有项目间共享
    - 项目缓存未命中时的次要优先级
@@ -76,8 +76,8 @@ help("varsoc")
 **缓存失效**：
 不存在自动的基于 TTL 的过期。缓存失效需要：
 - 手动删除缓存文件（`rm ~/.statamcp/help/help__{cmd}.txt`）
-- 设置环境变量 `STATA_MCP_CACHE_HELP=false` 以禁用缓存
-- 设置环境变量 `STATA_MCP_SAVE_HELP=false` 以禁用项目级缓存
+- 设置环境变量 `STATA_MCP__CACHE_HELP=false` 以禁用缓存
+- 设置环境变量 `STATA_MCP__SAVE_HELP=false` 以禁用项目级缓存
 
 **错误检测**：
 帮助系统通过将 Stata 输出与标准错误消息模板比较来检测命令是否存在：
@@ -94,7 +94,7 @@ try help contents or search {cmd}
 - **Windows**：由于 Windows 平台上 Stata CLI 的限制而不支持
 
 **性能优化**：
-对于频繁访问的命令（如 `regress`、`xtreg`），启用 `STATA_MCP_CACHE_HELP=true` 以避免重复的 Stata 调用。首次执行查询 Stata（约 50-200ms，取决于 Stata 启动时间），后续查询从缓存返回（约 1-5ms 文件读取）。
+对于频繁访问的命令（如 `regress`、`xtreg`），启用 `STATA_MCP__CACHE_HELP=true` 以避免重复的 Stata 调用。首次执行查询 Stata（约 50-200ms，取决于 Stata 启动时间），后续查询从缓存返回（约 1-5ms 文件读取）。
 
 **使用说明**：
 - 帮助文本语言取决于 Stata 安装区域设置
@@ -106,8 +106,8 @@ try help contents or search {cmd}
 
 | 变量 | 默认值 | 描述 |
 |----------|---------|-------------|
-| `STATA_MCP_CACHE_HELP` | `false` | 在 `~/.statamcp/help/` 启用全局缓存 |
-| `STATA_MCP_SAVE_HELP` | `true` | 在 `stata-mcp-tmp/` 启用项目级缓存 |
+| `STATA_MCP__CACHE_HELP` | `true` | 在 `~/.statamcp/help/` 启用全局缓存 |
+| `STATA_MCP__SAVE_HELP` | `true` | 在 `stata-mcp-tmp/` 启用项目级缓存 |
 
 **与工具的集成**：
 帮助资源在多种工作流程中与 Stata-MCP 工具集成：

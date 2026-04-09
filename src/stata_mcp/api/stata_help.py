@@ -25,6 +25,7 @@ def stata_help(
     help_reader = StataHelp(
         stata_cli=runtime.stata_cli,
         project_tmp_dir=runtime.tmp_base_path,
-        cache_dir=runtime.config.STATA_MCP_DIRECTORY / "help",
+        cache_dir=runtime.config.HELP_CACHE_DIR,
+        config=runtime.config,
     )
     return help_reader.help(cmd)

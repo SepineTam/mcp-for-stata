@@ -24,7 +24,7 @@ StataHelp includes a multi-level caching mechanism to improve performance:
 
 - **Project-Level Cache**: Saves help results to your project's temporary directory for quick access
 - **Global Cache**: Stores help files in `~/.stata_mcp/help/` for reuse across projects
-- **Environment Control**: Use `STATA_MCP_CACHE_HELP` and `STATA_MCP_SAVE_HELP` to control caching behavior
+- **Environment Control**: Use `STATA_MCP__CACHE_HELP` and `STATA_MCP__SAVE_HELP` to control caching behavior
 
 ### Command Validation
 
@@ -54,11 +54,11 @@ Before executing a Stata command, you can use StataHelp to verify if the command
 Control caching behavior with environment variables:
 
 ```bash
-# Enable global caching (default: false)
-export STATA_MCP_CACHE_HELP=true
+# Enable global caching (default: true)
+export STATA_MCP__CACHE_HELP=true
 
 # Enable project-level saving (default: true)
-export STATA_MCP_SAVE_HELP=true
+export STATA_MCP__SAVE_HELP=true
 ```
 
 ## Limitations

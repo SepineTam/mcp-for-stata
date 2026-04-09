@@ -108,13 +108,14 @@ def _load_help_cls():
         _help_cls = StataHelp(
             stata_cli=config.STATA_CLI,
             project_tmp_dir=config.STATA_MCP_FOLDER.TMP,
-            cache_dir=config.STATA_MCP_DIRECTORY / "help"
+            cache_dir=config.HELP_CACHE_DIR,
+            config=config,
         )
 
     return _help_cls
 
 
-def help(cmd: str) -> str:
+def help(cmd: str, replace: bool = False) -> str:
     """
     Retrieve documentation and usage information for a Stata command.
 
@@ -128,9 +129,9 @@ def help(cmd: str) -> str:
     Notes:
         If the returned content starts with 'Cached result for {cmd}', but the output shows the command
         does not exist or you believe the cached content is incorrect, and you are certain the command exists,
-        set the environment variable STATA_MCP_CACHE_HELP to false. STATA_MCP_SAVE_HELP works similarly.
+        set the environment variable STATA_MCP__CACHE_HELP to false. STATA_MCP__SAVE_HELP works similarly.
     """
-    return _load_help_cls().help(cmd)
+    return _load_help_cls().help(cmd, replace=replace)
 
 
 def stata_do(
