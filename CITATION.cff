@@ -6,8 +6,8 @@ authors:
     orcid: "https://orcid.org/0009-0006-7449-1094"
     email: "sepinetam@gmail.com"
 title: "Stata-MCP: Let LLM help you achieve your regression analysis with Stata"
-version: 1.15.0
-date-released: 2026-04-07
+version: 1.15.1
+date-released: 2026-04-09
 url: "https://www.statamcp.com"
 repository-code: "https://github.com/sepinetam/stata-mcp"
 license: AGPL-3.0

@@ -2,6 +2,17 @@
 
 
 <details>
+<summary>Click to expand v1.15.1 details</summary>
+
+## [1.15.1] - 2026-04-09
+
+### Changed
+- **Data Info**: Changed `head` parameter default from 5 to 0 in `get_data_info` to prevent context overflow on large datasets. Preview rows are now opt-in instead of opt-out.
+- **Docs**: Updated tool docs (tools.md, tools.zh.md) to reflect new `head` default value.
+
+</details>
+
+<details>
 <summary>Click to expand v1.15.0 details</summary>
 
 ## [1.15.0] - 2026-04-07
