@@ -40,4 +40,4 @@ jobs:
         run: black --check src
 
       - name: Flake8 static analysis
-        run: flake8 src --extend-ignore=E501,W291
+        run: flake8 src --extend-ignore=E501,W291,E203
