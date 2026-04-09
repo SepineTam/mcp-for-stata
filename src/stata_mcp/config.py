@@ -226,7 +226,7 @@ class Config:
         return self._get_config_value(
             config_keys=["HELP", "IS_CACHE"],
             env_var="STATA_MCP__CACHE_HELP",
-            default=False,
+            default=True,
             converter=self._to_bool,
             validator=lambda x: isinstance(x, bool)
         )

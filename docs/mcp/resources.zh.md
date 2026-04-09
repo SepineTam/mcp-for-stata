@@ -63,7 +63,7 @@ help("varsoc")
    - 在项目目录内跨会话持久化
    - 检索优先级最高
 
-2. **全局缓存**（`STATA_MCP__CACHE_HELP`，默认：`false`）：
+2. **全局缓存**（`STATA_MCP__CACHE_HELP`，默认：`true`）：
    - 将帮助文本存储在 `~/.statamcp/help/help__{cmd}.txt`
    - 在所有项目间共享
    - 项目缓存未命中时的次要优先级
@@ -106,7 +106,7 @@ try help contents or search {cmd}
 
 | 变量 | 默认值 | 描述 |
 |----------|---------|-------------|
-| `STATA_MCP__CACHE_HELP` | `false` | 在 `~/.statamcp/help/` 启用全局缓存 |
+| `STATA_MCP__CACHE_HELP` | `true` | 在 `~/.statamcp/help/` 启用全局缓存 |
 | `STATA_MCP__SAVE_HELP` | `true` | 在 `stata-mcp-tmp/` 启用项目级缓存 |
 
 **与工具的集成**：

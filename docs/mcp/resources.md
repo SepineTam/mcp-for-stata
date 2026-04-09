@@ -63,7 +63,7 @@ The `StataHelp` class manages help text retrieval with a three-tier caching stra
    - Persists across sessions within the project directory
    - Highest priority for retrieval
 
-2. **Global Cache** (`STATA_MCP__CACHE_HELP`, default: `false`):
+2. **Global Cache** (`STATA_MCP__CACHE_HELP`, default: `true`):
    - Stores help text in `~/.statamcp/help/help__{cmd}.txt`
    - Shared across all projects
    - Secondary priority if project cache miss
@@ -106,7 +106,7 @@ For frequently accessed commands (e.g., `regress`, `xtreg`), enable `STATA_MCP__
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `STATA_MCP__CACHE_HELP` | `false` | Enable global caching at `~/.statamcp/help/` |
+| `STATA_MCP__CACHE_HELP` | `true` | Enable global caching at `~/.statamcp/help/` |
 | `STATA_MCP__SAVE_HELP` | `true` | Enable project-level caching at `stata-mcp-tmp/` |
 
 **Integration with Tools**:
