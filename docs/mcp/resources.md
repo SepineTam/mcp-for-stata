@@ -58,12 +58,12 @@ The help resource implements a dual-registered pattern in the MCP framework, fun
 
 The `StataHelp` class manages help text retrieval with a three-tier caching strategy:
 
-1. **Project-level Cache** (`STATA_MCP_SAVE_HELP`, default: `true`):
+1. **Project-level Cache** (`STATA_MCP__SAVE_HELP`, default: `true`):
    - Stores help text in `stata-mcp-tmp/help__{cmd}.txt`
    - Persists across sessions within the project directory
    - Highest priority for retrieval
 
-2. **Global Cache** (`STATA_MCP_CACHE_HELP`, default: `false`):
+2. **Global Cache** (`STATA_MCP__CACHE_HELP`, default: `false`):
    - Stores help text in `~/.statamcp/help/help__{cmd}.txt`
    - Shared across all projects
    - Secondary priority if project cache miss
@@ -76,8 +76,8 @@ The `StataHelp` class manages help text retrieval with a three-tier caching stra
 **Cache Invalidation**:
 No automatic TTL-based expiration exists. Cache invalidation requires:
 - Manual deletion of cache files (`rm ~/.statamcp/help/help__{cmd}.txt`)
-- Setting environment variable `STATA_MCP_CACHE_HELP=false` to disable caching
-- Setting environment variable `STATA_MCP_SAVE_HELP=false` to disable project-level caching
+- Setting environment variable `STATA_MCP__CACHE_HELP=false` to disable caching
+- Setting environment variable `STATA_MCP__SAVE_HELP=false` to disable project-level caching
 
 **Error Detection**:
 The help system detects command existence by comparing Stata output against a standard error message template:
@@ -94,7 +94,7 @@ If the output matches this pattern, the system raises an exception indicating th
 - **Windows**: Not supported due to Stata CLI limitations on Windows platforms
 
 **Performance Optimization**:
-For frequently accessed commands (e.g., `regress`, `xtreg`), enable `STATA_MCP_CACHE_HELP=true` to avoid repeated Stata invocations. The first execution queries Stata (~50-200ms depending on Stata startup time), subsequent queries return from cache (~1-5ms file read).
+For frequently accessed commands (e.g., `regress`, `xtreg`), enable `STATA_MCP__CACHE_HELP=true` to avoid repeated Stata invocations. The first execution queries Stata (~50-200ms depending on Stata startup time), subsequent queries return from cache (~1-5ms file read).
 
 **Usage Notes**:
 - Help text language depends on the Stata installation locale
@@ -106,8 +106,8 @@ For frequently accessed commands (e.g., `regress`, `xtreg`), enable `STATA_MCP_C
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `STATA_MCP_CACHE_HELP` | `false` | Enable global caching at `~/.statamcp/help/` |
-| `STATA_MCP_SAVE_HELP` | `true` | Enable project-level caching at `stata-mcp-tmp/` |
+| `STATA_MCP__CACHE_HELP` | `false` | Enable global caching at `~/.statamcp/help/` |
+| `STATA_MCP__SAVE_HELP` | `true` | Enable project-level caching at `stata-mcp-tmp/` |
 
 **Integration with Tools**:
 The help resource integrates with Stata-MCP tools in several workflows:

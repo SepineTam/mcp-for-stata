@@ -310,7 +310,7 @@ help("reshape")
 **实现架构**：
 该工具通过带缓存层的 CLI 调用实现 Stata 命令文档检索。文档请求以 `help <cmd>` 命令在批处理模式下执行 Stata，捕获 stdout 作为返回值。`StataHelp` 类通过 `StataFinder` 检测的平台特定 Stata CLI 路径管理调用。
 
-缓存架构在 `~/.statamcp/help/` 目录维护帮助文本缓存，使用基于命令名的文件存储。缓存行为可通过环境变量控制：`STATA_MCP_CACHE_HELP`（默认：true）启用/禁用缓存；`STATA_MCP_SAVE_HELP` 控制缓存持久化。缓存结果包含指示缓存状态的前缀消息："Cached result for {cmd}: ..." 与实时帮助文本。
+缓存架构在 `~/.statamcp/help/` 目录维护帮助文本缓存，使用基于命令名的文件存储。缓存行为可通过环境变量控制：`STATA_MCP__CACHE_HELP`（默认：true）启用/禁用缓存；`STATA_MCP__SAVE_HELP` 控制缓存持久化。缓存结果包含指示缓存状态的前缀消息："Cached result for {cmd}: ..." 与实时帮助文本。
 
 双重注册将 `help` 同时注册为 MCP 工具和资源，通过 `_TOOL_REGISTRY` 系统实现。资源 URI 模式 `help://stata/{cmd}` 通过 MCP 资源协议启用基于 URI 的访问，工具注册启用直接调用。这种双重注册为不同的 MCP 客户端实现提供灵活的访问模式。该工具通过 `_TOOL_REGISTRY` 中的 `unix_only` 标志进行限制，仅在 macOS 和 Linux 上可用。
 

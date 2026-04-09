@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 from ...stata_controller import StataController
 
 if TYPE_CHECKING:
-    from ....config import Config
+    from ...config import Config
 
 
 class StataHelp:
@@ -25,7 +25,9 @@ class StataHelp:
             config: "Config | None" = None,
     ):
         self._config = config
-        self.help_cache_dir = cache_dir or Path.home() / ".statamcp" / "help"
+        self.help_cache_dir = cache_dir or (
+            config.HELP_CACHE_DIR if config else Path.home() / ".statamcp" / "help"
+        )
         self.help_cache_dir.mkdir(parents=True, exist_ok=True)
         self.project_tmp_dir = project_tmp_dir
         if self.project_tmp_dir is not None:
