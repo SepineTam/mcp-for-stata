@@ -54,7 +54,7 @@ StataHelp 包含多级缓存机制以提高性能：
 使用环境变量控制缓存行为：
 
 ```bash
-# 启用全局缓存（默认：false）
+# 启用全局缓存（默认：true）
 export STATA_MCP__CACHE_HELP=true
 
 # 启用项目级保存（默认：true）

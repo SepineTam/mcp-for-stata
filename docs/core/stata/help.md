@@ -54,7 +54,7 @@ Before executing a Stata command, you can use StataHelp to verify if the command
 Control caching behavior with environment variables:
 
 ```bash
-# Enable global caching (default: false)
+# Enable global caching (default: true)
 export STATA_MCP__CACHE_HELP=true
 
 # Enable project-level saving (default: true)
