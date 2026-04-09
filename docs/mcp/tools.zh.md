@@ -6,7 +6,7 @@
 def get_data_info(data_path: str | Path,
                   vars_list: List[str] | None = None,
                   encoding: str = "utf-8",
-                  head: int = 5) -> str:
+                  head: int = 0) -> str:
     ...
 ```
 
@@ -14,7 +14,7 @@ def get_data_info(data_path: str | Path,
 - `data_path`：数据文件的绝对文件系统路径或 URL（必填）
 - `vars_list`：可选变量子集规范，用于选择性分析（默认：null，所有变量）
 - `encoding`：文本格式文件的字符编码（默认：UTF-8，.dta 格式忽略）
-- `head`：预览数据集时显示的行数（默认：5，设为 0 禁用预览）
+- `head`：预览数据集时显示的行数（默认：0，禁用预览以避免大样本上下文溢出）
 
 **返回结构**：
 包含多层元数据的序列化 JSON 字符串：

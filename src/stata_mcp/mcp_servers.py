@@ -423,7 +423,7 @@ def get_data_info(
         data_path: str,
         vars_list: List[str] | None = None,
         encoding: str = "utf-8",
-        head: int = 5,
+        head: int = 0,
 ) -> str:
     """
     Get descriptive statistics and a data preview for a data file (dta, csv, xlsx).
@@ -434,6 +434,7 @@ def get_data_info(
         vars_list (List[str] | None): the vars you want to get info (default is None, means all vars).
         encoding (str): data file encoding method (dta file is not supported this arg),
             if you do not know your data ignore this arg, for most of the data files are `UTF-8`.
+        head (int): number of preview rows to display (default is 0, disabled).
 
     Returns:
         str: JSON string containing data summary with following structure:
