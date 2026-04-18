@@ -107,14 +107,13 @@ def handle_tool(args: Namespace) -> int:
             result = stata_do(
                 dofile_path=args.dofile_path,
                 log_file_name=args.log_file_name,
-                is_read_log=args.is_read_log,
+                read_log_when_error=args.is_read_log,
                 is_replace_log=args.is_replace_log,
                 enable_smcl=args.enable_smcl,
             )
         elif args.tool_action == "help":
             result = stata_help(
                 cmd=args.stata_command,
-                is_read_log=args.is_read_log,
                 enable_smcl=args.enable_smcl,
             )
         elif args.tool_action == "data-info":

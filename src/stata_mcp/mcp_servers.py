@@ -10,6 +10,7 @@
 import json
 import logging
 import logging.handlers
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Literal
@@ -137,7 +138,7 @@ def help(cmd: str, replace: bool = False) -> str:
 def stata_do(
         dofile_path: str,
         log_file_name: str = None,
-        is_read_log: bool = True,
+        read_log_when_error: bool = False,
         is_replace_log: bool = True,
         enable_smcl: bool = True
 ) -> Dict[str, Any]:
@@ -151,8 +152,8 @@ def stata_do(
         dofile_path (str): Absolute or relative path to the Stata do-file (.do) to execute.
         log_file_name (str, optional): Set log file name without a time-string.
             If None, using nowtime as filename. Recommand use default setting (nowtime).
-        is_read_log (bool, optional): Whether to read and return the log file content.
-            Defaults to True.
+        read_log_when_error (bool, optional): Whether to read the text log only when checking for
+            Stata return-code errors like r(198). Defaults to False.
         is_replace_log (bool, optional): Whether to replace existing log file.
             Defaults to True.
         enable_smcl (bool, optional): Whether to generate SMCL format log (.smcl).
@@ -164,7 +165,7 @@ def stata_do(
             - "log_file_path" (Dict[str, str]): Paths to generated log files.
                 - "text": Path to .log file
                 - "smcl": Path to .smcl file (if enable_smcl is True)
-            - "log_content" (Dict[str, str]): Content of log files if is_read_log is True.
+            - "log_content" (Dict[str, str]): Content of log files if read_log_when_error is True.
                 - "text": Content of .log file
                 - "smcl": Message about reading smcl log
             - "error" (str): Error message if execution fails
@@ -175,7 +176,7 @@ def stata_do(
         PermissionError: If there are insufficient permissions to execute Stata or write log files
 
     Example:
-        >>> result = stata_do("/path/to/analysis.do", is_read_log=True)
+        >>> result = stata_do("/path/to/analysis.do", read_log_when_error=True)
         {
             "log_file_path": {
                 "text": "/path/to/your/log/log_file_name.log",
@@ -286,8 +287,15 @@ def stata_do(
     }
 
     # Return log content based on user preference
-    if is_read_log:
-        log_content = {"text": stata_executor.read_log(text_log)}
+    if read_log_when_error:
+        text_content = stata_executor.read_log(text_log)
+        if not _has_stata_error(text_content):
+            text_content = (
+                "There is no Stata return-code error in this execution. "
+                "If you want to view the full log, use the read_log tool."
+            )
+
+        log_content = {"text": text_content}
         if enable_smcl:
             log_content["smcl"] = (
                 "Generally, text log is sufficient."
@@ -413,7 +421,7 @@ def ado_package_install(
         from_message = f"from({package_source_from})" if (package_source_from and source == "net") else ""
         replace_str = "replace" if is_replace else ""
         tmp_file = write_dofile(f"{source} install {package}, {replace_str} {from_message}")
-        return stata_do(tmp_file, is_read_log=True).get("log_content")
+        return stata_do(tmp_file, read_log_when_error=False).get("log_content")
 
 
 # =============================================================================
@@ -631,6 +639,11 @@ def _trim_lines(content: str, lines: int) -> str:
     return "\n".join(all_lines[-abs(lines):])
 
 
+def _has_stata_error(content: str) -> bool:
+    """Return True when the text log contains a Stata return code pattern like r(198)."""
+    return re.search(r"r\(\d+\)", content) is not None
+
+
 def write_dofile(content: str, encoding: str = None) -> str:
     """
     Write stata code to a dofile and return the do-file path.
@@ -673,7 +686,7 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
         "description": (
             "Execute a Stata do-file and return the execution log. "
             "Accepts a do-file path, runs it via the configured Stata executable, "
-            "and optionally returns the log content."
+            "and can optionally read log content only when return-code errors are detected."
         ),
         "func": stata_do,
         "profiles": {"core", "all"},

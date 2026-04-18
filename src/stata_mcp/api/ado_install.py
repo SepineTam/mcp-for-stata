@@ -62,4 +62,4 @@ def ado_package_install(
     replace_flag = "replace" if is_replace else ""
     command = f"{source} install {package}, {replace_flag} {from_message}".strip()
     dofile_path = write_dofile(command, config_file=config_file)
-    return str(stata_do(dofile_path, is_read_log=True, config_file=config_file).get("log_content", {}))
+    return str(stata_do(dofile_path, read_log_when_error=False, config_file=config_file).get("log_content", {}))
