@@ -377,6 +377,16 @@ class Config:
         return StataMcpFolder(self.WORKING_DIR / "stata-mcp-folder")
 
     @property
+    def CLEAN_LOG_DAYS(self) -> int:
+        return self._get_config_value(
+            config_keys=["PROJECT", "CLEAN_LOG_DAYS"],
+            env_var="STATA_MCP__CLEAN_LOG_DAYS",
+            default=-1,
+            converter=self._to_int,
+            validator=lambda x: isinstance(x, int),
+        )
+
+    @property
     def PROJECT_NAME(self) -> str:
         return self.WORKING_DIR.name
 

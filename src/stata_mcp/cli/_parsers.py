@@ -249,6 +249,11 @@ def add_doctor_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
         default=None,
         help="Run only specified check names (repeatable)",
     )
+    doctor_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview cleanup actions without deleting files",
+    )
     return doctor_parser
 
 

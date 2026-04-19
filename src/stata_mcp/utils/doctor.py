@@ -28,6 +28,8 @@ from typing import Any
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
+from .clean_log import clean_log_files, scan_old_files
+
 
 class CheckStatus(Enum):
     """Status values for a doctor check."""
@@ -594,7 +596,91 @@ def check_pypi() -> CheckResult:
         )
 
 
-def _all_checks(config: Any) -> list[tuple[str, Any]]:
+def _format_size(size_bytes: int) -> str:
+    """Return a human-readable file size."""
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    for unit in ["KB", "MB", "GB", "TB"]:
+        size_bytes /= 1024
+        if size_bytes < 1024:
+            return f"{size_bytes:.1f} {unit}"
+    return f"{size_bytes:.1f} PB"
+
+
+def check_cleanup(config: Any, dry_run: bool = False) -> CheckResult:
+    """Check and optionally clean old timestamped files."""
+    clean_days = config.CLEAN_LOG_DAYS
+    scan_days = clean_days if clean_days > 0 else 365
+    target_dirs = [
+        config.STATA_MCP_FOLDER.LOG,
+        config.STATA_MCP_FOLDER.DO,
+        config.STATA_MCP_FOLDER.TMP,
+    ]
+
+    old_files = scan_old_files(target_dirs, max_age_days=scan_days)
+    old_files_count = len(old_files)
+    total_size = 0
+    for file_path in old_files:
+        try:
+            total_size += file_path.stat().st_size
+        except OSError:
+            continue
+
+    if clean_days == -1:
+        return CheckResult(
+            name="cleanup",
+            status=CheckStatus.PASS,
+            message=(
+                f"{old_files_count} old files ({_format_size(total_size)}) "
+                "found; cleanup disabled (CLEAN_LOG_DAYS=-1)"
+            ),
+            details={
+                "old_files": old_files_count,
+                "size_bytes": total_size,
+                "auto_clean": False,
+                "dry_run": dry_run,
+                "clean_log_days": clean_days,
+            },
+        )
+
+    result = clean_log_files(
+        max_age_days=clean_days,
+        dry_run=dry_run,
+        config=config,
+        candidate_files=old_files,
+    )
+    if dry_run:
+        return CheckResult(
+            name="cleanup",
+            status=CheckStatus.PASS,
+            message=(
+                f"dry-run: {result['skipped_count']} files "
+                f"({_format_size(result['freed_bytes'])}) can be cleaned"
+            ),
+            details=result,
+        )
+
+    if result["failed_count"] > 0:
+        return CheckResult(
+            name="cleanup",
+            status=CheckStatus.WARN,
+            message=(
+                f"cleaned {result['deleted_count']} files ({_format_size(result['freed_bytes'])}), "
+                f"{result['failed_count']} failed"
+            ),
+            details=result,
+            hint="Check file permissions for failed paths in cleanup.errors.",
+        )
+
+    return CheckResult(
+        name="cleanup",
+        status=CheckStatus.PASS,
+        message=f"cleaned {result['deleted_count']} files ({_format_size(result['freed_bytes'])})",
+        details=result,
+    )
+
+
+def _all_checks(config: Any, dry_run: bool = False) -> list[tuple[str, Any]]:
     return [
         ("os", check_os),
         ("python", check_python),
@@ -607,6 +693,7 @@ def _all_checks(config: Any) -> list[tuple[str, Any]]:
         ("guard", lambda: check_guard(config)),
         ("monitor", lambda: check_monitor(config)),
         ("pypi", check_pypi),
+        ("cleanup", lambda: check_cleanup(config, dry_run)),
     ]
 
 
@@ -627,10 +714,15 @@ AVAILABLE_CHECKS = [
     "guard",
     "monitor",
     "pypi",
+    "cleanup",
 ]
 
 
-def run_doctor(config: Any, only_checks: list[str] | None = None) -> DoctorReport:
+def run_doctor(
+    config: Any,
+    only_checks: list[str] | None = None,
+    dry_run: bool = False,
+) -> DoctorReport:
     """Run selected checks and return a report."""
     try:
         version_text = pkg_version("stata-mcp")
@@ -641,7 +733,7 @@ def run_doctor(config: Any, only_checks: list[str] | None = None) -> DoctorRepor
     selected = set(only_checks) if only_checks else None
     stata_cli_path: str | None = None
 
-    for check_name, check_func in _all_checks(config):
+    for check_name, check_func in _all_checks(config, dry_run=dry_run):
         if selected is not None and check_name not in selected:
             continue
 
