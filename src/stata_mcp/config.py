@@ -189,6 +189,10 @@ class Config:
         """Convert value to Path object."""
         return Path(value).expanduser().absolute() if value else None
 
+    @staticmethod
+    def _to_str(value):
+        return str(value)
+
     @property
     def STATA_MCP_DIRECTORY(self) -> Path:
         base_dir = Path.home() / ".statamcp"
@@ -372,9 +376,45 @@ class Config:
 
         return cwd
 
+    def _migrate_stata_mcp_folder_warning(self):
+        old_folder = self.WORKING_DIR / "stata-mcp-folder"
+        if not old_folder.exists():
+            return
+
+        migrated_marker = old_folder / ".migrated"
+        if migrated_marker.exists():
+            return
+
+        migrate_message = (
+            "Warning! Stata MCP has migrated from \"$PWD / stata-mcp-folder\" "
+            "to \"$PWD / .statamcp\" since v1.16.0. "
+            "To keep using the old folder, set environment variable "
+            "STATA_MCP__FOLDER_TAG=stata-mcp-folder."
+        )
+        warning_file = old_folder / "README"
+        if not warning_file.exists():
+            warning_file.write_text(migrate_message)
+        else:
+            old_folder_readme = warning_file.read_text()
+            if migrate_message not in old_folder_readme:
+                warning_file.write_text(migrate_message + "\n" + old_folder_readme)
+
+        migrated_marker.touch()
+
+    @cached_property
+    def STATA_MCP_FOLDER_TAG(self) -> str:
+        return self._get_config_value(
+            config_keys=["PROJECT", "FOLDER_TAG"],
+            env_var="STATA_MCP__FOLDER_TAG",
+            default=".statamcp",
+            converter=self._to_str,
+            validator=lambda x: isinstance(x, str)
+        )
+
     @cached_property
     def STATA_MCP_FOLDER(self) -> StataMcpFolder:
-        return StataMcpFolder(self.WORKING_DIR / "stata-mcp-folder")
+        self._migrate_stata_mcp_folder_warning()
+        return StataMcpFolder(self.WORKING_DIR / self.STATA_MCP_FOLDER_TAG)
 
     @property
     def CLEAN_LOG_DAYS(self) -> int:
