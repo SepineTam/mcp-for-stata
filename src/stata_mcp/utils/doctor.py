@@ -643,7 +643,12 @@ def check_cleanup(config: Any, dry_run: bool = False) -> CheckResult:
             },
         )
 
-    result = clean_log_files(max_age_days=clean_days, dry_run=dry_run, config=config)
+    result = clean_log_files(
+        max_age_days=clean_days,
+        dry_run=dry_run,
+        config=config,
+        candidate_files=old_files,
+    )
     if dry_run:
         return CheckResult(
             name="cleanup",

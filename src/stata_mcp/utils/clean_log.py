@@ -56,7 +56,12 @@ def scan_old_files(dirs: list[Path], max_age_days: int, now: datetime | None = N
     return results
 
 
-def clean_log_files(max_age_days: int, dry_run: bool = False, config: Config | None = None) -> dict[str, Any]:
+def clean_log_files(
+    max_age_days: int,
+    dry_run: bool = False,
+    config: Config | None = None,
+    candidate_files: list[Path] | None = None,
+) -> dict[str, Any]:
     """Clean old timestamped files from log/do/tmp folders."""
     if config is None:
         from ..config import Config
@@ -69,7 +74,11 @@ def clean_log_files(max_age_days: int, dry_run: bool = False, config: Config | N
         cfg.STATA_MCP_FOLDER.DO,
         cfg.STATA_MCP_FOLDER.TMP,
     ]
-    candidates = scan_old_files(target_dirs, max_age_days=max_age_days)
+    candidates = (
+        candidate_files
+        if candidate_files is not None
+        else scan_old_files(target_dirs, max_age_days=max_age_days)
+    )
     candidate_size = 0
     for path in candidates:
         try:
