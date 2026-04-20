@@ -7,15 +7,27 @@
 # @Email  : sepinetam@gmail.com
 # @File   : stata_help.py
 
-import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ...stata_controller import StataController
 
+if TYPE_CHECKING:
+    from ...config import Config
+
 
 class StataHelp:
-    def __init__(self, stata_cli: str, project_tmp_dir: Path = None, cache_dir: Path = None):
-        self.help_cache_dir = cache_dir or Path.home() / ".statamcp" / "help"
+    def __init__(
+            self,
+            stata_cli: str,
+            project_tmp_dir: Path | None = None,
+            cache_dir: Path | None = None,
+            config: "Config | None" = None,
+    ):
+        self._config = config
+        self.help_cache_dir = cache_dir or (
+            config.HELP_CACHE_DIR if config else Path.home() / ".statamcp" / "help"
+        )
         self.help_cache_dir.mkdir(parents=True, exist_ok=True)
         self.project_tmp_dir = project_tmp_dir
         if self.project_tmp_dir is not None:
@@ -24,19 +36,24 @@ class StataHelp:
 
     @property
     def IS_SAVE(self) -> bool:
-        return os.getenv("STATA_MCP_SAVE_HELP", 'true').lower() == "true"
+        if self._config:
+            return self._config.IS_SAVE_HELP
+        return True
 
     @property
     def IS_CACHE(self) -> bool:
-        return os.getenv("STATA_MCP_CACHE_HELP", "false").lower() == "true"
+        if self._config:
+            return self._config.IS_CACHE_HELP
+        return False
 
-    def help(self, cmd: str) -> str:
-        saved_help_result = self.load_from_project(cmd)
-        cached_help_result = self.load_from_cache(cmd)
-        if saved_help_result and self.IS_SAVE:
-            return f"Saved result for {cmd}\n" + saved_help_result
-        if cached_help_result and self.IS_CACHE:
-            return f"Cached result for {cmd}\n" + cached_help_result
+    def help(self, cmd: str, replace: bool = False) -> str:
+        if not replace:
+            saved_help_result = self.load_from_project(cmd)
+            cached_help_result = self.load_from_cache(cmd)
+            if saved_help_result and self.IS_SAVE:
+                return f"Saved result for {cmd}\n" + saved_help_result
+            if cached_help_result and self.IS_CACHE:
+                return f"Cached result for {cmd}\n" + cached_help_result
 
         # If no cached help found, get from Stata
         try:
@@ -44,17 +61,17 @@ class StataHelp:
         except Exception as e:
             return str(e)
 
-        self._cache_and_save(cmd, content=help_result)
+        self._cache_and_save(cmd, content=help_result, force=replace)
         return help_result
 
-    def _cache_and_save(self, cmd: str, content: str) -> None:
-        if self.IS_CACHE:
+    def _cache_and_save(self, cmd: str, content: str, force: bool = False) -> None:
+        if force or self.IS_CACHE:
             try:
                 with open(self.help_cache_dir / f"help__{cmd}.txt", "w", encoding="utf-8") as f:
                     f.write(content)
             except Exception:
                 pass
-        if self.IS_SAVE and self.project_tmp_dir is not None:
+        if (force or self.IS_SAVE) and self.project_tmp_dir is not None:
             try:
                 with open(self.project_tmp_dir / f"help__{cmd}.txt", "w", encoding="utf-8") as f:
                     f.write(content)

@@ -1,6 +1,14 @@
 {
   "permissions": {
     "allow": [
+      "Skill(rfc-impl-generator)",
+      "Read(.claude/rules/*)",
+      "Bash(stata-mcp --version)",
+      "Bash(stata-mcp --help)",
+      "Bash(stata-mcp doctor:*)",
+      "Bash(stata-mcp server:*)",
+      "Bash(stata-mcp tool:*)",
+      "Bash(stata-mcp config:*)",
       "Bash(uvx:*)",
       "Bash(uv run:*)",
       "Bash(uv add:*)",
@@ -13,12 +21,12 @@
       "Bash(git log:*)",
       "Bash(git diff:*)",
       "Bash(git status:*)",
+      "Bash(git fetch:*)",
       "Bash(find:*)",
-      "Bash(python:*)",
-      "Bash(python3:*)",
       "Bash(mcp dev main.py)",
       "Bash(npx @modelcontextprotocol/inspector uv run main.py)",
       "WebFetch(domain:*.modelcontextprotocol.io)",
+      "WebFetch(domain:*.lianxh.cn)",
       "WebFetch(domain:*.stata.com)",
       "WebFetch(domain:*.statamcp.com)",
       "WebFetch(domain:*.nber.com)",
@@ -38,16 +46,17 @@
       "Bash(echo $:*TOKEN:*)",
       "Bash(echo $:*API_KEY:*)",
       "Bash(cat .env)",
-      "Read(.env)",
       "Read(~/.zshrc)",
       "Read(~/.bashrc)",
       "Read(~/.profile)",
       "Read(~/.zprofile)"
+    ],
+    "ask": [
+      "Read(.env)"
     ]
   },
   "enabledMcpjsonServers": [
-    "context7",
-    "github"
+    "context7"
   ],
   "enableAllProjectMcpServers": true
 }

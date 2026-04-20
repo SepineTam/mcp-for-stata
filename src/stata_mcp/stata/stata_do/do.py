@@ -181,6 +181,7 @@ class StataDo:
             {self.generate_log_command(smcl_file, is_replace, 'smcl') if enable_smcl else ''}
             do "{dofile_path}"
             log close _all
+            clear
             exit, STATA
             """
             _, stderr = proc.communicate(input=commands)  # Send commands and wait for completion
@@ -296,6 +297,7 @@ class StataDo:
             {self.generate_log_command(smcl_file, is_replace, 'smcl') if enable_smcl else ''}
             do "{dofile_path}"
             log close _all
+            clear
             exit, STATA
             """
 

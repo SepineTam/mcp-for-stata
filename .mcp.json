@@ -15,6 +15,13 @@
       "headers": {
         "Authorization": "Bearer ${GITHUB_TOKEN}"
       }
+    },
+    "mineru": {
+      "type": "streamableHttp",
+      "url": "https://mcp.mineru.net/mcp",
+      "env": {
+        "MINERU_API_TOKEN": "${MINERU_API_TOKEN}"
+      }
     }
   }
 }

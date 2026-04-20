@@ -24,7 +24,7 @@ StataHelp 包含多级缓存机制以提高性能：
 
 - **项目级缓存**：将帮助结果保存到项目的临时目录以便快速访问
 - **全局缓存**：将帮助文件存储在 `~/.stata_mcp/help/` 中以便跨项目重用
-- **环境控制**：使用 `STATA_MCP_CACHE_HELP` 和 `STATA_MCP_SAVE_HELP` 控制缓存行为
+- **环境控制**：使用 `STATA_MCP__CACHE_HELP` 和 `STATA_MCP__SAVE_HELP` 控制缓存行为
 
 ### 命令验证
 
@@ -54,11 +54,11 @@ StataHelp 包含多级缓存机制以提高性能：
 使用环境变量控制缓存行为：
 
 ```bash
-# 启用全局缓存（默认：false）
-export STATA_MCP_CACHE_HELP=true
+# 启用全局缓存（默认：true）
+export STATA_MCP__CACHE_HELP=true
 
 # 启用项目级保存（默认：true）
-export STATA_MCP_SAVE_HELP=true
+export STATA_MCP__SAVE_HELP=true
 ```
 
 ## 限制

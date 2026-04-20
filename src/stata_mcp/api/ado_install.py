@@ -49,10 +49,17 @@ def ado_package_install(
                     "\nPlease check the GitHub repository URL, verify case sensitivity, "
                     "and ensure the github command is installed in Stata."
                 )
+        else:
+            try:
+                from ..mcp_servers import _load_help_cls
+
+                _load_help_cls().help(package, replace=True)
+            except Exception:
+                pass
         return install_message
 
     from_message = f"from({package_source_from})" if (package_source_from and source == "net") else ""
     replace_flag = "replace" if is_replace else ""
     command = f"{source} install {package}, {replace_flag} {from_message}".strip()
     dofile_path = write_dofile(command, config_file=config_file)
-    return str(stata_do(dofile_path, is_read_log=True, config_file=config_file).get("log_content", {}))
+    return str(stata_do(dofile_path, read_log_when_error=False, config_file=config_file).get("log_content", {}))

@@ -304,7 +304,7 @@ help("reshape")
 **Implementation Architecture**:
 The tool implements Stata command documentation retrieval through CLI invocation with caching layer. Documentation requests execute Stata in batch mode with `help <cmd>` command, capturing stdout for return value. The `StataHelp` class manages invocation through platform-specific Stata CLI paths detected by `StataFinder`.
 
-Caching architecture maintains help text cache at `~/.statamcp/help/` directory with file-based storage keyed by command name. Cache behavior controllable via environment variables: `STATA_MCP_CACHE_HELP` (default: true) enables/disables caching; `STATA_MCP_SAVE_HELP` controls cache persistence. Cached results include prefix message indicating cache status: "Cached result for {cmd}: ..." versus live help text.
+Caching architecture maintains help text cache at `~/.statamcp/help/` directory with file-based storage keyed by command name. Cache behavior controllable via environment variables: `STATA_MCP__CACHE_HELP` (default: true) enables/disables caching; `STATA_MCP__SAVE_HELP` controls cache persistence. Cached results include prefix message indicating cache status: "Cached result for {cmd}: ..." versus live help text.
 
 Dual registration registers `help` as both an MCP tool and resource via the `_TOOL_REGISTRY` system. Resource URI pattern `help://stata/{cmd}` enables URI-based access through MCP resource protocol, while tool registration enables direct invocation. This dual registration provides flexible access patterns for different MCP client implementations. The tool is gated by the `unix_only` flag in `_TOOL_REGISTRY` and is only available on macOS and Linux.
 

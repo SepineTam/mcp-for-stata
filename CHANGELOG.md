@@ -2,6 +2,24 @@
 
 
 <details>
+<summary>Click to expand v1.16.0 details</summary>
+
+## [1.16.0] - 2026-04-20
+
+### Added
+- **Doctor**: Add `check_cleanup` to scan and optionally remove old log/dofile/tmp files older than `CLEAN_LOG_DAYS` (PR #66 closes #63).
+- **Config**: Add `STATA_MCP__FOLDER_TAG` config with env var override (default: `.statamcp`) and migration warning for legacy `stata-mcp-folder` (PR #67).
+
+### Fixed
+- **Stata Do**: Insert `clear` before Unix do-file runs to prevent Stata session hangs (PR #64 closes #60).
+- **API**: Rename `is_read_log` to `read_log_when_error` for clearer semantics (PR #65 closes #59).
+
+### Changed
+- **MCP Server**: Trim verbose tool docstrings for `stata_do`, `ado_package_install`, and `get_data_info` to reduce token usage (issue #58).
+
+</details>
+
+<details>
 <summary>Click to expand v1.15.1 details</summary>
 
 ## [1.15.1] - 2026-04-09

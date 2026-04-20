@@ -7,6 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : stata_do.py
 
+import re
 from pathlib import Path
 from typing import Any, Dict
 
@@ -20,12 +21,12 @@ from ._runtime import create_runtime_context
 def stata_do(
     dofile_path: str,
     log_file_name: str = None,
-    is_read_log: bool = True,
+    read_log_when_error: bool = False,
     is_replace_log: bool = True,
     enable_smcl: bool = True,
     config_file: str | Path | None = None,
 ) -> Dict[str, Any]:
-    """Execute a Stata do-file and optionally return log content."""
+    """Execute a Stata do-file and optionally return log content when errors occur."""
     runtime = create_runtime_context(config_file=config_file, require_stata=True)
 
     try:
@@ -87,11 +88,24 @@ def stata_do(
         }
     }
 
-    if is_read_log:
+    if read_log_when_error:
         text_log_reader = StataLog.from_path(text_log_path)
-        log_content = {"text": text_log_reader.read_without_framework()}
+        text_content = text_log_reader.read_without_framework()
+
+        if not _has_stata_error(text_content):
+            text_content = (
+                "There is no Stata return-code error in this execution. "
+                "If you want to view the full log, use the read_log tool."
+            )
+
+        log_content = {"text": text_content}
         if enable_smcl and "smcl" in log_file_path_mapping:
             log_content["smcl"] = log_file_path_mapping["smcl"].as_posix()
         result["log_content"] = log_content
 
     return result
+
+
+def _has_stata_error(content: str) -> bool:
+    """Return True when the text log contains a Stata return code pattern like r(198)."""
+    return re.search(r"r\(\d+\)", content) is not None

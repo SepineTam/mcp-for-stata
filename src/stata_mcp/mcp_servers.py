@@ -10,6 +10,7 @@
 import json
 import logging
 import logging.handlers
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Literal
@@ -108,13 +109,14 @@ def _load_help_cls():
         _help_cls = StataHelp(
             stata_cli=config.STATA_CLI,
             project_tmp_dir=config.STATA_MCP_FOLDER.TMP,
-            cache_dir=config.STATA_MCP_DIRECTORY / "help"
+            cache_dir=config.HELP_CACHE_DIR,
+            config=config,
         )
 
     return _help_cls
 
 
-def help(cmd: str) -> str:
+def help(cmd: str, replace: bool = False) -> str:
     """
     Retrieve documentation and usage information for a Stata command.
 
@@ -128,77 +130,47 @@ def help(cmd: str) -> str:
     Notes:
         If the returned content starts with 'Cached result for {cmd}', but the output shows the command
         does not exist or you believe the cached content is incorrect, and you are certain the command exists,
-        set the environment variable STATA_MCP_CACHE_HELP to false. STATA_MCP_SAVE_HELP works similarly.
+        set the environment variable STATA_MCP__CACHE_HELP to false. STATA_MCP__SAVE_HELP works similarly.
     """
-    return _load_help_cls().help(cmd)
+    return _load_help_cls().help(cmd, replace=replace)
 
 
 def stata_do(
         dofile_path: str,
         log_file_name: str = None,
-        is_read_log: bool = True,
+        read_log_when_error: bool = False,
         is_replace_log: bool = True,
         enable_smcl: bool = True
 ) -> Dict[str, Any]:
     """
-    Execute a Stata do-file and return the execution log.
-
-    This function runs a Stata do-file using the configured Stata executable and
-    generates a log file. It supports cross-platform execution (macOS, Windows, Linux).
+    Execute a Stata do-file and return log file paths.
 
     Args:
-        dofile_path (str): Absolute or relative path to the Stata do-file (.do) to execute.
-        log_file_name (str, optional): Set log file name without a time-string.
-            If None, using nowtime as filename. Recommand use default setting (nowtime).
-        is_read_log (bool, optional): Whether to read and return the log file content.
-            Defaults to True.
-        is_replace_log (bool, optional): Whether to replace existing log file.
-            Defaults to True.
-        enable_smcl (bool, optional): Whether to generate SMCL format log (.smcl).
-            SMCL logs preserve hyperlink information from commands like findsj, getiref.
-            Defaults to True. (Unix only, Windows support pending)
+        dofile_path (str): Path to the .do file.
+        log_file_name (str, optional): Custom log name without timestamp. Default uses current time.
+        read_log_when_error (bool): If True, include log text only when a Stata return-code error
+            (e.g. r(198)) is present. If no error is found, returns a short confirmation instead.
+        is_replace_log (bool): Overwrite existing log files. Defaults to True.
+        enable_smcl (bool): Also generate .smcl log (Unix only). Defaults to True.
 
     Returns:
-        Dict[str, Any]: A dictionary containing:
-            - "log_file_path" (Dict[str, str]): Paths to generated log files.
-                - "text": Path to .log file
-                - "smcl": Path to .smcl file (if enable_smcl is True)
-            - "log_content" (Dict[str, str]): Content of log files if is_read_log is True.
-                - "text": Content of .log file
-                - "smcl": Message about reading smcl log
-            - "error" (str): Error message if execution fails
+        Dict[str, Any]: "log_file_path" (text/smcl) and optionally "log_content".
+
+    Examples:
+        >>> stata_do("/path/to/analysis.do")
+        >>> stata_do("/path/to/analysis.do", read_log_when_error=True)
 
     Raises:
-        FileNotFoundError: If the specified do-file does not exist
-        RuntimeError: If Stata execution fails or log file cannot be generated
-        PermissionError: If there are insufficient permissions to execute Stata or write log files
+        FileNotFoundError: If the specified do-file does not exist.
+        RuntimeError: If Stata execution fails or log file cannot be generated.
+        PermissionError: If there are insufficient permissions to execute Stata or write log files.
 
-    Example:
-        >>> result = stata_do("/path/to/analysis.do", is_read_log=True)
-        {
-            "log_file_path": {
-                "text": "/path/to/your/log/log_file_name.log",
-                "smcl": "/path/to/your/log/log_file_name.smcl"
-            },
-            "log_content": {
-                "text": "log content ...",
-                ...
-            }
-        }
-        >>> print(result["log_file_path"]["text"])
-        /path/to/your/log/log_file_name.log
-        >>> print(result["log_file_path"]["smcl"])
-        /path/to/your/log/log_file_name.smcl
-
-        >>> result = stata_do("/not/exist/file.do")
-        {'error': 'Dofile /not/exist/file.do does not exist'}
-
-    Note:
-        - The log file is automatically created in the configured log_file_path directory
-        - Supports multiple operating systems through the StataDo executor
-        - SMCL format preserves hyperlinks from findsj, getiref commands
-        - Security guard blocks execution when dangerous commands are detected
-        - To disable security guard, set environment variable STATA_MCP__IS_GUARD=false
+    Notes:
+        - Log files are automatically created in the configured log directory.
+        - Supports multiple operating systems through the StataDo executor.
+        - SMCL format preserves hyperlinks from findsj, getiref commands (Unix only).
+        - Security guard blocks execution when dangerous commands are detected.
+        - To disable security guard, set STATA_MCP__IS_GUARD=false (not recommended).
     """
     # Convert dofile_path from str to Path
     try:
@@ -285,8 +257,15 @@ def stata_do(
     }
 
     # Return log content based on user preference
-    if is_read_log:
-        log_content = {"text": stata_executor.read_log(text_log)}
+    if read_log_when_error:
+        text_content = stata_executor.read_log(text_log)
+        if not _has_stata_error(text_content):
+            text_content = (
+                "There is no Stata return-code error in this execution. "
+                "If you want to view the full log, use the read_log tool."
+            )
+
+        log_content = {"text": text_content}
         if enable_smcl:
             log_content["smcl"] = (
                 "Generally, text log is sufficient."
@@ -304,74 +283,23 @@ def ado_package_install(
         package_source_from: str = None
 ) -> str:
     """
-    Install a Stata ado package from SSC, GitHub, or net sources.
+    Install a Stata package from SSC, GitHub, or net.
 
     Args:
-        package (str): The name of the package to be installed.
-                       for SSC, use package name;
-                       for GitHub, use "username/reponame" format.
-        source (str): The source to install from. Options are "ssc" (default) or "GitHub".
-        is_replace (bool): Whether to force replacement of an existing installation. Defaults to True.
-        package_source_from (str): The directory or url of the package from, only works if source == 'net'
+        package (str): Package name. For GitHub, use "user/repo" format.
+        source (str): "ssc" (default), "github", or "net".
+        is_replace (bool): Force reinstallation if already present.
+        package_source_from (str): Directory or URL (required only for source="net").
 
     Returns:
-        str: The execution log returned by Stata after running the installation.
+        str: Stata installation log as a string.
 
     Examples:
-        >>> ado_package_install(package="outreg2", source="ssc")
-        >>> # this would install outreg2 from ssc
-        >>> ado_package_install(package="sepinetam/texiv", source="github")
-        >>> # this would install texiv from https://github.com/sepinetam/texiv
-        -------------------------------------------------------------------------------
-        name:  <unnamed>
-        log:  /Users/sepinetam/Documents/stata-mcp-folder/stata-mcp-log/20251012185447.log
-        log type:  text
-        opened on:  12 Oct 2025, 18:54:47
-
-        . do "/Users/sepinetam/Documents/stata-mcp-folder/stata-mcp-dofile/20251012185447.do"
-
-        . ssc install outreg2, replace
-        checking outreg2 consistency and verifying not already installed...
-        all files already exist and are up to date.
-
-        .
-        end of do-file
-
-        . log close
-        name:  <unnamed>
-        log:  /Users/sepinetam/Documents/stata-mcp-folder/stata-mcp-log/20251012185447.log
-        log type:  text
-        closed on:  12 Oct 2025, 18:54:55
-        -------------------------------------------------------------------------------
-
-        >>> ado_package_install(command="a_fake_command")
-        -------------------------------------------------------------------------------
-        name:  <unnamed>
-        log:  /Users/sepinetam/Documents/stata-mcp-folder/stata-mcp-log/20251012190159.log
-        log type:  text
-        opened on:  12 Oct 2025, 19:01:59
-
-        . do "/Users/sepinetam/Documents/stata-mcp-folder/stata-mcp-dofile/20251012190159.do"
-
-        . ssc install a_fake_command, replace
-        ssc install: "a_fake_command" not found at SSC, type search a_fake_command
-        (To find all packages at SSC that start with a, type ssc describe a)
-        r(601);
-
-        end of do-file
-
-        r(601);
-
-        . log close
-        name:  <unnamed>
-        log:  /Users/sepinetam/Documents/stata-mcp-folder/stata-mcp-log/20251012190159.log
-        log type:  text
-        closed on:  12 Oct 2025, 19:02:00
-        -------------------------------------------------------------------------------
+        >>> ado_package_install(package="outreg2")
+        >>> ado_package_install(package="SepineTam/TexIV", source="github")
 
     Notes:
-        Avoid using this tool unless strictly necessary, as SSC installation can be time-consuming
-        and may not be required if the package is already present.
+        SSC installs can be slow; skip if the package is likely already installed.
     """
     source = source.lower()
 
@@ -412,7 +340,7 @@ def ado_package_install(
         from_message = f"from({package_source_from})" if (package_source_from and source == "net") else ""
         replace_str = "replace" if is_replace else ""
         tmp_file = write_dofile(f"{source} install {package}, {replace_str} {from_message}")
-        return stata_do(tmp_file, is_read_log=True).get("log_content")
+        return stata_do(tmp_file, read_log_when_error=False).get("log_content")
 
 
 # =============================================================================
@@ -426,78 +354,20 @@ def get_data_info(
         head: int = 0,
 ) -> str:
     """
-    Get descriptive statistics and a data preview for a data file (dta, csv, xlsx).
+    Return descriptive statistics for a supported data file.
 
     Args:
-        data_path (str): the data file's absolutely path.
-            Current, only allow [dta, csv, tsv, psv, xlsx, xls] file.
-        vars_list (List[str] | None): the vars you want to get info (default is None, means all vars).
-        encoding (str): data file encoding method (dta file is not supported this arg),
-            if you do not know your data ignore this arg, for most of the data files are `UTF-8`.
-        head (int): number of preview rows to display (default is 0, disabled).
+        data_path (str): Absolute path to .dta, .csv, .xlsx, .xls, .sav file.
+        vars_list (List[str] | None): Optional variable subset (default: all variables).
+        encoding (str): File encoding (ignored for .dta).
+        head (int): Number of preview rows (0 = disabled).
 
     Returns:
-        str: JSON string containing data summary with following structure:
-            - overview: Basic information including source, obs, var_numbers, var_list
-            - info_config: Configuration settings (metrics, max_display, decimal_places)
-            - vars_detail: Detailed statistics for each variable
-            - saved_path: Path to cached JSON file
+        str: JSON string with overview, variable details, and config.
 
     Examples:
         >>> get_data_info("/Applications/Stata/auto.dta")
-        {
-            'overview': {
-                'source': '/Applications/Stata/auto.dta',
-                'obs': 74,
-                'var_numbers': 12,
-                'var_list': ['make', 'price', 'mpg', 'rep78', 'headroom', 'trunk',
-                             'weight', 'length', 'turn', 'displacement', 'gear_ratio', 'foreign'],
-                'hash': 'c557a2db346b522404c2f22932048de4'
-            },
-            'info_config': {
-                'metrics': ['obs', 'mean', 'stderr', 'min', 'max'],
-                'max_display': 10,
-                'decimal_places': 3
-            },
-            'vars_detail': {
-                'make': {
-                    'type': 'str',
-                    'var': 'make',
-                    'summary': {
-                        'obs': 74,
-                        'value_list': ['AMC Pacer', 'Chev. Chevette', 'Chev. Nova',
-                                      'Honda Accord', 'Merc. Monarch', 'Olds Cutl Supr',
-                                      'Olds Delta 88', 'Pont. Catalina', 'Renault Le Car', 'Volvo 260']
-                    }
-                },
-                'price': {
-                    'type': 'float',
-                    'var': 'price',
-                    'summary': {
-                        'obs': 74, 'mean': 6165.257, 'stderr': 342.872, 'min': 3291.0, 'max': 15906.0,
-                        'q1': 4220.25, 'med': 5006.5, 'q3': 6332.25, 'skewness': 1.688, 'kurtosis': 2.034
-                    }
-                },
-                'mpg': {
-                    'type': 'float',
-                    'var': 'mpg',
-                    'summary': {
-                        'obs': 74, 'mean': 21.297, 'stderr': 0.673, 'min': 12.0, 'max': 41.0,
-                        'q1': 18.0, 'med': 20.0, 'q3': 24.75, 'skewness': 0.968, 'kurtosis': 1.13
-                    }
-                },
-                'rep78': {
-                    'type': 'float',
-                    'var': 'rep78',
-                    'summary': {
-                        'obs': 69, 'mean': 3.406, 'stderr': 0.119, 'min': 1.0, 'max': 5.0,
-                        'q1': 3.0, 'med': 3.0, 'q3': 4.0, 'skewness': -0.058, 'kurtosis': -0.254
-                    }
-                },
-                ...
-            },
-            'saved_path': '$cwd/stata-mcp-folder/stata-mcp-tmp/data_info__auto_dta__hash_c557a2db346b.json'
-        }
+        >>> get_data_info("/Applications/Stata/auto.dta", vars_list=["price", "mpg"], head=5)
     """
     data_path = Path(data_path).expanduser().resolve()
     data_extension = data_path.suffix.lower().strip(".")
@@ -630,6 +500,11 @@ def _trim_lines(content: str, lines: int) -> str:
     return "\n".join(all_lines[-abs(lines):])
 
 
+def _has_stata_error(content: str) -> bool:
+    """Return True when the text log contains a Stata return code pattern like r(198)."""
+    return re.search(r"r\(\d+\)", content) is not None
+
+
 def write_dofile(content: str, encoding: str = None) -> str:
     """
     Write stata code to a dofile and return the do-file path.
@@ -672,7 +547,7 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
         "description": (
             "Execute a Stata do-file and return the execution log. "
             "Accepts a do-file path, runs it via the configured Stata executable, "
-            "and optionally returns the log content."
+            "and can optionally read log content only when return-code errors are detected."
         ),
         "func": stata_do,
         "profiles": {"core", "all"},
