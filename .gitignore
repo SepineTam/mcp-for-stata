@@ -52,3 +52,6 @@ backup/
 backup.*
 *.backup
 *.backup.*
+
+# AI docs
+ai-driven/
