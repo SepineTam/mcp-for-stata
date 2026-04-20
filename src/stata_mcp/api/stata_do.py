@@ -7,8 +7,8 @@
 # @Email  : sepinetam@gmail.com
 # @File   : stata_do.py
 
-from pathlib import Path
 import re
+from pathlib import Path
 from typing import Any, Dict
 
 from ..core.types import RAMLimitExceededError
