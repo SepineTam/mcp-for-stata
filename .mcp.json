@@ -17,11 +17,11 @@
       }
     },
     "mineru": {
-      "type": "streamableHttp",
-      "url": "https://mcp.mineru.net/mcp",
-      "env": {
-        "MINERU_API_TOKEN": "${MINERU_API_TOKEN}"
-      }
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "mineru-open-mcp"
+      ]
     }
   }
 }
