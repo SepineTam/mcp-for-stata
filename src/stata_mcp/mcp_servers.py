@@ -628,13 +628,14 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
             continue
         server.tool(name=name, description=meta["description"])(tool_func)
 
-    # Keep help as both tool and resource on Unix platforms.
-    if config.IS_UNIX and profile in {"core", "all"}:
-        server.resource(
-            uri="help://stata/{cmd}",
-            name="help",
-            description="Get help for a Stata command"
-        )(help)
+    # # Keep help as both tool and resource on Unix platforms.
+    # # NOTE: Temporarily disabled due to MCP resource URI parameter mismatch
+    # if config.IS_UNIX and profile in {"core", "all"}:
+    #     server.resource(
+    #         uri="help://stata/{cmd}",
+    #         name="help",
+    #         description="Get help for a Stata command"
+    #     )(help)
 
     _registered_profile = profile
 
