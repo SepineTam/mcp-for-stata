@@ -2,6 +2,16 @@
 
 
 <details>
+<summary>Click to expand v1.16.1 details</summary>
+
+## [1.16.1] - 2026-04-22
+
+### Fixed
+- **MCP Server**: Disable `help` resource registration to fix startup crash caused by URI parameter mismatch between `{cmd}` and function signature `(cmd, replace)`.
+
+</details>
+
+<details>
 <summary>Click to expand v1.16.0 details</summary>
 
 ## [1.16.0] - 2026-04-20
