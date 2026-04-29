@@ -181,10 +181,19 @@ def stata_do(
         return {"error": f"Could not recognize dofile_path as pathlib.Path object: {e}"}
 
     dofile_path_resolved = dofile_path.resolve()
-    allowed_dirs = [
-        config.STATA_MCP_FOLDER.DO.resolve(),
-        config.WORKING_DIR.resolve(),
+    candidate_allowed_dirs = [
+        config.STATA_MCP_FOLDER.DO,
+        config.WORKING_DIR,
     ]
+    allowed_dirs: List[Path] = []
+    for candidate_dir in candidate_allowed_dirs:
+        if candidate_dir.exists():
+            allowed_dirs.append(candidate_dir.resolve())
+        else:
+            logging.warning(
+                "Skip missing allowed directory for dofile execution boundary check: "
+                f"{candidate_dir}"
+            )
     is_allowed = _is_within_allowed_directories(dofile_path_resolved, allowed_dirs)
     if not is_allowed:
         logging.warning(
@@ -519,11 +528,10 @@ def _trim_lines(content: str, lines: int) -> str:
 
 
 def _is_within_allowed_directories(target_path: Path, allowed_dirs: List[Path]) -> bool:
-    """Return True when target_path resolves under one of the allowed directories."""
-    resolved_target = target_path.resolve()
+    """Return True when target_path is under one of the allowed directories."""
     for allowed_dir in allowed_dirs:
         try:
-            resolved_target.relative_to(allowed_dir.resolve())
+            target_path.relative_to(allowed_dir)
             return True
         except ValueError:
             continue

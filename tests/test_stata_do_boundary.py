@@ -1,0 +1,192 @@
+"""Tests for dofile execution boundary validation."""
+
+from __future__ import annotations
+
+import importlib
+import sys
+from pathlib import Path
+from types import ModuleType, SimpleNamespace
+
+import pytest
+
+
+@pytest.fixture
+def loaded_mcp_servers(monkeypatch: pytest.MonkeyPatch):
+    """Load mcp_servers with minimal external dependency stubs."""
+    monkeypatch.setitem(sys.modules, "tomli_w", SimpleNamespace(dump=lambda *args, **kwargs: None))
+    monkeypatch.setitem(sys.modules, "pexpect", ModuleType("pexpect"))
+
+    fastmcp_module = ModuleType("mcp.server.fastmcp")
+
+    class _FastMCP:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def tool(self, name: str, description: str):
+            def _decorator(func):
+                return func
+
+            return _decorator
+
+        def resource(self, uri: str, name: str, description: str):
+            def _decorator(func):
+                return func
+
+            return _decorator
+
+    class _Icon:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+    fastmcp_module.FastMCP = _FastMCP
+    fastmcp_module.Icon = _Icon
+
+    mcp_module = ModuleType("mcp")
+    mcp_server_module = ModuleType("mcp.server")
+    mcp_server_module.fastmcp = fastmcp_module
+    mcp_module.server = mcp_server_module
+
+    monkeypatch.setitem(sys.modules, "mcp", mcp_module)
+    monkeypatch.setitem(sys.modules, "mcp.server", mcp_server_module)
+    monkeypatch.setitem(sys.modules, "mcp.server.fastmcp", fastmcp_module)
+
+    monkeypatch.delitem(sys.modules, "stata_mcp.mcp_servers", raising=False)
+    return importlib.import_module("stata_mcp.mcp_servers")
+
+
+def _configure_base(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, do_dir: Path, work_dir: Path, root: Path) -> None:
+    monkeypatch.setattr(
+        loaded_mcp_servers,
+        "config",
+        SimpleNamespace(
+            STATA_MCP_FOLDER=SimpleNamespace(DO=do_dir, LOG=root, path=root),
+            WORKING_DIR=work_dir,
+            IS_GUARD=False,
+            IS_MONITOR=False,
+            STATA_CLI="stata",
+            IS_UNIX=True,
+        ),
+        raising=False,
+    )
+
+
+def _patch_stata_module(monkeypatch: pytest.MonkeyPatch, log_file: Path) -> None:
+    fake_stata = ModuleType("stata_mcp.stata")
+
+    class _FakeStataDo:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def execute_dofile(self, *args, **kwargs):
+            return {"text": log_file}
+
+    fake_stata.StataDo = _FakeStataDo
+    monkeypatch.setitem(sys.modules, "stata_mcp.stata", fake_stata)
+
+
+def test_is_within_allowed_directories_uses_input_path_directly(loaded_mcp_servers, tmp_path: Path):
+    allowed = tmp_path / "allowed"
+    dofile = allowed / "nested" / "sample.do"
+    dofile.parent.mkdir(parents=True)
+    dofile.write_text("display 1")
+
+    assert loaded_mcp_servers._is_within_allowed_directories(dofile.resolve(), [allowed.resolve()]) is True
+    assert loaded_mcp_servers._is_within_allowed_directories((tmp_path / "outside.do").resolve(), [allowed.resolve()]) is False
+
+
+def test_stata_do_allows_dofile_in_working_dir(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofile = work_dir / "ok.do"
+    dofile.write_text("display 1")
+
+    log_file = tmp_path / "run.log"
+    log_file.write_text("ok")
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    _patch_stata_module(monkeypatch, log_file)
+
+    result = loaded_mcp_servers.stata_do(dofile.as_posix())
+
+    assert "error" not in result
+    assert result["log_file_path"]["text"] == log_file.as_posix()
+
+
+def test_stata_do_rejects_dofile_outside_whitelist(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    dofile = outside / "blocked.do"
+    dofile.write_text("display 1")
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+
+    result = loaded_mcp_servers.stata_do(dofile.as_posix())
+
+    assert result["error"].startswith("Access denied")
+    assert do_dir.resolve().as_posix() in result["allowed_directories"]
+    assert work_dir.resolve().as_posix() in result["allowed_directories"]
+
+
+def test_stata_do_rejects_symlink_pointing_outside(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    real_file = outside / "real.do"
+    real_file.write_text("display 1")
+    symlink = work_dir / "link.do"
+    symlink.symlink_to(real_file)
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+
+    result = loaded_mcp_servers.stata_do(symlink.as_posix())
+
+    assert result["error"].startswith("Access denied")
+
+
+def test_stata_do_rejects_path_traversal(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    blocked = outside / "blocked.do"
+    blocked.write_text("display 1")
+
+    traversal_path = work_dir / ".." / "outside" / "blocked.do"
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+
+    result = loaded_mcp_servers.stata_do(traversal_path.as_posix())
+
+    assert result["error"].startswith("Access denied")
+
+
+def test_stata_do_skips_missing_allowed_directories(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+    do_dir = tmp_path / "missing-do"
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofile = work_dir / "ok.do"
+    dofile.write_text("display 1")
+
+    log_file = tmp_path / "run.log"
+    log_file.write_text("ok")
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    _patch_stata_module(monkeypatch, log_file)
+
+    result = loaded_mcp_servers.stata_do(dofile.as_posix())
+
+    assert "error" not in result
+    assert result["log_file_path"]["text"] == log_file.as_posix()
