@@ -18,6 +18,17 @@ from ..stata import StataDo, StataLog
 from ._runtime import create_runtime_context
 
 
+def _is_within_allowed_directories(target_path: Path, allowed_dirs: list[Path]) -> bool:
+    """Return True when target_path is under one of the allowed directories."""
+    for allowed_dir in allowed_dirs:
+        try:
+            target_path.relative_to(allowed_dir)
+            return True
+        except ValueError:
+            continue
+    return False
+
+
 def stata_do(
     dofile_path: str,
     log_file_name: str = None,
@@ -35,6 +46,22 @@ def stata_do(
             return {"error": f"Dofile {resolved_dofile_path} does not exist"}
     except Exception as error:
         return {"error": f"Could not recognize dofile_path as pathlib.Path object: {error}"}
+
+    resolved_dofile_path = resolved_dofile_path.resolve()
+    candidate_allowed_dirs = [
+        runtime.config.STATA_MCP_FOLDER.DO,
+        runtime.config.WORKING_DIR,
+    ]
+    allowed_dirs: list[Path] = []
+    for candidate_dir in candidate_allowed_dirs:
+        if candidate_dir.exists():
+            allowed_dirs.append(candidate_dir.resolve())
+
+    if not _is_within_allowed_directories(resolved_dofile_path, allowed_dirs):
+        return {
+            "error": f"Access denied: Dofile '{resolved_dofile_path}' is outside allowed directories.",
+            "allowed_directories": [allowed_dir.as_posix() for allowed_dir in allowed_dirs],
+        }
 
     if runtime.config.IS_GUARD:
         try:

@@ -190,3 +190,39 @@ def test_stata_do_skips_missing_allowed_directories(monkeypatch: pytest.MonkeyPa
 
     assert "error" not in result
     assert result["log_file_path"]["text"] == log_file.as_posix()
+
+
+def test_stata_do_allows_dofile_in_do_directory(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofile = do_dir / "ok.do"
+    dofile.write_text("display 1")
+
+    log_file = tmp_path / "run.log"
+    log_file.write_text("ok")
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    _patch_stata_module(monkeypatch, log_file)
+
+    result = loaded_mcp_servers.stata_do(dofile.as_posix())
+
+    assert "error" not in result
+    assert result["log_file_path"]["text"] == log_file.as_posix()
+
+
+def test_stata_do_rejects_when_allowed_directories_are_empty(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+    do_dir = tmp_path / "missing-do"
+    work_dir = tmp_path / "missing-work"
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    dofile = outside_dir / "blocked.do"
+    dofile.write_text("display 1")
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+
+    result = loaded_mcp_servers.stata_do(dofile.as_posix())
+
+    assert result["error"].startswith("Access denied")
+    assert result["allowed_directories"] == []
