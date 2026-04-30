@@ -7,6 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : stata_do.py
 
+import logging
 import re
 from pathlib import Path
 from typing import Any, Dict
@@ -56,8 +57,19 @@ def stata_do(
     for candidate_dir in candidate_allowed_dirs:
         if candidate_dir.exists():
             allowed_dirs.append(candidate_dir.resolve())
+        else:
+            logging.warning(
+                "Skip missing allowed directory for dofile execution boundary check: "
+                f"{candidate_dir}"
+            )
 
     if not _is_within_allowed_directories(resolved_dofile_path, allowed_dirs):
+        logging.warning(
+            f"[SECURITY VIOLATION] Attempted to execute dofile outside allowed directories: "
+            f"requested_path='{dofile_path}', "
+            f"resolved_path='{resolved_dofile_path}', "
+            f"allowed_directories='{[allowed_dir.as_posix() for allowed_dir in allowed_dirs]}'"
+        )
         return {
             "error": f"Access denied: Dofile '{resolved_dofile_path}' is outside allowed directories.",
             "allowed_directories": [allowed_dir.as_posix() for allowed_dir in allowed_dirs],
