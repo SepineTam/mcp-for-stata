@@ -68,17 +68,25 @@ We can use Stata-MCP in Claude Code as its prefect agentic ability.
 
 Before using it, please make sure you have ever install `Claude Code`, if you don't know how to install it, visit on [GitHub](https://github.com/anthropics/claude-code)
 
-You can open your terminal and `cd` to your working directory, and run:
-```bash
-claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp
-```
-
-In your working directory, you can find a file named `.mcp.json`, your mcp config will be placed here. 
-
-If you want to install Stata-MCP globally, you can run:
+Generally, you can install Stata-MCP globally for one time, you can run:
 ```bash
 claude mcp add stata-mcp --scope user -- uvx stata-mcp
 ```
+
+Then, you do not need to watch it again. 
+
+If you want to install it locally only for the certain workspace, you can open your terminal and `cd` to your working directory, and run:
+```bash
+claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope local -- uvx --directory $(pwd) stata-mcp
+```
+
+It would nothing happen, you can type `claude` and type `/mcp` to find the status. 
+
+If you are collaborating with others, you can use project scope for that, with:
+```bash
+claude mcp add stata-mcp --scope project -- uvx stata-mcp
+```
+In your working directory, you can find a file named `.mcp.json`, your mcp config will be placed here. 
 
 Then, you can use Stata-MCP in Claude Code. Here are some scenarios for using it:
 
@@ -188,7 +196,7 @@ And some advanced usage, visit the [Advanced guide](source/docs/Usages/Advanced.
 ### Installation
 For the new version, you don't need to install the `stata-mcp` package again, you can just use the following command to check whether your computer can use stata-mcp.
 ```bash
-uvx stata-mcp --usable
+uvx stata-mcp doctor
 uvx stata-mcp --version
 ```
 
