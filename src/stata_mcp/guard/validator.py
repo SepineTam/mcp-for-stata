@@ -158,7 +158,8 @@ class GuardValidator:
             if not stripped_line or stripped_line.startswith("*") or stripped_line.startswith("//"):
                 continue
 
-            matched = local_pattern.search(line)
+            cleaned_line = self._strip_prefixes(stripped_line, self.stata_prefixes)
+            matched = local_pattern.search(cleaned_line)
             if not matched:
                 continue
 
@@ -174,7 +175,7 @@ class GuardValidator:
         items: List[RiskItem] = []
         for local_name in dangerous_local_names:
             macro_token = f"`{local_name}'"
-            if macro_token in line:
+            if re.search(rf"(?<!\w)`{re.escape(local_name)}'(?!\w)", line):
                 items.append(RiskItem(type="macro", content=macro_token, line=line_num))
         return items
 

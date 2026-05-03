@@ -33,3 +33,16 @@ def test_commented_local_definition_is_ignored() -> None:
     code = '* local cmd "shell"\n`cmd\' "rm -rf /"'  # noqa: S608
     report = GuardValidator().validate(code)
     assert report.is_safe is True
+
+
+def test_macro_expansion_does_not_match_substring_macro_name() -> None:
+    code = 'local cmd "shell"\n`cmdline\' "rm -rf /"'  # noqa: S608
+    report = GuardValidator().validate(code)
+    assert report.is_safe is True
+
+
+def test_prefixed_local_definition_is_detected() -> None:
+    code = 'qui local cmd "shell"\n`cmd\' "rm"'  # noqa: S608
+    report = GuardValidator().validate(code)
+    assert report.is_safe is False
+    assert any(item.type == "macro" and item.content == "`cmd'" for item in report.dangerous_items)
