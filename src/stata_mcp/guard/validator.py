@@ -116,16 +116,25 @@ class GuardValidator:
         # Split code into lines for line number tracking
         lines = code.split("\n")
 
+        dangerous_local_names = self._collect_dangerous_local_names(lines)
+
         for line_num, line in enumerate(lines, start=1):
             # Skip empty lines and comments
             stripped_line = line.strip()
-            if not stripped_line or stripped_line.startswith("*"):
+            if (
+                not stripped_line
+                or stripped_line.startswith("*")
+                or stripped_line.startswith("//")
+            ):
                 continue
 
             # Strip Stata prefixes (capture, quietly, etc.) before checking
             cleaned_line = self._strip_prefixes(stripped_line, self.stata_prefixes)
             if not cleaned_line:
                 continue
+
+            macro_items = self._check_macro_expansion(cleaned_line, line_num, dangerous_local_names)
+            dangerous_items.extend(macro_items)
 
             # Check for dangerous commands
             command_items = self._check_dangerous_commands(cleaned_line, line_num)
@@ -138,6 +147,37 @@ class GuardValidator:
         # Generate report
         is_safe = len(dangerous_items) == 0
         return SecurityReport(is_safe=is_safe, dangerous_items=dangerous_items)
+
+    def _collect_dangerous_local_names(self, lines: List[str]) -> set[str]:
+        """Collect local macro names whose values are dangerous commands."""
+        dangerous_names: set[str] = set()
+        local_pattern = re.compile(r"^\s*local\s+(\w+)\s+['\"]([^'\"]+)['\"]", re.IGNORECASE)
+
+        for line in lines:
+            stripped_line = line.strip()
+            if not stripped_line or stripped_line.startswith("*") or stripped_line.startswith("//"):
+                continue
+
+            cleaned_line = self._strip_prefixes(stripped_line, self.stata_prefixes)
+            matched = local_pattern.search(cleaned_line)
+            if not matched:
+                continue
+
+            local_name, local_value = matched.group(1), matched.group(2)
+            if local_value.strip().lower() in self.dangerous_commands:
+                dangerous_names.add(local_name)
+
+        return dangerous_names
+
+    @staticmethod
+    def _check_macro_expansion(line: str, line_num: int, dangerous_local_names: set[str]) -> List[RiskItem]:
+        """Check whether a line expands a dangerous local macro."""
+        items: List[RiskItem] = []
+        for local_name in dangerous_local_names:
+            macro_token = f"`{local_name}'"
+            if re.search(rf"(?<!\w)`{re.escape(local_name)}'(?!\w)", line):
+                items.append(RiskItem(type="macro", content=macro_token, line=line_num))
+        return items
 
     def _check_dangerous_commands(self, line: str, line_num: int) -> List[RiskItem]:
         """Check if a line contains dangerous commands.

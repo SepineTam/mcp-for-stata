@@ -42,9 +42,17 @@ DANGEROUS_COMMANDS: Set[str] = {
     "!",          # Unix-style shell escape: !ls
     "!!",         # Extended shell command (xshell synonym): !!vi file.do
     "shell",      # Shell command execution: shell dir
+    "sh",         # Stata abbreviation for shell
     "xshell",     # Extended shell for Mac/Unix(GUI): xshell vi file.do
+    "xsh",        # Stata abbreviation for xshell
     "winexec",    # Windows program execution: winexec notepad.exe
+    "winex",      # Stata abbreviation for winexec
     "unixcmd",    # Unix command execution: unixcmd ls
+    "unixc",      # Stata abbreviation for unixcmd
+    "erase",      # File deletion command
+    "era",        # Stata abbreviation for erase
+    "rmdir",      # Directory removal command
+    "rmd",        # Stata abbreviation for rmdir
 }
 
 
