@@ -9,7 +9,7 @@ Stata-MCP is an MCP (Model Context Protocol) server that enables LLMs to execute
 - **Agent mode**: Interactive Stata analysis via OpenAI Agents SDK
 - **CLI tools**: Direct command-line access to all Stata capabilities
 
-Current version: **1.15.1** | License: **AGPL-3.0** | Python: **>=3.11**
+Current version: **1.16.2** | License: **AGPL-3.0** | Python: **>=3.11**
 
 ## Common Development Commands
 
@@ -281,10 +281,12 @@ MAX_RAM_MB = -1  # -1 means no limit
 ### 7. Security Guard (`src/stata_mcp/guard/`)
 
 `GuardValidator` scans do-files before execution:
-- `DANGEROUS_COMMANDS`: Prohibited Stata commands (e.g., `shell`, `erase`, `rm`)
+- `DANGEROUS_COMMANDS`: Prohibited Stata commands including minimum abbreviations (e.g., `shell`/`sh`, `erase`/`era`)
 - `DANGEROUS_PATTERNS`: Regex patterns for dangerous constructs (e.g., `! del`, `! rm`)
+- **Macro expansion detection**: Tracks `local` definitions that contain dangerous commands and flags later usages of `` `name' ``
 - Returns `SecurityReport` with a list of `RiskItem` objects
 - Configurable via `IS_GUARD` setting (default: `true`)
+- When disabled, a `[SECURITY]` warning is logged at startup/execution
 
 ### 8. Monitoring System (`src/stata_mcp/monitor/`)
 
@@ -308,7 +310,7 @@ Tools are registered based on profile selection (`--core` / `--all`):
 
 | Profile | Tool | Notes |
 |---------|------|-------|
-| core, all | `stata_do` | Execute Stata do-files |
+| core, all | `stata_do` | Execute Stata do-files; restricted to `STATA_MCP_FOLDER.DO` or `WORKING_DIR` |
 | core, all | `get_data_info` | Analyze data files (CSV, DTA, XLSX, SPSS) |
 | core, all | `help` | Stata command documentation (Unix only) |
 | all | `read_log` | Read log files; supports `lines` param and `full`/`core`/`dict` formats |
@@ -382,6 +384,8 @@ Tests live in `tests/` and use **pytest**. The test suite uses `monkeypatch` and
 |------|--------------|
 | `test_server_parser.py` | CLI argument parsing: transport flags, profile defaults, mutual exclusion |
 | `test_server_registration.py` | `register_tools()`: core/all profile filtering, platform/deprecated filters, profile lock-in |
+| `test_stata_do_boundary.py` | Dofile directory boundary validation: whitelist enforcement, symlinks, path traversal |
+| `test_guard_validator.py` | Guard security: abbreviation blocking, macro expansion bypass detection |
 
 Pattern for adding tests:
 - Stub out external dependencies with `monkeypatch.setitem(sys.modules, ...)`
@@ -429,19 +433,32 @@ perf: lazy-load pandas at import time
 
 ### Branch Naming
 
-- Feature: `feat/feature-name` or `dev/v1.x.y`
+- Feature: `feat/feature-name` or `dev/1.x.y`
 - Fix: `fix/bug-name`
 - Docs: `docs/doc-name`
 
 ### Standard Workflow
 
-1. **Create branch**: `git checkout -b dev/v1.x.y`
+1. **Create branch** from the target development branch (e.g., `dev/1.x.y`):
+   ```bash
+   git checkout dev/1.x.y
+   git checkout -b feat/feature-name
+   ```
 2. **Lint code**: run pre-commit hooks
 3. **Stage files**: `git add <files>`
 4. **Review changes**: `git diff --staged`
 5. **Commit**: `git commit -m "type: description"`
-6. **Push branch**: `git push -u origin dev/v1.x.y`
-7. **Create PR** via GitHub
+6. **Push branch**: `git push -u origin feat/feature-name`
+7. **Create PR** targeting the development branch (e.g., `dev/1.x.y`) via GitHub
+
+### Keeping Dev Branches in Sync
+
+When `master` receives updates, merge them into the development branch to reduce future conflicts:
+
+```bash
+git checkout dev/1.x.y
+git merge origin/master
+```
 
 ## Code Conventions
 

@@ -8,31 +8,43 @@ Thank you for your interest in contributing to this project! We welcome contribu
 ### Branch Naming Convention
 
 Create a feature branch before making changes:
-- **Feature branches**: `feat/feature-name` or `dev/v1.2.3`
+- **Feature branches**: `feat/feature-name` or `dev/1.2.3`
 - **Bug fix branches**: `fix/bug-name`
 - **Docs branches**: `docs/doc-name`
 
 ### PR Workflow
 
-1. Create a new branch from `master`
+1. Create a new branch from the target development branch (e.g., `dev/1.x.y`)
 2. Make your changes and commit
 3. Push the branch to remote
-4. Create a Pull Request
+4. Create a Pull Request targeting the development branch
 5. Wait for review (if applicable)
 6. Merge PR when approved
+
+### Syncing Development Branches
+
+When `master` receives updates (e.g., documentation fixes, hotfixes), development branches should be kept in sync to reduce future merge conflicts:
+
+```bash
+# On the development branch
+git checkout dev/1.x.y
+git merge origin/master
+```
+
+This ensures the development branch incorporates the latest changes from `master` before it is eventually merged back.
 
 ### Example
 
 ```bash
 # Create and switch to new branch
-git checkout -b dev/v1.13.42
+git checkout -b dev/1.13.42
 
 # Make changes, stage and commit
 git add .
 git commit -m "feat: add new feature"
 
 # Push branch to remote
-git push -u origin dev/v1.13.42
+git push -u origin dev/1.13.42
 
 # Create PR via GitHub CLI or web interface
 gh pr create --title "feat: add new feature" --body "Description here"
@@ -197,10 +209,11 @@ def MY_NEW_OPTION(self) -> bool:
 
 When adding security features:
 
-1. Extend `src/stata_mcp/guard/` module
+1. Extend `src/stata_mcp/guard/` module for dofile content validation
 2. Add to blacklist or create new validators
-3. Document in `docs/security.md`
-4. Add tests if applicable
+3. For execution boundary controls, update both `src/stata_mcp/mcp_servers.py` and `src/stata_mcp/api/stata_do.py`
+4. Document in `docs/security.md`
+5. Add tests if applicable
 
 #### 3. Monitoring Features
 

@@ -180,6 +180,33 @@ def stata_do(
     except Exception as e:
         return {"error": f"Could not recognize dofile_path as pathlib.Path object: {e}"}
 
+    dofile_path_resolved = dofile_path.resolve()
+    candidate_allowed_dirs = [
+        config.STATA_MCP_FOLDER.DO,
+        config.WORKING_DIR,
+    ]
+    allowed_dirs: List[Path] = []
+    for candidate_dir in candidate_allowed_dirs:
+        if candidate_dir.exists():
+            allowed_dirs.append(candidate_dir.resolve())
+        else:
+            logging.warning(
+                "Skip missing allowed directory for dofile execution boundary check: "
+                f"{candidate_dir}"
+            )
+    is_allowed = _is_within_allowed_directories(dofile_path_resolved, allowed_dirs)
+    if not is_allowed:
+        logging.warning(
+            f"[SECURITY VIOLATION] Attempted to execute dofile outside allowed directories: "
+            f"requested_path='{dofile_path}', "
+            f"resolved_path='{dofile_path_resolved}', "
+            f"allowed_directories='{[d.as_posix() for d in allowed_dirs]}'"
+        )
+        return {
+            "error": f"Access denied: Dofile '{dofile_path}' is outside allowed directories.",
+            "allowed_directories": [d.as_posix() for d in allowed_dirs],
+        }
+
     # Security check: validate dofile before execution
     if config.IS_GUARD:
         from .guard import GuardValidator
@@ -213,6 +240,8 @@ def stata_do(
             }
         else:
             logging.info(f"✅ {dofile_path} - Security check passed")
+    else:
+        logging.warning("[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.")
 
     # Initialize monitors
     monitors = []
@@ -498,6 +527,17 @@ def _trim_lines(content: str, lines: int) -> str:
     if lines > 0:
         return "\n".join(all_lines[:lines])
     return "\n".join(all_lines[-abs(lines):])
+
+
+def _is_within_allowed_directories(target_path: Path, allowed_dirs: List[Path]) -> bool:
+    """Return True when target_path is under one of the allowed directories."""
+    for allowed_dir in allowed_dirs:
+        try:
+            target_path.relative_to(allowed_dir)
+            return True
+        except ValueError:
+            continue
+    return False
 
 
 def _has_stata_error(content: str) -> bool:
