@@ -240,6 +240,8 @@ def stata_do(
             }
         else:
             logging.info(f"✅ {dofile_path} - Security check passed")
+    else:
+        logging.warning("[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.")
 
     # Initialize monitors
     monitors = []

@@ -94,6 +94,8 @@ def stata_do(
                     "or set environment variable `STATA_MCP__IS_GUARD` to `false` (not recommended)"
                 ),
             }
+    else:
+        logging.warning("[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.")
 
     monitors = []
     if runtime.config.IS_MONITOR and runtime.config.MAX_RAM_MB is not None:

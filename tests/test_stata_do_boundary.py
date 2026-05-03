@@ -226,3 +226,27 @@ def test_stata_do_rejects_when_allowed_directories_are_empty(monkeypatch: pytest
 
     assert result["error"].startswith("Access denied")
     assert result["allowed_directories"] == []
+
+
+def test_stata_do_logs_warning_when_guard_is_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    loaded_mcp_servers,
+    tmp_path: Path,
+):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofile = work_dir / "ok.do"
+    dofile.write_text("display 1")
+    log_file = tmp_path / "run.log"
+    log_file.write_text("ok")
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    _patch_stata_module(monkeypatch, log_file)
+
+    with caplog.at_level("WARNING"):
+        loaded_mcp_servers.stata_do(dofile.as_posix())
+
+    assert any("[SECURITY] Guard is disabled" in message for message in caplog.messages)
