@@ -2,6 +2,19 @@
 
 
 <details>
+<summary>Click to expand v1.16.2 details</summary>
+
+## [1.16.2] - 2026-05-04
+
+### Security
+- **Stata Do**: Add directory boundary validation so dofiles can only be executed from `STATA_MCP_FOLDER.DO` or `WORKING_DIR` (PR #70).
+- **Guard**: Strengthen blacklist with dangerous command abbreviations (`sh`, `xsh`, `winex`, `unixc`, `era`, `rmd`) (PR #72).
+- **Guard**: Add local macro expansion detection to catch bypasses like `local cmd "shell"` followed by `` `cmd' `` (PR #72).
+- **Guard**: Log `[SECURITY]` warning when Guard is disabled at startup/execution time (PR #72).
+
+</details>
+
+<details>
 <summary>Click to expand v1.16.1 details</summary>
 
 ## [1.16.1] - 2026-04-22
