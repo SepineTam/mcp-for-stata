@@ -71,12 +71,14 @@ stata-mcp server --all -t http       # All tools, HTTP transport
 stata-mcp server --core -t http      # Core tools, HTTP transport
 ```
 
-#### Agent Mode
+#### Agent Mode (Deprecated)
+> Agent mode is deprecated and will be removed in a future version. Use MCP server mode instead.
+
 ```bash
-# Run interactive agent mode
+# Run interactive agent mode (deprecated)
 stata-mcp agent run
 
-# Or use uvx for direct execution
+# Or use uvx for direct execution (deprecated)
 uvx stata-mcp agent run
 ```
 

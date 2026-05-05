@@ -84,6 +84,13 @@ def handle_doctor(args: Namespace) -> int:
 
 def handle_agent(args: Namespace) -> None:
     """Handle the agent subcommand."""
+    warnings.simplefilter("default", FutureWarning)
+    warnings.warn(
+        "Agent mode is deprecated and will be removed in a future version. "
+        "Use MCP server mode (stata-mcp server) instead.",
+        FutureWarning,
+        stacklevel=2,
+    )
     if args.agent_action == "run":
         from ..agent_as import REPLAgent
 

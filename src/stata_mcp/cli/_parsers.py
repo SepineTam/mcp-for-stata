@@ -76,7 +76,11 @@ def create_root_parser() -> argparse.ArgumentParser:
 
 def add_agent_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     """Add the agent subcommand parser."""
-    agent_parser = subparsers.add_parser("agent", help="Run Stata-MCP as agent mode")
+    agent_parser = subparsers.add_parser(
+        "agent",
+        help="(Deprecated) Run Stata-MCP as agent mode",
+        description="WARNING: Agent mode is deprecated and will be removed in a future version. Use MCP server mode instead.",
+    )
     agent_subparsers = agent_parser.add_subparsers(dest="agent_action")
 
     agent_run_parser = agent_subparsers.add_parser("run", help="Start agent")

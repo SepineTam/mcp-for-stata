@@ -11,6 +11,7 @@ import asyncio
 import os
 import textwrap
 import uuid
+import warnings
 from pathlib import Path
 
 from agents import Agent, OpenAIChatCompletionsModel, Runner, set_tracing_disabled
@@ -65,6 +66,12 @@ class REPLAgent:
     )
 
     def __init__(self, work_dir: str = "./", session_id: str = None):
+        warnings.warn(
+            "Agent mode is deprecated and will be removed in a future version. "
+            "Use MCP server mode (stata-mcp server) instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
         self.work_dir = Path(work_dir).expanduser().absolute()
         self.work_dir.mkdir(exist_ok=True)
 
