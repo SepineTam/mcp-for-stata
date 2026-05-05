@@ -587,7 +587,9 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
         "description": (
             "Execute a Stata do-file and return the execution log. "
             "Accepts a do-file path, runs it via the configured Stata executable, "
-            "and can optionally read log content only when return-code errors are detected."
+            "and can optionally read log content only when return-code errors are detected. "
+            "Use when you need to run Stata commands, perform regression or statistical analysis, "
+            "or execute a do-file. "
         ),
         "func": stata_do,
         "profiles": {"core", "all"},
@@ -596,7 +598,8 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
         "description": (
             "Get descriptive statistics and a data preview for a data file "
             "(dta, csv, xlsx). Returns overview, variable details, "
-            "and optional head rows filtered by requested variables."
+            "and optional head rows filtered by requested variables. "
+            "Use when you need to understand a dataset or have no prior knowledge of the data."
         ),
         "func": get_data_info,
         "profiles": {"core", "all"},
