@@ -106,62 +106,6 @@ claude plugin marketplace add sepinetam/stata-mcp
 claude plugin install stata-toolbox -s local
 ```
 
-### Agent Mode
-The details of agent mode find [here](source/agent_examples/README.md).
-
-```bash
-git clone https://github.com/sepinetam/stata-mcp.git
-cd stata-mcp
-
-uv sync
-uv pip install -e .
-
-stata-mcp --version  # for test whether stata-mcp is installed successfully.
-stata-mcp agent run  # now you can enjoy your stata-mcp agent mode.
-```
-
-or you can directly use it with `uvx`:
-```bash
-uvx stata-mcp --version  # for test whether it could be used on your computer.
-uvx stata-mcp agent run
-```
-
-You can edit the task in `agent_examples/openai/main.py` for variable `[model_instructions](source/agent_examples/openai/main.py#L37)` and `[task_message](source/agent_examples/openai/main.py#L68)`
-
-### Agent as Tool
-If you want to use a Stata-Agent in another agent, [here](source/docs/Usages/agent_as/agent_as_tool.md) is a simple example:
-
-```python
-import asyncio
-
-from agents import Agent, Runner
-from stata_mcp.agent_as.agent_as_tool import StataAgent
-
-# init stata agent and set as tool
-stata_agent = StataAgent()
-sa_tool = stata_agent.as_tool()
-
-# Create main Agent
-agent = Agent(
-    name="Assistant",
-    instructions="You are a helpful assistant",
-    tools=[sa_tool],
-)
-
-
-# Then run the agent as usual.
-async def main(task: str, max_turns: int = 30):
-    result = await Runner.run(agent, input=task, max_turns=max_turns)
-    return result
-
-
-if __name__ == "__main__":
-    econ_task = "Use Stata default data to find out the relationship between mpg and price."
-    asyncio.run(main(econ_task))
-
-```
-
-
 ### AI Chat-Bot Client Mode
 > Standard config requires: please make sure the stata is installed at the default path, and the stata cli (for macOS and Linux) exists.
 
@@ -303,4 +247,3 @@ More information: refer to the Chinese version at [source/docs/README/cn/README.
 ## ✨ Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=sepinetam/stata-mcp&type=Date)](https://www.star-history.com/#sepinetam/stata-mcp&Date)
-
