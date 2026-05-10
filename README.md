@@ -129,7 +129,7 @@ And some advanced usage, visit the [Advanced guide](source/docs/Usages/Advanced.
 
 ### Prerequisites
 - [uv](https://github.com/astral-sh/uv) - Package installer and virtual environment manager
-- Claude, Cline, ChatWise, or other LLM service
+- Claude Code, Codex, OpenClaw or other Agents
 - Stata License
 - Your API-KEY from LLM
 
