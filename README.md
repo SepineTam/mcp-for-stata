@@ -138,31 +138,14 @@ And some advanced usage, visit the [Advanced guide](source/docs/Usages/Advanced.
 > 2. Claude is the best choice for Stata-MCP, for Chinese, I recommend to use DeepSeek as your model provider as it is cheap and powerful, also the score is highest in China provider, if you are increased in it, visit the report [How to use StataMCP improve your social science research](https://statamcp.com/reports/2025/09/21/stata_mcp_a_research_report_on_ai_assisted_empirical_research).
 
 ### Installation
-For the new version, you don't need to install the `stata-mcp` package again, you can just use the following command to check whether your computer can use stata-mcp.
+Quickly install (for all platform and all agent framework):
 ```bash
-uvx stata-mcp doctor
-uvx stata-mcp --version
+uvx stata-mcp install
 ```
 
-If you want to use it locally, you can install it via pip or download the source code.
-
-**Download via pip**
+If you use Claude Code and collaborate with a team, install it in project scope:
 ```bash
-pip install stata-mcp
-```
-
-**Download source code and compile**
-```bash
-git clone https://github.com/sepinetam/stata-mcp.git
-cd stata-mcp
-
-uv build
-```
-Then you can find the compiled `stata-mcp` binary in the `dist` directory. You can use it directly or add it to your PATH.
-
-For example:
-```bash
-uvx /path/to/your/whl/stata_mcp-1.13.0-py3-non-any.whl  # here is the wheel file name, you can change it to your version
+claude mcp add stata-mcp --scope project -- uvx stata-mcp
 ```
 
 ## 📝 Documentation
