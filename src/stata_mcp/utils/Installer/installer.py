@@ -55,6 +55,7 @@ class Installer:
             "cline": self.install_to_cline,
             "codex": self.install_to_codex,
             "opencode": self.install_to_opencode,
+            "openclaw": self.install_to_openclaw,
         }
 
     def install_all(self):
@@ -74,11 +75,13 @@ class Installer:
     def install_to_json_config(
         self,
         config_path: Path,
-        key: str = "mcpServers",
+        key: "str | list[str]" = "mcpServers",
         custom_config: dict = None
     ):
         config_path = Path(config_path)
         config_path.parent.mkdir(parents=True, exist_ok=True)
+
+        keys = [key] if isinstance(key, str) else list(key)
 
         if config_path.exists():
             try:
@@ -90,13 +93,17 @@ class Installer:
                     "whether continue (This might overwrite your config file)\n[Y]es/[N]o"
                 ).lower()
                 if overwrite in ["y", "yes"]:
-                    config = {key: {}}
+                    config = {}
                 else:
                     sys.exit(1)
         else:
-            config = {key: {}}
+            config = {}
 
-        servers = config.setdefault(key, {})
+        cursor = config
+        for k in keys:
+            cursor = cursor.setdefault(k, {})
+        servers = cursor
+
         if "stata-mcp" in servers:
             print("stata-mcp is already installed.")
             sys.exit(0)
@@ -248,6 +255,10 @@ class Installer:
     def install_to_codex(self):
         config_file = Path.home() / ".codex" / "config.toml"
         self.install_to_toml_config(config_file, key="mcp_servers")
+
+    def install_to_openclaw(self):
+        config_file = Path.home() / ".openclaw" / "openclaw.json"
+        self.install_to_json_config(config_file, key=["mcp", "servers"])
 
 
 class InstallerDockerMode(Installer):

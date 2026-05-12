@@ -288,7 +288,7 @@ def add_install_parser(subparsers: argparse._SubParsersAction) -> argparse.Argum
     install_parser.add_argument(
         "-c",
         "--client",
-        choices=["claude", "cc", "gemini", "cursor", "cline", "codex", "opencode"],
+        choices=["claude", "cc", "gemini", "cursor", "cline", "codex", "opencode", "openclaw"],
         default="claude",
         help="Target client (default: claude)",
     )

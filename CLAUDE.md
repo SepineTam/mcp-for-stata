@@ -116,6 +116,7 @@ stata-mcp install -c cursor         # Cursor
 stata-mcp install -c cline          # Cline
 stata-mcp install -c codex          # Codex
 stata-mcp install -c opencode       # OpenCode
+stata-mcp install -c openclaw       # OpenClaw
 stata-mcp install --all             # Install to all supported clients
 stata-mcp install --json-file PATH  # Install to custom config file
 
