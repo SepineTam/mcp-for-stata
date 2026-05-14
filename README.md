@@ -45,7 +45,7 @@
 **News**:
 - 🦞 **OpenClaw Support**: Standalone CLI tools for OpenClaw integration (`stata-mcp tool`), see [OpenClaw guide](https://docs.statamcp.com/agents/openclaw.md)
 - ✨ **Claude Code Plugin Support**: Official plugin package with MCP server and Stata LSP integration
-- Use Stata-MCP in Claude Code, look [here](#use-stata-mcp-in-claude-code)
+- Use Stata-MCP in Claude Code, look [here](#advanced---claude-code)
 
 > Finding our **newest research**? Click [here](source/reports/README.md) or visit [reports website](https://www.statamcp.com/reports).
 
@@ -54,17 +54,54 @@
 
 > **MCP or AI about Stata**
 > - A session based MCP server for Stata, [mcp-stata](https://github.com/tmonk/mcp-stata)
-> - A VScode or Cursor integrated [here](https://github.com/hanlulong/stata-mcp). Confused it? 💡 [Difference](source/docs/Difference.md)
+> - A VScode or Cursor integrated [here](https://github.com/hanlulong/stata-mcp). Confused it? 💡 [Comparison](#comparison)
 > 
-> **Datasets and Informations**  
+> **Datasets and Information**  
 > - [STOP Dataset](https://opendata.ai4cssci.com): StataMCP-Team Opendata Project 📊, we have open-sourced a comprehensive dataset collection for social science research, aiming to enable the future of AI-driven and data-powered research paradigms.  
 > - [Trace DID](https://github.com/asjadnaqvi/DiD): If you want to fetch the newest information about DID (Difference-in-Difference), click [here](https://asjadnaqvi.github.io/DiD/). Now there is a Chinese translation by [Sepine Tam](https://github.com/sepine) and [StataMCP-Team](https://github.com/statamcp-team) 🎉
 > - Jupyter Lab Usage (Important: Stata 17+) [here](source/docs/JupyterStata.md) and [nbstata](https://github.com/hugetim/nbstata)
 </details>
 
 ## 💡 Quickly Start
-### Use Stata-MCP in Claude Code
-We can use Stata-MCP in Claude Code as its prefect agentic ability. 
+### Install for all agent
+If you do not want to go through complicated setup, just run the following command:
+```bash
+uvx stata-mcp install --all
+```
+
+<details>
+<summary>Supported Agents 🤖</summary>
+Based on our own experience and testing, we recommend using Claude Code, Codex, and OpenClaw.
+We have found that Claude and DeepSeek are the two best models across any framework.
+
+| Agent                     | Tag      | Command                           |
+|---------------------------|----------|-----------------------------------|
+| Claude Desktop            | claude   | uvx stata-mcp install -c claude   |
+| Claude Code               | cc       | uvx stata-mcp install -c cc       |
+| Gemini CLI                | gemini   | uvx stata-mcp install -c gemini   |
+| Cursor                    | cursor   | uvx stata-mcp install -c cursor   |
+| Cline (VScode Extension)  | cline    | uvx stata-mcp install -c cline    |
+| Codex CLI & Codex Desktop | codex    | uvx stata-mcp install -c codex    |
+| OpenCode                  | opencode | uvx stata-mcp install -c opencode |
+| OpenClaw                  | openclaw | uvx stata-mcp install -c openclaw |
+
+</details>
+
+If you don't have `uv`, visit [here](https://docs.astral.sh/uv/getting-started/installation) to install it. 
+Or, use our beta install script (auto-installs `uv` if missing):
+
+**macOS / Linux:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/SepineTam/stata-mcp/master/scripts/install.sh | bash
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/SepineTam/stata-mcp/master/scripts/install.ps1 | iex
+```
+
+### Advanced - Claude Code
+As we find Claude Code is the best agent for Stata-MCP as its prefect agentic ability, we recommend using it, and there are lots of advanced usage following:
 
 Before using it, please make sure you have ever install `Claude Code`, if you don't know how to install it, visit on [GitHub](https://github.com/anthropics/claude-code)
 
@@ -75,18 +112,23 @@ claude mcp add stata-mcp --scope user -- uvx stata-mcp
 
 Then, you do not need to watch it again. 
 
-If you want to install it locally only for the certain workspace, you can open your terminal and `cd` to your working directory, and run:
+<details>
+<summary>Local and share with your partners</summary>
+
+If you want to install it locally only for the certain workspace, you can `cd` to your working directory, and run:
 ```bash
-claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope local -- uvx --directory $(pwd) stata-mcp
+claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope local -- uvx --directory $(pwd) stata-mcp
 ```
 
 It would nothing happen, you can type `claude` and type `/mcp` to find the status. 
 
-If you are collaborating with others, you can use project scope for that, with:
+Also, collaboration is an essential part of research. You can share your MCP config with your co-authors using:
 ```bash
 claude mcp add stata-mcp --scope project -- uvx stata-mcp
 ```
 In your working directory, you can find a file named `.mcp.json`, your mcp config will be placed here. 
+
+</details>
 
 Then, you can use Stata-MCP in Claude Code. Here are some scenarios for using it:
 
@@ -96,17 +138,19 @@ Then, you can use Stata-MCP in Claude Code. Here are some scenarios for using it
 - **Code Organization**: Review and optimize existing Stata do-files
 - **Result Interpretation**: Understand complex statistical outputs and regression results
 
-### Install Claude Code Plugin
-We provide official native plugin, integrating [Stata-MCP](https://github.com/sepinetam/stata-mcp) maintained by @sepinetam and [Stata LSP](https://github.com/euglevi/stata-language-server) maintained by @euglevi. Installation commands:
-```bash
-# Install stata-mcp marketplace first
-claude plugin marketplace add sepinetam/stata-mcp
+If you use Claude Code inside IDEs (either the integrated terminal or the Claude Code Extension), installing our plugin including [Stata-MCP](https://github.com/sepinetam/stata-mcp) and [Stata LSP](https://github.com/euglevi/stata-language-server) maintained by @euglevi. 
 
-# Install plugin to local, project or user scope
-claude plugin install stata-toolbox -s local
+```bash
+# Add the Stata-MCP marketplace
+claude plugin marketplace add SepineTam/stata-mcp
+
+# Install the plugin to local, project or user scope
+claude plugin install stata-toolbox -s project
 ```
 
-### AI Chat-Bot Client Mode
+> The language server gives AI-generated Stata code better syntax awareness and completion, which improves output quality. We package the LSP in compliance with its license and give full attribution to the original author.
+
+### Other Clients
 > Standard config requires: please make sure the stata is installed at the default path, and the stata cli (for macOS and Linux) exists.
 
 The standard config json as follows, you can DIY your config via add envs.
@@ -123,9 +167,7 @@ The standard config json as follows, you can DIY your config via add envs.
 }
 ```
 
-For more detailed usage information, visit the [Usage guide](source/docs/Usages/Usage.md). 
-
-And some advanced usage, visit the [Advanced guide](source/docs/Usages/Advanced.md)
+For more detailed usage information, visit the [Usage guide](https://docs.statamcp.com/usage).
 
 ### Prerequisites
 - [uv](https://github.com/astral-sh/uv) - Package installer and virtual environment manager
@@ -133,22 +175,62 @@ And some advanced usage, visit the [Advanced guide](source/docs/Usages/Advanced.
 - Stata License
 - Your API-KEY from LLM
 
+If you want to check whether your device is supported, you can run:
+```bash
+uvx stata-mcp doctor
+```
+
+It displays basic information about your device and checks whether your setup is supported.
+
+<details>
+<summary>Example output</summary>
+
+```
+stata-mcp v1.16.3 — Doctor Report
+
+  [PASS] os: macOS (Darwin 25.3.0, arm64)
+  [PASS] python: 3.13.5
+  [PASS] uv: uv 0.11.13
+  [PASS] dependencies: all required packages available
+  [PASS] stata_cli: /usr/local/bin/stata-mp (from env)
+  [PASS] stata_execution: OK (0.1s)
+  [PASS] config: /Users/sepinetam/.statamcp/config.toml (loaded)
+  [PASS] working_dir: /Users/sepinetam/Documents/Github/stata-mcp (writable)
+  [PASS] guard: enabled, loaded 27 rules
+  [PASS] monitor: disabled (psutil available)
+  [PASS] pypi: reachable (4.86s)
+  [PASS] cleanup: 0 old files (0 B) found; cleanup disabled (CLEAN_LOG_DAYS=-1)
+
+Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
+```
+
+</details>
+
 > Notes:
 > 1. If you are located in China, a short uv usage document you can find [here](source/docs/ChinaUsers/uv.md).
 > 2. Claude is the best choice for Stata-MCP, for Chinese, I recommend to use DeepSeek as your model provider as it is cheap and powerful, also the score is highest in China provider, if you are increased in it, visit the report [How to use StataMCP improve your social science research](https://statamcp.com/reports/2025/09/21/stata_mcp_a_research_report_on_ai_assisted_empirical_research).
 
-### Installation
-Quickly install (for all platform and all agent framework):
-```bash
-uvx stata-mcp install
-```
+## Comparison
 
-If you use Claude Code and collaborate with a team, install it in project scope:
-```bash
-claude mcp add stata-mcp --scope project -- uvx stata-mcp
-```
+There are several Stata-related MCP projects. The table below was generated by Claude Code after analyzing each codebase directly.
+
+| Feature | Stata-MCP (this) | hanlulong/stata-mcp | tmonk/mcp-stata |
+|---|---|---|---|
+| **Agents** | All | VSCode window must stay active | All |
+| **Type** | MCP Server + CLI toolkit | VSCode Extension (localhost server, not standalone MCP) | Session-based MCP Server |
+| **Execution** | do-file via subprocess | IDE-embedded runner via localhost :4000 | pystata (Stata 17+) |
+| **Safety** | Command guard + RAM monitor | — | — |
+| **Data analysis** | CSV, DTA, XLSX, SPSS handlers | — | In-session `describe` / `codebook` |
+| **Logs** | Text + SMCL readers | — | Built-in log reader |
+| **Graphs** | — | — | Export, cache, SVG/PNG |
+| **CLI Support** | Native (same tools as MCP server) | — | — |
+| **Sessions** | — | — | Multi-session, background tasks |
+| **IDE plug-in** | — | Native VSCode / Cursor | Stata Workbench (VS Code) |
+| **Install** | `uvx stata-mcp install` | VS Code Marketplace | `uvx` or install script |
+| **Best for** | Agent-driven analysis (Claude Code, Codex, OpenClaw) | Users who write and run Stata code inside VSCode themselves | Research workflows (replication, robustness, publication QA) |
 
 ## 📝 Documentation
+> Stata-MCP documents visit https://docs.statamcp.com
 
 ### Core Documentation
 - **[Complete Documentation](https://docs.statamcp.com/)**: Full documentation site with all features
@@ -157,32 +239,12 @@ claude mcp add stata-mcp --scope project -- uvx stata-mcp
 - **[Monitoring System](https://docs.statamcp.com/monitoring)**: RAM monitoring and resource limits
 - **[Architecture Overview](https://docs.statamcp.com/overview)**: System design and integration patterns
 
-### Usage Guides
-- For more detailed usage information, visit the [Usage guide](source/docs/Usages/Usage.md)
-- Advanced Usage, visit the [Advanced](source/docs/Usages/Advanced.md)
-- Some questions, visit the [Questions](source/docs/Usages/Questions.md)
-- Difference with [Stata-MCP@hanlulong](https://github.com/hanlulong/stata-mcp), visit the [Difference](source/docs/Difference.md)
-
 ### Key Features
 - **[Security Guard](https://docs.statamcp.com/security)**: Blocks dangerous commands (`!`, `shell`, `erase`, etc.)
 - **[RAM Monitoring](https://docs.statamcp.com/monitoring)**: Prevents memory exhaustion with configurable limits
 - **[Unified Configuration](https://docs.statamcp.com/configuration)**: TOML config + environment variables
 - Cross-platform support (macOS, Windows, Linux)
 - Automatic log capture and error reporting
-
-## 💡 Questions
-- [Cherry Studio 32000 wrong](source/docs/Usages/Questions.md#cherry-studio-32000-wrong)
-- [Cherry Studio 32000 error](source/docs/Usages/Questions.md#cherry-studio-32000-error)
-- [Windows Support](source/docs/Usages/Questions.md#windows-supports)
-- [Network Errors When Running Stata-MCP](source/docs/Usages/Questions.md#network-errors-when-running-stata-mcp)
-
-## 🚀 Roadmap
-- [x] macOS support
-- [x] Windows support
-- [ ] Additional LLM integrations (With a new webUI)
-- [ ] Performance optimizations (Via prompt and context engineering)
-
-For more information, refer to the [Statement](source/docs/Rights/Statement.md).
 
 ## 🐛 Report Issues
 If you encounter any bugs or have feature requests, please [open an issue](https://github.com/sepinetam/stata-mcp/issues/new).
@@ -191,7 +253,7 @@ If you encounter any bugs or have feature requests, please [open an issue](https
 [GNU Affero General Public License v3.0](LICENSE)
 
 ## 📚 Citation
-If you use Stata-MCP in your research, please cite this repository using one of the following formats:
+If you use Stata-MCP in your research, and it really helps you, you can cite this repository using one of the following formats:
 
 ### BibTeX
 ```bibtex
@@ -225,7 +287,7 @@ The author sincerely thanks the Stata official team for their support and the St
 ## 📃 Statement
 The Stata referred to in this project is the commercial software Stata developed by [StataCorp LLC](https://www.stata.com/company/). This project is not affiliated with, endorsed by, or sponsored by StataCorp LLC. This project does not include the Stata software or any installation packages; users must obtain and install a validly licensed copy of Stata from StataCorp. This project is licensed under [AGPL-3.0](LICENSE). The project maintainers accept no liability for any loss or damage arising from the use of this project or from actions related to Stata.
 
-More information: refer to the Chinese version at [source/docs/README/cn/README.md]; in case of any conflict, the Chinese version shall prevail.
+More information: refer to the Chinese version at [cn/README.md](source/docs/README/cn/README.md); in case of any conflict, the Chinese version shall prevail.
 
 ## ✨ Star History
 
