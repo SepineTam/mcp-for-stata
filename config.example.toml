@@ -5,17 +5,34 @@ IS_DEBUG = false
 LOGGING_ON = true
 LOGGING_CONSOLE_HANDLER_ON = false
 LOGGING_FILE_HANDLER_ON = true
-LOG_FILE = "~/"
-
+LOG_FILE = "~/.statamcp/stata_mcp_debug.log"
 MAX_BYTES = 10_000_000
 BACKUP_COUNT = 5
+
+[BETA]
+ENABLE_WRITE_DOFILE = false
+
+[HELP]
+IS_CACHE = true
+IS_SAVE = true
 
 [SECURITY]
 IS_GUARD = true
 
 [PROJECT]
 WORKING_DIR = ""
+CLEAN_LOG_DAYS = -1
+FOLDER_TAG = ".statamcp"
 
 [MONITOR]
 IS_MONITOR = false
 MAX_RAM_MB = -1
+
+[data_info]
+metrics = ["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]
+string_keep_number = 10
+decimal_places = 3
+hash_length = 12
+
+[STATA]
+STATA_CLI = ""
