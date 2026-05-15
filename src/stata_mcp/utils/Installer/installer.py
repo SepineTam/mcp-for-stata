@@ -58,6 +58,19 @@ class Installer:
             "openclaw": self.install_to_openclaw,
         }
 
+    # Default JSON key path each generic-JSON client expects.
+    # opencode/codex are intentionally excluded: they have client-specific
+    # schemas and do not participate in the --json-file/--json-index flow.
+    CLIENT_DEFAULT_KEY: Dict[str, "str | list[str]"] = {
+        "claude": "mcpServers",
+        "cc": "mcpServers",
+        "claude-code": "mcpServers",
+        "gemini": "mcpServers",
+        "cursor": "mcpServers",
+        "cline": "mcpServers",
+        "openclaw": ["mcp", "servers"],
+    }
+
     def install_all(self):
         func = self.client_function_mapping.values()
         for func in func:

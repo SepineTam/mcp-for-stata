@@ -191,16 +191,57 @@ def handle_install(args: Namespace) -> int:
     from ..utils.Installer import Installer
 
     installer = Installer(sys_os=sys.platform)
+
+    client = args.client
+    json_file = args.json_file
+    json_index = args.json_index
+
+    # 1. bare `stata-mcp install` -> equivalent to --all
+    if not args.all and not client and not json_file and not json_index:
+        args.all = True
+
+    # 2. --all wins, ignore everything else
     if args.all:
         installer.install_all()
         return 0
-    if args.json_file:
-        installer.install_to_json_config(args.json_file)
+
+    # 3. --json-index requires --json-file
+    if json_index and not json_file:
+        print("error: --json-index must be used together with --json-file", file=sys.stderr)
+        return 1
+
+    # 4. opencode / codex have client-specific schemas; ignore custom path
+    if client in {"opencode", "codex"}:
+        if json_file or json_index:
+            print(
+                f"warning: --json-file/--json-index are ignored for {client}; "
+                "using the default config path."
+            )
+        installer.install(client)
+        print(f"Stata-MCP has been installed to {client}.")
         return 0
 
-    installer.install(args.client)
-    print(f"Stata-MCP has been installed to {args.client}.")
+    # 5. -c CLIENT (generic-JSON clients)
+    if client:
+        if json_file:
+            key = _parse_json_index(json_index) if json_index else Installer.CLIENT_DEFAULT_KEY[client]
+            installer.install_to_json_config(json_file, key=key)
+            print(f"Stata-MCP has been installed to {json_file}.")
+            return 0
+        installer.install(client)
+        print(f"Stata-MCP has been installed to {client}.")
+        return 0
+
+    # 6. only --json-file (no -c)
+    key = _parse_json_index(json_index) if json_index else "mcpServers"
+    installer.install_to_json_config(json_file, key=key)
+    print(f"Stata-MCP has been installed to {json_file}.")
     return 0
+
+
+def _parse_json_index(raw: str) -> "list[str]":
+    """Split a dot-separated nested key path into a list of segments."""
+    return [segment for segment in raw.split(".") if segment]
 
 
 def handle_sandbox(args: Namespace) -> int:

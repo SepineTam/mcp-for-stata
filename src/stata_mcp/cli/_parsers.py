@@ -308,8 +308,8 @@ def add_install_parser(subparsers: argparse._SubParsersAction) -> argparse.Argum
         "-c",
         "--client",
         choices=["claude", "cc", "gemini", "cursor", "cline", "codex", "opencode", "openclaw"],
-        default="claude",
-        help="Target client (default: claude)",
+        default=None,
+        help="Target client. Omit -c (and --json-file) to install to all clients.",
     )
     install_parser.add_argument(
         "-a",
@@ -321,6 +321,12 @@ def add_install_parser(subparsers: argparse._SubParsersAction) -> argparse.Argum
         "--json-file",
         type=str,
         help="Custom target client config file path",
+    )
+    install_parser.add_argument(
+        "--json-index",
+        type=str,
+        default=None,
+        help="Dot-separated nested key path (e.g. 'mcp.servers'). Only valid with --json-file.",
     )
     return install_parser
 
