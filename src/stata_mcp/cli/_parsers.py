@@ -264,20 +264,39 @@ def add_doctor_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
 def add_config_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     """Add the config subcommand parser."""
     config_parser = subparsers.add_parser("config", help="Show and manage Stata-MCP configuration")
-    config_subparsers = config_parser.add_subparsers(dest="config_target")
+    config_subparsers = config_parser.add_subparsers(dest="config_action")
 
-    config_cli_parser = config_subparsers.add_parser("cli", help="Manage Stata CLI executable path")
-    config_cli_subparsers = config_cli_parser.add_subparsers(dest="config_cli_action")
-
-    config_cli_set_parser = config_cli_subparsers.add_parser(
-        "set",
-        help="Set STATA_CLI path in config file",
+    config_set_parser = config_subparsers.add_parser("set", help="Set a config value")
+    config_set_parser.add_argument(
+        "key",
+        choices=["cli"],
+        help="Config key to set",
     )
-    config_cli_set_parser.add_argument(
+    config_set_parser.add_argument(
         "value",
         nargs="?",
         default=None,
-        help="Optional STATA_CLI path. If omitted, auto-detect from StataFinder.",
+        help="Value to set. If omitted, auto-detect from StataFinder.",
+    )
+
+    config_show_parser = config_subparsers.add_parser("show", help="Show a config value")
+    config_show_parser.add_argument(
+        "key",
+        choices=["cli"],
+        help="Config key to show",
+    )
+
+    config_edit_parser = config_subparsers.add_parser(
+        "edit",
+        help="Edit a config value by section.key",
+    )
+    config_edit_parser.add_argument(
+        "dot_key",
+        help="Dot-notation key, e.g. STATA.STATA_CLI",
+    )
+    config_edit_parser.add_argument(
+        "value",
+        help="New value",
     )
     return config_parser
 

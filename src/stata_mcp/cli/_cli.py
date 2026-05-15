@@ -76,7 +76,7 @@ def main() -> None:
 
     if args.command == "config":
         exit_code = handle_config(args)
-        if exit_code != 0:
+        if exit_code == 2:
             config_parser.print_help()
         sys.exit(exit_code)
 

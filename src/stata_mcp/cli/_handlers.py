@@ -151,7 +151,7 @@ def handle_config(args: Namespace) -> int:
 
     cfg = Config()
 
-    if args.config_target is None:
+    if args.config_action is None:
         content = cfg.read_config_text()
         if content:
             print(content, end="" if content.endswith("\n") else "\n")
@@ -159,9 +159,28 @@ def handle_config(args: Namespace) -> int:
             print(f"No config file found at: {cfg.config_file}")
         return 0
 
-    if args.config_target == "cli" and args.config_cli_action == "set":
-        value = cfg.set_stata_cli(args.value)
-        print(f"Set STATA.STATA_CLI = {value}")
+    if args.config_action == "set":
+        if args.key == "cli":
+            value = cfg.set_stata_cli(args.value)
+            print(f"Set STATA.STATA_CLI = {value}")
+        return 0
+
+    if args.config_action == "show":
+        if args.key == "cli":
+            value = cfg.get_stata_cli()
+            if value is None:
+                print("STATA.STATA_CLI is not set")
+            else:
+                print(value)
+        return 0
+
+    if args.config_action == "edit":
+        try:
+            cfg.edit_value(args.dot_key, args.value)
+        except KeyError as error:
+            print(error, file=sys.stderr)
+            return 1
+        print(f"Updated {args.dot_key} = {args.value}")
         return 0
 
     return 2

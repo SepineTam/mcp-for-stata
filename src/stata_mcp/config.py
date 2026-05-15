@@ -105,6 +105,33 @@ class Config:
         self._write_toml(updated)
         return cleaned_value
 
+    def get_stata_cli(self) -> str | None:
+        """Return the persisted STATA.STATA_CLI value, or None if not set."""
+        return self.config.get("STATA", {}).get("STATA_CLI", None)
+
+    def edit_value(self, dot_key: str, value: str) -> None:
+        """Edit an existing config key using dot notation (Section.Key).
+
+        Raises:
+            KeyError: If the section or key does not exist in the config file.
+        """
+        if "." not in dot_key:
+            raise KeyError(f"Invalid key format '{dot_key}': expected Section.Key")
+
+        section, key = dot_key.split(".", 1)
+        cleaned_value = self._clean_string_value(value)
+
+        updated = self.config
+        if section not in updated:
+            raise KeyError(f"Section '{section}' not found")
+        if not isinstance(updated[section], dict):
+            raise KeyError(f"Section '{section}' is not a table")
+        if key not in updated[section]:
+            raise KeyError(f"Key '{key}' not found in section '{section}'")
+
+        updated[section][key] = cleaned_value
+        self._write_toml(updated)
+
     @staticmethod
     def _clean_string_value(value):
         """
