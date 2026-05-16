@@ -174,7 +174,7 @@ uvx stata-mcp doctor
 <summary>示例输出</summary>
 
 ```
-stata-mcp v1.16.3 — Doctor Report
+stata-mcp v1.17.0 — Doctor Report
 
   [PASS] os: macOS (Darwin 25.3.0, arm64)
   [PASS] python: 3.13.5

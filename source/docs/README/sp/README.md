@@ -182,7 +182,7 @@ Muestra información básica sobre tu dispositivo y verifica si tu configuració
 <summary>Ejemplo de salida</summary>
 
 ```
-stata-mcp v1.16.3 — Doctor Report
+stata-mcp v1.17.0 — Doctor Report
 
   [PASS] os: macOS (Darwin 25.3.0, arm64)
   [PASS] python: 3.13.5
