@@ -109,6 +109,17 @@ class Config:
         """Return the persisted STATA.STATA_CLI value, or None if not set."""
         return self.config.get("STATA", {}).get("STATA_CLI", None)
 
+    def get_value(self, dot_key: str) -> Any | None:
+        """Return a config value by dot notation (Section.Key), or None if not set."""
+        if "." not in dot_key:
+            raise KeyError(f"Invalid key format '{dot_key}': expected Section.Key")
+
+        section, key = dot_key.split(".", 1)
+        section_data = self.config.get(section)
+        if not isinstance(section_data, dict):
+            return None
+        return section_data.get(key, None)
+
     def edit_value(self, dot_key: str, value: str) -> None:
         """Edit an existing config key using dot notation (Section.Key).
 
