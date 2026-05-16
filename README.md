@@ -100,6 +100,8 @@ curl -fsSL https://raw.githubusercontent.com/SepineTam/stata-mcp/master/scripts/
 irm https://raw.githubusercontent.com/SepineTam/stata-mcp/master/scripts/install.ps1 | iex
 ```
 
+If you don't know how to use them, try click [here](https://github.com/SepineTam/stata-mcp/tree/master/scripts) and download the installation scripts and double-click it in your device. `install.bat` for Windows users, and `install.command` for macOS users. 
+
 ### Advanced - Claude Code
 As we find Claude Code is the best agent for Stata-MCP as its prefect agentic ability, we recommend using it, and there are lots of advanced usage following:
 
