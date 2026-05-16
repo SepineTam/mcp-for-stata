@@ -89,6 +89,8 @@ irm https://raw.githubusercontent.com/SepineTam/stata-mcp/master/scripts/install
 
 如果你不知道如何去使用命令行进行安装，尝试点击[这里](https://github.com/SepineTam/stata-mcp/tree/master/scripts)，并且下载安装脚本，并在本地双击运行。`install.bat` 为了 Windows 用户，并且 `install.command` for macOS 用户。
 
+如果因为网络问题出现失败，参考[使用镜像网站](../../ChinaUsers/uv.md)
+
 ### 高级 - Claude Code
 由于我们发现 Claude Code 凭借其出色的 agentic 能力是 Stata-MCP 的最佳选择，我们推荐使用它，以下是大量高级用法：
 
