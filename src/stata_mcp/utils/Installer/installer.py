@@ -10,6 +10,8 @@
 import json
 import os
 import platform
+import shutil
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -56,6 +58,8 @@ class Installer:
             "codex": self.install_to_codex,
             "opencode": self.install_to_opencode,
             "openclaw": self.install_to_openclaw,
+            "hermes": self.install_to_hermes_agent,
+            "hermes-agent": self.install_to_hermes_agent,
         }
 
     # Default JSON key path each generic-JSON client expects.
@@ -118,7 +122,7 @@ class Installer:
         servers = cursor
 
         if "stata-mcp" in servers:
-            print("stata-mcp is already installed.")
+            print(f"[DONE]\tstata-mcp is already installed in {config_path}.")
             sys.exit(0)
 
         servers.update(custom_config or self.STATA_MCP_COMMON_CONFIG)
@@ -147,6 +151,57 @@ class Installer:
             f.write(f"args = {self._format_toml_list(self.args)}\n")
             if self.is_env:
                 f.write(f"env = {self._format_inline_table(self.env)}\n")
+
+        print(f"✅ Successfully installed stata-mcp to: {config_path}")
+
+    def install_to_yaml_config(self, config_path: Path, key: str = "mcpServers"):
+        config_path = Path(config_path)
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+
+        print(
+            "[NOTE]\tHermes Agent uses YAML for mcpServers config."
+            " This is a text-based implementation without a YAML parser. Use with caution."
+        )
+
+        server_yaml = [
+            "  stata-mcp:",
+            f'    command: "{self.command}"',
+            f'    args: {json.dumps(self.args)}',
+        ]
+        if self.is_env:
+            server_yaml.append("    env:")
+            for k, v in self.env.items():
+                server_yaml.append(f'      {k}: "{v}"')
+
+        if config_path.exists():
+            existing = config_path.read_text(encoding="utf-8")
+            if "stata-mcp:" in existing:
+                print("stata-mcp is already installed.")
+                sys.exit(0)
+
+            if f"{key}:" in existing:
+                lines = existing.splitlines()
+                new_lines = []
+                inserted = False
+                for line in lines:
+                    new_lines.append(line)
+                    if not inserted and line.strip() == f"{key}:":
+                        new_lines.extend(server_yaml)
+                        inserted = True
+                if not inserted:
+                    new_lines.extend(["", f"{key}:"] + server_yaml)
+                config_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+            else:
+                sep = "\n\n" if existing.strip() else ""
+                config_path.write_text(
+                    existing.rstrip("\n") + sep + f"{key}:\n" + "\n".join(server_yaml) + "\n",
+                    encoding="utf-8",
+                )
+        else:
+            config_path.write_text(
+                f"{key}:\n" + "\n".join(server_yaml) + "\n",
+                encoding="utf-8",
+            )
 
         print(f"✅ Successfully installed stata-mcp to: {config_path}")
 
@@ -196,7 +251,42 @@ class Installer:
         formatted = [f'"{item}"' if isinstance(item, str) else str(item) for item in lst]
         return "[" + ", ".join(formatted) + "]"
 
+    def install_from_cli(self, cli_bin: str, command: list[str]) -> bool:
+        """Try to install via a CLI tool. Return True if successful."""
+        if not shutil.which(cli_bin):
+            print(f"[WARN]\t{cli_bin} is not found, falling back to config file.")
+            return False
+        full_cmd = [cli_bin, *command]
+        print(f"$ {' '.join(full_cmd)}")
+        try:
+            result = subprocess.run(
+                full_cmd,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            if result.stdout:
+                print(result.stdout)
+            print(f"[DONE]\tSuccessfully installed Stata-MCP via {cli_bin}")
+            return True
+        except subprocess.CalledProcessError as e:
+            if e.stdout:
+                print(">", e.stdout)
+            if e.stderr:
+                print(">", e.stderr)
+            stderr = (e.stderr or "").lower()
+            if "already exists" in stderr:
+                return True
+            print(f"[WARN]\tFailed to install Stata-MCP with {cli_bin}, falling back to config file")
+            return False
+
     def install_to_claude_code(self):
+        if self.install_from_cli(
+            cli_bin="claude",
+            command=["mcp", "add", "stata-mcp", "--scope", "user", "--env",
+                     f"STATA_CLI={self.STATA_CLI}", "--", self.command, *self.args]
+        ):
+            return
         cc_mcp_config_file = Path.home() / ".claude.json"
         self.install_to_json_config(cc_mcp_config_file)
 
@@ -228,7 +318,7 @@ class Installer:
         # As some reason, cursor should config more args to use.
         document_path = Path.home() / "Documents"
         self.args = ["--directory", document_path.as_posix(), "stata-mcp"]
-        self.env["STATA_MCP_CWD"] = document_path.as_posix()
+        self.env["STATA_MCP__CWD"] = document_path.as_posix()
 
         self.install_to_json_config(config_file)
 
@@ -266,12 +356,36 @@ class Installer:
         )
 
     def install_to_codex(self):
+        if self.install_from_cli(
+            cli_bin="codex",
+            command=["mcp", "add", "--env", f"STATA_CLI={self.STATA_CLI}", "stata-mcp", "--", self.command, *self.args]
+        ):
+            return
         config_file = Path.home() / ".codex" / "config.toml"
         self.install_to_toml_config(config_file, key="mcp_servers")
 
     def install_to_openclaw(self):
+        _json_config = json.dumps(
+            {"command": self.command, "args": self.args, "env": self.env}
+        )
+        if self.install_from_cli(
+            cli_bin="openclaw",
+            command=["mcp", "set", "stata-mcp", _json_config]
+        ):
+            return
         config_file = Path.home() / ".openclaw" / "openclaw.json"
         self.install_to_json_config(config_file, key=["mcp", "servers"])
+
+    def install_to_hermes_agent(self):
+        if self.install_from_cli(
+            cli_bin="hermes",
+            command=[
+                "mcp", "add", "stata-mcp", "--command", self.command, "--args", ",".join(self.args),
+            ],
+        ):
+            return
+        config_file = Path.home() / ".hermes" / "config.yaml"
+        self.install_to_yaml_config(config_file, key="mcp_servers")
 
 
 class InstallerDockerMode(Installer):

@@ -281,9 +281,8 @@ def add_config_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
 
     config_show_parser = config_subparsers.add_parser("show", help="Show a config value")
     config_show_parser.add_argument(
-        "key",
-        choices=["cli"],
-        help="Config key to show",
+        "dot_key",
+        help="Config key to show. Use 'cli' as shorthand for STATA.STATA_CLI, or Section.Key notation.",
     )
 
     config_edit_parser = config_subparsers.add_parser(
@@ -307,7 +306,8 @@ def add_install_parser(subparsers: argparse._SubParsersAction) -> argparse.Argum
     install_parser.add_argument(
         "-c",
         "--client",
-        choices=["claude", "cc", "gemini", "cursor", "cline", "codex", "opencode", "openclaw"],
+        choices=["claude", "cc", "claude-code", "gemini", "cursor", "cline", "codex",
+                 "opencode", "openclaw", "hermes", "hermes-agent"],
         default=None,
         help="Target client. Omit -c (and --json-file) to install to all clients.",
     )

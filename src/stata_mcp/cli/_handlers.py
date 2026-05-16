@@ -166,12 +166,18 @@ def handle_config(args: Namespace) -> int:
         return 0
 
     if args.config_action == "show":
-        if args.key == "cli":
+        if args.dot_key == "cli":
             value = cfg.get_stata_cli()
-            if value is None:
-                print("STATA.STATA_CLI is not set")
-            else:
-                print(value)
+        else:
+            try:
+                value = cfg.get_value(args.dot_key)
+            except KeyError as error:
+                print(error, file=sys.stderr)
+                return 1
+        if value is None:
+            print(f"{args.dot_key} is not set")
+        else:
+            print(value)
         return 0
 
     if args.config_action == "edit":
@@ -210,8 +216,8 @@ def handle_install(args: Namespace) -> int:
         print("error: --json-index must be used together with --json-file", file=sys.stderr)
         return 1
 
-    # 4. opencode / codex have client-specific schemas; ignore custom path
-    if client in {"opencode", "codex"}:
+    # 4. opencode / codex / hermes have client-specific schemas; ignore custom path
+    if client in {"opencode", "codex", "hermes", "hermes-agent"}:
         if json_file or json_index:
             print(
                 f"warning: --json-file/--json-index are ignored for {client}; "
