@@ -44,7 +44,7 @@ Unified configuration management with hierarchical priority:
 - **[Configuration System](configuration.md)**: TOML-based config file at `~/.statamcp/config.toml`
 - **Environment variables**: Override settings for specific sessions
 - **Priority**: Environment variables > config file > defaults
-- **Sections**: DEBUG, SECURITY, PROJECT, MONITOR
+- **Sections**: DEBUG, SECURITY, PROJECT, MONITOR, BETA, HELP, STATA, data_info
 
 ### 5. **Application Layer (Modes & Tools)**
 Two primary operational modes:
@@ -55,11 +55,13 @@ Operates as a stdio/HTTP/SSE server, responding to tool invocation requests from
 | Tool | Purpose |
 |------|---------|
 | `stata_do` | Execute do-files with log retrieval |
-| `write_dofile` | Create timestamped do-files |
+| `write_dofile` | Create timestamped do-files (deprecated, controlled by BETA config) |
 | `get_data_info` | Analyze CSV/DTA files with statistical summaries |
-| `help` | Retrieve Stata command documentation (cached) |
+| `help` | Retrieve Stata command documentation (cached) (Unix only) |
 | `ado_package_install` | Install packages from SSC/GitHub/net sources |
-| `read_file` | Generic file reading with encoding support |
+| `read_log` | Read Stata log files (text and SMCL formats) |
+
+> **Deprecated**: Agent mode is marked with `FutureWarning` since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (`stata-mcp server` / `stata-mcp install`).
 
 #### **Agent Mode** (`agent run` command)
 Interactive REPL agent for conversational analysis:
@@ -97,7 +99,7 @@ Cache invalidation occurs automatically on content change detection.
 Stata-MCP enforces a standardized directory layout for reproducible research:
 
 ```text
-~/Documents/stata-mcp-folder/
+~/.statamcp/
 ├── stata-mcp-log/      # Stata execution logs (timestamped)
 ├── stata-mcp-dofile/   # Generated do-files (ISO 8601 timestamps)
 ├── stata-mcp-result/   # Command outputs (outreg2, esttab exports)
@@ -118,7 +120,7 @@ For AI-assisted research projects, the recommended template (`stata-mcp --init`)
 │   │   └── final/           # Analysis-ready data
 │   ├── figs/                # Publication figures
 │   └── tabs/                # Publication tables
-├── stata-mcp-folder/        # Stata-MCP working directory
+├── .statamcp/               # Stata-MCP working directory
 └── CLAUDE.md                # Project-specific instructions
 ```
 

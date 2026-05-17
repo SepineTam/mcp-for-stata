@@ -13,7 +13,7 @@ Before using Stata-MCP, ensure you have:
 
 Verify your setup:
 ```bash
-uvx stata-mcp --usable
+uvx stata-mcp doctor
 ```
 
 ## New Features
@@ -115,6 +115,29 @@ MAX_RAM_MB = -1
 For details, see [Configuration Documentation](configuration.md).
 
 </details>
+
+## CLI Commands
+
+Stata-MCP provides several utility commands beyond the MCP server.
+
+```bash
+# Run diagnostics
+stata-mcp doctor
+
+# Install an ado package
+stata-mcp tool ado-install reghdfe
+
+# Inspect a dataset
+stata-mcp tool data-info /path/to/data.dta
+
+# Update to latest version
+stata-mcp update
+
+# Docker-based sandbox install
+stata-mcp sandbox-install -l /path/to/stata.lic
+```
+
+See [CLI Reference](cli.md) for complete documentation.
 
 ## Usage in Python
 
@@ -254,7 +277,7 @@ For research projects, use project-scoped configuration:
 
 ```bash
 cd ~/Documents/MyResearchProject
-claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp
+claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp
 ```
 
 #### Specify Version
@@ -262,7 +285,7 @@ claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope project -- uvx --dir
 To use a specific version:
 
 ```bash
-claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp==1.13.0
+claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp==1.16.3
 ```
 
 **Verify installation:**
@@ -315,7 +338,7 @@ For Cline users, edit the MCP configuration file at `~/Library/Application Suppo
         "stata-mcp"
       ],
       "env": {
-        "STATA_MCP_CWD": "/path/to/your/project"
+        "STATA_MCP__CWD": "/path/to/your/project"
       }
     }
   }
@@ -354,7 +377,7 @@ Most AI clients follow the standard MCP server configuration format. Below is th
         "stata-mcp"
       ],
       "env": {
-        "STATA_MCP_CWD": "/path/to/working/directory"
+        "STATA_MCP__CWD": "/path/to/working/directory"
       }
     }
   }
@@ -372,7 +395,7 @@ Most AI clients follow the standard MCP server configuration format. Below is th
         "stata-mcp"
       ],
       "env": {
-        "STATA_MCP_CWD": "/path/to/working/directory",
+        "STATA_MCP__CWD": "/path/to/working/directory",
         "STATA_MCP_MODEL": "gpt-4",
         "STATA_MCP_API_KEY": "your-api-key",
         "STATA_MCP_API_BASE_URL": "https://api.openai.com/v1"
@@ -388,21 +411,23 @@ Stata-MCP supports several environment variables for customization:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `STATA_MCP_CWD` | Current working directory for Stata operations | `./` |
-| `STATA_MCP_MODEL` | LLM model for agent mode | `gpt-3.5-turbo` |
-| `STATA_MCP_API_KEY` | API key for LLM provider | `OPENAI_API_KEY` |
+| `STATA_MCP__CWD` | Current working directory for Stata operations | `./` |
+| `STATA_MCP_MODEL` | LLM model for agent mode (deprecated, agent mode only) | `gpt-3.5-turbo` |
+| `STATA_MCP_API_KEY` | API key for LLM provider (deprecated, agent mode only) | `OPENAI_API_KEY` |
 | `STATA_MCP_API_BASE_URL` | Base URL for API requests | `https://api.openai.com/v1` |
 | `STATA_MCP_CLIENT` | Client type identifier | - |
 
 ## Terminal REPL Mode
 
+> **Deprecated**: Agent mode is marked with `FutureWarning` since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (`stata-mcp server` / `stata-mcp install`).
+
 For interactive sessions, use the built-in REPL agent:
 
 ```bash
-# Start with current directory
+# Start with current directory (deprecated)
 uvx stata-mcp agent run
 
-# Start with custom working directory
+# Start with custom working directory (deprecated)
 uvx stata-mcp agent run ~/Documents/MyResearch
 ```
 
@@ -458,7 +483,7 @@ Sessions are stored in `<work_dir>/.stata_sessions.db` for conversation history.
 - Check Python version: 3.11+ required
 
 **MCP server not connecting**
-- Verify `uvx stata-mcp --usable` passes all checks
+- Verify `uvx stata-mcp doctor` passes all checks
 - Check client's MCP server logs
 - Test with stdio transport (default)
 
@@ -473,7 +498,7 @@ uvx stata-mcp agent run
 ## Best Practices
 
 1. **Project Structure**: Use project-scoped MCP configuration for better isolation
-2. **Version Pinning**: Specify exact versions in production: `stata-mcp==1.13.0`
+2. **Version Pinning**: Specify exact versions in production: `stata-mcp==1.16.3`
 3. **Data Management**: Keep raw data immutable; use processing/ directories
 4. **Session Cleanup**: Regularly archive or cleanup old SQLite session databases
 5. **API Keys**: Use environment variables, never hardcode credentials

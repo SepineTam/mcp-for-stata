@@ -44,7 +44,7 @@ Stata-MCP 通过四个架构层运行：
 - **[配置系统](configuration.md)**：位于 `~/.statamcp/config.toml` 的 TOML 配置文件
 - **环境变量**：针对特定会话覆盖设置
 - **优先级**：环境变量 > 配置文件 > 默认值
-- **分区**：DEBUG、SECURITY、PROJECT、MONITOR
+- **分区**：DEBUG、SECURITY、PROJECT、MONITOR、BETA、HELP、STATA、data_info
 
 ### 5. **应用层（模式与工具）**
 两种主要操作模式：
@@ -55,11 +55,13 @@ Stata-MCP 通过四个架构层运行：
 | 工具 | 用途 |
 |------|---------|
 | `stata_do` | 执行 do 文件并获取日志 |
-| `write_dofile` | 创建带时间戳的 do 文件 |
+| `write_dofile` | 创建带时间戳的 do 文件（已弃用，由 BETA 配置控制） |
 | `get_data_info` | 分析 CSV/DTA 文件并生成统计摘要 |
-| `help` | 检索 Stata 命令文档（缓存） |
+| `help` | 检索 Stata 命令文档（缓存）（仅 Unix） |
 | `ado_package_install` | 从 SSC/GitHub/net 源安装包 |
-| `read_file` | 带编码支持的通用文件读取 |
+| `read_log` | 读取 Stata 日志文件（文本和 SMCL 格式） |
+
+> **已弃用**：智能体模式自 v1.16.x 起标记为 `FutureWarning`，将在未来版本中移除。新工作流应使用 MCP 服务器模式（`stata-mcp server` / `stata-mcp install`）。
 
 #### **智能体模式**（`agent run` 命令）
 用于对话分析的交互式 REPL 智能体：
@@ -97,7 +99,7 @@ Stata-MCP 实现了支持多种格式的多态数据分析系统：
 Stata-MCP 为可复现研究强制执行标准化的目录布局：
 
 ```text
-~/Documents/stata-mcp-folder/
+~/.statamcp/
 ├── stata-mcp-log/      # Stata 执行日志（带时间戳）
 ├── stata-mcp-dofile/   # 生成的 do 文件（ISO 8601 时间戳）
 ├── stata-mcp-result/   # 命令输出（outreg2、esttab 导出）
@@ -118,7 +120,7 @@ Stata-MCP 为可复现研究强制执行标准化的目录布局：
 │   │   └── final/           # 可直接分析的数据
 │   ├── figs/                # 出版图表
 │   └── tabs/                # 出版表格
-├── stata-mcp-folder/        # Stata-MCP 工作目录
+├── .statamcp/               # Stata-MCP 工作目录
 └── CLAUDE.md                # 项目特定指令
 ```
 

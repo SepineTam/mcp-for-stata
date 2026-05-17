@@ -16,27 +16,27 @@ The Security Guard is **enabled by default** to prevent accidental execution of 
 
 ## Dangerous Commands
 
-The Security Guard blocks the following dangerous commands:
+The Security Guard blocks the following dangerous commands. Stata resolves any unambiguous prefix to its full command (for example `sh` to `shell`), so the blacklist enumerates both the full names and the minimum abbreviations that Stata accepts. `GuardValidator` matches both forms before execution.
 
 ### Shell Execution Commands
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `!` | Unix-style shell escape | `! ls -la` |
-| `!!` | Extended shell command | `!! vi file.do` |
-| `shell` | Shell command execution | `shell dir` |
-| `xshell` | Extended shell for Mac/Unix(GUI) | `xshell vi file.do` |
-| `winexec` | Windows program execution | `winexec notepad.exe` |
-| `unixcmd` | Unix command execution | `unixcmd ls` |
+| Command | Abbreviation | Description | Example |
+|---------|--------------|-------------|---------|
+| `!` | - | Unix-style shell escape | `! ls -la` |
+| `!!` | - | Extended shell command | `!! vi file.do` |
+| `shell` | `sh` | Shell command execution | `shell dir` |
+| `xshell` | `xsh` | Extended shell for Mac/Unix (GUI) | `xshell vi file.do` |
+| `winexec` | `winex` | Windows program execution | `winexec notepad.exe` |
+| `unixcmd` | `unixc` | Unix command execution (macOS/Linux) | `unixcmd ls` |
 
 ### File Operations
 
-| Command | Description | Risk |
-|---------|-------------|------|
-| `erase` | File deletion | Data loss |
-| `rm` | File deletion (alias) | Data loss |
-| `rmdir` | Directory removal | Data loss |
-| `copy` | File copy | Can overwrite files |
+| Command | Abbreviation | Description | Risk |
+|---------|--------------|-------------|------|
+| `erase` | `era` | File deletion | Data loss |
+| `rm` | - | File deletion (alias) | Data loss |
+| `rmdir` | `rmd` | Directory removal | Data loss |
+| `copy` | - | File copy | Can overwrite files |
 
 ### Code Execution
 
@@ -45,6 +45,59 @@ The Security Guard blocks the following dangerous commands:
 | `run` | Run another do-file | Untrusted code execution |
 | `do` | Execute do-file | Untrusted code execution |
 | `include` | Include another do-file | Untrusted code execution |
+
+## Dofile Directory Boundary
+
+Since v1.16.2, `stata_do` rejects any dofile that resolves outside an approved root directory. The boundary check runs before the Guard validator and applies to both the MCP server and the CLI `stata-mcp tool do` entry point.
+
+### Allowed Roots
+
+A dofile is accepted only when its resolved absolute path lies under one of the following directories:
+
+| Root | Source |
+|------|--------|
+| `<WORKING_DIR>/<FOLDER_TAG>/stata-mcp-dofile/` | `STATA_MCP_FOLDER.DO` |
+| `<WORKING_DIR>` | Configured working directory |
+
+`WORKING_DIR` is taken from `STATA_MCP__CWD` (or the legacy `STATA_MCP_CWD`); the dofile root is the `stata-mcp-dofile/` subdirectory under it. Symbolic links are resolved before the check, so a link pointing outside the allowed roots is denied.
+
+### Rejection Behaviour
+
+When the resolved path is outside the allowed roots, `stata_do` returns an error of the form `Access denied: Dofile '<path>' is outside allowed directories.` together with the list of allowed roots, and a `[SECURITY VIOLATION]` warning is written to the log with the requested path, the resolved path, and the configured roots.
+
+### Operational Guidance
+
+Place dofiles either under the configured working directory or let Stata-MCP generate them into `stata-mcp-dofile/`. To execute dofiles that live elsewhere, point `STATA_MCP__CWD` at a parent directory that already contains them rather than relaxing the check.
+
+## Local Macro Expansion Detection
+
+A naive blacklist that only inspects each line's first token can be bypassed by hiding a dangerous command inside a local macro and expanding it later. Since v1.16.2 `GuardValidator` performs a two-pass check that closes this gap.
+
+### Detection Logic
+
+1. Pass one collects every `local <name> "<value>"` (and `local <name> = "<value>"`) definition. When the trimmed value is itself in `DANGEROUS_COMMANDS`, the local name is added to a tainted set.
+2. Pass two scans every non-comment line for `` `name' `` expansions of any tainted local and records each match as a `macro` risk in the `SecurityReport`.
+
+The local name pattern is `\w+`, so suffixed or prefixed variants such as `local cmd_x "shell"` are tracked alongside plain names. Stata prefixes (`capture`, `quietly`, `noisily`, ...) are stripped before both passes, so they cannot mask a tainted definition.
+
+### Counter-Example
+
+```stata
+local cmd_x "shell"
+`cmd_x' rm -rf /tmp/important
+```
+
+Without macro tracking the second line begins with a backtick and would slip past a first-token check. With macro tracking enabled the validator reports a `macro` risk on the second line, and `stata_do` refuses execution.
+
+### Coverage Caveats
+
+The macro tracker matches single-token dangerous values only. Concatenated assignments such as `local cmd = "she" + "ll"` or values constructed at runtime are outside its scope and remain a known limitation of static validation. Keep the Guard enabled and review generated dofiles when external sources contribute their content.
+
+## Guard Disable Warning
+
+`STATA_MCP__IS_GUARD=false` (or `[SECURITY] IS_GUARD = false` in `~/.statamcp/config.toml`) disables the validator entirely. Disabling the Guard skips every blacklist, pattern, and macro check, so any dofile content reaches Stata unchanged. Each `stata_do` call emits the warning `[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.` to the log; the same line is recorded at server startup when the configuration is read.
+
+Disable the Guard only inside controlled environments such as the Docker sandbox installation or an ephemeral VM, and re-enable it once the trusted task completes. The directory boundary check above continues to apply even when the Guard is disabled.
 
 ## Configuration
 

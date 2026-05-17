@@ -20,7 +20,7 @@ If you want to know more about Stata-MCP, visit its [documents](https://docs.sta
 | Tool | Purpose | Key Params |
 |------|---------|------------|
 | `help` | Get Stata command docs | `cmd` (Unix only) |
-| `stata_do` | Execute .do file | `dofile_path`, `is_read_log` |
+| `stata_do` | Execute .do file | `dofile_path`, `read_log_when_error` |
 | `ado_package_install` | Install packages | `package`, `source` (ssc/github/net) |
 | `get_data_info` | Analyze data files | `data_path`, `vars_list` |
 | `read_log` | Read log files | `file_path`, `output_format` |
@@ -48,4 +48,4 @@ uvx stata-mcp tool read-log <log_path> [--output-format full|core|dict]
 - Requires valid Stata license
 - `help` only works on macOS/Linux
 - Security guard blocks dangerous commands (shell, rm, etc.)
-- Log location: `<cwd>/stata-mcp-folder/stata-mcp-log/`
+- Log location: `<cwd>/.statamcp/stata-mcp-log/`

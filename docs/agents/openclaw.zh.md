@@ -1,5 +1,9 @@
 # 在 OpenClaw 中使用 🦞
 
+> **已废弃**:Stata-MCP 内置的 agent 模式自 v1.16.x 起已带 `FutureWarning`,将在后续版本移除。请改用 MCP server 模式(`stata-mcp server` 或 `stata-mcp install -c <客户端>`),并使用宿主 AI 客户端自带的 agent 能力。
+>
+> 备注:如需配置 OpenClaw 作为 MCP 客户端,请参考 docs/clients.md。
+
 由于 OpenClaw 原生不支持 MCP 工具协议，Stata-MCP 提供了独立的 CLI 工具命令，OpenClaw 可以通过终端工具调用使用。
 
 ## 安装指引（OpenClaw）
@@ -195,4 +199,4 @@ stata-mcp tool read-log /project/stata-mcp-log/analysis.log --output-format core
 1. **Stata 许可证**：需要有效的 Stata 安装和许可证
 2. **路径格式**：建议使用绝对路径
 3. **help 命令**：仅支持 macOS 和 Linux
-4. **日志位置**：默认在 `<cwd>/stata-mcp-folder/stata-mcp-log/`
+4. **日志位置**：默认在 `<cwd>/.statamcp/stata-mcp-log/`

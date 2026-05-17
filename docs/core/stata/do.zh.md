@@ -65,8 +65,8 @@ StataDo 是 Stata-MCP 工具链的重要组成部分：
 
 StataDo 遵循 Stata-MCP 目录结构约定：
 
-- **Do 文件目录**：`~/Documents/stata-mcp-folder/stata-mcp-dofile/`
-- **日志文件目录**：`~/Documents/stata-mcp-folder/stata-mcp-log/`
+- **Do 文件目录**：`~/Documents/.statamcp/stata-mcp-dofile/`
+- **日志文件目录**：`~/Documents/.statamcp/stata-mcp-log/`
 
 ## 注意事项
 

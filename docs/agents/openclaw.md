@@ -1,5 +1,9 @@
 # Use in OpenClaw 🦞
 
+> **Deprecated**: Stata-MCP's built-in agent mode is marked with `FutureWarning` since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (`stata-mcp server` or `stata-mcp install -c <client>`) and rely on the host AI client's native agent capabilities instead.
+>
+> Note: To configure OpenClaw as an MCP client, please refer to `docs/clients.md`.
+
 Since OpenClaw does not natively support the MCP tool protocol, Stata-MCP provides standalone CLI tool commands that OpenClaw can use through terminal tool invocation.
 
 ## Install instruction OpenClaw
@@ -195,4 +199,4 @@ stata-mcp tool read-log /project/stata-mcp-log/analysis.log --output-format core
 1. **Stata License**: Requires a valid Stata installation and license
 2. **Path Format**: Absolute paths are recommended
 3. **help Command**: Only supported on macOS and Linux
-4. **Log Location**: Defaults to `<cwd>/stata-mcp-folder/stata-mcp-log/`
+4. **Log Location**: Defaults to `<cwd>/.statamcp/stata-mcp-log/`

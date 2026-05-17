@@ -19,7 +19,7 @@ See [OpenClaw Integration Guide](agents/openclaw.md) for complete documentation.
 
 First, you should check whether your device is supported by stata-mcp.  
 ```bash
-uvx stata-mcp --usable
+uvx stata-mcp doctor
 ```
 If each check is passed, you can start using stata-mcp.  
 If remind not found STATA_CLI, you can see [StataFinder](core/stata/finder.md#not-found) to solve it.
@@ -45,7 +45,7 @@ Before using it, please make sure you have Claude Code installed. If you don't k
 Open your terminal, `cd` to your working directory, and run:
 
 ```bash
-claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp
+claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp
 ```
 
 This will create a `.mcp.json` file in your working directory with the MCP configuration.

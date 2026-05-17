@@ -19,7 +19,7 @@ Install `stata-skill` from ClawHub by @SepineTam.
 
 首先，你应该检查你的设备是否被 stata-mcp 支持。
 ```bash
-uvx stata-mcp --usable
+uvx stata-mcp doctor
 ```
 如果每项检查都通过，你就可以开始使用 stata-mcp 了。
 如果提示找不到 STATA_CLI，你可以查看 [StataFinder](core/stata/finder.md#not-found) 来解决。
@@ -45,7 +45,7 @@ uvx stata-mcp --usable
 打开你的终端，`cd` 到你的工作目录，然后运行：
 
 ```bash
-claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp
+claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp
 ```
 
 这将在你的工作目录中创建一个包含 MCP 配置的 `.mcp.json` 文件。

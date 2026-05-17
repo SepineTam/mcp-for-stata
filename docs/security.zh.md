@@ -16,27 +16,27 @@
 
 ## 危险命令
 
-安全守卫阻止以下危险命令：
+安全守卫阻止以下危险命令。Stata 会将任何无歧义的前缀解析为完整命令（例如 `sh` 解析为 `shell`），因此黑名单同时枚举完整命令名和 Stata 接受的最短缩写形式，`GuardValidator` 在执行前对两种形式都进行匹配。
 
 ### Shell 执行命令
 
-| 命令 | 描述 | 示例 |
-|---------|-------------|---------|
-| `!` | Unix 风格 shell 转义 | `! ls -la` |
-| `!!` | 扩展 shell 命令 | `!! vi file.do` |
-| `shell` | Shell 命令执行 | `shell dir` |
-| `xshell` | Mac/Unix(GUI) 扩展 shell | `xshell vi file.do` |
-| `winexec` | Windows 程序执行 | `winexec notepad.exe` |
-| `unixcmd` | Unix 命令执行 | `unixcmd ls` |
+| 命令 | 缩写 | 描述 | 示例 |
+|---------|--------------|-------------|---------|
+| `!` | - | Unix 风格 shell 转义 | `! ls -la` |
+| `!!` | - | 扩展 shell 命令 | `!! vi file.do` |
+| `shell` | `sh` | Shell 命令执行 | `shell dir` |
+| `xshell` | `xsh` | Mac/Unix(GUI) 扩展 shell | `xshell vi file.do` |
+| `winexec` | `winex` | Windows 程序执行 | `winexec notepad.exe` |
+| `unixcmd` | `unixc` | Unix 命令执行（macOS/Linux） | `unixcmd ls` |
 
 ### 文件操作
 
-| 命令 | 描述 | 风险 |
-|---------|-------------|------|
-| `erase` | 文件删除 | 数据丢失 |
-| `rm` | 文件删除（别名） | 数据丢失 |
-| `rmdir` | 目录删除 | 数据丢失 |
-| `copy` | 文件复制 | 可能覆盖文件 |
+| 命令 | 缩写 | 描述 | 风险 |
+|---------|--------------|-------------|------|
+| `erase` | `era` | 文件删除 | 数据丢失 |
+| `rm` | - | 文件删除（别名） | 数据丢失 |
+| `rmdir` | `rmd` | 目录删除 | 数据丢失 |
+| `copy` | - | 文件复制 | 可能覆盖文件 |
 
 ### 代码执行
 
@@ -45,6 +45,59 @@
 | `run` | 运行另一个 do 文件 | 不受信任的代码执行 |
 | `do` | 执行 do 文件 | 不受信任的代码执行 |
 | `include` | 包含另一个 do 文件 | 不受信任的代码执行 |
+
+## Dofile 目录边界
+
+自 v1.16.2 起，`stata_do` 会拒绝任何解析后位于受信任根目录之外的 dofile。边界校验在 Guard 验证器之前运行，对 MCP server 模式和 CLI `stata-mcp tool do` 入口同时生效。
+
+### 允许的根目录
+
+dofile 的绝对解析路径必须位于以下目录之一，才会被接受：
+
+| 根目录 | 来源 |
+|------|--------|
+| `<WORKING_DIR>/<FOLDER_TAG>/stata-mcp-dofile/` | `STATA_MCP_FOLDER.DO` |
+| `<WORKING_DIR>` | 配置的工作目录 |
+
+`WORKING_DIR` 取自 `STATA_MCP__CWD`（或兼容旧版的 `STATA_MCP_CWD`），dofile 根目录是其下的 `stata-mcp-dofile/` 子目录。符号链接会先被解析再校验，因此指向白名单外的链接会被拒绝。
+
+### 拒绝行为
+
+当解析后的路径位于允许根目录之外时，`stata_do` 返回 `Access denied: Dofile '<path>' is outside allowed directories.` 错误，并附带允许的根目录列表；同时日志会写入一条 `[SECURITY VIOLATION]` 警告，记录请求路径、解析路径以及当前配置的根目录。
+
+### 操作建议
+
+将 dofile 放在配置的工作目录下，或让 Stata-MCP 自动生成到 `stata-mcp-dofile/`。若需要执行位于其他位置的 dofile，应通过把 `STATA_MCP__CWD` 指向其上级目录来纳入白名单，而不是放宽校验。
+
+## Local Macro 展开检测
+
+仅检查每行首个 token 的朴素黑名单可以被绕过：把危险命令藏进 local macro，稍后通过展开调用。自 v1.16.2 起 `GuardValidator` 通过两轮扫描堵上了这个缺口。
+
+### 检测逻辑
+
+1. 第一轮遍历所有 `local <name> "<value>"`（以及 `local <name> = "<value>"`）定义，若 value 去空格后整体落在 `DANGEROUS_COMMANDS` 中，则把 local 名加入污染集合。
+2. 第二轮扫描所有非注释行，匹配任何污染 local 的 `` `name' `` 展开，并在 `SecurityReport` 中记录为 `macro` 风险。
+
+local 名称的匹配规则是 `\w+`，因此带后缀或前缀的写法如 `local cmd_x "shell"` 也会被跟踪。Stata 前缀（`capture`、`quietly`、`noisily` 等）在两轮扫描前都会被剥离，无法掩盖污染定义。
+
+### 反例
+
+```stata
+local cmd_x "shell"
+`cmd_x' rm -rf /tmp/important
+```
+
+不开启 macro 跟踪时，第二行以反引号开头，会绕过首 token 检查。启用 macro 跟踪后，验证器会对第二行报告 `macro` 风险，`stata_do` 拒绝执行。
+
+### 覆盖范围说明
+
+macro 跟踪只匹配单 token 危险值。拼接式赋值如 `local cmd = "she" + "ll"` 或运行时构造的内容超出静态校验范围，属于已知限制。当 dofile 内容来自外部输入时，请保持 Guard 启用并审查生成的代码。
+
+## Guard 禁用警告
+
+`STATA_MCP__IS_GUARD=false`（或在 `~/.statamcp/config.toml` 中写入 `[SECURITY] IS_GUARD = false`）会整体禁用验证器。Guard 禁用后，所有黑名单、模式与 macro 检查都会被跳过，dofile 内容会原样进入 Stata。每次 `stata_do` 调用都会向日志写入 `[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.`；server 启动读取配置时也会写入同样一行。
+
+仅在受控环境中禁用 Guard，例如 Docker 沙箱安装或临时虚拟机，受控任务完成后立即恢复启用。即便 Guard 被禁用，上文所述的目录边界校验仍然生效。
 
 ## 配置
 

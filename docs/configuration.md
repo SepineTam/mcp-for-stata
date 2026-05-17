@@ -29,16 +29,24 @@ IS_DEBUG = false
 LOGGING_ON = true
 LOGGING_CONSOLE_HANDLER_ON = false
 LOGGING_FILE_HANDLER_ON = true
-LOG_FILE = "~/"
-
+LOG_FILE = "~/.statamcp/stata_mcp_debug.log"
 MAX_BYTES = 10_000_000
 BACKUP_COUNT = 5
+
+[BETA]
+ENABLE_WRITE_DOFILE = false
+
+[HELP]
+IS_CACHE = true
+IS_SAVE = true
 
 [SECURITY]
 IS_GUARD = true
 
 [PROJECT]
 WORKING_DIR = ""
+CLEAN_LOG_DAYS = -1
+FOLDER_TAG = ".statamcp"
 
 [MONITOR]
 IS_MONITOR = false
@@ -48,9 +56,11 @@ MAX_RAM_MB = -1
 # Optional: Override automatic Stata detection
 # STATA_CLI = "/path/to/stata-mp"
 
-[BETA]
-# Beta features - use with caution
-ENABLE_WRITE_DOFILE = false  # Control write_dofile MCP tool registration
+[data_info]
+metrics = ["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]
+string_keep_number = 10
+decimal_places = 3
+hash_length = 12
 ```
 
 ## Configuration Sections
@@ -143,6 +153,36 @@ Number of backup log files to keep.
   export STATA_MCP__LOGGING__BACKUP_COUNT=10
   ```
 
+### HELP Section
+
+Controls caching behavior for the `help` tool.
+
+#### `HELP.IS_CACHE`
+
+Enable in-memory caching of help results returned by the `help` tool.
+
+- **Type**: Boolean
+- **Default**: `true`
+- **Environment Variable**: `STATA_MCP__CACHE_HELP`
+- **Description**: When enabled, previously fetched help text for the same command is served from cache, reducing repeated Stata calls within a session.
+- **Example**:
+  ```bash
+  export STATA_MCP__CACHE_HELP=true
+  ```
+
+#### `HELP.IS_SAVE`
+
+Persist cached help results to disk under `~/.statamcp/help/`.
+
+- **Type**: Boolean
+- **Default**: `true`
+- **Environment Variable**: `STATA_MCP__SAVE_HELP`
+- **Description**: When enabled, help responses are saved as files and reused across sessions. Disable this if you prefer a strictly in-memory cache.
+- **Example**:
+  ```bash
+  export STATA_MCP__SAVE_HELP=false
+  ```
+
 ### SECURITY Section
 
 Controls security features.
@@ -174,7 +214,7 @@ Set the working directory for Stata-MCP operations.
 - **Default**: Current directory (if writable) or `~/Documents`
 - **Environment Variable**: `STATA_MCP__CWD` (double underscore)
 - **Description**:
-  - If set and writable, all output files will be organized under `<WORKING_DIR>/stata-mcp-folder/`
+  - If set and writable, all output files will be organized under `<WORKING_DIR>/<FOLDER_TAG>/` (default `.statamcp/`)
   - If not set or not writable, falls back to current directory or `~/Documents`
   - **Legacy support**: `STATA_MCP_CWD` (single underscore) is still supported but deprecated
 - **Example**:
@@ -182,14 +222,50 @@ Set the working directory for Stata-MCP operations.
   export STATA_MCP__CWD="/projects/my-research"
   ```
 
+#### `PROJECT.CLEAN_LOG_DAYS`
+
+Retention window (in days) for Stata logs produced under the working directory.
+
+- **Type**: Integer
+- **Default**: `-1` (no cleanup)
+- **Environment Variable**: `STATA_MCP__CLEAN_LOG_DAYS`
+- **Description**:
+  - `-1` disables automatic cleanup
+  - When set to a positive integer, the `stata-mcp doctor` cleanup check removes Stata log files older than the specified number of days
+- **Example**:
+  ```bash
+  export STATA_MCP__CLEAN_LOG_DAYS=30
+  ```
+
+#### `PROJECT.FOLDER_TAG`
+
+Name of the stata-mcp subdirectory created under `WORKING_DIR`.
+
+- **Type**: String
+- **Default**: `.statamcp` (hidden directory)
+- **Environment Variable**: `STATA_MCP__FOLDER_TAG`
+- **Description**:
+  - Determines the folder name used for logs, do-files, results, and temporary files
+  - Since v1.16.0 the default was migrated from `stata-mcp-folder` to `.statamcp`
+  - To preserve the legacy folder layout, set this to `stata-mcp-folder`
+- **Example**:
+  ```bash
+  export STATA_MCP__FOLDER_TAG=stata-mcp-folder
+  ```
+
 The working directory structure:
 ```
-<WORKING_DIR>/stata-mcp-folder/
+<WORKING_DIR>/<FOLDER_TAG>/        # default: .statamcp/
 ├── stata-mcp-log/      # Stata execution logs
 ├── stata-mcp-dofile/   # Generated do-files
 ├── stata-mcp-result/   # Analysis results
 └── stata-mcp-tmp/      # Temporary files
 ```
+
+**Migration note (v1.16.0)**:
+- The default folder name changed from `stata-mcp-folder` to `.statamcp`.
+- If an old `stata-mcp-folder` directory is detected under the working directory, Stata-MCP writes a `README` notice inside it and creates a `.migrated` marker so the warning is emitted only once.
+- To roll back to the previous layout, set `export STATA_MCP__FOLDER_TAG=stata-mcp-folder`.
 
 ### MONITOR Section
 
@@ -265,6 +341,63 @@ Override automatic Stata detection.
   ```toml
   [STATA]
   STATA_CLI = "/usr/local/stata17/stata-mp"
+  ```
+
+### data_info Section
+
+Controls the behavior of the `get_data_info` tool: which descriptive statistics are reported, how strings are summarized, and how cache filenames are constructed.
+
+#### `data_info.metrics`
+
+Default list of numeric metrics returned for each variable.
+
+- **Type**: List of strings
+- **Default**: `["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]`
+- **Description**:
+  - Supported values include `obs`, `mean`, `stderr`, `min`, `max`, `q1`, `q3`, `skewness`, and `kurtosis`
+  - Trim the list to keep responses small, or extend it when richer summaries are needed
+- **Example**:
+  ```toml
+  [data_info]
+  metrics = ["obs", "mean", "stderr", "min", "max"]
+  ```
+
+#### `data_info.string_keep_number`
+
+Maximum number of unique values retained when summarizing string variables.
+
+- **Type**: Integer
+- **Default**: `10`
+- **Environment Variable**: `STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER`
+- **Description**: Categorical strings with more unique values are truncated to this many representatives.
+- **Example**:
+  ```bash
+  export STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER=20
+  ```
+
+#### `data_info.decimal_places`
+
+Number of decimal places used when formatting numeric statistics.
+
+- **Type**: Integer
+- **Default**: `3`
+- **Environment Variable**: `STATA_MCP_DATA_INFO_DECIMAL_PLACES`
+- **Example**:
+  ```bash
+  export STATA_MCP_DATA_INFO_DECIMAL_PLACES=4
+  ```
+
+#### `data_info.hash_length`
+
+Length of the hash suffix appended to cached data-info filenames.
+
+- **Type**: Integer
+- **Default**: `12`
+- **Environment Variable**: `STATA_MCP_DATA_INFO_HASH_LENGTH`
+- **Description**: Used by the data-info layer to disambiguate cache entries derived from the same source file.
+- **Example**:
+  ```bash
+  export STATA_MCP_DATA_INFO_HASH_LENGTH=8
   ```
 
 ## Using Environment Variables

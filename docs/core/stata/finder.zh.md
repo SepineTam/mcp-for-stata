@@ -26,12 +26,12 @@
 
 ## 找不到？
 
-如果 `uvx stata-mcp --usable` 提示找不到您的 Stata，别担心。如果您确定设备上有 Stata，请按照以下步骤解决。
+如果 `uvx stata-mcp doctor` 提示找不到您的 Stata，别担心。如果您确定设备上有 Stata，请按照以下步骤解决。
 
 ### macOS
 1. 打开您的 `Stata.app`，您可以在 Apple 标志右侧找到 `Stata/MP 19.0` 或其他类似版本，点击它。
 2. 然后，点击 `install terminal utility`。
-3. 现在，您可以关闭 Stata，再次运行 `uvx stata-mcp --usable`。
+3. 现在，您可以关闭 Stata，再次运行 `uvx stata-mcp doctor`。"
 4. 如果仍然提示 `not found`，您可以打开终端并运行 `which stata-mp`（如果您的版本是 StataSE 或 StataBE，可以将 `stata-mp` 替换为 `stata-se` 或 `stata-be`）。
 5. 将环境变量 `STATA_CLI` 设置为您在第 4 步获得的路径。
 
@@ -40,28 +40,24 @@
 sepinetam@sepine-macbook ~ % which stata-mp
 /usr/local/bin/stata-mp
 sepinetam@sepine-macbook ~ % export STATA_CLI="/usr/local/bin/stata-mp"
-sepinetam@sepine-macbook ~ % uvx stata-mcp --usable
+sepinetam@sepine-macbook ~ % uvx stata-mcp doctor
 
-===== Stata MCP Configuration Check =====
+stata-mcp v1.17.0 — Doctor Report
 
-Operating system (Current: macOS): ✅ PASSED
-Python version (Current: 3.13.5): ✅ PASSED
-MCP library installation: ✅ PASSED
-Locating Stata CLI...
-Stata CLI (Path: /usr/local/bin/stata-mp): ✅ PASSED
-Testing Stata execution...
-Stata execution test: ✅ PASSED
+  [PASS] os: macOS (Darwin 25.3.0, arm64)
+  [PASS] python: 3.11.11 (/Users/sepinetam/Documents/Github/stata-mcp/.venv/bin/python3)
+  [PASS] uv: uv 0.11.13 (Homebrew 2026-05-11 aarch64-apple-darwin) (/opt/homebrew/bin/uv)
+  [PASS] dependencies: all required packages available
+  [PASS] stata_cli: /usr/local/bin/stata-mp (from env)
+  [PASS] stata_execution: OK (0.2s)
+  [PASS] config: /Users/sepinetam/.statamcp/config.toml (loaded)
+  [PASS] working_dir: /Users/sepinetam/Documents/Github/stata-mcp (writable)
+  [PASS] guard: enabled, loaded 27 rules
+  [PASS] monitor: disabled (psutil available)
+  [PASS] pypi: reachable (1.74s)
+  [PASS] cleanup: 0 old files (0 B) found; cleanup disabled (CLEAN_LOG_DAYS=-1)
 
-Checking required directories...
-Base Dir (Path: /Users/sepinetam/Documents/stata-mcp-folder): ✅ PASSED
-Log Dir (Path: /Users/sepinetam/Documents/stata-mcp-folder/stata-mcp-log): ✅ PASSED
-Dofile Dir (Path: /Users/sepinetam/Documents/stata-mcp-folder/stata-mcp-dofile): ✅ PASSED
-Result Dir (Path: /Users/sepinetam/Documents/stata-mcp-folder/stata-mcp-result): ✅ PASSED
-
-===== Summary =====
-
-✅ Success! Your Stata-MCP setup is ready to use.
-You can now use Stata-MCP with your preferred MCP client (Claude, Cherry Studio, etc.)
+Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 ```
 
 此外，将配置写入 `~/.zshrc`，如下所示：
@@ -77,10 +73,10 @@ echo "$STATA_CLI"
 
 ### Linux
 1. 如果您使用的是没有 GUI 的 Linux 机器，您应该知道您的 `stata-mp` 可执行文件位于何处，我将假设您是一位有经验的计算机用户。
-2. 只需将环境变量 `STATA_CLI` 设置为您的 `stata-mp` 可执行文件路径，然后再次运行 `uvx stata-mcp --usable`。如果没有错误，则配置成功。
+2. 只需将环境变量 `STATA_CLI` 设置为您的 `stata-mp` 可执行文件路径，然后再次运行 `uvx stata-mcp doctor`。如果没有错误，则配置成功。
 
 ### Windows
 Windows 的配置相对复杂，但核心方法与 macOS 和 Linux 类似。您需要找到您的 `Stata.exe`（或类似命名的）文件，然后将 `Stata.exe` 路径设置为环境变量 `STATA_CLI`。关于如何在 Windows 中设置环境变量有很多在线资源，您可以自己搜索。以下是如何找到实际的 `Stata.exe` 文件：
 1. 按键盘上的 Windows 键，搜索 "Stata"，找到您正在使用的 Stata。
 2. 右键点击并选择 "打开文件位置"。此时，此目录中通常只有两个文件——这些不是实际的可执行文件。再次右键点击并选择"打开文件位置"以找到真正的可执行文件，然后将其路径设置为环境变量 `STATA_CLI`。
-3. 再次运行 `uvx stata-mcp --usable`。如果没有错误，则配置成功。
+3. 再次运行 `uvx stata-mcp doctor`。如果没有错误，则配置成功。

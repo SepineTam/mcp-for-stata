@@ -82,7 +82,7 @@ print(runtime.is_unix)          # 是否为 macOS/Linux
 def stata_do(
     dofile_path: str,
     log_file_name: str = None,
-    is_read_log: bool = True,
+    read_log_when_error: bool = False,
     is_replace_log: bool = True,
     enable_smcl: bool = True,
     config_file: str | Path | None = None,
@@ -96,7 +96,7 @@ def stata_do(
 |------|------|--------|------|
 | `dofile_path` | `str` | 必填 | do 文件路径 |
 | `log_file_name` | `str` | `None` | 自定义日志文件名（不含扩展名） |
-| `is_read_log` | `bool` | `True` | 执行后读取日志内容 |
+| `read_log_when_error` | `bool` | `False` | Stata 报错时才读取日志 |
 | `is_replace_log` | `bool` | `True` | 替换已存在的日志文件 |
 | `enable_smcl` | `bool` | `True` | 生成 SMCL 格式日志 |
 | `config_file` | `str \| Path` | `None` | 自定义配置文件路径 |
@@ -110,7 +110,7 @@ def stata_do(
         "smcl": "/path/to/output.smcl"  # 如果 enable_smcl=True
     },
     "log_content": {
-        "text": "..."  # 如果 is_read_log=True 时的日志内容
+        "text": "..."  # 如果 read_log_when_error=True 且发生错误时的日志内容
     }
 }
 ```
@@ -400,7 +400,7 @@ def analyze_dataset(data_path: str, dofile_path: str):
     info = get_data_info(data_path)
 
     # 2. 执行分析
-    result = stata_do(dofile_path, is_read_log=True)
+    result = stata_do(dofile_path, read_log_when_error=True)
 
     # 3. 返回结果
     return {

@@ -16,7 +16,7 @@ Run diagnostics to check system health:
 stata-mcp doctor
 ```
 
-> **Note:** `--usable` is deprecated since v1.14.3 and will be removed in v1.16.0. Use `stata-mcp doctor` instead.
+> **Note:** `--usable` has been deprecated since v1.14.3. It still works in current releases but `stata-mcp doctor` is the recommended replacement in v1.16+ and may be removed in a later major release.
 
 ## Commands
 
@@ -63,6 +63,8 @@ stata-mcp server --core -t sse
 
 ### Agent Mode
 
+> **Deprecated**: Agent mode is marked with `FutureWarning` since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (`stata-mcp server` or `stata-mcp install`).
+
 Run Stata-MCP in interactive agent mode:
 
 ```bash
@@ -72,8 +74,6 @@ stata-mcp agent run
 # Start agent in specific directory
 stata-mcp agent run --work-dir /path/to/project
 ```
-
-### Local Tool Commands
 
 ### Doctor Diagnostics
 
@@ -91,7 +91,12 @@ stata-mcp doctor --json
 
 # Run only specific checks (repeatable)
 stata-mcp doctor --check stata --check python
+
+# Preview cleanup actions without deleting (cleanup checks only)
+stata-mcp doctor --check cleanup --dry-run
 ```
+
+Common check names include `stata`, `python`, and `cleanup`. The `--dry-run` flag is interpreted by cleanup-style checks and previews destructive operations instead of executing them; other checks ignore it.
 
 ### Update
 
@@ -123,11 +128,11 @@ Run API-backed Stata tools directly from the CLI:
 # Install an ado package from SSC (default source)
 stata-mcp tool ado-install reghdfe
 
-# Run a do-file and print generated log output
-stata-mcp tool do /path/to/analysis.do
+# Run a do-file and only read the log when execution fails
+stata-mcp tool do /path/to/analysis.do --read-log-when-error true
 
 # Read Stata help through the one-shot API helper
-stata-mcp tool help regress --is-read-log true --enable-smcl true
+stata-mcp tool help regress --enable-smcl true
 
 # Inspect a supported dataset
 stata-mcp tool data-info /path/to/data.dta
@@ -138,58 +143,74 @@ stata-mcp tool read-log /path/to/output.log
 
 Tool subcommands:
 - `stata-mcp tool ado-install <package_name> [--source ssc|net|github]`
-- `stata-mcp tool do <dofile_path> [--is-read-log true|false] [--enable-smcl true|false]`
-- `stata-mcp tool help <command> [--is-read-log true|false] [--enable-smcl true|false]`
+- `stata-mcp tool do <dofile_path> [--read-log-when-error true|false] [--enable-smcl true|false]`
+- `stata-mcp tool help <command> [--read-log-when-error true|false] [--enable-smcl true|false]`
 - `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
 - `stata-mcp tool read-log <log_path> [--output-format full|core|dict]`
 
+> Note: `--read-log-when-error` replaces the older `--is-read-log` flag. Unlike the old flag (which unconditionally read the log), the new flag reads the log only when the underlying execution reports an error.
+
 ### Config Management
 
-Inspect and update local CLI configuration:
+Inspect and update local CLI configuration stored in `~/.statamcp/config.toml`:
 
 ```bash
-# Print current config file content (~/.statamcp/config.toml)
+# Print the entire config file
 stata-mcp config
 
+# Show a single value (cli is shorthand for STATA.STATA_CLI)
+stata-mcp config show cli
+stata-mcp config show STATA.STATA_CLI
+stata-mcp config show SECURITY.IS_GUARD
+
 # Set STATA_CLI explicitly
-stata-mcp config cli set /path/to/stata
+stata-mcp config set cli /path/to/stata
 
 # Auto-detect STATA_CLI via StataFinder and persist it
-stata-mcp config cli set
+stata-mcp config set cli
+
+# Edit an existing key by dot-notation
+stata-mcp config edit STATA.STATA_CLI /path/to/stata
+stata-mcp config edit SECURITY.IS_GUARD false
 ```
+
+The `set` subcommand currently accepts only the `cli` key. The `edit` subcommand accepts any existing `Section.Key` in the config file and rejects keys that are not already defined.
 
 ### Install to AI Clients
 
 Install Stata-MCP to various AI coding assistants:
 
 ```bash
-# Install to Claude Desktop (default)
+# Install to all supported clients (no -c, no --json-file)
 stata-mcp install
 
-# Install to specific client
-stata-mcp install -c claude    # Claude Desktop
-stata-mcp install -c cc        # Claude Code
-stata-mcp install -c gemini    # Gemini CLI
-stata-mcp install -c cursor    # Cursor
-stata-mcp install -c cline     # Cline
-stata-mcp install -c codex     # Codex
-stata-mcp install -c opencode  # OpenCode
+# Install to a specific client
+stata-mcp install -c claude-code
+stata-mcp install -c cursor
 
-# Install to all supported clients
+# Install to all clients explicitly
 stata-mcp install --all
 
-# Install to custom config file
+# Install into a custom JSON config file
 stata-mcp install --json-file /path/to/config.json
+
+# Install into a nested key inside a custom JSON config file
+stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 ```
 
 **Supported Clients:**
-- `claude` - Claude Desktop
-- `cc` - Claude Code
-- `gemini` - Gemini CLI
-- `cursor` - Cursor Editor
-- `cline` - Cline (VSCode extension)
-- `codex` - Codex
-- `opencode` - OpenCode
+
+| Client ID | Target | Aliases |
+|-----------|--------|---------|
+| `claude` | Claude Desktop | |
+| `claude-code` | Claude Code | `cc` |
+| `cursor` | Cursor Editor | |
+| `cline` | Cline (VS Code extension) | |
+| `codex` | Codex | |
+| `gemini` | Gemini CLI | |
+| `opencode` | OpenCode | |
+| `openclaw` | OpenClaw | |
+| `hermes` | Hermes | `hermes-agent` |
 
 ### Docker-based Installation (sandbox-install)
 
@@ -227,7 +248,7 @@ uvx stata-mcp sandbox-install \
 |--------|-------------|
 | `--core` | Register only core tools (stata_do, get_data_info, help) |
 | `--all` | Register all tools (default) |
-| `--transport` | `-t` | MCP transport method (stdio/sse/http) |
+| `-t`, `--transport` | MCP transport method (stdio/sse/http) |
 
 ### Global Options
 
@@ -248,16 +269,19 @@ uvx stata-mcp sandbox-install \
 
 | Command | Description |
 |---------|-------------|
-| `stata-mcp config` | Print raw config file content |
-| `stata-mcp config cli set [value]` | Set `STATA.STATA_CLI` in config, auto-detect when value is omitted |
+| `stata-mcp config` | Print the raw `~/.statamcp/config.toml` content |
+| `stata-mcp config show <dot_key>` | Show one value. `cli` is shorthand for `STATA.STATA_CLI`; otherwise use `Section.Key` |
+| `stata-mcp config set cli [value]` | Set `STATA.STATA_CLI`. Auto-detect via StataFinder when value is omitted |
+| `stata-mcp config edit <dot_key> <value>` | Edit an existing `Section.Key` entry |
 
 ### Install Options
 
 | Option | Short | Description |
 |--------|-------|-------------|
-| `--client` | `-c` | Target client (default: claude) |
+| `--client` | `-c` | Target client. Omitting both `-c` and `--json-file` is equivalent to `--all` |
 | `--all` | `-a` | Install to all supported clients |
 | `--json-file` | | Custom target client config file path |
+| `--json-index` | | Dot-separated nested key path (e.g. `mcp.servers`); only valid together with `--json-file` |
 
 ### Doctor Options
 
@@ -266,6 +290,7 @@ uvx stata-mcp sandbox-install \
 | `--verbose` | Show detailed information for each check |
 | `--json` | Output report in JSON format |
 | `--check` | Run only specified check names (repeatable) |
+| `--dry-run` | Preview cleanup actions without deleting files (cleanup-style checks only) |
 
 ### Update Options
 
@@ -309,11 +334,11 @@ stata-mcp -t sse
 # 1. Run diagnostics
 stata-mcp doctor
 
-# 2. Install to Claude Desktop
-stata-mcp install
+# 2. Install to Claude Code
+stata-mcp install -c claude-code
 
-# 3. Run agent for interactive analysis
-stata-mcp agent run
+# 3. Inspect a dataset before writing the analysis
+stata-mcp tool data-info /path/to/data.dta
 ```
 
 ### Using with uvx
@@ -327,12 +352,28 @@ uvx stata-mcp --version
 # Run diagnostics
 uvx stata-mcp doctor
 
-# Run agent
-uvx stata-mcp agent run
+# Run a do-file directly
+uvx stata-mcp tool do /path/to/analysis.do
 
-# Install to client
+# Start the MCP server
+uvx stata-mcp server
+
+# Install to a client
 uvx stata-mcp install -c cursor
 ```
+
+## Self-contained Install Scripts
+
+The project root ships a set of self-contained installer scripts for users who do not already have `uv` or `pip` available. They bootstrap a Python toolchain and bring up `stata-mcp` in one step.
+
+| Script | Target platform | Typical use |
+|--------|-----------------|-------------|
+| `install.sh` | Unix shells (Linux, macOS, WSL) | `bash install.sh` |
+| `install.command` | macOS Finder | double-click to launch in Terminal |
+| `install.ps1` | Windows PowerShell | `powershell -ExecutionPolicy Bypass -File install.ps1` |
+| `install.bat` | Windows command line | double-click or run from `cmd.exe` |
+
+These scripts are intended for first-time bootstrap on machines without a Python package manager. On machines that already have `uv` or `pip`, the standard `uv tool install stata-mcp` / `pip install stata-mcp` flow is preferred.
 
 ## Exit Codes
 

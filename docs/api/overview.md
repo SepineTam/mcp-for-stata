@@ -82,7 +82,7 @@ Execute a Stata do-file and optionally return log content.
 def stata_do(
     dofile_path: str,
     log_file_name: str = None,
-    is_read_log: bool = True,
+    read_log_when_error: bool = False,
     is_replace_log: bool = True,
     enable_smcl: bool = True,
     config_file: str | Path | None = None,
@@ -96,7 +96,7 @@ def stata_do(
 |-----------|------|---------|-------------|
 | `dofile_path` | `str` | required | Path to do-file |
 | `log_file_name` | `str` | `None` | Custom log filename (without extension) |
-| `is_read_log` | `bool` | `True` | Read log content after execution |
+| `read_log_when_error` | `bool` | `False` | Read log only when Stata reports an error |
 | `is_replace_log` | `bool` | `True` | Replace existing log file |
 | `enable_smcl` | `bool` | `True` | Generate SMCL format log |
 | `config_file` | `str \| Path` | `None` | Custom config file path |
@@ -110,7 +110,7 @@ def stata_do(
         "smcl": "/path/to/output.smcl"  # if enable_smcl=True
     },
     "log_content": {
-        "text": "..."  # log content if is_read_log=True
+        "text": "..."  # log content if read_log_when_error=True and error occurred
     }
 }
 ```
@@ -400,7 +400,7 @@ def analyze_dataset(data_path: str, dofile_path: str):
     info = get_data_info(data_path)
 
     # 2. Execute analysis
-    result = stata_do(dofile_path, is_read_log=True)
+    result = stata_do(dofile_path, read_log_when_error=True)
 
     # 3. Return results
     return {

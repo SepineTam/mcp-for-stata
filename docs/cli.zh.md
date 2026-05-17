@@ -16,7 +16,7 @@ stata-mcp --version
 stata-mcp doctor
 ```
 
-> **注意：** `--usable` 自 v1.14.3 起已弃用，将在 v1.16.0 中移除。请改用 `stata-mcp doctor`。
+> **注意：** `--usable` 自 v1.14.3 起已弃用。在当前版本中仍可使用，但 v1.16+ 起推荐改用 `stata-mcp doctor`，该选项可能在后续主版本中被移除。
 
 ## 命令
 
@@ -63,6 +63,8 @@ stata-mcp server --core -t sse
 
 ### 智能体模式
 
+> **Deprecated**: 智能体模式自 v1.16.x 起带有 `FutureWarning`，并将在后续版本中移除。新的工作流应改用 MCP server 模式（`stata-mcp server` 或 `stata-mcp install`）。
+
 以交互式智能体模式运行 Stata-MCP：
 
 ```bash
@@ -72,8 +74,6 @@ stata-mcp agent run
 # 在指定目录启动智能体
 stata-mcp agent run --work-dir /path/to/project
 ```
-
-### 本地工具命令
 
 ### 诊断检查（doctor）
 
@@ -91,7 +91,12 @@ stata-mcp doctor --json
 
 # 仅运行特定检查（可重复）
 stata-mcp doctor --check stata --check python
+
+# 仅预览清理动作但不实际删除（仅 cleanup 类检查）
+stata-mcp doctor --check cleanup --dry-run
 ```
+
+常见的检查名包括 `stata`、`python` 和 `cleanup`。`--dry-run` 仅对 `cleanup` 类检查生效，用于预览将要清理的内容而不真正删除；其他检查会忽略该参数。
 
 ### 更新（update）
 
@@ -123,11 +128,11 @@ stata-mcp update --method homebrew  # brew upgrade
 # 从 SSC 安装 ado 包（默认源）
 stata-mcp tool ado-install reghdfe
 
-# 运行 do-file 并打印生成的日志输出
-stata-mcp tool do /path/to/analysis.do
+# 运行 do-file，仅在执行失败时读取 log
+stata-mcp tool do /path/to/analysis.do --read-log-when-error true
 
 # 通过一次性的 API helper 读取 Stata help
-stata-mcp tool help regress --is-read-log true --enable-smcl true
+stata-mcp tool help regress --enable-smcl true
 
 # 查看支持的数据集元信息
 stata-mcp tool data-info /path/to/data.dta
@@ -138,58 +143,74 @@ stata-mcp tool read-log /path/to/output.log
 
 工具子命令：
 - `stata-mcp tool ado-install <package_name> [--source ssc|net|github]`
-- `stata-mcp tool do <dofile_path> [--is-read-log true|false] [--enable-smcl true|false]`
-- `stata-mcp tool help <command> [--is-read-log true|false] [--enable-smcl true|false]`
+- `stata-mcp tool do <dofile_path> [--read-log-when-error true|false] [--enable-smcl true|false]`
+- `stata-mcp tool help <command> [--read-log-when-error true|false] [--enable-smcl true|false]`
 - `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
 - `stata-mcp tool read-log <log_path> [--output-format full|core|dict]`
 
+> 说明：`--read-log-when-error` 取代了旧的 `--is-read-log`。旧参数会无条件读取 log，新参数仅在底层执行报告错误时才读取 log。
+
 ### 配置管理
 
-查看和更新本地 CLI 配置：
+查看和更新本地 CLI 配置（位于 `~/.statamcp/config.toml`）：
 
 ```bash
-# 打印当前配置文件内容（~/.statamcp/config.toml）
+# 打印整个配置文件内容
 stata-mcp config
 
-# 手动设置 STATA_CLI 路径
-stata-mcp config cli set /path/to/stata
+# 查看单个键值（cli 是 STATA.STATA_CLI 的简写）
+stata-mcp config show cli
+stata-mcp config show STATA.STATA_CLI
+stata-mcp config show SECURITY.IS_GUARD
+
+# 显式设置 STATA_CLI
+stata-mcp config set cli /path/to/stata
 
 # 自动检测 STATA_CLI 并持久化保存
-stata-mcp config cli set
+stata-mcp config set cli
+
+# 通过 dot-notation 编辑已存在的键
+stata-mcp config edit STATA.STATA_CLI /path/to/stata
+stata-mcp config edit SECURITY.IS_GUARD false
 ```
+
+`set` 子命令目前只接受 `cli` 这一个键。`edit` 子命令接受配置文件中任意已存在的 `Section.Key`，对未定义的键会拒绝写入。
 
 ### 安装到 AI 客户端
 
 将 Stata-MCP 安装到各种 AI 编程助手：
 
 ```bash
-# 安装到 Claude Desktop（默认）
+# 安装到所有支持的客户端（不带 -c 和 --json-file 时等价于 --all）
 stata-mcp install
 
 # 安装到特定客户端
-stata-mcp install -c claude    # Claude Desktop
-stata-mcp install -c cc        # Claude Code
-stata-mcp install -c gemini    # Gemini CLI
-stata-mcp install -c cursor    # Cursor
-stata-mcp install -c cline     # Cline
-stata-mcp install -c codex     # Codex
-stata-mcp install -c opencode  # OpenCode
+stata-mcp install -c claude-code
+stata-mcp install -c cursor
 
-# 安装到所有支持的客户端
+# 显式安装到所有客户端
 stata-mcp install --all
 
-# 安装到自定义配置文件
+# 安装到自定义 JSON 配置文件
 stata-mcp install --json-file /path/to/config.json
+
+# 安装到自定义 JSON 配置文件的嵌套键路径
+stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 ```
 
 **支持的客户端：**
-- `claude` - Claude Desktop
-- `cc` - Claude Code
-- `gemini` - Gemini CLI
-- `cursor` - Cursor Editor
-- `cline` - Cline（VS Code 扩展）
-- `codex` - Codex
-- `opencode` - OpenCode
+
+| 客户端 ID | 目标 | 别名 |
+|-----------|------|------|
+| `claude` | Claude Desktop | |
+| `claude-code` | Claude Code | `cc` |
+| `cursor` | Cursor Editor | |
+| `cline` | Cline（VS Code 扩展） | |
+| `codex` | Codex | |
+| `gemini` | Gemini CLI | |
+| `opencode` | OpenCode | |
+| `openclaw` | OpenClaw | |
+| `hermes` | Hermes | `hermes-agent` |
 
 ### 基于 Docker 的安装（sandbox-install）
 
@@ -227,7 +248,7 @@ uvx stata-mcp sandbox-install \
 |--------|-------------|
 | `--core` | 仅注册核心工具（stata_do、get_data_info、help） |
 | `--all` | 注册所有工具（默认） |
-| `--transport` | `-t` | MCP 传输方式（stdio/sse/http） |
+| `-t`, `--transport` | MCP 传输方式（stdio/sse/http） |
 
 ### 全局选项
 
@@ -248,16 +269,19 @@ uvx stata-mcp sandbox-install \
 
 | 命令 | 描述 |
 |--------|-------------|
-| `stata-mcp config` | 打印原始配置文件内容 |
-| `stata-mcp config cli set [value]` | 设置 `STATA.STATA_CLI`，省略 value 时自动检测 |
+| `stata-mcp config` | 打印 `~/.statamcp/config.toml` 的全部内容 |
+| `stata-mcp config show <dot_key>` | 查看单个值，`cli` 为 `STATA.STATA_CLI` 的简写，其他使用 `Section.Key` |
+| `stata-mcp config set cli [value]` | 设置 `STATA.STATA_CLI`，省略 value 时由 StataFinder 自动检测 |
+| `stata-mcp config edit <dot_key> <value>` | 通过 `Section.Key` 修改已存在的配置项 |
 
 ### 安装选项
 
 | 选项 | 简写 | 描述 |
 |--------|-------|-------------|
-| `--client` | `-c` | 目标客户端（默认：claude） |
+| `--client` | `-c` | 目标客户端；若同时省略 `-c` 和 `--json-file`，等价于 `--all` |
 | `--all` | `-a` | 安装到所有支持的客户端 |
 | `--json-file` | | 自定义目标客户端配置文件路径 |
+| `--json-index` | | dot-notation 的嵌套键路径（如 `mcp.servers`），仅在与 `--json-file` 一起使用时有效 |
 
 ### 诊断选项（doctor）
 
@@ -266,6 +290,7 @@ uvx stata-mcp sandbox-install \
 | `--verbose` | 显示每项检查的详细信息 |
 | `--json` | 以 JSON 格式输出报告 |
 | `--check` | 仅运行指定检查（可重复） |
+| `--dry-run` | 仅预览清理动作但不实际删除文件（仅 cleanup 类检查生效） |
 
 ### 更新选项（update）
 
@@ -309,11 +334,11 @@ stata-mcp -t sse
 # 1. 运行诊断检查
 stata-mcp doctor
 
-# 2. 安装到 Claude Desktop
-stata-mcp install
+# 2. 安装到 Claude Code
+stata-mcp install -c claude-code
 
-# 3. 运行智能体进行交互式分析
-stata-mcp agent run
+# 3. 在写分析之前先查看数据
+stata-mcp tool data-info /path/to/data.dta
 ```
 
 ### 使用 uvx
@@ -327,12 +352,28 @@ uvx stata-mcp --version
 # 运行诊断
 uvx stata-mcp doctor
 
-# 运行智能体
-uvx stata-mcp agent run
+# 直接执行一个 do-file
+uvx stata-mcp tool do /path/to/analysis.do
+
+# 启动 MCP 服务器
+uvx stata-mcp server
 
 # 安装到客户端
 uvx stata-mcp install -c cursor
 ```
+
+## 自包含安装脚本
+
+项目根目录提供了一组自包含的安装脚本，适合机器上尚未安装 `uv` 或 `pip` 的用户使用。脚本会自动拉起所需的 Python 工具链，并以一键方式启动 `stata-mcp`。
+
+| 脚本 | 适用平台 | 典型用法 |
+|------|----------|----------|
+| `install.sh` | Unix shell（Linux、macOS、WSL） | `bash install.sh` |
+| `install.command` | macOS Finder | 双击在终端中启动 |
+| `install.ps1` | Windows PowerShell | `powershell -ExecutionPolicy Bypass -File install.ps1` |
+| `install.bat` | Windows 命令行 | 双击或在 `cmd.exe` 中运行 |
+
+这些脚本主要面向无 Python 包管理器的首次安装场景。对于已经装好 `uv` 或 `pip` 的机器，仍然推荐使用 `uv tool install stata-mcp` / `pip install stata-mcp` 的标准流程。
 
 ## 退出代码
 

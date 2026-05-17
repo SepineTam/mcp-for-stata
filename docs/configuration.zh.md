@@ -29,16 +29,24 @@ IS_DEBUG = false
 LOGGING_ON = true
 LOGGING_CONSOLE_HANDLER_ON = false
 LOGGING_FILE_HANDLER_ON = true
-LOG_FILE = "~/"
-
+LOG_FILE = "~/.statamcp/stata_mcp_debug.log"
 MAX_BYTES = 10_000_000
 BACKUP_COUNT = 5
+
+[BETA]
+ENABLE_WRITE_DOFILE = false
+
+[HELP]
+IS_CACHE = true
+IS_SAVE = true
 
 [SECURITY]
 IS_GUARD = true
 
 [PROJECT]
 WORKING_DIR = ""
+CLEAN_LOG_DAYS = -1
+FOLDER_TAG = ".statamcp"
 
 [MONITOR]
 IS_MONITOR = false
@@ -48,9 +56,11 @@ MAX_RAM_MB = -1
 # 可选：覆盖自动 Stata 检测
 # STATA_CLI = "/path/to/stata-mp"
 
-[BETA]
-# Beta 功能 - 谨慎使用
-ENABLE_WRITE_DOFILE = false  # 控制 write_dofile MCP 工具是否注册
+[data_info]
+metrics = ["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]
+string_keep_number = 10
+decimal_places = 3
+hash_length = 12
 ```
 
 ## 配置分区
@@ -143,6 +153,36 @@ ENABLE_WRITE_DOFILE = false  # 控制 write_dofile MCP 工具是否注册
   export STATA_MCP__LOGGING__BACKUP_COUNT=10
   ```
 
+### HELP 分区
+
+控制 `help` 工具的缓存行为。
+
+#### `HELP.IS_CACHE`
+
+启用 `help` 工具结果的内存缓存。
+
+- **类型**：Boolean
+- **默认值**：`true`
+- **环境变量**：`STATA_MCP__CACHE_HELP`
+- **描述**：启用后，对同一命令的重复 help 请求将从缓存读取，减少会话内对 Stata 的重复调用。
+- **示例**：
+  ```bash
+  export STATA_MCP__CACHE_HELP=true
+  ```
+
+#### `HELP.IS_SAVE`
+
+将 help 缓存持久化到磁盘（`~/.statamcp/help/`）。
+
+- **类型**：Boolean
+- **默认值**：`true`
+- **环境变量**：`STATA_MCP__SAVE_HELP`
+- **描述**：启用后，help 响应会写入文件，可跨会话复用。如果只需要内存缓存，请关闭此项。
+- **示例**：
+  ```bash
+  export STATA_MCP__SAVE_HELP=false
+  ```
+
 ### SECURITY 分区
 
 控制安全功能。
@@ -174,7 +214,7 @@ ENABLE_WRITE_DOFILE = false  # 控制 write_dofile MCP 工具是否注册
 - **默认值**：当前目录（如果可写）或 `~/Documents`
 - **环境变量**：`STATA_MCP__CWD`（双下划线）
 - **描述**：
-  - 如果设置且可写，所有输出文件将组织在 `<WORKING_DIR>/stata-mcp-folder/` 下
+  - 如果设置且可写，所有输出文件将组织在 `<WORKING_DIR>/<FOLDER_TAG>/` 下（默认 `.statamcp/`）
   - 如果未设置或不可写，回退到当前目录或 `~/Documents`
   - **遗留支持**：`STATA_MCP_CWD`（单下划线）仍受支持但已弃用
 - **示例**：
@@ -182,14 +222,50 @@ ENABLE_WRITE_DOFILE = false  # 控制 write_dofile MCP 工具是否注册
   export STATA_MCP__CWD="/projects/my-research"
   ```
 
+#### `PROJECT.CLEAN_LOG_DAYS`
+
+工作目录下 Stata 日志的保留天数。
+
+- **类型**：Integer
+- **默认值**：`-1`（不清理）
+- **环境变量**：`STATA_MCP__CLEAN_LOG_DAYS`
+- **描述**：
+  - `-1` 表示关闭自动清理
+  - 设置为正整数后，`stata-mcp doctor` 的 cleanup 检查会删除超过指定天数的 Stata 日志文件
+- **示例**：
+  ```bash
+  export STATA_MCP__CLEAN_LOG_DAYS=30
+  ```
+
+#### `PROJECT.FOLDER_TAG`
+
+`WORKING_DIR` 下 stata-mcp 子目录的名称。
+
+- **类型**：String
+- **默认值**：`.statamcp`（隐藏目录）
+- **环境变量**：`STATA_MCP__FOLDER_TAG`
+- **描述**：
+  - 决定存放日志、do 文件、结果与临时文件的目录名
+  - 自 v1.16.0 起，默认名称从 `stata-mcp-folder` 迁移到 `.statamcp`
+  - 如需保留旧的目录布局，可将其设置为 `stata-mcp-folder`
+- **示例**：
+  ```bash
+  export STATA_MCP__FOLDER_TAG=stata-mcp-folder
+  ```
+
 工作目录结构：
 ```
-<WORKING_DIR>/stata-mcp-folder/
+<WORKING_DIR>/<FOLDER_TAG>/        # 默认：.statamcp/
 ├── stata-mcp-log/      # Stata 执行日志
 ├── stata-mcp-dofile/   # 生成的 do 文件
 ├── stata-mcp-result/   # 分析结果
 └── stata-mcp-tmp/      # 临时文件
 ```
+
+**迁移说明（v1.16.0）**：
+- 默认目录名从 `stata-mcp-folder` 改为 `.statamcp`。
+- 若检测到工作目录下仍存在旧的 `stata-mcp-folder`，Stata-MCP 会在该目录中写入一个 `README` 警告并创建 `.migrated` 标记，避免重复提示。
+- 如需回滚旧布局，设置 `export STATA_MCP__FOLDER_TAG=stata-mcp-folder` 即可。
 
 ### MONITOR 分区
 
@@ -265,6 +341,63 @@ ENABLE_WRITE_DOFILE = false  # 控制 write_dofile MCP 工具是否注册
   ```toml
   [STATA]
   STATA_CLI = "/usr/local/stata17/stata-mp"
+  ```
+
+### data_info 分区
+
+控制 `get_data_info` 工具的行为：返回哪些描述性统计、如何处理字符串变量，以及缓存文件名的构造方式。
+
+#### `data_info.metrics`
+
+每个变量返回的默认数值指标列表。
+
+- **类型**：List of strings
+- **默认值**：`["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]`
+- **描述**：
+  - 支持的取值包括 `obs`、`mean`、`stderr`、`min`、`max`、`q1`、`q3`、`skewness`、`kurtosis`
+  - 可裁剪列表缩减返回体积，也可补充更多指标以获得更详尽的摘要
+- **示例**：
+  ```toml
+  [data_info]
+  metrics = ["obs", "mean", "stderr", "min", "max"]
+  ```
+
+#### `data_info.string_keep_number`
+
+字符串变量保留的唯一值数量上限。
+
+- **类型**：Integer
+- **默认值**：`10`
+- **环境变量**：`STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER`
+- **描述**：唯一值数量超过该上限的分类字符串只保留若干代表值。
+- **示例**：
+  ```bash
+  export STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER=20
+  ```
+
+#### `data_info.decimal_places`
+
+格式化数值统计时使用的小数位数。
+
+- **类型**：Integer
+- **默认值**：`3`
+- **环境变量**：`STATA_MCP_DATA_INFO_DECIMAL_PLACES`
+- **示例**：
+  ```bash
+  export STATA_MCP_DATA_INFO_DECIMAL_PLACES=4
+  ```
+
+#### `data_info.hash_length`
+
+data-info 缓存文件名所附加的哈希后缀长度。
+
+- **类型**：Integer
+- **默认值**：`12`
+- **环境变量**：`STATA_MCP_DATA_INFO_HASH_LENGTH`
+- **描述**：data-info 层用它区分基于相同源文件生成的不同缓存条目。
+- **示例**：
+  ```bash
+  export STATA_MCP_DATA_INFO_HASH_LENGTH=8
   ```
 
 ## 使用环境变量

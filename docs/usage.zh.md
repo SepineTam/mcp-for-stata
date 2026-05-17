@@ -13,7 +13,7 @@
 
 验证你的设置：
 ```bash
-uvx stata-mcp --usable
+uvx stata-mcp doctor
 ```
 
 ## 新功能
@@ -115,6 +115,29 @@ MAX_RAM_MB = -1
 详情请参阅[配置文档](configuration.md)。
 
 </details>
+
+## CLI 命令
+
+Stata-MCP 在 MCP 服务器之外还提供了多个实用命令。
+
+```bash
+# 运行诊断
+stata-mcp doctor
+
+# 安装 ado 包
+stata-mcp tool ado-install reghdfe
+
+# 查看数据集
+stata-mcp tool data-info /path/to/data.dta
+
+# 更新到最新版本
+stata-mcp update
+
+# 基于 Docker 的沙盒安装
+stata-mcp sandbox-install -l /path/to/stata.lic
+```
+
+完整文档请参阅 [CLI 参考](cli.md)。
 
 ## 在 Python 中使用
 
@@ -254,7 +277,7 @@ claude mcp add stata-mcp -- uvx stata-mcp
 
 ```bash
 cd ~/Documents/MyResearchProject
-claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp
+claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp
 ```
 
 #### 指定版本
@@ -262,7 +285,7 @@ claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope project -- uvx --dir
 要使用特定版本：
 
 ```bash
-claude mcp add stata-mcp --env STATA_MCP_CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp==1.13.0
+claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --directory $(pwd) stata-mcp==1.16.3
 ```
 
 **验证安装：**
@@ -315,7 +338,7 @@ args = ["stata-mcp"]
         "stata-mcp"
       ],
       "env": {
-        "STATA_MCP_CWD": "/path/to/your/project"
+        "STATA_MCP__CWD": "/path/to/your/project"
       }
     }
   }
@@ -354,7 +377,7 @@ args = ["stata-mcp"]
         "stata-mcp"
       ],
       "env": {
-        "STATA_MCP_CWD": "/path/to/working/directory"
+        "STATA_MCP__CWD": "/path/to/working/directory"
       }
     }
   }
@@ -372,7 +395,7 @@ args = ["stata-mcp"]
         "stata-mcp"
       ],
       "env": {
-        "STATA_MCP_CWD": "/path/to/working/directory",
+        "STATA_MCP__CWD": "/path/to/working/directory",
         "STATA_MCP_MODEL": "gpt-4",
         "STATA_MCP_API_KEY": "your-api-key",
         "STATA_MCP_API_BASE_URL": "https://api.openai.com/v1"
@@ -388,21 +411,23 @@ Stata-MCP 支持多个环境变量进行自定义：
 
 | 变量 | 描述 | 默认值 |
 |----------|-------------|---------|
-| `STATA_MCP_CWD` | Stata 操作的当前工作目录 | `./` |
-| `STATA_MCP_MODEL` | 智能体模式的 LLM 模型 | `gpt-3.5-turbo` |
-| `STATA_MCP_API_KEY` | LLM 提供商的 API 密钥 | `OPENAI_API_KEY` |
+| `STATA_MCP__CWD` | Stata 操作的当前工作目录 | `./` |
+| `STATA_MCP_MODEL` | 智能体模式的 LLM 模型（已弃用，仅限智能体模式） | `gpt-3.5-turbo` |
+| `STATA_MCP_API_KEY` | LLM 提供商的 API 密钥（已弃用，仅限智能体模式） | `OPENAI_API_KEY` |
 | `STATA_MCP_API_BASE_URL` | API 请求的基础 URL | `https://api.openai.com/v1` |
 | `STATA_MCP_CLIENT` | 客户端类型标识符 | - |
 
 ## 终端 REPL 模式
 
+> **已弃用**：智能体模式自 v1.16.x 起标记为 `FutureWarning`，将在未来版本中移除。新工作流应使用 MCP 服务器模式（`stata-mcp server` / `stata-mcp install`）。
+
 对于交互式会话，使用内置 REPL 智能体：
 
 ```bash
-# 使用当前目录启动
+# 使用当前目录启动（已弃用）
 uvx stata-mcp agent run
 
-# 使用自定义工作目录启动
+# 使用自定义工作目录启动（已弃用）
 uvx stata-mcp agent run ~/Documents/MyResearch
 ```
 
@@ -458,7 +483,7 @@ agent = REPLAgent(
 - 检查 Python 版本：需要 3.11+
 
 **MCP 服务器无法连接**
-- 验证 `uvx stata-mcp --usable` 通过所有检查
+- 验证 `uvx stata-mcp doctor` 通过所有检查
 - 检查客户端的 MCP 服务器日志
 - 使用 stdio 传输（默认）测试
 
@@ -473,7 +498,7 @@ uvx stata-mcp agent run
 ## 最佳实践
 
 1. **项目结构**：使用项目范围的 MCP 配置以获得更好的隔离
-2. **版本固定**：在生产环境中指定确切版本：`stata-mcp==1.13.0`
+2. **版本固定**：在生产环境中指定确切版本：`stata-mcp==1.16.3`
 3. **数据管理**：保持原始数据不可变；使用 processing/ 目录
 4. **会话清理**：定期归档或清理旧的 SQLite 会话数据库
 5. **API 密钥**：使用环境变量，切勿硬编码凭证

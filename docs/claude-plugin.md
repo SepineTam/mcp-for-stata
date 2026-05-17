@@ -161,7 +161,7 @@ Before installing the plugin, ensure following requirements are met:
 3. **Python Package**: `stata-mcp` package available
    ```bash
    # Verify installation
-   uvx stata-mcp --usable
+   uvx stata-mcp doctor
    ```
 
 4. **Stata LSP**: Language server installed
@@ -280,7 +280,7 @@ or requires manual `.mcp.json` editing:
       "command": "uvx",
       "args": ["stata-mcp"],
       "env": {
-        "STATA_MCP_CWD": "/absolute/path/to/project"
+        "STATA_MCP__CWD": "/absolute/path/to/project"
       }
     }
   }
@@ -376,7 +376,7 @@ claude plugin install stata-toolbox
 **Diagnosis:**
 ```bash
 # Test MCP server independently
-uvx stata-mcp --usable
+uvx stata-mcp doctor
 
 # Check if Stata is accessible
 stata-se --version
@@ -427,7 +427,7 @@ stata-language-server --help
 
 ## Best Practices
 
-1. **Verify Installation**: Check system compatibility with `uvx stata-mcp --usable` before installing
+1. **Verify Installation**: Check system compatibility with `uvx stata-mcp doctor` before installing
 2. **Environment Variables**: Use `.env` file or project settings for sensitive data
 3. **Documentation**: Maintain project-specific CLAUDE.md with research instructions
 4. **Version Updates**: Keep plugin updated for latest features and bug fixes

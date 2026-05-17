@@ -65,8 +65,8 @@ StataDo is an important part of the Stata-MCP toolchain:
 
 StataDo follows the Stata-MCP directory structure conventions:
 
-- **Do File Directory**: `~/Documents/stata-mcp-folder/stata-mcp-dofile/`
-- **Log File Directory**: `~/Documents/stata-mcp-folder/stata-mcp-log/`
+- **Do File Directory**: `~/Documents/.statamcp/stata-mcp-dofile/`
+- **Log File Directory**: `~/Documents/.statamcp/stata-mcp-log/`
 
 ## Important Notes
 

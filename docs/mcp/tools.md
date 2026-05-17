@@ -1,5 +1,7 @@
 # MCP.Tools
 
+Tools are partitioned into two profiles inside `_TOOL_REGISTRY`. `stata-mcp server --core` registers only `stata_do`, `get_data_info`, and `help`. `stata-mcp server --all` (the default) registers every tool in the registry. The `help` tool carries an `unix_only` flag and is filtered out on Windows during `register_tools()`. The `write_dofile` tool is flagged deprecated and is skipped unless `ENABLE_WRITE_DOFILE` (TOML `[BETA]` section or env `STATA_MCP__ENABLE_WRITE_DOFILE`) is set to `true`.
+
 ---
 ## get_data_info
 ```python
@@ -59,48 +61,58 @@ Caching strategy employs content-addressable storage where hash computation dete
 ```python
 def stata_do(dofile_path: str,
              log_file_name: str | None = None,
-             is_read_log: bool = True) -> Dict[str, Union[str, None]]:
+             read_log_when_error: bool = False,
+             is_replace_log: bool = True,
+             enable_smcl: bool = True) -> Dict[str, Union[str, None]]:
     ...
 ```
 
 **Input Parameters**:
 - `dofile_path`: Absolute or relative path to target .do file (required)
 - `log_file_name`: Custom log filename without timestamp (optional, auto-generated if null)
-- `is_read_log`: Boolean flag for log content retrieval (default: true)
+- `read_log_when_error`: Boolean flag that gates log payload retrieval; the tool only reads the log when a Stata return-code error (e.g. `r(198)`) is detected, keeping the success path I/O-free (default: false)
+- `is_replace_log`: Boolean flag controlling whether an existing log file with the same name is overwritten (default: true)
+- `enable_smcl`: Boolean flag toggling SMCL formatted logging; when true the Stata CLI is invoked without the `nolog` redirection so both `.smcl` and `.log` artifacts are produced (default: true)
 
 **Return Structure**:
 Dictionary containing execution metadata and optional log payload:
 ```python
 {
-  "log_file_path": "<absolute_path_to_stata_log>",
-  "log_content": "<full_log_text_or_'Not_read_log'>"
+  "log_file_path": {"text": "<absolute_path_to_log>", "smcl": "<absolute_path_to_smcl>"},
+  "log_content": {"text": "<error_log_text_or_placeholder>", "smcl": "<smcl_path>"}
 }
 ```
-Error condition returns: `{"error": "<exception_message>"}`
+The `log_content` key is only present when `read_log_when_error=True`. Error condition returns: `{"error": "<exception_message>"}`.
 
 **Operational Examples**:
 ```python
-# Standard execution with log retrieval
+# Standard execution; log payload skipped on success
 stata_do("/Users/project/stata-mcp-dofile/20250104153045.do")
 
 # Custom log naming
 stata_do("~/analysis/regression_pipeline.do", log_file_name="quarterly_results")
 
-# Execution without log reading
-stata_do("/tmp/estimation.do", is_read_log=False)
+# Surface log content only when Stata reports an error
+stata_do("/tmp/estimation.do", read_log_when_error=True)
+
+# Keep prior logs and disable SMCL output
+stata_do("/tmp/estimation.do",
+         read_log_when_error=True,
+         is_replace_log=False,
+         enable_smcl=False)
 ```
 
 **Implementation Architecture**:
 The tool encapsulates the `StataDo` executor class which implements platform-specific command invocation strategies. Cross-platform abstraction abstracts Stata executable location through the `StataFinder` class: macOS probes `/Applications/Stata/` hierarchy, Windows interrogates Program Files registry, and Linux queries system PATH for `stata-mp`. The execution pipeline involves do-file staging, Stata CLI invocation with `-b` batch mode flag, log file redirection, and exit code monitoring.
 
-Log file management operates within the `stata-mcp-log/` directory structure with automatic timestamp generation when `log_file_name` is omitted. The executor implements differential log handling based on `is_read_log` flag: when enabled, performs file read operation and returns content; when disabled, returns placeholder string to minimize I/O overhead.
+Log file management operates within the `stata-mcp-log/` directory structure with automatic timestamp generation when `log_file_name` is omitted. The `is_replace_log` flag determines whether prior logs are overwritten, and `enable_smcl` decides whether the SMCL artifact is emitted alongside the plain text log. The executor implements conditional log retrieval based on the `read_log_when_error` flag: the text log is scanned with the `r(\d+)` pattern, and only when a Stata return-code error is detected does the tool return the log payload, otherwise it returns a placeholder pointing users to the `read_log` tool.
 
 Exception handling categorizes failures into three tiers: `FileNotFoundError` for missing do-file artifacts, `RuntimeError` for Stata execution failures or log generation issues, and `PermissionError` for insufficient execution or write permissions. Error conditions return dictionary with `"error"` key rather than raising exceptions to maintain MCP protocol compatibility.
 
 ---
 
 ## write_dofile
-> **⚠️ Disabled by Default**: This tool requires `ENABLE_WRITE_DOFILE=true` configuration.
+> **Disabled by Default**: Whether this tool is registered with the MCP server is controlled by the `ENABLE_WRITE_DOFILE` switch. Without setting it to `true`, `register_tools()` skips this entry entirely and the tool will not be exposed to the client.
 >
 > Modern AI agents have native file writing capabilities, making this tool redundant.
 > To enable, set `STATA_MCP__ENABLE_WRITE_DOFILE=true` or add `[BETA] ENABLE_WRITE_DOFILE = true` to your config.
@@ -150,7 +162,7 @@ Integration with output redirection commands (`outreg2`, `esttab`) requires coor
 
 The tool does not perform syntactic validation or semantic analysis of the Stata code content. Code correctness, command sequencing, and macro expansion validity remain the responsibility of the calling context. Error handling wraps file I/O operations in try-except blocks with structured logging for success/failure tracking.
 
-> **⚠️ Deprecation Notice**: This tool is disabled by default and will be removed in a future version. Modern AI agents have native file writing capabilities - use those instead.
+> **Deprecation Notice**: This tool is disabled by default and will be removed in a future version. Modern AI agents have native file writing capabilities, so use those instead.
 
 ---
 
@@ -306,7 +318,7 @@ The tool implements Stata command documentation retrieval through CLI invocation
 
 Caching architecture maintains help text cache at `~/.statamcp/help/` directory with file-based storage keyed by command name. Cache behavior controllable via environment variables: `STATA_MCP__CACHE_HELP` (default: true) enables/disables caching; `STATA_MCP__SAVE_HELP` controls cache persistence. Cached results include prefix message indicating cache status: "Cached result for {cmd}: ..." versus live help text.
 
-Dual registration registers `help` as both an MCP tool and resource via the `_TOOL_REGISTRY` system. Resource URI pattern `help://stata/{cmd}` enables URI-based access through MCP resource protocol, while tool registration enables direct invocation. This dual registration provides flexible access patterns for different MCP client implementations. The tool is gated by the `unix_only` flag in `_TOOL_REGISTRY` and is only available on macOS and Linux.
+Currently registered only as an MCP tool. Resource registration (URI pattern `help://stata/{cmd}`) was disabled in v1.16.1 due to a URI template parameter mismatch with FastMCP; tool form remains fully functional. The tool is gated by the `unix_only` flag in `_TOOL_REGISTRY` and is only available on macOS and Linux.
 
 Cache invalidation requires manual deletion of cache files or environment variable configuration; no TTL-based expiration exists. Help text language depends on Stata installation locale; multilingual support requires separate Stata installations or locale reconfiguration.
 

@@ -2,9 +2,29 @@
 
 Different AI clients have varying configuration formats for MCP servers. This page documents the configuration specifics for each supported client.
 
+## Quick Install
+
+For most clients, `stata-mcp install` handles configuration automatically:
+
+```bash
+# Single client (see the table below for valid client keys)
+stata-mcp install -c <client>
+
+# All supported clients in one shot
+stata-mcp install --all
+
+# Custom config file with optional nested JSON key
+stata-mcp install -c <client> --json-file /path/to/config.json
+stata-mcp install -c <client> --json-file /path/to/config.json --json-index parent.child
+```
+
+Supported client keys: `claude`, `cc` (alias `claude-code`), `gemini`, `cursor`, `cline`, `codex`, `opencode`, `openclaw`, `hermes` (alias `hermes-agent`).
+
+The manual configuration snippets below are useful when the automated installer fails, when a client is not yet supported by the installer (e.g. Cherry Studio), or when full control over the generated config is required.
+
 ## Standard Configuration Pattern
 
-Most AI clients follow this basic pattern:
+Most AI clients follow this basic JSON pattern:
 
 ```json
 {
@@ -17,56 +37,21 @@ Most AI clients follow this basic pattern:
 }
 ```
 
-However, each client may have slight variations in file location, format, or supported features.
+Each client may vary in file location, JSON key path, or format (JSON / TOML / YAML).
 
 ## Client-Specific Configurations
 
-### Claude Code
-
-**Configuration Method**: CLI command or `.mcp.json`
-
-**Global Installation**:
-```bash
-claude mcp add stata-mcp -- uvx stata-mcp
-```
-
-**Project-based Installation** (Recommended):
-```bash
-cd ~/Documents/MyResearch
-claude mcp add stata-mcp \
-  --env STATA_MCP_CWD=$(pwd) \
-  --scope project \
-  -- uvx --directory $(pwd) stata-mcp
-```
-
-**Configuration File**: `.mcp.json` (created in project directory)
-
-**Format**: JSON
-```json
-{
-  "mcpServers": {
-    "stata-mcp": {
-      "command": "uvx",
-      "args": ["stata-mcp"],
-      "env": {
-        "STATA_MCP_CWD": "/absolute/path/to/project"
-      }
-    }
-  }
-}
-```
-
-**Unique Features**:
-- ✅ Project-scoped configuration (`--scope project`)
-- ✅ Environment variable injection (`--env`)
-- ✅ Directory specification (`--directory`)
-- ✅ Version pinning support (`stata-mcp==1.13.0`)
-
 ### Claude Desktop
 
-**Configuration File**: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
+**Configuration Method**: Manual file edit (no first-party CLI).
 
-**Format**: JSON
+**Configuration File**:
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+- Linux: not supported by Anthropic.
+
+**Format**: JSON, top-level key `mcpServers`.
+
 ```json
 {
   "mcpServers": {
@@ -74,7 +59,7 @@ claude mcp add stata-mcp \
       "command": "uvx",
       "args": ["stata-mcp"],
       "env": {
-        "STATA_MCP_CWD": "/path/to/project",
+        "STATA_MCP__CWD": "/path/to/project",
         "STATA_CLI": "/Applications/Stata/StataMP"
       }
     }
@@ -83,59 +68,85 @@ claude mcp add stata-mcp \
 ```
 
 **Unique Features**:
-- ✅ Environment variable support via `env` object
-- ✅ Manual configuration file editing required
+- Environment variables via the `env` object.
+- Requires a full client restart after edits.
 
-### Codex (VS Code Extension)
+### Claude Code
 
-**Configuration File**: `~/.codex/config.toml`
+**Configuration Method**: Prefers the `claude mcp add` CLI; falls back to writing `~/.claude.json` when the CLI is unavailable.
 
-**Format**: TOML
-```toml
-[mcp_servers.stata-mcp]
-command = "uvx"
-args = ["stata-mcp"]
+**Configuration File**: `~/.claude.json` (fallback) or project-local `.mcp.json` when using `--scope project`.
+
+**Format**: JSON, top-level key `mcpServers`.
+
+**Global Installation**:
+```bash
+claude mcp add stata-mcp -- uvx stata-mcp
 ```
 
-**With environment variables**:
-```toml
-[mcp_servers.stata-mcp]
-command = "uvx"
-args = ["stata-mcp"]
-env = { STATA_MCP_CWD = "/path/to/project" }
+**Project-Scoped Installation**:
+```bash
+cd ~/Documents/MyResearch
+claude mcp add stata-mcp \
+  --env STATA_MCP__CWD=$(pwd) \
+  --scope project \
+  -- uvx --directory $(pwd) stata-mcp
 ```
 
-**Unique Features**:
-- ⚠️ Uses TOML format instead of JSON
-- ✅ Environment variables via `env` table
-
-### Cline
-
-**Configuration File**: `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/setting/cline_mcp_settings.json`
-
-**Format**: JSON
+**Equivalent file form**:
 ```json
 {
   "mcpServers": {
     "stata-mcp": {
       "command": "uvx",
-      "args": [
-        "stata-mcp"
-      ]
+      "args": ["stata-mcp"],
+      "env": {
+        "STATA_MCP__CWD": "/absolute/path/to/project"
+      }
     }
   }
 }
 ```
 
 **Unique Features**:
-- ⚠️ Standard JSON format
-- ⚠️ No special features or extensions
+- Project-scoped configuration via `--scope project`.
+- Environment variable injection via `--env`.
+- Directory pinning via `uvx --directory`.
+- Version pinning supported (e.g. `stata-mcp==1.16.2`).
+
+### Gemini CLI
+
+**Configuration Method**: Manual file edit. Installer key: `gemini`.
+
+**Configuration File**: `~/.gemini/settings.json`.
+
+**Format**: JSON, top-level key `mcpServers`.
+
+```json
+{
+  "mcpServers": {
+    "stata-mcp": {
+      "command": "uvx",
+      "args": ["stata-mcp"],
+      "env": {
+        "STATA_MCP__CWD": "/absolute/path/to/project"
+      }
+    }
+  }
+}
+```
+
+**Unique Features**:
+- Same JSON schema as Claude Desktop; portable across `mcpServers`-compatible clients.
 
 ### Cursor
 
-**Configuration File**: Cursor settings (location varies by OS)
+**Configuration Method**: Manual file edit. The installer auto-injects `--directory` and `STATA_MCP__CWD` pointing to `~/Documents` to work around Cursor's sandbox.
 
-**Format**: JSON
+**Configuration File**: `~/.cursor/mcp.json`.
+
+**Format**: JSON, top-level key `mcpServers`.
+
 ```json
 {
   "mcpServers": {
@@ -147,24 +158,28 @@ env = { STATA_MCP_CWD = "/path/to/project" }
         "stata-mcp"
       ],
       "env": {
-        "STATA_MCP_CWD": "/absolute/path/to/project"
+        "STATA_MCP__CWD": "/absolute/path/to/project"
       }
     }
   }
 }
 ```
 
-**Known Issues**:
-- ⚠️ File system access limitations (may not access `Documents` directory)
-- ⚠️ **Requires both** `--directory` in args **and** `STATA_MCP_CWD` environment variable (both must point to same path)
-- ⚠️ Must use absolute paths (relative paths not supported)
-- ✅ Environment variables supported
+**Known Issues / Unique Features**:
+- File system sandbox may block access to `~/Documents`; absolute paths inside an allowed directory are required.
+- Both `--directory` (in `args`) and `STATA_MCP__CWD` (in `env`) must point to the same path.
+- Relative paths are not supported.
 
-### Cherry Studio
+### Cline (VS Code Extension)
 
-**Configuration File**: Cherry Studio settings
+**Configuration Method**: Manual file edit inside VS Code globalStorage.
 
-**Format**: JSON (same as Claude Desktop)
+**Configuration File**:
+- macOS: `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+- Linux: `~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+- Windows: `%APPDATA%/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+
+**Format**: JSON, top-level key `mcpServers`.
 
 ```json
 {
@@ -178,8 +193,124 @@ env = { STATA_MCP_CWD = "/path/to/project" }
 ```
 
 **Unique Features**:
-- ✅ Standard MCP configuration
-- ✅ Compatible with Claude Desktop format
+- Standard `mcpServers` schema; no Cline-specific extensions.
+
+### Codex CLI
+
+**Configuration Method**: Prefers the `codex mcp add` CLI; falls back to appending to `~/.codex/config.toml`.
+
+**Configuration File**: `~/.codex/config.toml`.
+
+**Format**: TOML, top-level key `mcp_servers`.
+
+```toml
+[mcp_servers.stata-mcp]
+command = "uvx"
+args = ["stata-mcp"]
+env = { STATA_MCP__CWD = "/path/to/project" }
+```
+
+**Unique Features**:
+- Only client in this list using TOML.
+- Note the underscore key `mcp_servers` (not `mcpServers`).
+
+### OpenCode
+
+**Configuration Method**: Manual file edit. Installer key: `opencode`.
+
+**Configuration File**: `~/.config/opencode/opencode.json`.
+
+**Format**: JSON with an OpenCode-specific schema, top-level key `mcp`.
+
+```json
+{
+  "mcp": {
+    "stata-mcp": {
+      "type": "local",
+      "command": ["uvx", "stata-mcp"],
+      "env": {
+        "STATA_MCP__CWD": "/absolute/path/to/project"
+      }
+    }
+  }
+}
+```
+
+**Unique Features**:
+- Uses `type: "local"` and stores `command` as an array (binary plus args combined).
+- Top-level key is `mcp`, not `mcpServers`.
+
+### OpenClaw
+
+**Configuration Method**: Prefers the `openclaw mcp set` CLI; falls back to writing `~/.openclaw/openclaw.json`.
+
+**Configuration File**: `~/.openclaw/openclaw.json`.
+
+**Format**: JSON, nested key path `mcp.servers`.
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "stata-mcp": {
+        "command": "uvx",
+        "args": ["stata-mcp"],
+        "env": {
+          "STATA_MCP__CWD": "/absolute/path/to/project"
+        }
+      }
+    }
+  }
+}
+```
+
+**Unique Features**:
+- Added in stata-mcp v1.16.3.
+- Configuration sits two levels deep (`mcp.servers.<name>`); when using `--json-file`, pass `--json-index mcp.servers`.
+
+### Hermes Agent
+
+**Configuration Method**: Prefers the `hermes mcp add` CLI; falls back to appending to `~/.hermes/config.yaml`. Installer keys: `hermes` and `hermes-agent`.
+
+**Configuration File**: `~/.hermes/config.yaml`.
+
+**Format**: YAML, top-level key `mcp_servers`.
+
+```yaml
+mcp_servers:
+  stata-mcp:
+    command: "uvx"
+    args: ["stata-mcp"]
+    env:
+      STATA_MCP__CWD: "/absolute/path/to/project"
+```
+
+**Unique Features**:
+- Only YAML target in this list; the installer uses a minimal text-based writer rather than a full YAML parser.
+- Underscore key `mcp_servers` matches the Codex naming convention.
+
+### Cherry Studio (manual only)
+
+**Configuration Method**: Not covered by `stata-mcp install`; user must edit Cherry Studio's settings manually.
+
+**Configuration File**: Cherry Studio settings directory (location varies by platform).
+
+**Format**: JSON, compatible with the Claude Desktop schema.
+
+```json
+{
+  "mcpServers": {
+    "stata-mcp": {
+      "command": "uvx",
+      "args": ["stata-mcp"]
+    }
+  }
+}
+```
+
+**Unique Features**:
+- Manual configuration only; no installer support.
+- Re-uses the standard `mcpServers` schema.
 
 ## Configuration Options
 
@@ -194,7 +325,7 @@ env = { STATA_MCP_CWD = "/path/to/project" }
 **Pinned Version**:
 ```json
 "command": "uvx",
-"args": ["stata-mcp==1.13.0"]
+"args": ["stata-mcp==1.16.2"]
 ```
 
 **With Custom Directory**:
@@ -211,13 +342,14 @@ env = { STATA_MCP_CWD = "/path/to/project" }
 
 #### Core Variables
 
-| Variable                 | Purpose                                | Example                         |
-|--------------------------|----------------------------------------|---------------------------------|
-| `STATA_MCP_CWD`          | Working directory for Stata operations | `"/Users/user/research"`        |
-| `STATA_CLI`              | Path to specific Stata executable      | `"/Applications/Stata/StataMP"` |
-| `STATA_MCP_MODEL`        | LLM model for agent mode               | `"gpt-4"`                       |
-| `STATA_MCP_API_KEY`      | API key for LLM provider               | `"sk-..."`                      |
-| `STATA_MCP_API_BASE_URL` | Custom API endpoint                    | `"https://api.openai.com/v1"`   |
+| Variable                 | Purpose                                                       | Example                         |
+|--------------------------|---------------------------------------------------------------|---------------------------------|
+| `STATA_MCP__CWD`         | Working directory for Stata operations                        | `"/Users/user/research"`        |
+| `STATA_MCP_CWD`          | Legacy alias for `STATA_MCP__CWD` (kept for back-compat)      | `"/Users/user/research"`        |
+| `STATA_CLI`              | Path to specific Stata executable                             | `"/Applications/Stata/StataMP"` |
+| `STATA_MCP_MODEL`        | Used by deprecated agent mode; not needed for MCP server mode | `"gpt-4"`                       |
+| `STATA_MCP_API_KEY`      | Used by deprecated agent mode; not needed for MCP server mode | `"sk-..."`                      |
+| `STATA_MCP_API_BASE_URL` | Used by deprecated agent mode; not needed for MCP server mode | `"https://api.openai.com/v1"`   |
 
 #### Security Variables
 
@@ -245,7 +377,7 @@ env = { STATA_MCP_CWD = "/path/to/project" }
 **JSON Format**:
 ```json
 "env": {
-  "STATA_MCP_CWD": "/path/to/project",
+  "STATA_MCP__CWD": "/path/to/project",
   "STATA_CLI": "/path/to/stata"
 }
 ```
@@ -253,7 +385,7 @@ env = { STATA_MCP_CWD = "/path/to/project" }
 **With Security and Monitoring**:
 ```json
 "env": {
-  "STATA_MCP_CWD": "/path/to/project",
+  "STATA_MCP__CWD": "/path/to/project",
   "STATA_MCP__IS_GUARD": "true",
   "STATA_MCP__IS_MONITOR": "true",
   "STATA_MCP__RAM_LIMIT": "8192"
@@ -262,12 +394,12 @@ env = { STATA_MCP_CWD = "/path/to/project" }
 
 **TOML Format** (Codex):
 ```toml
-env = { STATA_MCP_CWD = "/path/to/project" }
+env = { STATA_MCP__CWD = "/path/to/project" }
 ```
 
 **With All Features**:
 ```toml
-env.STATA_MCP_CWD = "/path/to/project"
+env.STATA_MCP__CWD = "/path/to/project"
 env.STATA_MCP__IS_GUARD = "true"
 env.STATA_MCP__IS_MONITOR = "true"
 env.STATA_MCP__RAM_LIMIT = "8192"
@@ -276,49 +408,53 @@ env.STATA_MCP__LOGGING_CONSOLE_HANDLER_ON = "true"
 
 ## Configuration File Locations
 
-| Client         | Config File Location                                                                                           | Format |
-|----------------|----------------------------------------------------------------------------------------------------------------|--------|
-| Claude Code    | `.mcp.json` (project) or global config                                                                         | JSON   |
-| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json`                                              | JSON   |
-| Codex          | `~/.codex/config.toml`                                                                                         | TOML   |
-| Cline          | `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/setting/cline_mcp_settings.json` | JSON   |
-| Cursor         | Cursor settings directory                                                                                      | JSON   |
-| Cherry Studio  | Cherry Studio settings directory                                                                               | JSON   |
+| Client         | Config File Location                                                                                            | Format |
+|----------------|-----------------------------------------------------------------------------------------------------------------|--------|
+| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) / `%APPDATA%/Claude/...` (Windows)    | JSON   |
+| Claude Code    | `~/.claude.json` (fallback) or project-local `.mcp.json`                                                        | JSON   |
+| Gemini CLI     | `~/.gemini/settings.json`                                                                                       | JSON   |
+| Cursor         | `~/.cursor/mcp.json`                                                                                            | JSON   |
+| Cline          | `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json` | JSON   |
+| Codex CLI      | `~/.codex/config.toml`                                                                                          | TOML   |
+| OpenCode       | `~/.config/opencode/opencode.json`                                                                              | JSON   |
+| OpenClaw       | `~/.openclaw/openclaw.json`                                                                                     | JSON   |
+| Hermes Agent   | `~/.hermes/config.yaml`                                                                                         | YAML   |
+| Cherry Studio  | Cherry Studio settings directory (manual only)                                                                  | JSON   |
 
 ## Troubleshooting
 
 ### Configuration Not Detected
 
-1. **Verify file path**: Check if configuration file exists in the correct location
-2. **Validate JSON/TOML syntax**: Use online validators to check for syntax errors
-3. **Restart client**: Most clients require restart after configuration changes
-4. **Check logs**: Look for MCP server connection errors in client logs
+1. **Verify file path**: Check if configuration file exists in the correct location.
+2. **Validate JSON/TOML/YAML syntax**: Use online validators to check for syntax errors.
+3. **Restart client**: Most clients require restart after configuration changes.
+4. **Check logs**: Look for MCP server connection errors in client logs.
 
 ### Path Issues
 
-**Problem**: Stata-MCP cannot access project files
+**Problem**: Stata-MCP cannot access project files.
 
 **Solution**:
-- Use absolute paths for `STATA_MCP_CWD`
-- Ensure paths are within client's allowed directories
-- Check client's file system access permissions
+- Use absolute paths for `STATA_MCP__CWD`.
+- Ensure paths are within the client's allowed directories.
+- Check the client's file system access permissions.
 
 ### Version Conflicts
 
-**Problem**: Wrong Stata-MCP version loaded
+**Problem**: Wrong Stata-MCP version loaded.
 
 **Solution**:
-- Clear Python package cache: `pip cache purge stata-mcp`
-- Pin specific version: `uvx stata-mcp==1.13.0`
-- Use `uvx --refresh stata-mcp` to force refresh
+- Clear Python package cache: `pip cache purge stata-mcp`.
+- Pin a specific version: `uvx stata-mcp==1.16.2`.
+- Force a refresh: `uvx --refresh stata-mcp`.
 
 ## Best Practices
 
-1. **Use project-scoped configuration** when available (Claude Code)
-2. **Pin versions** in production environments
-3. **Set absolute paths** for working directories
-4. **Test configuration** with `uvx stata-mcp --usable` before adding to client
-5. **Document custom configurations** for team collaboration
+1. **Use project-scoped configuration** when available (Claude Code).
+2. **Pin versions** in production environments.
+3. **Set absolute paths** for working directories.
+4. **Test configuration** with `uvx stata-mcp doctor` before adding to a client.
+5. **Document custom configurations** for team collaboration.
 
 ## Additional Resources
 
