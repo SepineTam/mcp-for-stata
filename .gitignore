@@ -22,7 +22,6 @@ wheels/
 
 # test
 test/
-tests/
 *.test.*
 
 # Logs
