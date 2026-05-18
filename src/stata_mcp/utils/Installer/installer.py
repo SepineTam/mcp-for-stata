@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tomllib
+from datetime import datetime
 from pathlib import Path
 from typing import Callable, Dict, Optional
 
@@ -99,6 +100,11 @@ class Installer:
         config_path.parent.mkdir(parents=True, exist_ok=True)
 
         keys = [key] if isinstance(key, str) else list(key)
+        try:
+            self._backup_before_write(config_path)
+        except OSError as exc:
+            print(f"[ERROR]\tFailed to backup {config_path}: {exc}")
+            sys.exit(1)
 
         if config_path.exists():
             try:
@@ -132,6 +138,11 @@ class Installer:
     def install_to_toml_config(self, config_path: Path, key: str = "mcpServers"):
         config_path = Path(config_path)
         config_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            self._backup_before_write(config_path)
+        except OSError as exc:
+            print(f"[ERROR]\tFailed to backup {config_path}: {exc}")
+            sys.exit(1)
 
         # Check if stata-mcp already exists
         if config_path.exists():
@@ -157,6 +168,11 @@ class Installer:
     def install_to_yaml_config(self, config_path: Path, key: str = "mcpServers"):
         config_path = Path(config_path)
         config_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            self._backup_before_write(config_path)
+        except OSError as exc:
+            print(f"[ERROR]\tFailed to backup {config_path}: {exc}")
+            sys.exit(1)
 
         print(
             "[NOTE]\tHermes Agent uses YAML for mcpServers config."
@@ -204,6 +220,23 @@ class Installer:
             )
 
         print(f"✅ Successfully installed stata-mcp to: {config_path}")
+
+    def _backup_before_write(self, config_path: Path) -> Optional[Path]:
+        """Copy an existing config file before editing it."""
+        if not config_path.exists():
+            return None
+
+        timestamp = datetime.now().strftime("%Y%m%d%H%M")
+        suffix = config_path.suffix.lstrip(".")
+        backup_name = f"{config_path.stem}.backup-{timestamp}"
+        if suffix:
+            backup_name = f"{backup_name}.{suffix}"
+        backup_path = config_path.with_name(backup_name)
+
+        shutil.copy2(config_path, backup_path)
+
+        print(f"[BACKUP]\tOriginal config backed up to: {backup_path.resolve()}")
+        return backup_path
 
     def _write_toml(self, file, config, prefix=""):
         """Recursively write config to TOML format."""
