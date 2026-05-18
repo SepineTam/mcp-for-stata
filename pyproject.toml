@@ -1,6 +1,6 @@
 [project]
 name = "stata-mcp"
-version = "1.17.0"
+version = "1.17.1"
 description = "Let LLM help you achieve your regression analysis with Stata"
 readme = "README.md"
 authors = [
