@@ -139,7 +139,7 @@ class StataDo:
             raise ValueError(
                 "Invalid log_file_name. Use 1-128 characters from A-Z, a-z, 0-9, underscore, dot, or hyphen."
             )
-        if any(part in {"", ".", ".."} for part in Path(log_name).parts):
+        if log_name in {"", ".", ".."}:
             raise ValueError("Invalid log_file_name. Path traversal is not allowed.")
 
     def generate_log_file(self, log_name: str, extension: Literal['smcl', 'log'] = 'log'):
