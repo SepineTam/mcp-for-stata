@@ -54,3 +54,6 @@ backup.*
 
 # AI docs
 ai-driven/
+
+# test fixtures (downloaded at runtime from Stata Press)
+tests/fixtures/dataset/
