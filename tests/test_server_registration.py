@@ -118,7 +118,7 @@ def test_register_tools_core_only_registers_core(monkeypatch: pytest.MonkeyPatch
     mcp_servers.register_tools(server, profile="core")
 
     assert set(server.tools) == {"stata_do", "get_data_info", "help"}
-    assert server.resources == ["help"]
+    assert server.resources == []  # resource registration temporarily disabled
 
 
 def test_register_tools_all_applies_platform_and_deprecated_filters(
