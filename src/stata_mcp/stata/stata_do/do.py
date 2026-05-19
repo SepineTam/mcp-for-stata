@@ -9,12 +9,15 @@
 
 import logging
 import os
+import re
 import subprocess
 import tempfile
 from pathlib import Path
 from typing import Dict, List, Literal, Optional
 
 from ...utils import get_nowtime
+
+LOG_FILE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]{1,128}$")
 
 
 class StataDo:
@@ -79,7 +82,8 @@ class StataDo:
         """
         nowtime = get_nowtime()
         log_name = log_file_name or nowtime
-        log_file = self.log_file_path / f"{log_name}.log"
+        self._validate_log_name(log_name)
+        log_file = self.generate_log_file(log_name)
 
         if self.is_unix:
             args = dofile_path, log_name, is_replace, enable_smcl
@@ -128,6 +132,15 @@ class StataDo:
         replace_clause = 'replace' if is_replace else ''
         log_cmd = f'log using "{log_file.as_posix()}", {replace_clause} {log_type} name({log_type}_log)'
         return log_cmd
+
+    @staticmethod
+    def _validate_log_name(log_name: str) -> None:
+        if not LOG_FILE_NAME_PATTERN.fullmatch(log_name):
+            raise ValueError(
+                "Invalid log_file_name. Use 1-128 characters from A-Z, a-z, 0-9, underscore, dot, or hyphen."
+            )
+        if any(part in {"", ".", ".."} for part in Path(log_name).parts):
+            raise ValueError("Invalid log_file_name. Path traversal is not allowed.")
 
     def generate_log_file(self, log_name: str, extension: Literal['smcl', 'log'] = 'log'):
         return self.log_file_path / f"{log_name}.{extension}"
@@ -225,7 +238,7 @@ class StataDo:
             cmd = [self.STATA_CLI, "/e", "do", batch_file.as_posix()]
             result = subprocess.run(
                 cmd,
-                shell=True,
+                shell=True,  # Windows Stata requires shell execution for proper path resolution and startup
                 capture_output=True,
                 text=True,
                 cwd=self.cwd
@@ -360,7 +373,7 @@ class StataDo:
             cmd = [self.STATA_CLI, "/e", "do", str(batch_file)]
             proc = subprocess.Popen(
                 cmd,
-                shell=True,
+                shell=True,  # Windows Stata requires shell execution for proper path resolution and startup
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
