@@ -46,7 +46,7 @@
 - Find more in WeChat: [Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ), and [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
 - 🦞 **OpenClaw Support**: Standalone CLI tools for OpenClaw integration (`stata-mcp tool`), see [OpenClaw guide](https://docs.statamcp.com/agents/openclaw.md)
 - ✨ **Claude Code Plugin Support**: Official plugin package with MCP server and Stata LSP integration
-- Use Stata-MCP in Claude Code, look [here](#advanced---claude-code)
+- Use Stata-MCP in Claude Code, look [here](#advanced---claude-code), or Codex [here](#advanced---codex)
 
 > Finding our **newest research**? Click [here](source/reports/README.md) or visit [reports website](https://www.statamcp.com/reports).
 
@@ -152,6 +152,40 @@ claude plugin install stata-toolbox -s project
 ```
 
 > The language server gives AI-generated Stata code better syntax awareness and completion, which improves output quality. We package the LSP in compliance with its license and give full attribution to the original author.
+
+### Advanced - Codex
+We find that many researchers are using Codex as their agent, therefore we also provide instructions for Codex users. 
+
+I figure that researchers are not using Codex CLI but Codex Desktop, so we can say it is easier to config Stata-MCP than other agents. 
+
+You just need to say `Install Stata-MCP for yourself globally from https://www.statamcp.com or visit https://github.com/SepineTam/stata-mcp` then restart your Codex Desktop after it say ready. 
+
+Also, if you want to install it manually, here are two ways:
+
+#### A. Install in Codex Desktop GUI
+1. Open your Codex Desktop APP
+2. Click `Settings` in the bottom-left corner
+3. Find `MCP servers` on the left side
+4. Click `Add server`
+5. Fill with the following:
+    ```
+    Name: stata-mcp
+    Command to launch: uvx
+    Arguments: stata-mcp
+    ```
+6. Click `Save`
+7. Then, restart your Codex Desktop and enjoy it. 
+
+#### B. Install with Codex CLI
+For CLI mode, just run the following command in your terminal
+```bash
+uvx stata-mcp install -c codex
+```
+
+Or use
+```bash
+codex mcp add stata-mcp -- uvx stata-mcp
+```
 
 ### Other Clients
 > Standard config requires: please make sure the stata is installed at the default path, and the stata cli (for macOS and Linux) exists.

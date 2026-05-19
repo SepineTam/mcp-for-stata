@@ -33,7 +33,7 @@
 - 在微信公众号中阅读更多：[为什么做Stata-MCP？](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ)，和 [8张图带你了解 Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
 - 🦞 **OpenClaw 支持**：独立 CLI 工具用于 OpenClaw 集成（`stata-mcp tool`），详见 [OpenClaw 指南](https://docs.statamcp.com/agents/openclaw.md)
 - ✨ **Claude Code 插件支持**：官方插件包，集成 MCP 服务器和 Stata LSP
-- 在Claude Code中使用Stata-MCP，请查看[此处](#高级---claude-code)
+- 在 Claude Code 中使用 Stata-MCP，请查看[此处](#高级---claude-code)，或在 Codex 中查看[此处](#高级---codex)
 
 > 寻找我们的**最新研究**？点击[此处](../../../reports/README.md)或访问[报告网站](https://www.statamcp.com/reports)。
 
@@ -142,6 +142,40 @@ claude plugin install stata-toolbox -s project
 ```
 
 > 语言服务器为 AI 生成的 Stata 代码提供更好的语法感知和补全功能，从而提高输出质量。我们在遵守其许可证的前提下打包 LSP，并给予原作者完整的署名。
+
+### 高级 - Codex
+我们发现许多研究人员在使用 Codex 作为他们的 agent，因此我们也为 Codex 用户提供使用说明。
+
+我认为研究人员使用的不是 Codex CLI 而是 Codex Desktop，因此我们可以说配置 Stata-MCP 比其他 agent 更容易。
+
+您只需要说 `Install Stata-MCP for yourself globally from https://www.statamcp.com or visit https://github.com/SepineTam/stata-mcp`，然后在它显示 ready 后重启您的 Codex Desktop。
+
+此外，如果您想手动安装，有以下两种方式：
+
+#### A. 在 Codex Desktop GUI 中安装
+1. 打开您的 Codex Desktop APP
+2. 点击左下角的 `Settings`
+3. 在左侧找到 `MCP servers`
+4. 点击 `Add server`
+5. 填写以下内容：
+    ```
+    Name: stata-mcp
+    Command to launch: uvx
+    Arguments: stata-mcp
+    ```
+6. 点击 `Save`
+7. 然后，重启您的 Codex Desktop 即可使用。
+
+#### B. 使用 Codex CLI 安装
+对于 CLI 模式，只需在终端运行以下命令
+```bash
+uvx stata-mcp install -c codex
+```
+
+或使用
+```bash
+codex mcp add stata-mcp -- uvx stata-mcp
+```
 
 ### 其他客户端
 > 标准配置要求：请确保 Stata 安装在默认路径，并且在 macOS 和 Linux 上存在 Stata CLI。
