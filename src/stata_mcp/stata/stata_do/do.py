@@ -83,6 +83,7 @@ class StataDo:
         nowtime = get_nowtime()
         log_name = log_file_name or nowtime
         self._validate_log_name(log_name)
+        dofile_path = self._validate_dofile_path(dofile_path)
         log_file = self.generate_log_file(log_name)
 
         if self.is_unix:
@@ -142,8 +143,24 @@ class StataDo:
         if log_name in {"", ".", ".."}:
             raise ValueError("Invalid log_file_name. Path traversal is not allowed.")
 
+    @staticmethod
+    def _validate_dofile_path(dofile_path: Path) -> Path:
+        resolved_path = Path(dofile_path).resolve()
+        if resolved_path.suffix.lower() != ".do":
+            raise ValueError("Invalid dofile_path. Only .do files are allowed.")
+
+        path_text = resolved_path.as_posix()
+        if any(char in path_text for char in ('"', "'", "`", "\n", "\r")):
+            raise ValueError("Invalid dofile_path. Quotes, backticks, and newlines are not allowed.")
+
+        return resolved_path
+
     def generate_log_file(self, log_name: str, extension: Literal['smcl', 'log'] = 'log'):
-        return self.log_file_path / f"{log_name}.{extension}"
+        log_root = self.log_file_path.resolve()
+        log_file = (self.log_file_path / f"{log_name}.{extension}").resolve()
+        if not log_file.is_relative_to(log_root):
+            raise ValueError("Invalid log_file_name. Path traversal is not allowed.")
+        return log_file
 
     def _execute_unix_like(
         self,

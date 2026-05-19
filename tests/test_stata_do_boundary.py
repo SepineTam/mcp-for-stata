@@ -13,8 +13,9 @@ from stata_mcp.stata.stata_do.do import StataDo
 
 
 @pytest.fixture
-def loaded_mcp_servers(monkeypatch: pytest.MonkeyPatch):
+def loaded_mcp_servers(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     """Load mcp_servers with minimal external dependency stubs."""
+    monkeypatch.setenv("HOME", (tmp_path / "home").as_posix())
     monkeypatch.setitem(sys.modules, "tomli_w", SimpleNamespace(dump=lambda *args, **kwargs: None))
     monkeypatch.setitem(sys.modules, "pexpect", ModuleType("pexpect"))
 
@@ -305,3 +306,40 @@ class TestValidateLogName:
         StataDo._validate_log_name("a" * 128)
         with pytest.raises(ValueError, match="Invalid log_file_name"):
             StataDo._validate_log_name("a" * 129)
+
+
+class TestValidateDofilePath:
+    """Tests for StataDo._validate_dofile_path security validation."""
+
+    def test_allows_do_file(self, tmp_path: Path):
+        dofile = tmp_path / "ok.do"
+        dofile.write_text("display 1")
+
+        assert StataDo._validate_dofile_path(dofile) == dofile.resolve()
+
+    def test_rejects_non_do_file(self, tmp_path: Path):
+        dofile = tmp_path / "ok.txt"
+        dofile.write_text("display 1")
+
+        with pytest.raises(ValueError, match="Only .do files"):
+            StataDo._validate_dofile_path(dofile)
+
+    def test_rejects_control_characters_in_resolved_path(self, tmp_path: Path):
+        for name in ['bad"name.do', "bad`name.do", "bad'name.do"]:
+            dofile = tmp_path / name
+            dofile.write_text("display 1")
+
+            with pytest.raises(ValueError, match="Quotes, backticks, and newlines"):
+                StataDo._validate_dofile_path(dofile)
+
+
+class TestGenerateLogFile:
+    """Tests for StataDo.generate_log_file boundary validation."""
+
+    def test_rejects_resolved_path_outside_log_directory(self, tmp_path: Path):
+        log_dir = tmp_path / "logs"
+        log_dir.mkdir()
+        stata_do = StataDo("stata", log_dir)
+
+        with pytest.raises(ValueError, match="Path traversal"):
+            stata_do.generate_log_file("../outside")

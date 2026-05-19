@@ -16,8 +16,59 @@ def test_dangerous_command_abbreviations_are_blacklisted() -> None:
     assert expected.issubset(DANGEROUS_COMMANDS)
 
 
+def test_embedded_execution_commands_are_blacklisted() -> None:
+    expected = {"python", "mata", "java", "plugin"}
+    assert expected.issubset(DANGEROUS_COMMANDS)
+
+
+def test_colon_prefix_is_stripped_before_command_check() -> None:
+    report = GuardValidator().validate("quietly: shell echo pwn")
+    assert report.is_safe is False
+    assert any(item.type == "command" and item.content == "shell" for item in report.dangerous_items)
+
+
+def test_chained_colon_prefix_is_stripped_before_command_check() -> None:
+    report = GuardValidator().validate("capture noisily: shell echo pwn")
+    assert report.is_safe is False
+    assert any(item.type == "command" and item.content == "shell" for item in report.dangerous_items)
+
+
+def test_delimit_semicolon_is_rejected() -> None:
+    report = GuardValidator().validate("#delimit ;\ndisplay 1")
+    assert report.is_safe is False
+    assert any(item.content == "#delimit ;" for item in report.dangerous_items)
+
+
 def test_macro_expansion_with_dangerous_local_is_flagged() -> None:
     code = 'local cmd "shell"\n`cmd\' "rm -rf /"'  # noqa: S608
+    report = GuardValidator().validate(code)
+    assert report.is_safe is False
+    assert any(item.type == "macro" and item.content == "`cmd'" for item in report.dangerous_items)
+
+
+def test_unquoted_dangerous_local_is_flagged() -> None:
+    code = "local cmd shell\ndisplay `cmd'"
+    report = GuardValidator().validate(code)
+    assert report.is_safe is False
+    assert any(item.type == "macro" and item.content == "`cmd'" for item in report.dangerous_items)
+
+
+def test_compound_quoted_dangerous_local_is_flagged() -> None:
+    code = "local cmd `\"shell\"'\ndisplay `cmd'"
+    report = GuardValidator().validate(code)
+    assert report.is_safe is False
+    assert any(item.type == "macro" and item.content == "`cmd'" for item in report.dangerous_items)
+
+
+def test_global_macro_expansion_with_dangerous_value_is_flagged() -> None:
+    code = 'global cmd "shell"\ndisplay $cmd'
+    report = GuardValidator().validate(code)
+    assert report.is_safe is False
+    assert any(item.type == "macro" and item.content == "$cmd" for item in report.dangerous_items)
+
+
+def test_macro_expansion_is_checked_across_entire_line() -> None:
+    code = 'local cmd "shell"\ndisplay `cmd\''
     report = GuardValidator().validate(code)
     assert report.is_safe is False
     assert any(item.type == "macro" and item.content == "`cmd'" for item in report.dangerous_items)
@@ -46,3 +97,36 @@ def test_prefixed_local_definition_is_detected() -> None:
     report = GuardValidator().validate(code)
     assert report.is_safe is False
     assert any(item.type == "macro" and item.content == "`cmd'" for item in report.dangerous_items)
+
+
+def test_chained_colon_prefix_with_each_prefix_having_colon() -> None:
+    report = GuardValidator().validate("capture: noisily: shell echo pwn")
+    assert report.is_safe is False
+    assert any(item.type == "command" and item.content == "shell" for item in report.dangerous_items)
+
+
+def test_colon_prefix_with_space_before_colon() -> None:
+    report = GuardValidator().validate("quietly : shell echo pwn")
+    assert report.is_safe is False
+    assert any(item.type == "command" and item.content == "shell" for item in report.dangerous_items)
+
+
+def test_macro_with_argument_in_value_is_flagged() -> None:
+    code = "local cmd shell echo pwn\n`cmd'"
+    report = GuardValidator().validate(code)
+    assert report.is_safe is False
+    assert any(item.type == "macro" and item.content == "`cmd'" for item in report.dangerous_items)
+
+
+def test_global_macro_with_argument_in_value_is_flagged() -> None:
+    code = "global cmd shell echo pwn\n$cmd"
+    report = GuardValidator().validate(code)
+    assert report.is_safe is False
+    assert any(item.type == "macro" and item.content == "$cmd" for item in report.dangerous_items)
+
+
+def test_global_macro_with_braces_is_flagged() -> None:
+    code = 'global cmd "shell"\n${cmd}'
+    report = GuardValidator().validate(code)
+    assert report.is_safe is False
+    assert any(item.type == "macro" and item.content == "$cmd" for item in report.dangerous_items)

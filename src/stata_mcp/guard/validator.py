@@ -97,10 +97,14 @@ class GuardValidator:
         Returns:
             The line with all leading prefixes removed
         """
-        words = line.split()
-        while words and words[0].lower() in prefixes:
-            words.pop(0)
-        return " ".join(words) if words else ""
+        cleaned_line = line
+        prefix_pattern = re.compile(r"^\s*(\w+)\s*:?\s*", re.IGNORECASE)
+        while cleaned_line:
+            matched = prefix_pattern.match(cleaned_line)
+            if not matched or matched.group(1).lower() not in prefixes:
+                break
+            cleaned_line = cleaned_line[matched.end():]
+        return cleaned_line.strip()
 
     def validate(self, code: str) -> SecurityReport:
         """Validate Stata dofile code for security risks.
@@ -128,6 +132,10 @@ class GuardValidator:
             ):
                 continue
 
+            if re.match(r"^#delimit\s+;", stripped_line, re.IGNORECASE):
+                dangerous_items.append(RiskItem(type="pattern", content="#delimit ;", line=line_num))
+                continue
+
             # Strip Stata prefixes (capture, quietly, etc.) before checking
             cleaned_line = self._strip_prefixes(stripped_line, self.stata_prefixes)
             if not cleaned_line:
@@ -149,9 +157,9 @@ class GuardValidator:
         return SecurityReport(is_safe=is_safe, dangerous_items=dangerous_items)
 
     def _collect_dangerous_local_names(self, lines: List[str]) -> set[str]:
-        """Collect local macro names whose values are dangerous commands."""
+        """Collect macro names whose values are dangerous commands."""
         dangerous_names: set[str] = set()
-        local_pattern = re.compile(r"^\s*local\s+(\w+)\s+['\"]([^'\"]+)['\"]", re.IGNORECASE)
+        macro_pattern = re.compile(r"^\s*(?:local|global)\s+(\w+)\s+(.+)$", re.IGNORECASE)
 
         for line in lines:
             stripped_line = line.strip()
@@ -159,23 +167,40 @@ class GuardValidator:
                 continue
 
             cleaned_line = self._strip_prefixes(stripped_line, self.stata_prefixes)
-            matched = local_pattern.search(cleaned_line)
+            matched = macro_pattern.search(cleaned_line)
             if not matched:
                 continue
 
-            local_name, local_value = matched.group(1), matched.group(2)
-            if local_value.strip().lower() in self.dangerous_commands:
+            local_name, local_value = matched.group(1), self._strip_macro_value_quotes(matched.group(2))
+            first_value_token = local_value.split()[0].lower() if local_value.split() else ""
+            if first_value_token in self.dangerous_commands:
                 dangerous_names.add(local_name)
 
         return dangerous_names
 
     @staticmethod
+    def _strip_macro_value_quotes(value: str) -> str:
+        """Remove Stata macro value quotes, including compound quotes."""
+        stripped_value = value.strip()
+        if len(stripped_value) >= 4 and stripped_value.startswith('`"') and stripped_value.endswith('"\''):
+            return stripped_value[2:-2]
+        if len(stripped_value) >= 2 and stripped_value[0] == stripped_value[-1] and stripped_value[0] in {'"', "'"}:
+            return stripped_value[1:-1]
+        return stripped_value
+
+    @staticmethod
     def _check_macro_expansion(line: str, line_num: int, dangerous_local_names: set[str]) -> List[RiskItem]:
-        """Check whether a line expands a dangerous local macro."""
+        """Check whether a line expands a dangerous macro."""
         items: List[RiskItem] = []
         for local_name in dangerous_local_names:
-            macro_token = f"`{local_name}'"
             if re.search(rf"(?<!\w)`{re.escape(local_name)}'(?!\w)", line):
+                macro_token = f"`{local_name}'"
+                items.append(RiskItem(type="macro", content=macro_token, line=line_num))
+            if re.search(rf"(?<!\w)\${re.escape(local_name)}(?!\w)", line):
+                macro_token = f"${local_name}"
+                items.append(RiskItem(type="macro", content=macro_token, line=line_num))
+            if re.search(rf"(?<!\w)\$\{{{re.escape(local_name)}\}}(?!\w)", line):
+                macro_token = f"${local_name}"
                 items.append(RiskItem(type="macro", content=macro_token, line=line_num))
         return items
 

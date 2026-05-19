@@ -53,6 +53,10 @@ DANGEROUS_COMMANDS: Set[str] = {
     "era",        # Stata abbreviation for erase
     "rmdir",      # Directory removal command
     "rmd",        # Stata abbreviation for rmdir
+    "python",     # Python execution block: python:
+    "mata",       # Mata execution block
+    "java",       # Java integration
+    "plugin",     # Native plugin loading
 }
 
 
@@ -80,6 +84,12 @@ DANGEROUS_PATTERNS: List[str] = [
     r"^\s*run\s+",            # Run another do-file: run script.do
     r"^\s*do\s+",             # Run another do-file: do script.do
     r"^\s*include\s+",        # Include another do-file: include setup.do
+
+    # Embedded language/runtime execution
+    r"^\s*python\s*:",        # Python block execution: python:
+    r"^\s*mata\b",            # Mata execution
+    r"^\s*java\b",            # Java integration
+    r"^\s*plugin\b",          # Native plugin loading
 ]
 
 
