@@ -77,8 +77,9 @@ def detect_install_method() -> InstallMethod:
         return InstallMethod.UNKNOWN
 
     python_path = Path(sys.executable).resolve()
+    prefix_path = Path(sys.prefix).resolve()
     uv_tool_dir = get_uv_tool_dir().resolve()
-    if _path_is_relative_to(python_path, uv_tool_dir):
+    if _path_is_relative_to(prefix_path, uv_tool_dir):
         return InstallMethod.UV_TOOL
 
     if _is_uvx_runtime(python_path):
