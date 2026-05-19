@@ -9,6 +9,8 @@ from types import ModuleType, SimpleNamespace
 
 import pytest
 
+from stata_mcp.stata.stata_do.do import StataDo
+
 
 @pytest.fixture
 def loaded_mcp_servers(monkeypatch: pytest.MonkeyPatch):
@@ -250,3 +252,56 @@ def test_stata_do_logs_warning_when_guard_is_disabled(
         loaded_mcp_servers.stata_do(dofile.as_posix())
 
     assert any("[SECURITY] Guard is disabled" in message for message in caplog.messages)
+
+
+class TestValidateLogName:
+    """Tests for StataDo._validate_log_name security validation."""
+
+    def test_valid_log_names(self):
+        valid_names = [
+            "test",
+            "test_123",
+            "my.file",
+            "my-file",
+            "A" * 128,
+        ]
+        for name in valid_names:
+            StataDo._validate_log_name(name)
+
+    def test_invalid_characters(self):
+        invalid_names = [
+            'test"; shell echo pwn',
+            "test`cmd'",
+            "test\nshell",
+            "test; shell",
+            "test/name",
+            "test\\name",
+            "test name",
+            "test<dir>",
+        ]
+        for name in invalid_names:
+            with pytest.raises(ValueError, match="Invalid log_file_name"):
+                StataDo._validate_log_name(name)
+
+    def test_path_traversal(self):
+        invalid_names = [
+            "..",
+            ".",
+        ]
+        for name in invalid_names:
+            with pytest.raises(ValueError, match="Path traversal"):
+                StataDo._validate_log_name(name)
+
+    def test_path_traversal_with_slash(self):
+        invalid_names = [
+            "../etc/passwd",
+            "foo/../../bar",
+        ]
+        for name in invalid_names:
+            with pytest.raises(ValueError, match="Invalid log_file_name"):
+                StataDo._validate_log_name(name)
+
+    def test_length_boundary(self):
+        StataDo._validate_log_name("a" * 128)
+        with pytest.raises(ValueError, match="Invalid log_file_name"):
+            StataDo._validate_log_name("a" * 129)
