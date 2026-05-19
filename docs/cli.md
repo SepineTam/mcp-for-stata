@@ -120,6 +120,8 @@ stata-mcp update --method homebrew  # brew upgrade
 
 **Update Methods:** `auto` (default), `pip`, `uv-tool`, `homebrew`
 
+> **Note for uv tool users on versions before 1.17.2:** Due to a detection bug in earlier versions, `stata-mcp update` may incorrectly detect pip and fail. Run `uv tool upgrade stata-mcp` once manually to reach 1.17.2 or later, after which `stata-mcp update` will work correctly.
+
 ### Local Tool Commands
 
 Run API-backed Stata tools directly from the CLI:

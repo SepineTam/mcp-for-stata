@@ -120,6 +120,8 @@ stata-mcp update --method homebrew  # brew upgrade
 
 **更新方式：** `auto`（默认）、`pip`、`uv-tool`、`homebrew`
 
+> **1.17.2 之前通过 uv tool 安装的用户注意：** 早期版本存在检测 bug，`stata-mcp update` 可能误判为 pip 导致更新失败。请先手动运行一次 `uv tool upgrade stata-mcp` 升级到 1.17.2 或更高版本，之后 `stata-mcp update` 即可正常使用。
+
 ### 本地工具命令
 
 直接从 CLI 运行由 API 模块驱动的 Stata 工具：
