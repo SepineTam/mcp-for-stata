@@ -30,6 +30,7 @@
 
 ---
 **新闻**：
+- 在微信公众号中阅读更多：[为什么做Stata-MCP？](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ)，和 [8张图带你了解 Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
 - 🦞 **OpenClaw 支持**：独立 CLI 工具用于 OpenClaw 集成（`stata-mcp tool`），详见 [OpenClaw 指南](https://docs.statamcp.com/agents/openclaw.md)
 - ✨ **Claude Code 插件支持**：官方插件包，集成 MCP 服务器和 Stata LSP
 - 在Claude Code中使用Stata-MCP，请查看[此处](#高级---claude-code)
