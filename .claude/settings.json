@@ -31,8 +31,12 @@
       "WebFetch(domain:*.statamcp.com)",
       "WebFetch(domain:*.nber.com)",
       "WebFetch(domain:*.ssrn.com)",
+      "WebFetch(domain:*.openai.com)",
+      "WebFetch(domain:*.claude.com)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
+      "mcp__codex-mcp__codex",
+      "mcp__codex-mcp__codex-reply",
       "mcp__github__list_issues",
       "mcp__github__issue_read",
       "mcp__github__search_issues",
@@ -56,7 +60,9 @@
     ]
   },
   "enabledMcpjsonServers": [
-    "context7"
+    "context7",
+    "mineru",
+    "codex-mcp"
   ],
   "enableAllProjectMcpServers": true
 }

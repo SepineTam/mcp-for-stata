@@ -22,6 +22,14 @@
       "args": [
         "mineru-open-mcp"
       ]
+    },
+    "codex-mcp": {
+      "type": "stdio",
+      "command": "codex",
+      "args": [
+        "mcp-server"
+      ],
+      "env": {}
     }
   }
 }
