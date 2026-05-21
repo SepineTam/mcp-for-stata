@@ -30,6 +30,10 @@
         "mcp-server"
       ],
       "env": {}
+    },
+    "openaiDeveloperDocs": {
+      "type": "http",
+      "url": "https://developers.openai.com/mcp"
     }
   }
 }
