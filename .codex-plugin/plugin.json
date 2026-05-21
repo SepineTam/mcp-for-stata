@@ -1,7 +1,7 @@
 {
   "name": "stata-toolbox",
   "version": "0.1.0",
-  "description": "The official working package of Stata-MCP plugin, including mcp config and stata-mcp skill.",
+  "description": "The official working package of Stata-MCP plugin, including mcp config and stata-skill.",
   "author": {
     "name": "Song Tan",
     "email": "sepinetam@gmail.com",
