@@ -1,0 +1,24 @@
+{
+  "name": "stata-toolbox",
+  "version": "0.1.0",
+  "description": "The official working package of Stata-MCP plugin, including mcp config and stata-mcp skill.",
+  "author": {
+    "name": "Song Tan",
+    "email": "sepinetam@gmail.com",
+    "url": "https://github.com/sepinetam"
+  },
+  "homepage": "https://www.statamcp.com",
+  "repository": "https://github.com/sepinetam/stata-mcp",
+  "license": "AGPL-3.0",
+  "keywords": ["stata", "mcp", "econometrics", "regression", "social-science", "computational-social-science"],
+  "mcpServers": "../plugins/stata-toolbox/mcp.json",
+  "skills": "../plugins/stata-toolbox/skills/",
+  "interface": {
+    "displayName": "Stata MCP",
+    "shortDescription": "Run Stata statistical analysis from Codex-compatible MCP clients.",
+    "longDescription": "Connects Codex to Stata for regression analysis, data processing, ado package management, and log reading. Supports CSV, DTA, XLSX, and SPSS data formats.",
+    "category": "Data Science",
+    "websiteURL": "https://www.statamcp.com",
+    "defaultPrompt": "Run a regression analysis using Stata"
+  }
+}
