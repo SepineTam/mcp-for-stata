@@ -9,7 +9,7 @@ Stata-MCP is an MCP (Model Context Protocol) server that enables LLMs to execute
 - **Agent mode**: Interactive Stata analysis via OpenAI Agents SDK
 - **CLI tools**: Direct command-line access to all Stata capabilities
 
-Current version: **1.16.2** | License: **AGPL-3.0** | Python: **>=3.11**
+License: **AGPL-3.0** | Python: **>=3.11**
 
 ## Common Development Commands
 
@@ -71,17 +71,6 @@ stata-mcp server --all -t http       # All tools, HTTP transport
 stata-mcp server --core -t http      # Core tools, HTTP transport
 ```
 
-#### Agent Mode (Deprecated)
-> Agent mode is deprecated and will be removed in a future version. Use MCP server mode instead.
-
-```bash
-# Run interactive agent mode (deprecated)
-stata-mcp agent run
-
-# Or use uvx for direct execution (deprecated)
-uvx stata-mcp agent run
-```
-
 #### Utility Commands
 ```bash
 # Run diagnostics to check system health (replaces deprecated --usable)
@@ -89,40 +78,6 @@ stata-mcp doctor
 stata-mcp doctor --verbose          # Detailed output
 stata-mcp doctor --json             # JSON output
 stata-mcp doctor --check stata      # Run specific check(s)
-
-# Update stata-mcp to latest version
-stata-mcp update
-stata-mcp update --check            # Check if update is available
-stata-mcp update --dry-run          # Show detected method without updating
-stata-mcp update --method pip       # Force specific update method (auto/pip/uv-tool/homebrew)
-
-# Manage configuration
-stata-mcp config                    # Show current config
-stata-mcp config cli set            # Auto-detect and set STATA_CLI path
-stata-mcp config cli set /path/to/stata  # Set specific STATA_CLI path
-
-# Run local Stata tools via CLI
-stata-mcp tool ado-install <package> [--source ssc|net|github]
-stata-mcp tool do <dofile_path> [--log-file-name NAME]
-stata-mcp tool help <command>
-stata-mcp tool data-info <data_path> [--vars-list var1 var2]
-stata-mcp tool read-log <file_path> [--output-format full|core|dict]
-
-# Install to MCP clients
-stata-mcp install                   # Default: Claude Desktop
-stata-mcp install -c cc             # Claude Code
-stata-mcp install -c gemini         # Gemini CLI
-stata-mcp install -c cursor         # Cursor
-stata-mcp install -c cline          # Cline
-stata-mcp install -c codex          # Codex
-stata-mcp install -c opencode       # OpenCode
-stata-mcp install -c openclaw       # OpenClaw
-stata-mcp install --all             # Install to all supported clients
-stata-mcp install --json-file PATH  # Install to custom config file
-
-# Docker-based sandbox installation
-stata-mcp sandbox-install -l /path/to/stata.lic
-stata-mcp sandbox-install -l /path/to/stata.lic -c cursor --cpus 2 --memory 4g
 
 # Check version
 stata-mcp --version
@@ -256,30 +211,7 @@ Priority (highest to lowest): **environment variables > config file > defaults**
 
 `Config` class uses `@cached_property` for lazy directory creation. `StataMcpFolder` helper manages the working directory structure.
 
-Config file location: `~/.statamcp/config.toml`
-
-```toml
-[DEBUG]
-IS_DEBUG = false
-
-[DEBUG.logging]
-LOGGING_ON = true
-LOGGING_CONSOLE_HANDLER_ON = false
-LOGGING_FILE_HANDLER_ON = true
-LOG_FILE = "~/.statamcp/stata_mcp_debug.log"
-MAX_BYTES = 10_000_000
-BACKUP_COUNT = 5
-
-[SECURITY]
-IS_GUARD = true
-
-[PROJECT]
-WORKING_DIR = ""
-
-[MONITOR]
-IS_MONITOR = false
-MAX_RAM_MB = -1  # -1 means no limit
-```
+Config file location: `~/.statamcp/config.toml`. See `src/stata_mcp/config.py` for the configuration schema.
 
 ### 7. Security Guard (`src/stata_mcp/guard/`)
 
@@ -319,65 +251,6 @@ Tools are registered based on profile selection (`--core` / `--all`):
 | all | `read_log` | Read log files; supports `lines` param and `full`/`core`/`dict` formats |
 | all | `ado_package_install` | Install packages from SSC, GitHub, or net |
 | all | `write_dofile` | Create do-files (deprecated) |
-
-### File Structure Conventions
-
-Working directory is configurable via `STATA_MCP__CWD` environment variable.
-- Falls back to current directory (if writable) or `~/Documents`
-
-```
-<cwd>/stata-mcp-folder/
-├── stata-mcp-log/      # Stata execution logs
-├── stata-mcp-dofile/   # Generated do-files
-├── stata-mcp-result/   # Analysis results
-└── stata-mcp-tmp/      # Temporary files
-```
-
-Configuration directory: `~/.statamcp/`
-- `config.toml`: Configuration file
-- `help/`: Cached help texts
-- `stata_mcp_debug.log`: Debug log file (if logging enabled)
-
-### Cross-Platform Support
-
-| Platform | Stata Location |
-|----------|---------------|
-| macOS | `/Applications/Stata/` |
-| Windows | `Program Files` |
-| Linux | `stata-mp` from system PATH |
-
-## Environment Variables Reference
-
-### Working Directory
-- `STATA_MCP__CWD`: Working directory (defaults to cwd or `~/Documents`)
-- `STATA_MCP_CWD`: Legacy alias for backward compatibility
-
-### Logging
-- `STATA_MCP__LOGGING_ON`: Enable/disable logging (default: `true`)
-- `STATA_MCP__LOGGING_CONSOLE_HANDLER_ON`: Enable console logging (default: `false`)
-- `STATA_MCP__LOGGING_FILE_HANDLER_ON`: Enable file logging (default: `true`)
-- `STATA_MCP__LOG_FILE`: Custom log file path
-- `STATA_MCP__LOGGING__MAX_BYTES`: Max log file size in bytes (default: `10_000_000`)
-- `STATA_MCP__LOGGING__BACKUP_COUNT`: Number of backup log files (default: `5`)
-
-### Data Processing
-- `STATA_MCP_CACHE_HELP`: Enable help caching (default: `false`)
-- `STATA_MCP_SAVE_HELP`: Save help text to cache (default: `true`)
-- `STATA_MCP_DATA_INFO_DECIMAL_PLACES`: Decimal places for data info output (default: `3`)
-- `STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER`: Max string values to display (default: `10`)
-- `STATA_MCP_DATA_INFO_HASH_LENGTH`: Hash length for cache filename (default: `12`)
-
-### Security
-- `STATA_MCP__IS_GUARD`: Enable security guard validation (default: `true`)
-
-### Monitoring
-- `STATA_MCP__IS_MONITOR`: Enable RAM monitoring (default: `false`)
-- `STATA_MCP__RAM_LIMIT`: Maximum RAM in MB (default: `-1`, no limit)
-
-### Agent Mode
-- `STATA_MCP_API_KEY`: API key for LLM (falls back to `OPENAI_API_KEY`)
-- `STATA_MCP_API_BASE_URL`: API base URL for LLM
-- `STATA_MCP_MODEL`: Model name for LLM
 
 ## Testing
 
@@ -421,6 +294,8 @@ This project follows the [Conventional Commits](https://www.conventionalcommits.
 - Reference issues with `Closes #` or `Fixes #`
 - **No co-author information in commits**
 - Breaking changes: use `!` after type/scope or `BREAKING CHANGE:` footer
+
+**Commit message must be written by a SubAgent.** Do not write commit messages from memory or imagination. Instead, spawn a `commit-commands:commit` agent, provide the first line if specified by the user, and let the agent inspect `git diff --staged` to write the detailed body based solely on the actual changes.
 
 **Examples:**
 ```
@@ -476,8 +351,6 @@ git merge origin/master
 
 ## Important Notes
 
-- Default data output is in `<STATA_MCP__CWD>/stata-mcp-folder/`
 - The `help` tool is Unix-only; it is filtered out on Windows during `register_tools()`
 - `write_dofile` is deprecated — do not extend or rely on it for new features
 - `--usable` CLI flag is deprecated since v1.14.3; use `stata-mcp doctor` instead
-- For comprehensive end-user documentation, see the `docs/` directory and https://docs.statamcp.com
