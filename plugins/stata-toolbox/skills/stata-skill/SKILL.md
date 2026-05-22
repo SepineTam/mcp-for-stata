@@ -6,7 +6,7 @@ description: |
 ---
 
 # MCP-for-Stata
-> Official plugin for MCP-for-Stata maintained by the [StataMCP-Team](https://github.com/statamcp-team), in collaboration with [SepineTam](https://github.com/sepinetam).
+> Official plugin for MCP-for-Stata maintained in collaboration with [SepineTam](https://github.com/sepinetam).
 
 [MCP-for-Stata](https://statamcp.com) is an MCP (Model Context Protocol) server that exposes Stata's statistical and econometric capabilities to LLMs. This toolset supports executing do-files, querying data file structures, installing ado packages, reading Stata logs, and looking up command documentation. 
 
