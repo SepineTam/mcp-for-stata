@@ -4,11 +4,9 @@
   </a>
 </h1>
 
-<h1 align="center">MCP-for-Stata</h1>
+<h1 align="center">MCP-for-Stata: 将 Stata 集成到你的智能体中</h1>
 
 > Stata 是 StataCorp LLC 的注册商标。本项目为独立社区开发工具，与 StataCorp LLC 无任何关联、背书或赞助关系。
-
-<p align="center">将 Stata 集成到你的智能体中</p>
 
 [![en](https://img.shields.io/badge/lang-English-red.svg)](README.md)
 [![cn](https://img.shields.io/badge/语言-中文-yellow.svg)](README.zh-CN.md)

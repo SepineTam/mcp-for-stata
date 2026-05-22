@@ -4,11 +4,9 @@
   </a>
 </h1>
 
-<h1 align="center">MCP-for-Stata</h1>
+<h1 align="center">MCP-for-Stata: Integra Stata en tu agente</h1>
 
 > Stata es una marca registrada de StataCorp LLC. Este proyecto es una herramienta independiente desarrollada por la comunidad y no esta afiliada, respaldada ni patrocinada por StataCorp LLC.
-
-<p align="center">Integra Stata en tu agente</p>
 
 [![es](https://img.shields.io/badge/idioma-Español-green.svg)](README.es.md)
 [![en](https://img.shields.io/badge/lang-English-red.svg)](README.md)
