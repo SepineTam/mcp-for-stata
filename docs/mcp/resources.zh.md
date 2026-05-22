@@ -1,6 +1,6 @@
 # MCP.Resources
 
-Stata-MCP 提供用于访问 Stata 文档和帮助内容的 MCP 资源。
+MCP-for-Stata 提供用于访问 Stata 文档和帮助内容的 MCP 资源。
 
 ---
 ## help
@@ -110,7 +110,7 @@ try help contents or search {cmd}
 | `STATA_MCP__SAVE_HELP` | `true` | 在 `stata-mcp-tmp/` 启用项目级缓存 |
 
 **与工具的集成**：
-帮助资源在多种工作流程中与 Stata-MCP 工具集成：
+帮助资源在多种工作流程中与 MCP-for-Stata 工具集成：
 - **执行前验证**：在生成 do 文件前检查命令语法
 - **错误诊断**：理解 Stata 执行中的错误消息
 - **学习辅助**：在分析会话期间提供上下文帮助

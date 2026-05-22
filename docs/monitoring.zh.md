@@ -101,7 +101,7 @@ export STATA_MCP__RAM_LIMIT=16384
    export STATA_MCP__RAM_LIMIT=8192
    ```
 
-2. **正常运行 Stata-MCP**：
+2. **正常运行 MCP-for-Stata**：
    ```bash
    stata-mcp
    # 或
@@ -115,7 +115,7 @@ export STATA_MCP__RAM_LIMIT=16384
 
 ### 编程使用
 
-如果您将 Stata-MCP 作为库使用：
+如果您将 MCP-for-Stata 作为库使用：
 
 ```python
 from stata_mcp.monitor import RAMMonitor

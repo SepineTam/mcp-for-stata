@@ -432,7 +432,7 @@ env.STATA_MCP__LOGGING_CONSOLE_HANDLER_ON = "true"
 
 ### Path Issues
 
-**Problem**: Stata-MCP cannot access project files.
+**Problem**: MCP-for-Stata cannot access project files.
 
 **Solution**:
 - Use absolute paths for `STATA_MCP__CWD`.
@@ -441,7 +441,7 @@ env.STATA_MCP__LOGGING_CONSOLE_HANDLER_ON = "true"
 
 ### Version Conflicts
 
-**Problem**: Wrong Stata-MCP version loaded.
+**Problem**: Wrong MCP-for-Stata version loaded.
 
 **Solution**:
 - Clear Python package cache: `pip cache purge stata-mcp`.

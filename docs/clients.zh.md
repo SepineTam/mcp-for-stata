@@ -432,7 +432,7 @@ env.STATA_MCP__LOGGING_CONSOLE_HANDLER_ON = "true"
 
 ### 路径问题
 
-**问题**：Stata-MCP 无法访问项目文件。
+**问题**：MCP-for-Stata 无法访问项目文件。
 
 **解决方案**：
 - 为 `STATA_MCP__CWD` 使用绝对路径。
@@ -441,7 +441,7 @@ env.STATA_MCP__LOGGING_CONSOLE_HANDLER_ON = "true"
 
 ### 版本冲突
 
-**问题**：加载了错误的 Stata-MCP 版本。
+**问题**：加载了错误的 MCP-for-Stata 版本。
 
 **解决方案**：
 - 清除 Python 包缓存：`pip cache purge stata-mcp`。

@@ -2,14 +2,14 @@
 
 > **希望未来不再有[star war](https://www.aeaweb.org/articles?id=10.1257/app.20150044)。** - 让科研从 reg monkeys 变成有价值的研究。
 
-本指南介绍如何在不同环境和智能体中集成和使用 Stata-MCP。
+本指南介绍如何在不同环境和智能体中集成和使用 MCP-for-Stata。
 
 ## 前提条件
 
-在使用 Stata-MCP 之前，请确保你有：
+在使用 MCP-for-Stata 之前，请确保你有：
 - 已安装 **Stata** 17+ 并具有有效许可证
 - **uv** 包管理器或 Python 3.11+
-- 已安装或可通过 `uvx` 使用 **Stata-MCP**
+- 已安装或可通过 `uvx` 使用 **MCP-for-Stata**
 
 验证你的设置：
 ```bash
@@ -22,7 +22,7 @@ uvx stata-mcp doctor
 
 ### 🔒 安全守卫系统
 
-Stata-MCP 现在包含自动安全验证以防止危险命令：
+MCP-for-Stata 现在包含自动安全验证以防止危险命令：
 
 ```python
 # 默认自动启用
@@ -118,7 +118,7 @@ MAX_RAM_MB = -1
 
 ## CLI 命令
 
-Stata-MCP 在 MCP 服务器之外还提供了多个实用命令。
+MCP-for-Stata 在 MCP 服务器之外还提供了多个实用命令。
 
 ```bash
 # 运行诊断
@@ -143,7 +143,7 @@ stata-mcp sandbox-install -l /path/to/stata.lic
 
 ### 使用 OpenAI Agents SDK
 
-Stata-MCP 可以使用 OpenAI Agents SDK 与 Python 智能体集成。
+MCP-for-Stata 可以使用 OpenAI Agents SDK 与 Python 智能体集成。
 
 #### 方法 1：直接 MCP 服务器集成
 
@@ -154,7 +154,7 @@ from agents.mcp import MCPServerStdio, MCPServerStdioParams
 
 # 创建 MCP 服务器连接
 stata_mcp_server = MCPServerStdio(
-    name="Stata-MCP",
+    name="MCP-for-Stata",
     params=MCPServerStdioParams(
         command="uvx",
         args=["stata-mcp"]
@@ -195,7 +195,7 @@ print(f"Result: \n> {result.final_output}")
 
 ### 智能体作为工具
 
-将 Stata-MCP 作为工具嵌入到更大的智能体工作流程中：
+将 MCP-for-Stata 作为工具嵌入到更大的智能体工作流程中：
 
 ```python
 # !uv pip install openai-agents stata-mcp
@@ -222,11 +222,11 @@ result = await Runner.run(
 
 ## 在编码智能体中使用
 
-Stata-MCP 设计用于与现代 AI 编码智能体无缝集成。以下是流行平台的测试配置。
+MCP-for-Stata 设计用于与现代 AI 编码智能体无缝集成。以下是流行平台的测试配置。
 
 ### Claude 插件（推荐）
 
-我们推荐使用官方插件以获得最佳体验。因此在 Claude Code 中使用 Stata-MCP 的最简单方式是通过官方插件，它同时提供 MCP 服务器和 LSP 集成：
+我们推荐使用官方插件以获得最佳体验。因此在 Claude Code 中使用 MCP-for-Stata 的最简单方式是通过官方插件，它同时提供 MCP 服务器和 LSP 集成：
 
 ```bash
 # 添加市场注册表
@@ -294,7 +294,7 @@ claude mcp list
 ```
 
 **基于项目配置的优势：**
-- 每个研究项目隔离 Stata-MCP 环境
+- 每个研究项目隔离 MCP-for-Stata 环境
 - 项目目录内自动路径管理
 - 无全局配置冲突
 
@@ -407,7 +407,7 @@ args = ["stata-mcp"]
 
 ## 环境变量
 
-Stata-MCP 支持多个环境变量进行自定义：
+MCP-for-Stata 支持多个环境变量进行自定义：
 
 | 变量 | 描述 | 默认值 |
 |----------|-------------|---------|
@@ -508,8 +508,8 @@ uvx stata-mcp agent run
 - [概述](overview.md) - 架构和设计
 - [工具文档](tools.md) - 可用的 MCP 工具
 - [智能体指南](agents/index.md) - 智能体特定文档
-- [GitHub 仓库](https://github.com/sepinetam/stata-mcp) - 源代码和问题
+- [GitHub 仓库](https://github.com/sepinetam/mcp-for-stata) - 源代码和问题
 
 ## 贡献
 
-发现错误或有功能请求？请[提交 issue](https://github.com/sepinetam/stata-mcp/issues/new) 或发送 pull request。
+发现错误或有功能请求？请[提交 issue](https://github.com/sepinetam/mcp-for-stata/issues/new) 或发送 pull request。

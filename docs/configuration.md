@@ -1,6 +1,6 @@
 # Configuration System
 
-Stata-MCP uses a hierarchical configuration system with three levels of priority:
+MCP-for-Stata uses a hierarchical configuration system with three levels of priority:
 
 1. **Environment Variables** (highest priority)
 2. **Configuration File** (`~/.statamcp/config.toml`)
@@ -208,7 +208,7 @@ Controls project-specific settings.
 
 #### `PROJECT.WORKING_DIR`
 
-Set the working directory for Stata-MCP operations.
+Set the working directory for MCP-for-Stata operations.
 
 - **Type**: Path (string)
 - **Default**: Current directory (if writable) or `~/Documents`
@@ -264,7 +264,7 @@ The working directory structure:
 
 **Migration note (v1.16.0)**:
 - The default folder name changed from `stata-mcp-folder` to `.statamcp`.
-- If an old `stata-mcp-folder` directory is detected under the working directory, Stata-MCP writes a `README` notice inside it and creates a `.migrated` marker so the warning is emitted only once.
+- If an old `stata-mcp-folder` directory is detected under the working directory, MCP-for-Stata writes a `README` notice inside it and creates a `.migrated` marker so the warning is emitted only once.
 - To roll back to the previous layout, set `export STATA_MCP__FOLDER_TAG=stata-mcp-folder`.
 
 ### MONITOR Section
@@ -513,7 +513,7 @@ MAX_RAM_MB = 65536  # 64 GB
 
 ### Working Directory Issues
 
-If the working directory is not writable, Stata-MCP will fall back to `~/Documents`. To fix:
+If the working directory is not writable, MCP-for-Stata will fall back to `~/Documents`. To fix:
 
 1. Check directory permissions:
    ```bash

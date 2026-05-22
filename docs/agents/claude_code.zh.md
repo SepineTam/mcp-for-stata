@@ -1,8 +1,8 @@
 # 在 Claude Code 中使用
 
-> **已废弃**:Stata-MCP 内置的 agent 模式自 v1.16.x 起已带 `FutureWarning`,将在后续版本移除。请改用 MCP server 模式(`stata-mcp server` 或 `stata-mcp install -c <客户端>`),并使用宿主 AI 客户端自带的 agent 能力。
+> **已废弃**:MCP-for-Stata 内置的 agent 模式自 v1.16.x 起已带 `FutureWarning`,将在后续版本移除。请改用 MCP server 模式(`stata-mcp server` 或 `stata-mcp install -c <客户端>`),并使用宿主 AI 客户端自带的 agent 能力。
 
-我们非常高兴能编写这份关于 Stata-MCP 与 Claude Code 结合使用的文档。在我日常的研究工作中，Claude Code 是我最常使用的工具之一。
+我们非常高兴能编写这份关于 MCP-for-Stata 与 Claude Code 结合使用的文档。在我日常的研究工作中，Claude Code 是我最常使用的工具之一。
 
 如果尚未安装，可以访问 [Claude Code](https://code.claude.com/docs/en/quickstart) 进行安装。
 
@@ -13,7 +13,7 @@
 
 ## 快速开始
 
-首先，检查 Stata-MCP 是否与您的设备兼容：
+首先，检查 MCP-for-Stata 是否与您的设备兼容：
 
 ```bash
 uvx stata-mcp doctor
@@ -32,7 +32,7 @@ claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --di
 
 ```text
 my_first_project/            # 项目目录
-├── .statamcp/               # Stata-MCP 生成的所有文件
+├── .statamcp/               # MCP-for-Stata 生成的所有文件
 │   ├── stata-mcp-dofile/    # do 文件
 │   ├── stata-mcp-log/       # 日志文件
 │   ├── stata-mcp-result/    # 某些命令（如 `outreg2`）的结果保存在此

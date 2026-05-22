@@ -67,7 +67,7 @@ dofile 的绝对解析路径必须位于以下目录之一，才会被接受：
 
 ### 操作建议
 
-将 dofile 放在配置的工作目录下，或让 Stata-MCP 自动生成到 `stata-mcp-dofile/`。若需要执行位于其他位置的 dofile，应通过把 `STATA_MCP__CWD` 指向其上级目录来纳入白名单，而不是放宽校验。
+将 dofile 放在配置的工作目录下，或让 MCP-for-Stata 自动生成到 `stata-mcp-dofile/`。若需要执行位于其他位置的 dofile，应通过把 `STATA_MCP__CWD` 指向其上级目录来纳入白名单，而不是放宽校验。
 
 ## Local Macro 展开检测
 
@@ -161,7 +161,7 @@ result = stata_mcp.stata_do(code="""
 
 ### 编程使用
 
-如果您将 Stata-MCP 作为库使用：
+如果您将 MCP-for-Stata 作为库使用：
 
 ```python
 from stata_mcp.guard import GuardValidator
