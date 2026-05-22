@@ -7,8 +7,8 @@ exit /b
 
 # --- PowerShell script starts below this line ---
 #
-# Stata-MCP Installation Script for Windows
-# https://github.com/sepinetam/stata-mcp
+# MCP-for-Stata Installation Script for Windows
+# https://github.com/sepinetam/mcp-for-stata
 #
 # Usage:
 #   .\install.bat                    # Install to all supported clients
@@ -40,7 +40,7 @@ if ($Help) {
 
 Write-Host ""
 Write-Host "======================================"
-Write-Host "    Stata-MCP Installation Script"
+Write-Host "    MCP-for-Stata Installation Script"
 Write-Host "======================================"
 Write-Host ""
 
@@ -153,5 +153,5 @@ Write-Host "======================================"
 Write-Host ""
 Write-Host "Please restart your MCP client(s) for the changes to take effect."
 Write-Host ""
-Write-Host "For more information, visit: https://github.com/sepinetam/stata-mcp"
+Write-Host "For more information, visit: https://github.com/sepinetam/mcp-for-stata"
 Write-Host ""

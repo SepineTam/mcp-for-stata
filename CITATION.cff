@@ -5,9 +5,9 @@ authors:
     given-names: "Song"
     orcid: "https://orcid.org/0009-0006-7449-1094"
     email: "sepinetam@gmail.com"
-title: "Stata-MCP: Let LLM help you achieve your regression analysis with Stata"
-version: 1.17.3
-date-released: 2026-05-20
+title: "MCP-for-Stata: Integrate Stata into your agent"
+version: 1.18.0
+date-released: 2026-05-22
 url: "https://www.statamcp.com"
-repository-code: "https://github.com/sepinetam/stata-mcp"
+repository-code: "https://github.com/sepinetam/mcp-for-stata"
 license: AGPL-3.0

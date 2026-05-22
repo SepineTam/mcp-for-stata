@@ -4,24 +4,24 @@
   </a>
 </h1>
 
-<h1 align="center">Stata-MCP</h1>
+<h1 align="center">MCP-for-Stata</h1>
 
-<p align="center"> 
-    Let LLM help you achieve your regression analysis with Stata ✨ <br>
-    Evolve from reg monkey to causal thinker 🐒 -> 🧐
-</p>
+> Stata is a registered trademark of StataCorp LLC. This project is an independent community-developed tool and is not affiliated with, endorsed by, or sponsored by StataCorp LLC.
+
+<p align="center">Integrate Stata into your agent</p>
 
 [![en](https://img.shields.io/badge/lang-English-red.svg)](README.md)
-[![cn](https://img.shields.io/badge/语言-中文-yellow.svg)](source/docs/README/cn/README.md)
-[![Publish to PyPI](https://github.com/SepineTam/stata-mcp/actions/workflows/python-package.yml/badge.svg)](https://github.com/SepineTam/stata-mcp/actions/workflows/python-package.yml)
-[![Build and Push Docker Images](https://github.com/SepineTam/stata-mcp/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/SepineTam/stata-mcp/actions/workflows/docker-publish.yml)
+[![cn](https://img.shields.io/badge/语言-中文-yellow.svg)](README.zh-CN.md)
+[![fr](https://img.shields.io/badge/langue-Français-blue.svg)](README.fr.md)
+[![es](https://img.shields.io/badge/idioma-Español-green.svg)](README.es.md)
+[![Publish to PyPI](https://github.com/SepineTam/mcp-for-stata/actions/workflows/python-package.yml/badge.svg)](https://github.com/SepineTam/mcp-for-stata/actions/workflows/python-package.yml)
 [![PyPI version](https://img.shields.io/pypi/v/stata-mcp.svg)](https://pypi.org/project/stata-mcp/)
 [![PyPI Downloads](https://static.pepy.tech/badge/stata-mcp)](https://pepy.tech/projects/stata-mcp)
 [![License: AGPL 3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](LICENSE)
-[![Issue](https://img.shields.io/badge/Issue-report-green.svg)](https://github.com/sepinetam/stata-mcp/issues/new)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/SepineTam/stata-mcp)
+[![Issue](https://img.shields.io/badge/Issue-report-green.svg)](https://github.com/sepinetam/mcp-for-stata/issues/new)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/SepineTam/mcp-for-stata)
 
-<!-- mcp-name: io.github.SepineTam/stata-mcp -->
+<!-- mcp-name: io.github.SepineTam/mcp-for-stata -->
 
 ---
 **Notes**: While we strive to make open source accessible to everyone, we regret that we can no longer maintain the Apache-2.0 License. Due to individuals directly copying this project and claiming to be its maintainers, we have decided to change the license to AGPL-3.0 to prevent misuse of the project in ways that go against our original vision.
@@ -46,7 +46,7 @@
 - Find more in WeChat: [Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ), and [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
 - 🦞 **OpenClaw Support**: Standalone CLI tools for OpenClaw integration (`stata-mcp tool`), see [OpenClaw guide](https://docs.statamcp.com/agents/openclaw.md)
 - ✨ **Claude Code Plugin Support**: Official plugin package with MCP server and Stata LSP integration
-- Use Stata-MCP in Claude Code, look [here](#advanced---claude-code), or Codex [here](#advanced---codex)
+- Use MCP-for-Stata in Claude Code, look [here](#advanced---claude-code), or Codex [here](#advanced---codex)
 
 > Finding our **newest research**? Click [here](source/reports/README.md) or visit [reports website](https://www.statamcp.com/reports).
 
@@ -55,7 +55,7 @@
 
 > **MCP or AI about Stata**
 > - A session based MCP server for Stata, [mcp-stata](https://github.com/tmonk/mcp-stata)
-> - A VScode or Cursor integrated [here](https://github.com/hanlulong/stata-mcp). Confused it? 💡 [Comparison](#comparison)
+> - IDEs (VScode or Cursor) integrated [here](https://github.com/hanlulong/stata-mcp). Confused them? 💡 [Comparison](#comparison)
 > 
 > **Datasets and Information**  
 > - [STOP Dataset](https://opendata.ai4cssci.com): StataMCP-Team Opendata Project 📊, we have open-sourced a comprehensive dataset collection for social science research, aiming to enable the future of AI-driven and data-powered research paradigms.  
@@ -93,22 +93,22 @@ Or, use our beta install script (auto-installs `uv` if missing):
 
 **macOS / Linux:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SepineTam/stata-mcp/master/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SepineTam/mcp-for-stata/master/scripts/install.sh | bash
 ```
 
 **Windows (PowerShell):**
 ```powershell
-irm https://raw.githubusercontent.com/SepineTam/stata-mcp/master/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/SepineTam/mcp-for-stata/master/scripts/install.ps1 | iex
 ```
 
-If you don't know how to use them, try click [here](https://github.com/SepineTam/stata-mcp/tree/master/scripts) and download the installation scripts and double-click it in your device. `install.bat` for Windows users, and `install.command` for macOS users. 
+If you don't know how to use them, try click [here](https://github.com/SepineTam/mcp-for-stata/tree/master/scripts) and download the installation scripts and double-click it in your device. `install.bat` for Windows users, and `install.command` for macOS users. 
 
 ### Advanced - Claude Code
-As we find Claude Code is the best agent for Stata-MCP as its prefect agentic ability, we recommend using it, and there are lots of advanced usage following:
+As we find Claude Code is the best agent for MCP-for-Stata as its prefect agentic ability, we recommend using it, and there are lots of advanced usage following:
 
 Before using it, please make sure you have ever install `Claude Code`, if you don't know how to install it, visit on [GitHub](https://github.com/anthropics/claude-code)
 
-Generally, you can install Stata-MCP globally for one time, you can run:
+Generally, you can install MCP-for-Stata globally for one time, you can run:
 ```bash
 claude mcp add stata-mcp --scope user -- uvx stata-mcp
 ```
@@ -133,7 +133,7 @@ In your working directory, you can find a file named `.mcp.json`, your mcp confi
 
 </details>
 
-Then, you can use Stata-MCP in Claude Code. Here are some scenarios for using it:
+Then, you can use MCP-for-Stata in Claude Code. Here are some scenarios for using it:
 
 - **Paper Replication**: Replicate empirical studies from economics papers
 - **Quick Hypothesis Testing**: Validate economic hypotheses through regression analysis
@@ -141,11 +141,11 @@ Then, you can use Stata-MCP in Claude Code. Here are some scenarios for using it
 - **Code Organization**: Review and optimize existing Stata do-files
 - **Result Interpretation**: Understand complex statistical outputs and regression results
 
-If you use Claude Code inside IDEs (either the integrated terminal or the Claude Code Extension), installing our plugin including [Stata-MCP](https://github.com/sepinetam/stata-mcp) and [Stata LSP](https://github.com/euglevi/stata-language-server) maintained by @euglevi. 
+If you use Claude Code inside IDEs (either the integrated terminal or the Claude Code Extension), installing our plugin including [MCP-for-Stata](https://github.com/sepinetam/mcp-for-stata) and [Stata LSP](https://github.com/euglevi/stata-language-server) maintained by @euglevi. 
 
 ```bash
-# Add the Stata-MCP marketplace
-claude plugin marketplace add SepineTam/stata-mcp
+# Add the MCP-for-Stata marketplace
+claude plugin marketplace add SepineTam/mcp-for-stata
 
 # Install the plugin to local, project or user scope
 claude plugin install stata-toolbox -s project
@@ -156,9 +156,9 @@ claude plugin install stata-toolbox -s project
 ### Advanced - Codex
 We find that many researchers are using Codex as their agent, therefore we also provide instructions for Codex users. 
 
-I figure that researchers are not using Codex CLI but Codex Desktop, so we can say it is easier to config Stata-MCP than other agents. 
+I figure that researchers are not using Codex CLI but Codex Desktop, so we can say it is easier to config MCP-for-Stata than other agents. 
 
-You just need to say `Install Stata-MCP for yourself globally from https://www.statamcp.com or visit https://github.com/SepineTam/stata-mcp` then restart your Codex Desktop after it say ready. 
+You just need to say `Install MCP-for-Stata for yourself globally from https://www.statamcp.com or visit https://github.com/SepineTam/mcp-for-stata` then restart your Codex Desktop after it say ready. 
 
 Also, if you want to install it manually, here are two ways:
 
@@ -245,13 +245,13 @@ Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 
 > Notes:
 > 1. If you are located in China, a short uv usage document you can find [here](source/docs/ChinaUsers/uv.md).
-> 2. Claude is the best choice for Stata-MCP, for Chinese, I recommend to use DeepSeek as your model provider as it is cheap and powerful, also the score is highest in China provider, if you are increased in it, visit the report [How to use StataMCP improve your social science research](https://statamcp.com/reports/2025/09/21/stata_mcp_a_research_report_on_ai_assisted_empirical_research).
+> 2. Claude is the best choice for MCP-for-Stata, for Chinese, I recommend to use DeepSeek as your model provider as it is cheap and powerful, also the score is highest in China provider, if you are increased in it, visit the report [How to use StataMCP improve your social science research](https://statamcp.com/reports/2025/09/21/stata_mcp_a_research_report_on_ai_assisted_empirical_research).
 
 ## Comparison
 
 There are several Stata-related MCP projects. The table below was generated by Claude Code after analyzing each codebase directly.
 
-| Feature | Stata-MCP (this) | hanlulong/stata-mcp | tmonk/mcp-stata |
+| Feature | MCP-for-Stata (this) | hanlulong/stata-mcp | tmonk/mcp-stata |
 |---|---|---|---|
 | **Agents** | All | VSCode window must stay active | All |
 | **Type** | MCP Server + CLI toolkit | VSCode Extension (localhost server, not standalone MCP) | Session-based MCP Server |
@@ -267,7 +267,7 @@ There are several Stata-related MCP projects. The table below was generated by C
 | **Best for** | Agent-driven analysis (Claude Code, Codex, OpenClaw) | Users who write and run Stata code inside VSCode themselves | Research workflows (replication, robustness, publication QA) |
 
 ## 📝 Documentation
-> Stata-MCP documents visit https://docs.statamcp.com
+> MCP-for-Stata documents visit https://docs.statamcp.com
 
 ### Core Documentation
 - **[Complete Documentation](https://docs.statamcp.com/)**: Full documentation site with all features
@@ -284,47 +284,46 @@ There are several Stata-related MCP projects. The table below was generated by C
 - Automatic log capture and error reporting
 
 ## 🐛 Report Issues
-If you encounter any bugs or have feature requests, please [open an issue](https://github.com/sepinetam/stata-mcp/issues/new).
+If you encounter any bugs or have feature requests, please [open an issue](https://github.com/sepinetam/mcp-for-stata/issues/new).
 
 ## 📄 License
 [GNU Affero General Public License v3.0](LICENSE)
 
 ## 📚 Citation
-If you use Stata-MCP in your research, and it really helps you, you can cite this repository using one of the following formats:
+If you use MCP-for-Stata in your research, and it really helps you, you can cite this repository using one of the following formats:
 
 ### BibTeX
 ```bibtex
 @software{sepinetam2025stata,
   author = {Song Tan},
-  title = {Stata-MCP: Let LLM help you achieve your regression analysis with Stata},
+  title = {MCP-for-Stata: Integrate Stata into your agent},
   year = {2025},
-  url = {https://github.com/sepinetam/stata-mcp},
-  version = {1.13.0}
+  url = {https://github.com/sepinetam/mcp-for-stata},
+  version = {1.18.0}
 }
 ```
 
 ### APA
 ```
-Song Tan. (2025). Stata-MCP: Let LLM help you achieve your regression analysis with Stata (Version 1.13.0) [Computer software]. https://github.com/sepinetam/stata-mcp
+Song Tan. (2025). MCP-for-Stata: Integrate Stata into your agent (Version 1.18.0) [Computer software]. https://github.com/sepinetam/mcp-for-stata
 ```
 
 ### Chicago
 ```
-Song Tan. 2025. "Stata-MCP: Let LLM help you achieve your regression analysis with Stata." Version 1.13.0. https://github.com/sepinetam/stata-mcp.
+Song Tan. 2025. "MCP-for-Stata: Integrate Stata into your agent." Version 1.18.0. https://github.com/sepinetam/mcp-for-stata.
 ```
 
 ## 📬 Contact
 Email: [sepinetam@gmail.com](mailto:sepinetam@gmail.com)
 
-Or contribute directly by submitting a [Pull Request](https://github.com/sepinetam/stata-mcp/pulls)! We welcome contributions of all kinds, from bug fixes to new features.
-
-## ❤️ Acknowledgements
-The author sincerely thanks the Stata official team for their support and the Stata License for authorizing the test development.
+Or contribute directly by submitting a [Pull Request](https://github.com/sepinetam/mcp-for-stata/pulls)! We welcome contributions of all kinds, from bug fixes to new features.
 
 ## 📃 Statement
-The Stata referred to in this project is the commercial software Stata developed by [StataCorp LLC](https://www.stata.com/company/). This project is not affiliated with, endorsed by, or sponsored by StataCorp LLC. This project does not include the Stata software or any installation packages; users must obtain and install a validly licensed copy of Stata from StataCorp. This project is licensed under [AGPL-3.0](LICENSE). The project maintainers accept no liability for any loss or damage arising from the use of this project or from actions related to Stata.
+Stata is a registered trademark of [StataCorp LLC](https://www.stata.com/company/). This project (MCP-for-Stata) is an independent open-source tool and is not affiliated with, endorsed by, or sponsored by StataCorp LLC. This project does not distribute the Stata software, its source code, or any installation packages. Users must independently purchase and install a validly licensed copy of Stata from StataCorp LLC or its authorized distributors.
 
-More information: refer to the Chinese version at [cn/README.md](source/docs/README/cn/README.md); in case of any conflict, the Chinese version shall prevail.
+This project is licensed under [AGPL-3.0](LICENSE). The project maintainers accept no liability for any loss or damage arising solely from the use of this project's code or documentation.
+
+More information: refer to the Chinese version at [README.zh-CN.md](README.zh-CN.md); in case of any conflict, the Chinese version shall prevail.
 
 ## ✨ Star History
 

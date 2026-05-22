@@ -1,7 +1,7 @@
 [project]
 name = "stata-mcp"
-version = "1.17.3"
-description = "Let LLM help you achieve your regression analysis with Stata"
+version = "1.18.0"
+description = "Integrate Stata into your agent"
 readme = "README.md"
 authors = [
     { name = "Song Tan", email = "sepinetam@gmail.com" }
@@ -52,6 +52,6 @@ all = [
 [project.urls]
 Homepage = "https://www.statamcp.com"
 Documentation = "https://docs.statamcp.com"
-Source = "https://github.com/sepinetam/stata-mcp"
-Issues = "https://github.com/sepinetam/stata-mcp/issues"
-Changelog = "https://github.com/sepinetam/stata-mcp/blob/master/CHANGELOG.md"
+Source = "https://github.com/sepinetam/mcp-for-stata"
+Issues = "https://github.com/sepinetam/mcp-for-stata/issues"
+Changelog = "https://github.com/sepinetam/mcp-for-stata/blob/master/CHANGELOG.md"

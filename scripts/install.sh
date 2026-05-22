@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Stata-MCP Installation Script for macOS and Linux
-# https://github.com/sepinetam/stata-mcp
+# MCP-for-Stata Installation Script for macOS and Linux
+# https://github.com/sepinetam/mcp-for-stata
 #
 # Usage:
 #   ./install.sh                    # Install to all supported clients
@@ -50,7 +50,7 @@ done
 
 echo ""
 echo "======================================"
-echo "    Install Stata-MCP ..."
+echo "    Install MCP-for-Stata ..."
 echo "======================================"
 echo ""
 
@@ -158,7 +158,7 @@ main() {
     echo ""
     echo "Please restart your AI client(s) for the changes to take effect."
     echo ""
-    echo "For more information, visit: https://www.statamcp.com or https://github.com/sepinetam/stata-mcp"
+    echo "For more information, visit: https://www.statamcp.com or https://github.com/sepinetam/mcp-for-stata"
     echo ""
 }
 
