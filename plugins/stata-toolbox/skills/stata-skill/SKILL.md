@@ -2,17 +2,17 @@
 name: stata-skill
 version: 1.0.0
 description: |
-  A packaged Stata Runner skill via official Stata-MCP server including stata_do, ado_package_install, help, read_log and get_data_info tools. Use it when (1) need to execute Stata do-file; (2) missing ado-packages; (3) find code error caused by syntax in Stata; (4) want to read smcl and text format log file with rich text output; (5) first encounter a data file and want to understand its structure and content.
+  A packaged Stata Runner skill via official MCP-for-Stata server including stata_do, ado_package_install, help, read_log and get_data_info tools. Use it when (1) need to execute Stata do-file; (2) missing ado-packages; (3) find code error caused by syntax in Stata; (4) want to read smcl and text format log file with rich text output; (5) first encounter a data file and want to understand its structure and content.
 ---
 
-# Stata-MCP
-> Official plugin for Stata-MCP maintained by the [StataMCP-Team](https://github.com/statamcp-team), in collaboration with [SepineTam](https://github.com/sepinetam).
+# MCP-for-Stata
+> Official plugin for MCP-for-Stata maintained by the [StataMCP-Team](https://github.com/statamcp-team), in collaboration with [SepineTam](https://github.com/sepinetam).
 
-[Stata-MCP](https://statamcp.com) is an MCP (Model Context Protocol) server that exposes Stata's statistical and econometric capabilities to LLMs. This toolset supports executing do-files, querying data file structures, installing ado packages, reading Stata logs, and looking up command documentation. 
+[MCP-for-Stata](https://statamcp.com) is an MCP (Model Context Protocol) server that exposes Stata's statistical and econometric capabilities to LLMs. This toolset supports executing do-files, querying data file structures, installing ado packages, reading Stata logs, and looking up command documentation. 
 
 ## Prerequisites
 
-This skill requires the Stata-MCP server to be installed and running. If you have not configured it yet, follow `@references/installation.md`. After installation, verify with `uvx stata-mcp doctor`. Restart your AI client after installation (required for the first-time setup).
+This skill requires the MCP-for-Stata server to be installed and running. If you have not configured it yet, follow `@references/installation.md`. After installation, verify with `uvx stata-mcp doctor`. Restart your AI client after installation (required for the first-time setup).
 
 ## When to Use
 
@@ -160,7 +160,7 @@ This tool is disabled by default and only available when `STATA_MCP__ENABLE_WRIT
 
 | Name | Location | Description |
 |:---|:---|:---|
-| Installation | `@references/installation.md` | Installation and configuration guide for Stata-MCP |
+| Installation | `@references/installation.md` | Installation and configuration guide for MCP-for-Stata |
 | stata_do | `@references/stata_do.md` | Detailed guide for the execution tool |
 | get_data_info | `@references/get_data_info.md` | Detailed guide for the data exploration tool |
 | help | `@references/help.md` | Detailed guide for the documentation tool |
@@ -168,5 +168,5 @@ This tool is disabled by default and only available when `STATA_MCP__ENABLE_WRIT
 | ado_package_install | `@references/ado_package_install.md` | Detailed guide for the package installer tool |
 | Documentation | [docs.statamcp.com](https://docs.statamcp.com) | Full user documentation |
 | Homepage | [statamcp.com](https://statamcp.com) | Project homepage |
-| Source Code | [github.com/sepinetam/stata-mcp](https://github.com/sepinetam/stata-mcp) | GitHub repository |
+| Source Code | [github.com/sepinetam/mcp-for-stata](https://github.com/sepinetam/mcp-for-stata) | GitHub repository |
 

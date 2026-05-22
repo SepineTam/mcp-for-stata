@@ -8,7 +8,7 @@
     {
       "name": "stata-toolbox",
       "source": "./plugins/stata-toolbox",
-      "description": "The official working package of Stata-MCP plugin, including mcp config and stata lsp."
+      "description": "The official working package of MCP-for-Stata plugin, including mcp config and stata lsp."
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Stata-MCP runs via `uvx` without system installation. You only need to register it as an MCP server in your AI client.
+MCP-for-Stata runs via `uvx` without system installation. You only need to register it as an MCP server in your AI client.
 
 ## Automatic Registration (Recommended)
 
@@ -10,15 +10,15 @@ Stata-MCP runs via `uvx` without system installation. You only need to register 
 
 **macOS / Linux:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SepineTam/stata-mcp/master/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SepineTam/mcp-for-stata/master/scripts/install.sh | bash
 ```
 
 **Windows (PowerShell):**
 ```powershell
-irm https://raw.githubusercontent.com/SepineTam/stata-mcp/master/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/SepineTam/mcp-for-stata/master/scripts/install.ps1 | iex
 ```
 
-This script auto-installs `uv` if missing, then registers Stata-MCP to all supported AI clients.
+This script auto-installs `uv` if missing, then registers MCP-for-Stata to all supported AI clients.
 
 ### If uv is already installed
 
@@ -83,5 +83,5 @@ uvx stata-mcp doctor
 
 Checks:
 - Stata executable is found
-- Stata-MCP is properly configured
+- MCP-for-Stata is properly configured
 - Required directories are writable
