@@ -1,14 +1,14 @@
 {
   "name": "stata-toolbox",
-  "version": "0.1.0",
-  "description": "The official working package of Stata-MCP plugin, including mcp config and stata lsp.",
+  "version": "0.1.1",
+  "description": "The official working package of MCP-for-Stata plugin, including mcp config and stata lsp.",
   "author": {
     "name": "Song Tan",
     "email": "sepinetam@gmail.com",
     "url": "https://www.sepinetam.com"
   },
   "homepage": "https://statamcp.com",
-  "repository": "https://github.com/sepinetam/stata-mcp",
+  "repository": "https://github.com/sepinetam/mcp-for-stata",
   "license": "AGPL-3.0",
   "keywords": ["stata", "econometrics", "empirical analysis"],
   "mcpServers": {
