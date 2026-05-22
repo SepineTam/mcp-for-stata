@@ -2,7 +2,7 @@
 
 ## 概述
 
-StataDo 是 Stata-MCP 中负责执行 Stata do 文件的核心模块。它提供了一种安全可靠的方式来运行 Stata 脚本，具有自动结果日志记录功能，支持三大操作系统：macOS、Linux 和 Windows。
+StataDo 是 MCP-for-Stata 中负责执行 Stata do 文件的核心模块。它提供了一种安全可靠的方式来运行 Stata 脚本，具有自动结果日志记录功能，支持三大操作系统：macOS、Linux 和 Windows。
 
 ## 关键功能
 
@@ -55,7 +55,7 @@ StataDo 主要用于以下场景：
 
 ## 与其他模块的集成
 
-StataDo 是 Stata-MCP 工具链的重要组成部分：
+StataDo 是 MCP-for-Stata 工具链的重要组成部分：
 
 - **StataFinder**：提供 Stata 可执行文件路径
 - **StataController**：提供更高级别的 Stata 控制接口
@@ -63,7 +63,7 @@ StataDo 是 Stata-MCP 工具链的重要组成部分：
 
 ## 文件路径约定
 
-StataDo 遵循 Stata-MCP 目录结构约定：
+StataDo 遵循 MCP-for-Stata 目录结构约定：
 
 - **Do 文件目录**：`~/Documents/.statamcp/stata-mcp-dofile/`
 - **日志文件目录**：`~/Documents/.statamcp/stata-mcp-log/`

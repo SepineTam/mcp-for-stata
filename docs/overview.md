@@ -1,14 +1,14 @@
-# Stata-MCP Overview
+# MCP-for-Stata Overview
 
-## What is Stata-MCP and Stata?
+## What is MCP-for-Stata and Stata?
 
-**Stata-MCP** is a Model Context Protocol (MCP) server that bridges Large Language Models (LLMs) with Stata, enabling autonomous econometric analysis and statistical computation. Built on the FastMCP framework, Stata-MCP exposes Stata's comprehensive analytical capabilities as structured tools that LLMs can invoke programmatically, transforming natural language queries into reproducible Stata workflows.
+**MCP-for-Stata** is a Model Context Protocol (MCP) server that bridges Large Language Models (LLMs) with Stata, enabling autonomous econometric analysis and statistical computation. Built on the FastMCP framework, MCP-for-Stata exposes Stata's comprehensive analytical capabilities as structured tools that LLMs can invoke programmatically, transforming natural language queries into reproducible Stata workflows.
 
-### Why Stata-MCP?
+### Why MCP-for-Stata?
 
 Stata remains the dominant analytical engine in empirical social science research. In China's economics discipline alone, over 80% of published articles are empirical studies, with more than 98.4% utilizing Stata for analysis. This prevalence stems from Stata's mature ecosystem, methodological completeness, and reliability in reproducing published research.
 
-Stata-MCP addresses a critical gap in AI-assisted research: while modern LLMs excel at code generation and statistical reasoning, they lack native execution environments for domain-specific tools like Stata. By implementing the MCP protocol, Stata-MCP enables:
+MCP-for-Stata addresses a critical gap in AI-assisted research: while modern LLMs excel at code generation and statistical reasoning, they lack native execution environments for domain-specific tools like Stata. By implementing the MCP protocol, MCP-for-Stata enables:
 
 - **Deterministic Execution**: LLM-generated Stata code executes in a controlled, reproducible environment
 - **Methodological Rigor**: Access to Stata's validated econometric implementations ensures analytical integrity
@@ -17,7 +17,7 @@ Stata-MCP addresses a critical gap in AI-assisted research: while modern LLMs ex
 
 ## Architecture Overview
 
-Stata-MCP operates through four architectural layers:
+MCP-for-Stata operates through four architectural layers:
 
 ### 1. **Protocol Layer (MCP Server)**
 The `FastMCP`-based server (`src/stata_mcp/__init__.py`) implements the Model Context Protocol, exposing Stata operations as structured tools. Each tool defines:
@@ -73,7 +73,7 @@ Interactive REPL agent for conversational analysis:
 
 ## Data Processing Pipeline
 
-Stata-MCP implements a polymorphic data analysis system supporting multiple formats:
+MCP-for-Stata implements a polymorphic data analysis system supporting multiple formats:
 
 ### **DataInfo Architecture**
 Abstract base class `DataInfoBase` with format-specific implementations:
@@ -96,7 +96,7 @@ Cache invalidation occurs automatically on content change detection.
 
 ## Project Structure Convention
 
-Stata-MCP enforces a standardized directory layout for reproducible research:
+MCP-for-Stata enforces a standardized directory layout for reproducible research:
 
 ```text
 ~/.statamcp/
@@ -120,14 +120,14 @@ For AI-assisted research projects, the recommended template (`stata-mcp --init`)
 │   │   └── final/           # Analysis-ready data
 │   ├── figs/                # Publication figures
 │   └── tabs/                # Publication tables
-├── .statamcp/               # Stata-MCP working directory
+├── .statamcp/               # MCP-for-Stata working directory
 └── CLAUDE.md                # Project-specific instructions
 ```
 
 ## Integration Patterns
 
 ### **In AI Clients**
-MCP-compliant clients (Claude Code, Cline, Continue) register Stata-MCP as a server in their configuration:
+MCP-compliant clients (Claude Code, Cline, Continue) register MCP-for-Stata as a server in their configuration:
 
 ```json
 {
@@ -141,7 +141,7 @@ MCP-compliant clients (Claude Code, Cline, Continue) register Stata-MCP as a ser
 ```
 
 ### **In Python Agents**
-Stata-MCP agents can be embedded as tools within other agent workflows:
+MCP-for-Stata agents can be embedded as tools within other agent workflows:
 
 ```python
 from stata_mcp.agent_as import StataAgent
@@ -227,5 +227,5 @@ Configurable language settings for localized error messages and documentation.
 
 ## Citation and Acknowledgments
 
-Stata-MCP is developed by the empirical research community to bridge AI assistance with domain-specific analytical tools. Contributions, bug reports, and feature requests are welcome via the [GitHub repository](https://github.com/sepinetam/stata-mcp).
+MCP-for-Stata is developed by the empirical research community to bridge AI assistance with domain-specific analytical tools. Contributions, bug reports, and feature requests are welcome via the [GitHub repository](https://github.com/sepinetam/mcp-for-stata).
 

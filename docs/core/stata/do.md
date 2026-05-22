@@ -2,7 +2,7 @@
 
 ## Overview
 
-StataDo is the core module in Stata-MCP responsible for executing Stata do files. It provides a secure and reliable way to run Stata scripts with automatic result logging, supporting three major operating systems: macOS, Linux, and Windows.
+StataDo is the core module in MCP-for-Stata responsible for executing Stata do files. It provides a secure and reliable way to run Stata scripts with automatic result logging, supporting three major operating systems: macOS, Linux, and Windows.
 
 ## Key Features
 
@@ -55,7 +55,7 @@ StataDo is primarily used in the following scenarios:
 
 ## Integration with Other Modules
 
-StataDo is an important part of the Stata-MCP toolchain:
+StataDo is an important part of the MCP-for-Stata toolchain:
 
 - **StataFinder**: Provides the path to the Stata executable
 - **StataController**: Provides higher-level Stata control interfaces
@@ -63,7 +63,7 @@ StataDo is an important part of the Stata-MCP toolchain:
 
 ## File Path Conventions
 
-StataDo follows the Stata-MCP directory structure conventions:
+StataDo follows the MCP-for-Stata directory structure conventions:
 
 - **Do File Directory**: `~/Documents/.statamcp/stata-mcp-dofile/`
 - **Log File Directory**: `~/Documents/.statamcp/stata-mcp-log/`

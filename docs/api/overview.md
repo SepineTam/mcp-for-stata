@@ -1,6 +1,6 @@
 # Python API Reference
 
-Stata-MCP provides a Python SDK for programmatic access to Stata functionality. This is useful for building custom agents, integrating with other Python applications, or scripting Stata workflows.
+MCP-for-Stata provides a Python SDK for programmatic access to Stata functionality. This is useful for building custom agents, integrating with other Python applications, or scripting Stata workflows.
 
 ## Installation
 

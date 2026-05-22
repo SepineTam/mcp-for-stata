@@ -1,6 +1,6 @@
 # Python API 参考
 
-Stata-MCP 提供了 Python SDK，用于在 Python 中直接调用 Stata 功能。这对于构建自定义 Agent、集成到其他 Python 应用或编写 Stata 工作流脚本非常有用。
+MCP-for-Stata 提供了 Python SDK，用于在 Python 中直接调用 Stata 功能。这对于构建自定义 Agent、集成到其他 Python 应用或编写 Stata 工作流脚本非常有用。
 
 ## 安装
 

@@ -2,14 +2,14 @@
 
 > **Hope no [Star War](https://www.aeaweb.org/articles?id=10.1257/app.20150044) future.** - Let's evolve from reg monkeys to causal thinkers.
 
-This guide covers how to integrate and use Stata-MCP across different environments and agents.
+This guide covers how to integrate and use MCP-for-Stata across different environments and agents.
 
 ## Prerequisites
 
-Before using Stata-MCP, ensure you have:
+Before using MCP-for-Stata, ensure you have:
 - **Stata** 17+ installed with a valid license
 - **uv** package manager or Python 3.11+
-- **Stata-MCP** installed or available via `uvx`
+- **MCP-for-Stata** installed or available via `uvx`
 
 Verify your setup:
 ```bash
@@ -22,7 +22,7 @@ uvx stata-mcp doctor
 
 ### 🔒 Security Guard System
 
-Stata-MCP now includes automatic security validation to prevent dangerous commands:
+MCP-for-Stata now includes automatic security validation to prevent dangerous commands:
 
 ```python
 # Automatically enabled by default
@@ -118,7 +118,7 @@ For details, see [Configuration Documentation](configuration.md).
 
 ## CLI Commands
 
-Stata-MCP provides several utility commands beyond the MCP server.
+MCP-for-Stata provides several utility commands beyond the MCP server.
 
 ```bash
 # Run diagnostics
@@ -143,7 +143,7 @@ See [CLI Reference](cli.md) for complete documentation.
 
 ### Using OpenAI Agents SDK
 
-Stata-MCP can be integrated with Python agents using the OpenAI Agents SDK.
+MCP-for-Stata can be integrated with Python agents using the OpenAI Agents SDK.
 
 #### Method 1: Direct MCP Server Integration
 
@@ -154,7 +154,7 @@ from agents.mcp import MCPServerStdio, MCPServerStdioParams
 
 # Create MCP server connection
 stata_mcp_server = MCPServerStdio(
-    name="Stata-MCP",
+    name="MCP-for-Stata",
     params=MCPServerStdioParams(
         command="uvx",
         args=["stata-mcp"]
@@ -195,7 +195,7 @@ print(f"Result: \n> {result.final_output}")
 
 ### Agent as Tool
 
-Embed Stata-MCP as a tool within larger agent workflows:
+Embed MCP-for-Stata as a tool within larger agent workflows:
 
 ```python
 # !uv pip install openai-agents stata-mcp
@@ -222,11 +222,11 @@ result = await Runner.run(
 
 ## Usage in Coding Agents
 
-Stata-MCP is designed for seamless integration with modern AI coding agents. Below are tested configurations for popular platforms.
+MCP-for-Stata is designed for seamless integration with modern AI coding agents. Below are tested configurations for popular platforms.
 
 ### Claude Plugin (Recommended)
 
-We recommend using the official plugin for the best experience. Therefore the simplest way to use Stata-MCP with Claude Code is through the official plugin, which provides both MCP server and LSP integration:
+We recommend using the official plugin for the best experience. Therefore the simplest way to use MCP-for-Stata with Claude Code is through the official plugin, which provides both MCP server and LSP integration:
 
 ```bash
 # Add marketplace registry
@@ -294,7 +294,7 @@ claude mcp list
 ```
 
 **Benefits of project-based configuration:**
-- Isolates Stata-MCP environment per research project
+- Isolates MCP-for-Stata environment per research project
 - Automatic path management within project directory
 - No global configuration conflicts
 
@@ -407,7 +407,7 @@ Most AI clients follow the standard MCP server configuration format. Below is th
 
 ## Environment Variables
 
-Stata-MCP supports several environment variables for customization:
+MCP-for-Stata supports several environment variables for customization:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -508,8 +508,8 @@ uvx stata-mcp agent run
 - [Overview](overview.md) - Architecture and design
 - [Tools Documentation](tools.md) - Available MCP tools
 - [Agents Guide](agents/index.md) - Agent-specific documentation
-- [GitHub Repository](https://github.com/sepinetam/stata-mcp) - Source code and issues
+- [GitHub Repository](https://github.com/sepinetam/mcp-for-stata) - Source code and issues
 
 ## Contributing
 
-Found a bug or have a feature request? Please [open an issue](https://github.com/sepinetam/stata-mcp/issues/new) or submit a pull request.
+Found a bug or have a feature request? Please [open an issue](https://github.com/sepinetam/mcp-for-stata/issues/new) or submit a pull request.

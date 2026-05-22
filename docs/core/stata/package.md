@@ -2,7 +2,7 @@
 
 ## Overview
 
-The package installation module provides a convenient way to install Stata packages from the Statistical Software Components (SSC) archive. It supports automated package installation within Stata-MCP workflows, making it easy to extend Stata's functionality programmatically.
+The package installation module provides a convenient way to install Stata packages from the Statistical Software Components (SSC) archive. It supports automated package installation within MCP-for-Stata workflows, making it easy to extend Stata's functionality programmatically.
 
 ## Key Features
 

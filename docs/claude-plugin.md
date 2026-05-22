@@ -2,9 +2,9 @@
 
 ## Overview
 
-Stata-MCP provides official native plugin support for Claude Code, integrating two powerful components in `stata-toolbox@stata-plugin-lib` now:
+MCP-for-Stata provides official native plugin support for Claude Code, integrating two powerful components in `stata-toolbox@stata-plugin-lib` now:
 
-1. **Stata-MCP Server**: Model Context Protocol server for Stata execution
+1. **MCP-for-Stata Server**: Model Context Protocol server for Stata execution
 2. **Stata LSP (Language Server Protocol)**: Advanced language support for Stata do-files
 
 This plugin package, named **stata-toolbox**, delivers a unified development environment for empirical research, combining the analytical power of Stata with AI assistance and advanced IDE features.
@@ -45,7 +45,7 @@ The plugin system enables one-command installation of complex development enviro
     {
       "name": "stata-toolbox",
       "source": "./plugins/stata-toolbox",
-      "description": "The official working package of Stata-MCP plugin, including mcp config and stata lsp."
+      "description": "The official working package of MCP-for-Stata plugin, including mcp config and stata lsp."
     }
   ]
 }
@@ -67,14 +67,14 @@ The plugin system enables one-command installation of complex development enviro
 {
   "name": "stata-toolbox",
   "version": "0.1.0",
-  "description": "The official working package of Stata-MCP plugin, including mcp config and stata lsp.",
+  "description": "The official working package of MCP-for-Stata plugin, including mcp config and stata lsp.",
   "author": {
     "name": "Song Tan",
     "email": "sepinetam@gmail.com",
     "url": "https://www.sepinetam.com"
   },
   "homepage": "https://statamcp.com",
-  "repository": "https://github.com/sepinetam/stata-mcp",
+  "repository": "https://github.com/sepinetam/mcp-for-stata",
   "license": "AGPL-3.0",
   "keywords": ["stata", "econometrics", "empirical analysis"],
   "mcpServers": {
@@ -217,7 +217,7 @@ Claude Code automatically detects:
 - `plugins/stata-toolbox/plugin.json` → Plugin configuration
 
 **2. MCP Tools**
-The Stata-MCP server exposes tools that Claude can invoke:
+The MCP-for-Stata server exposes tools that Claude can invoke:
 - `stata_do`: Execute Stata code
 - `write_dofile`: Create do-files
 - `get_data_info`: Analyze datasets
@@ -344,7 +344,7 @@ claude plugin install stata-toolbox
     └────┬─────┘                └────┬─────┘
          │                           │
     ┌────▼───────────────────────────▼────┐
-    │         Stata-MCP Package           │
+    │         MCP-for-Stata Package           │
     │  - stata_do tool                    │
     │  - Data analysis tools              │
     │  - Help system                      │
@@ -443,7 +443,7 @@ stata-language-server --help
 
 ## License and Attribution
 
-stata-toolbox plugin is part of the Stata-MCP project.
+stata-toolbox plugin is part of the MCP-for-Stata project.
 
 - **License**: AGPL-3.0
 - **Copyright**: (c) 2026 Song Tan (Sepine Tam), Inc.
@@ -452,7 +452,7 @@ stata-toolbox plugin is part of the Stata-MCP project.
 **Stata LSP**: Copyright by [euglevi](https://github.com/euglevi/stata-language-server) with [MIT License](https://github.com/euglevi/stata-language-server/blob/main/LICENSE)
 
 The plugin integrates independently developed components:
-- **Stata-MCP Server**: [GitHub Repository](https://github.com/sepinetam/stata-mcp)
+- **MCP-for-Stata Server**: [GitHub Repository](https://github.com/sepinetam/mcp-for-stata)
 - **Stata LSP**: [GitHub Repository](https://github.com/euglevi/stata-language-server)
 
 ---

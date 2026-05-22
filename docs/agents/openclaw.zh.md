@@ -1,20 +1,20 @@
 # 在 OpenClaw 中使用 🦞
 
-> **已废弃**:Stata-MCP 内置的 agent 模式自 v1.16.x 起已带 `FutureWarning`,将在后续版本移除。请改用 MCP server 模式(`stata-mcp server` 或 `stata-mcp install -c <客户端>`),并使用宿主 AI 客户端自带的 agent 能力。
+> **已废弃**:MCP-for-Stata 内置的 agent 模式自 v1.16.x 起已带 `FutureWarning`,将在后续版本移除。请改用 MCP server 模式(`stata-mcp server` 或 `stata-mcp install -c <客户端>`),并使用宿主 AI 客户端自带的 agent 能力。
 >
 > 备注:如需配置 OpenClaw 作为 MCP 客户端,请参考 docs/clients.md。
 
-由于 OpenClaw 原生不支持 MCP 工具协议，Stata-MCP 提供了独立的 CLI 工具命令，OpenClaw 可以通过终端工具调用使用。
+由于 OpenClaw 原生不支持 MCP 工具协议，MCP-for-Stata 提供了独立的 CLI 工具命令，OpenClaw 可以通过终端工具调用使用。
 
 ## 安装指引（OpenClaw）
 
 复制下面的信息发送给你的 OpenClaw：
 
 ```text
-Install Stata-MCP Skills from https://docs.statamcp.com/skills/openclaw
+Install MCP-for-Stata Skills from https://docs.statamcp.com/skills/openclaw
 ```
 
-如果你是 OpenClaw，请直接访问 [Stata-MCP Skill for OpenClaw](https://docs.statamcp.com/skills/openclaw)。
+如果你是 OpenClaw，请直接访问 [MCP-for-Stata Skill for OpenClaw](https://docs.statamcp.com/skills/openclaw)。
 
 ## 手动安装
 

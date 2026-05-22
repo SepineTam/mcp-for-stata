@@ -1,6 +1,6 @@
 # 配置系统
 
-Stata-MCP 使用具有三个优先级的分层配置系统：
+MCP-for-Stata 使用具有三个优先级的分层配置系统：
 
 1. **环境变量**（最高优先级）
 2. **配置文件**（`~/.statamcp/config.toml`）
@@ -208,7 +208,7 @@ hash_length = 12
 
 #### `PROJECT.WORKING_DIR`
 
-设置 Stata-MCP 操作的工作目录。
+设置 MCP-for-Stata 操作的工作目录。
 
 - **类型**：Path（string）
 - **默认值**：当前目录（如果可写）或 `~/Documents`
@@ -264,7 +264,7 @@ hash_length = 12
 
 **迁移说明（v1.16.0）**：
 - 默认目录名从 `stata-mcp-folder` 改为 `.statamcp`。
-- 若检测到工作目录下仍存在旧的 `stata-mcp-folder`，Stata-MCP 会在该目录中写入一个 `README` 警告并创建 `.migrated` 标记，避免重复提示。
+- 若检测到工作目录下仍存在旧的 `stata-mcp-folder`，MCP-for-Stata 会在该目录中写入一个 `README` 警告并创建 `.migrated` 标记，避免重复提示。
 - 如需回滚旧布局，设置 `export STATA_MCP__FOLDER_TAG=stata-mcp-folder` 即可。
 
 ### MONITOR 分区
@@ -513,7 +513,7 @@ MAX_RAM_MB = 65536  # 64 GB
 
 ### 工作目录问题
 
-如果工作目录不可写，Stata-MCP 将回退到 `~/Documents`。解决方法：
+如果工作目录不可写，MCP-for-Stata 将回退到 `~/Documents`。解决方法：
 
 1. 检查目录权限：
    ```bash

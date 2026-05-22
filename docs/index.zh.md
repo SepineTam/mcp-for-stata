@@ -1,10 +1,10 @@
-# Stata-MCP
+# MCP-for-Stata
 
 **让 LLM 帮助你使用 Stata 完成回归分析。**
 
-## 🆕 Stata-MCP 现已支持 OpenClaw
+## 🆕 MCP-for-Stata 现已支持 OpenClaw
 
-**Stata-MCP 现已支持 OpenClaw！** Stata-MCP 提供独立的 CLI 工具，将以下命令粘贴到你的 OpenClaw 中，它会自动安装 skill。
+**MCP-for-Stata 现已支持 OpenClaw！** MCP-for-Stata 提供独立的 CLI 工具，将以下命令粘贴到你的 OpenClaw 中，它会自动安装 skill。
 
 ```text
 Install `stata-skill` from ClawHub by @SepineTam.
@@ -38,7 +38,7 @@ uvx stata-mcp doctor
 
 ### 在 Claude Code 中使用
 
-我们推荐将 Stata-MCP 与 [Claude Code](https://github.com/anthropics/claude-code) 配合使用，因为它具有出色的智能体能力。
+我们推荐将 MCP-for-Stata 与 [Claude Code](https://github.com/anthropics/claude-code) 配合使用，因为它具有出色的智能体能力。
 
 在使用之前，请确保你已经安装了 Claude Code。如果你不知道如何安装，请访问 [GitHub](https://github.com/anthropics/claude-code)。
 
@@ -76,7 +76,7 @@ claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --di
 
 ### 高级功能
 
-- **[Docker](docker.md)**：在容器化环境中运行 Stata-MCP
+- **[Docker](docker.md)**：在容器化环境中运行 MCP-for-Stata
 - **[安全守卫](security.md)**：危险命令的安全验证系统
 - **[监控系统](monitoring.md)**：RAM 监控和资源限制
 

@@ -1,10 +1,10 @@
-# Stata-MCP
+# MCP-for-Stata
 
 **Let LLM help you achieve your regression with Stata.**
 
-## 🆕 Stata-MCP Now Supports OpenClaw
+## 🆕 MCP-for-Stata Now Supports OpenClaw
 
-**Stata-MCP now supports OpenClaw!** Stata-MCP provides standalone CLI tools, paste the following command to your openclaw, it would install the skill automatically.
+**MCP-for-Stata now supports OpenClaw!** MCP-for-Stata provides standalone CLI tools, paste the following command to your openclaw, it would install the skill automatically.
 
 ```text
 Install `stata-skill` from ClawHub by @SepineTam. 
@@ -36,9 +36,9 @@ The common configuration file (json)
 }
 ```
 
-### Use Stata-MCP in Claude Code
+### Use MCP-for-Stata in Claude Code
 
-We recommend using Stata-MCP with [Claude Code](https://github.com/anthropics/claude-code) for its excellent agentic capabilities.
+We recommend using MCP-for-Stata with [Claude Code](https://github.com/anthropics/claude-code) for its excellent agentic capabilities.
 
 Before using it, please make sure you have Claude Code installed. If you don't know how to install it, visit [GitHub](https://github.com/anthropics/claude-code).
 
@@ -76,7 +76,7 @@ If you want to explore more [clients](clients.md) or [agents](agents/index.md), 
 
 ### Advanced Features
 
-- **[Docker](docker.md)**: Run Stata-MCP in containerized environments
+- **[Docker](docker.md)**: Run MCP-for-Stata in containerized environments
 - **[Security Guard](security.md)**: Security validation system for dangerous commands
 - **[Monitoring System](monitoring.md)**: RAM monitoring and resource limits
 

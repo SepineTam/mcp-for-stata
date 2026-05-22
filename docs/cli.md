@@ -1,6 +1,6 @@
 # CLI Reference
 
-Stata-MCP provides a command-line interface (CLI) for various operations including starting MCP servers, running agent mode, and installing to different AI clients.
+MCP-for-Stata provides a command-line interface (CLI) for various operations including starting MCP servers, running agent mode, and installing to different AI clients.
 
 ## Installation
 
@@ -65,7 +65,7 @@ stata-mcp server --core -t sse
 
 > **Deprecated**: Agent mode is marked with `FutureWarning` since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (`stata-mcp server` or `stata-mcp install`).
 
-Run Stata-MCP in interactive agent mode:
+Run MCP-for-Stata in interactive agent mode:
 
 ```bash
 # Start agent in current directory
@@ -180,7 +180,7 @@ The `set` subcommand currently accepts only the `cli` key. The `edit` subcommand
 
 ### Install to AI Clients
 
-Install Stata-MCP to various AI coding assistants:
+Install MCP-for-Stata to various AI coding assistants:
 
 ```bash
 # Install to all supported clients (no -c, no --json-file)
@@ -216,7 +216,7 @@ stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 
 ### Docker-based Installation (sandbox-install)
 
-Install Docker-based Stata-MCP to AI clients. Requires Docker and a valid Stata license.
+Install Docker-based MCP-for-Stata to AI clients. Requires Docker and a valid Stata license.
 
 ```bash
 # Basic usage with default settings (StataNow 19.5 MP)
@@ -320,7 +320,7 @@ uvx stata-mcp sandbox-install \
 ### Basic Usage
 
 ```bash
-# Check if Stata-MCP can run on your system
+# Check if MCP-for-Stata can run on your system
 stata-mcp doctor
 
 # Start MCP server for Claude Desktop
@@ -345,7 +345,7 @@ stata-mcp tool data-info /path/to/data.dta
 
 ### Using with uvx
 
-If you prefer not to install Stata-MCP globally, you can use `uvx`:
+If you prefer not to install MCP-for-Stata globally, you can use `uvx`:
 
 ```bash
 # Check version
@@ -385,7 +385,7 @@ These scripts are intended for first-time bootstrap on machines without a Python
 
 ## Environment Variables
 
-Stata-MCP behavior can be configured through environment variables. See [Configuration](configuration.md) for details.
+MCP-for-Stata behavior can be configured through environment variables. See [Configuration](configuration.md) for details.
 
 Key environment variables:
 

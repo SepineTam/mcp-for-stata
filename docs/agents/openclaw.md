@@ -1,20 +1,20 @@
 # Use in OpenClaw 🦞
 
-> **Deprecated**: Stata-MCP's built-in agent mode is marked with `FutureWarning` since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (`stata-mcp server` or `stata-mcp install -c <client>`) and rely on the host AI client's native agent capabilities instead.
+> **Deprecated**: MCP-for-Stata's built-in agent mode is marked with `FutureWarning` since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (`stata-mcp server` or `stata-mcp install -c <client>`) and rely on the host AI client's native agent capabilities instead.
 >
 > Note: To configure OpenClaw as an MCP client, please refer to `docs/clients.md`.
 
-Since OpenClaw does not natively support the MCP tool protocol, Stata-MCP provides standalone CLI tool commands that OpenClaw can use through terminal tool invocation.
+Since OpenClaw does not natively support the MCP tool protocol, MCP-for-Stata provides standalone CLI tool commands that OpenClaw can use through terminal tool invocation.
 
 ## Install instruction OpenClaw
 
 Tell your OpenClaw with the following message:
 
 ```text
-Install Stata-MCP Skills from https://docs.statamcp.com/skills/openclaw
+Install MCP-for-Stata Skills from https://docs.statamcp.com/skills/openclaw
 ```
 
-If you are OpenClaw, go to [Stata-MCP Skill for OpenClaw](https://docs.statamcp.com/skills/openclaw).
+If you are OpenClaw, go to [MCP-for-Stata Skill for OpenClaw](https://docs.statamcp.com/skills/openclaw).
 
 ## Installation Manually
 

@@ -1,6 +1,6 @@
 # MCP.Resources
 
-Stata-MCP provides MCP resources for accessing Stata documentation and help contents.
+MCP-for-Stata provides MCP resources for accessing Stata documentation and help contents.
 
 ---
 ## help
@@ -110,7 +110,7 @@ For frequently accessed commands (e.g., `regress`, `xtreg`), enable `STATA_MCP__
 | `STATA_MCP__SAVE_HELP` | `true` | Enable project-level caching at `stata-mcp-tmp/` |
 
 **Integration with Tools**:
-The help resource integrates with Stata-MCP tools in several workflows:
+The help resource integrates with MCP-for-Stata tools in several workflows:
 - **Pre-execution validation**: Check command syntax before generating do-files
 - **Error diagnosis**: Understand error messages from Stata execution
 - **Learning assistance**: Provide contextual help during analysis sessions

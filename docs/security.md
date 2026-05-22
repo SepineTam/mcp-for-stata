@@ -67,7 +67,7 @@ When the resolved path is outside the allowed roots, `stata_do` returns an error
 
 ### Operational Guidance
 
-Place dofiles either under the configured working directory or let Stata-MCP generate them into `stata-mcp-dofile/`. To execute dofiles that live elsewhere, point `STATA_MCP__CWD` at a parent directory that already contains them rather than relaxing the check.
+Place dofiles either under the configured working directory or let MCP-for-Stata generate them into `stata-mcp-dofile/`. To execute dofiles that live elsewhere, point `STATA_MCP__CWD` at a parent directory that already contains them rather than relaxing the check.
 
 ## Local Macro Expansion Detection
 
@@ -161,7 +161,7 @@ result = stata_mcp.stata_do(code="""
 
 ### Programmatic Usage
 
-If you're using Stata-MCP as a library:
+If you're using MCP-for-Stata as a library:
 
 ```python
 from stata_mcp.guard import GuardValidator

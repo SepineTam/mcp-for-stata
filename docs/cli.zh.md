@@ -1,6 +1,6 @@
 # CLI 参考
 
-Stata-MCP 提供命令行界面（CLI）用于各种操作，包括启动 MCP 服务器、运行智能体模式以及安装到不同的 AI 客户端。
+MCP-for-Stata 提供命令行界面（CLI）用于各种操作，包括启动 MCP 服务器、运行智能体模式以及安装到不同的 AI 客户端。
 
 ## 安装
 
@@ -65,7 +65,7 @@ stata-mcp server --core -t sse
 
 > **Deprecated**: 智能体模式自 v1.16.x 起带有 `FutureWarning`，并将在后续版本中移除。新的工作流应改用 MCP server 模式（`stata-mcp server` 或 `stata-mcp install`）。
 
-以交互式智能体模式运行 Stata-MCP：
+以交互式智能体模式运行 MCP-for-Stata：
 
 ```bash
 # 在当前目录启动智能体
@@ -180,7 +180,7 @@ stata-mcp config edit SECURITY.IS_GUARD false
 
 ### 安装到 AI 客户端
 
-将 Stata-MCP 安装到各种 AI 编程助手：
+将 MCP-for-Stata 安装到各种 AI 编程助手：
 
 ```bash
 # 安装到所有支持的客户端（不带 -c 和 --json-file 时等价于 --all）
@@ -216,7 +216,7 @@ stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 
 ### 基于 Docker 的安装（sandbox-install）
 
-将基于 Docker 的 Stata-MCP 安装到 AI 客户端。需要 Docker 和有效的 Stata 许可证。
+将基于 Docker 的 MCP-for-Stata 安装到 AI 客户端。需要 Docker 和有效的 Stata 许可证。
 
 ```bash
 # 使用默认设置的基本用法（StataNow 19.5 MP）
@@ -320,7 +320,7 @@ uvx stata-mcp sandbox-install \
 ### 基本用法
 
 ```bash
-# 检查 Stata-MCP 能否在您的系统上运行
+# 检查 MCP-for-Stata 能否在您的系统上运行
 stata-mcp doctor
 
 # 为 Claude Desktop 启动 MCP 服务器
@@ -345,7 +345,7 @@ stata-mcp tool data-info /path/to/data.dta
 
 ### 使用 uvx
 
-如果您不想全局安装 Stata-MCP，可以使用 `uvx`：
+如果您不想全局安装 MCP-for-Stata，可以使用 `uvx`：
 
 ```bash
 # 检查版本
@@ -385,7 +385,7 @@ uvx stata-mcp install -c cursor
 
 ## 环境变量
 
-Stata-MCP 的行为可以通过环境变量配置。详见[配置](configuration.md)。
+MCP-for-Stata 的行为可以通过环境变量配置。详见[配置](configuration.md)。
 
 关键环境变量：
 
