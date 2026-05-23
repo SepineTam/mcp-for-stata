@@ -9,7 +9,6 @@
 
 import json
 import os
-import platform
 import shutil
 import subprocess
 import sys
@@ -419,47 +418,3 @@ class Installer:
             return
         config_file = Path.home() / ".hermes" / "config.yaml"
         self.install_to_yaml_config(config_file, key="mcp_servers")
-
-
-class InstallerDockerMode(Installer):
-    def __init__(self,
-                 license_file_path: Path,
-                 work_dir: Optional[Path] = None,
-                 cpus: Optional[float] = None,
-                 memory: Optional[str] = None,
-                 image: str = "ghcr.io/sepinetam/stata-mcp:latest"):
-        # Skip parent __init__ to avoid calling parent _post_init
-        self.license_file_path = Path(license_file_path)
-        self.work_dir = Path(work_dir) if work_dir else Path.cwd()
-        self.cpus = cpus
-        self.memory = memory
-        self.image = image
-
-        super().__init__(is_env=False)
-
-    def _post_init(self):
-        self.args = [
-            "run",
-            "--rm",
-            "-i",
-        ]
-
-        # Add platform flag for non-amd64 machines (amd64-only images)
-        if platform.machine() not in ("x86_64", "amd64"):
-            self.args.extend(["--platform", "linux/amd64"])
-
-        if self.cpus:
-            self.args.extend(["--cpus", str(self.cpus)])
-        if self.memory:
-            self.args.extend(["--memory", self.memory])
-
-        self.args.extend([
-            "-v",
-            f"{self.license_file_path.as_posix()}:/usr/local/stata/stata.lic",
-            "-v",
-            f"{self.work_dir.as_posix()}:/workspace",
-            self.image,
-        ])
-
-        self.command = "docker"
-        self.env = {}

@@ -16,7 +16,6 @@ from ._handlers import (
     handle_config,
     handle_doctor,
     handle_install,
-    handle_sandbox,
     handle_server,
     handle_tool,
     handle_update,
@@ -27,7 +26,6 @@ from ._parsers import (
     add_config_parser,
     add_doctor_parser,
     add_install_parser,
-    add_sandbox_parser,
     add_server_parser,
     add_tool_parser,
     add_update_parser,
@@ -46,7 +44,6 @@ def main() -> None:
     tool_parser = add_tool_parser(subparsers)
     config_parser = add_config_parser(subparsers)
     add_install_parser(subparsers)
-    add_sandbox_parser(subparsers)
     add_update_parser(subparsers)
 
     args = parser.parse_args()
@@ -82,9 +79,6 @@ def main() -> None:
 
     if args.command == "install":
         sys.exit(handle_install(args))
-
-    if args.command == "sandbox-install":
-        sys.exit(handle_sandbox(args))
 
     if args.command == "update":
         sys.exit(handle_update(args))

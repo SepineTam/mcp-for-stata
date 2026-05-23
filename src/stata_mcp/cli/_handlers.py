@@ -250,28 +250,6 @@ def _parse_json_index(raw: str) -> "list[str]":
     return [segment for segment in raw.split(".") if segment]
 
 
-def handle_sandbox(args: Namespace) -> int:
-    """Handle the sandbox-install subcommand."""
-    from ..utils.Installer.installer import InstallerDockerMode
-
-    image_name = f"stata-mcp_{args.version}_{args.edition}:{args.tag}"
-    if args.source.lower() == "github":
-        image = f"ghcr.io/sepinetam/{image_name}"
-    else:
-        image = f"sepinetam/{image_name}"
-
-    installer = InstallerDockerMode(
-        license_file_path=args.license_file,
-        work_dir=args.work_dir,
-        cpus=args.cpus,
-        memory=args.memory,
-        image=image,
-    )
-    installer.install(args.client)
-    print(f"Docker-based Stata-MCP has been installed to {args.client}.")
-    return 0
-
-
 def handle_server(args: Namespace) -> None:
     """Handle the default behavior of starting the MCP server."""
     from ..mcp_servers import register_tools
