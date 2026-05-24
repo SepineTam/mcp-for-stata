@@ -82,22 +82,6 @@ def handle_doctor(args: Namespace) -> int:
     return 1 if report.has_failures else 0
 
 
-def handle_agent(args: Namespace) -> None:
-    """Handle the agent subcommand."""
-    warnings.simplefilter("default", FutureWarning)
-    warnings.warn(
-        "Agent mode is deprecated and will be removed in a future version. "
-        "Use MCP server mode (stata-mcp server) instead.",
-        FutureWarning,
-        stacklevel=2,
-    )
-    if args.agent_action == "run":
-        from ..agent_as import REPLAgent
-
-        agent = REPLAgent(work_dir=args.work_dir)
-        agent.run()
-
-
 def handle_tool(args: Namespace) -> int:
     """Handle the tool subcommand."""
     from ..api import ado_package_install, get_data_info, read_log, stata_do, stata_help

@@ -61,16 +61,6 @@ Operates as a stdio/HTTP/SSE server, responding to tool invocation requests from
 | `ado_package_install` | Install packages from SSC/GitHub/net sources |
 | `read_log` | Read Stata log files (text and SMCL formats) |
 
-> **Deprecated**: Agent mode is marked with `FutureWarning` since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (`stata-mcp server` / `stata-mcp install`).
-
-#### **Agent Mode** (`agent run` command)
-Interactive REPL agent for conversational analysis:
-- Read-Eval-Print Loop (REPL) interface for multi-turn sessions
-- SQLite-based session management for conversation history
-- Custom working directory support via `agent run <path>`
-- Environment variables for model configuration (`STATA_MCP_MODEL`, `STATA_MCP_API_KEY`)
-- Supports any OpenAI-compatible API endpoint
-
 ## Data Processing Pipeline
 
 MCP-for-Stata implements a polymorphic data analysis system supporting multiple formats:
@@ -138,41 +128,6 @@ MCP-compliant clients (Claude Code, Cline, Continue) register MCP-for-Stata as a
     }
   }
 }
-```
-
-### **In Python Agents**
-MCP-for-Stata agents can be embedded as tools within other agent workflows:
-
-```python
-from stata_mcp.agent_as import StataAgent
-from agents import Agent, Runner
-
-# Initialize Stata agent and convert to tool
-stata_agent = StataAgent()
-stata_tool = stata_agent.as_tool
-
-# Embed in a larger agent workflow
-research_assistant = Agent(
-    name="Research Assistant",
-    instructions="You help with economic research using Stata",
-    tools=[stata_tool]
-)
-
-# Run the agent
-result = await Runner.run(
-    research_assistant,
-    "Analyze the relationship between education and income"
-)
-```
-
-### **Terminal REPL**
-Interactive analysis sessions:
-
-```python
-from stata_mcp.agent_as import REPLAgent
-
-agent = REPLAgent(work_dir="~/analysis")
-agent.run()  # Starts interactive REPL
 ```
 
 ## Cross-Platform Support

@@ -177,49 +177,6 @@ result = await Runner.run(
 print(f"Result: \n> {result.final_output}")
 ```
 
-#### Method 2: Pre-configured StataAgent
-
-```python
-# !uv pip install stata-mcp
-from agents import Runner
-from stata_mcp.agent_as import StataAgent
-
-# Use pre-configured Stata agent
-agent = StataAgent()
-result = await Runner.run(
-    agent,
-    input="Help me run a regression -> log(wage) ~ age, educ, exper with `nlsw88` data and report me the coefficients."
-)
-print(f"Result: \n> {result.final_output}")
-```
-
-### Agent as Tool
-
-Embed MCP-for-Stata as a tool within larger agent workflows:
-
-```python
-# !uv pip install openai-agents stata-mcp
-from agents import Agent, Runner
-from stata_mcp.agent_as import StataAgent
-
-# Create Stata agent and convert to tool
-stata_agent = StataAgent(max_turns=100)
-stata_tool = stata_agent.as_tool
-
-# Embed in a larger research workflow
-researcher = Agent(
-    name="Scientific Researcher",
-    instructions="You are a helpful scientist conducting empirical research.",
-    tools=[stata_tool]
-)
-
-# Run the composed agent
-result = await Runner.run(
-    researcher,
-    input="Analyze the relationship between education and wages using standard datasets."
-)
-```
-
 ## Usage in Coding Agents
 
 MCP-for-Stata is designed for seamless integration with modern AI coding agents. Below are tested configurations for popular platforms.
@@ -412,63 +369,8 @@ MCP-for-Stata supports several environment variables for customization:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `STATA_MCP__CWD` | Current working directory for Stata operations | `./` |
-| `STATA_MCP_MODEL` | LLM model for agent mode (deprecated, agent mode only) | `gpt-3.5-turbo` |
-| `STATA_MCP_API_KEY` | API key for LLM provider (deprecated, agent mode only) | `OPENAI_API_KEY` |
 | `STATA_MCP_API_BASE_URL` | Base URL for API requests | `https://api.openai.com/v1` |
 | `STATA_MCP_CLIENT` | Client type identifier | - |
-
-## Terminal REPL Mode
-
-> **Deprecated**: Agent mode is marked with `FutureWarning` since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (`stata-mcp server` / `stata-mcp install`).
-
-For interactive sessions, use the built-in REPL agent:
-
-```bash
-# Start with current directory (deprecated)
-uvx stata-mcp agent run
-
-# Start with custom working directory (deprecated)
-uvx stata-mcp agent run ~/Documents/MyResearch
-```
-
-**Usage:**
-- Type your research questions in natural language
-- Agent maintains conversation context
-- Type `/exit` or `bye` to quit
-
-## Advanced Usage
-
-### Custom Agent Instructions
-
-Create a custom StataAgent with specific instructions:
-
-```python
-from stata_mcp.agent_as import StataAgent
-
-agent = StataAgent(
-    instructions="""
-    You are a labor economics specialist.
-    Focus on causal inference methods like DID, RDD, and IV.
-    Always robustness checks and placebo tests.
-    """,
-    max_turns=50
-)
-```
-
-### Session Management
-
-REPLAgent supports SQLite-based session persistence:
-
-```python
-from stata_mcp.agent_as import REPLAgent
-
-agent = REPLAgent(
-    work_dir="~/research",
-    session_id="my_experiment_1"  # Optional custom session ID
-)
-```
-
-Sessions are stored in `<work_dir>/.stata_sessions.db` for conversation history.
 
 ## Troubleshooting
 
@@ -492,7 +394,7 @@ Sessions are stored in `<work_dir>/.stata_sessions.db` for conversation history.
 Enable verbose logging:
 ```bash
 export STATA_MCP__IS_DEBUG=true
-uvx stata-mcp agent run
+uvx stata-mcp doctor --verbose
 ```
 
 ## Best Practices
@@ -500,8 +402,7 @@ uvx stata-mcp agent run
 1. **Project Structure**: Use project-scoped MCP configuration for better isolation
 2. **Version Pinning**: Specify exact versions in production: `stata-mcp==1.16.3`
 3. **Data Management**: Keep raw data immutable; use processing/ directories
-4. **Session Cleanup**: Regularly archive or cleanup old SQLite session databases
-5. **API Keys**: Use environment variables, never hardcode credentials
+4. **API Keys**: Use environment variables, never hardcode credentials
 
 ## Additional Resources
 

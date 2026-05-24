@@ -12,7 +12,6 @@ from __future__ import annotations
 import sys
 
 from ._handlers import (
-    handle_agent,
     handle_config,
     handle_doctor,
     handle_install,
@@ -22,7 +21,6 @@ from ._handlers import (
     handle_usable,
 )
 from ._parsers import (
-    add_agent_parser,
     add_config_parser,
     add_doctor_parser,
     add_install_parser,
@@ -38,7 +36,6 @@ def main() -> None:
     parser = create_root_parser()
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    agent_parser = add_agent_parser(subparsers)
     add_doctor_parser(subparsers)
     add_server_parser(subparsers)
     tool_parser = add_tool_parser(subparsers)
@@ -50,13 +47,6 @@ def main() -> None:
 
     if args.usable:
         sys.exit(handle_usable())
-
-    if args.command == "agent":
-        if args.agent_action == "run":
-            handle_agent(args)
-            return
-        agent_parser.print_help()
-        return
 
     if args.command == "tool":
         exit_code = handle_tool(args)

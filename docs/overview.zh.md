@@ -61,16 +61,6 @@ MCP-for-Stata 通过四个架构层运行：
 | `ado_package_install` | 从 SSC/GitHub/net 源安装包 |
 | `read_log` | 读取 Stata 日志文件（文本和 SMCL 格式） |
 
-> **已弃用**：智能体模式自 v1.16.x 起标记为 `FutureWarning`，将在未来版本中移除。新工作流应使用 MCP 服务器模式（`stata-mcp server` / `stata-mcp install`）。
-
-#### **智能体模式**（`agent run` 命令）
-用于对话分析的交互式 REPL 智能体：
-- 用于多轮会话的 Read-Eval-Print Loop (REPL) 接口
-- 基于 SQLite 的会话管理，用于对话历史
-- 通过 `agent run <path>` 支持自定义工作目录
-- 用于模型配置的环境变量（`STATA_MCP_MODEL`、`STATA_MCP_API_KEY`）
-- 支持任何 OpenAI 兼容的 API 端点
-
 ## 数据处理流水线
 
 MCP-for-Stata 实现了支持多种格式的多态数据分析系统：
@@ -138,41 +128,6 @@ MCP 兼容客户端（Claude Code、Cline、Continue）在其配置中将 MCP-fo
     }
   }
 }
-```
-
-### **在 Python 智能体中**
-MCP-for-Stata 智能体可以作为工具嵌入到其他智能体工作流程中：
-
-```python
-from stata_mcp.agent_as import StataAgent
-from agents import Agent, Runner
-
-# 初始化 Stata 智能体并转换为工具
-stata_agent = StataAgent()
-stata_tool = stata_agent.as_tool
-
-# 嵌入到更大的智能体工作流程中
-research_assistant = Agent(
-    name="Research Assistant",
-    instructions="You help with economic research using Stata",
-    tools=[stata_tool]
-)
-
-# 运行智能体
-result = await Runner.run(
-    research_assistant,
-    "Analyze the relationship between education and income"
-)
-```
-
-### **终端 REPL**
-交互式分析会话：
-
-```python
-from stata_mcp.agent_as import REPLAgent
-
-agent = REPLAgent(work_dir="~/analysis")
-agent.run()  # 启动交互式 REPL
 ```
 
 ## 跨平台支持

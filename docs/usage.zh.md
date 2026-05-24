@@ -177,49 +177,6 @@ result = await Runner.run(
 print(f"Result: \n> {result.final_output}")
 ```
 
-#### 方法 2：预配置的 StataAgent
-
-```python
-# !uv pip install stata-mcp
-from agents import Runner
-from stata_mcp.agent_as import StataAgent
-
-# 使用预配置的 Stata 智能体
-agent = StataAgent()
-result = await Runner.run(
-    agent,
-    input="Help me run a regression -> log(wage) ~ age, educ, exper with `nlsw88` data and report me the coefficients."
-)
-print(f"Result: \n> {result.final_output}")
-```
-
-### 智能体作为工具
-
-将 MCP-for-Stata 作为工具嵌入到更大的智能体工作流程中：
-
-```python
-# !uv pip install openai-agents stata-mcp
-from agents import Agent, Runner
-from stata_mcp.agent_as import StataAgent
-
-# 创建 Stata 智能体并转换为工具
-stata_agent = StataAgent(max_turns=100)
-stata_tool = stata_agent.as_tool
-
-# 嵌入到更大的研究工作流程中
-researcher = Agent(
-    name="Scientific Researcher",
-    instructions="You are a helpful scientist conducting empirical research.",
-    tools=[stata_tool]
-)
-
-# 运行组合智能体
-result = await Runner.run(
-    researcher,
-    input="Analyze the relationship between education and wages using standard datasets."
-)
-```
-
 ## 在编码智能体中使用
 
 MCP-for-Stata 设计用于与现代 AI 编码智能体无缝集成。以下是流行平台的测试配置。
@@ -412,63 +369,8 @@ MCP-for-Stata 支持多个环境变量进行自定义：
 | 变量 | 描述 | 默认值 |
 |----------|-------------|---------|
 | `STATA_MCP__CWD` | Stata 操作的当前工作目录 | `./` |
-| `STATA_MCP_MODEL` | 智能体模式的 LLM 模型（已弃用，仅限智能体模式） | `gpt-3.5-turbo` |
-| `STATA_MCP_API_KEY` | LLM 提供商的 API 密钥（已弃用，仅限智能体模式） | `OPENAI_API_KEY` |
 | `STATA_MCP_API_BASE_URL` | API 请求的基础 URL | `https://api.openai.com/v1` |
 | `STATA_MCP_CLIENT` | 客户端类型标识符 | - |
-
-## 终端 REPL 模式
-
-> **已弃用**：智能体模式自 v1.16.x 起标记为 `FutureWarning`，将在未来版本中移除。新工作流应使用 MCP 服务器模式（`stata-mcp server` / `stata-mcp install`）。
-
-对于交互式会话，使用内置 REPL 智能体：
-
-```bash
-# 使用当前目录启动（已弃用）
-uvx stata-mcp agent run
-
-# 使用自定义工作目录启动（已弃用）
-uvx stata-mcp agent run ~/Documents/MyResearch
-```
-
-**使用方法：**
-- 用自然语言输入你的研究问题
-- 智能体维护对话上下文
-- 输入 `/exit` 或 `bye` 退出
-
-## 高级用法
-
-### 自定义智能体指令
-
-创建带特定指令的自定义 StataAgent：
-
-```python
-from stata_mcp.agent_as import StataAgent
-
-agent = StataAgent(
-    instructions="""
-    You are a labor economics specialist.
-    Focus on causal inference methods like DID, RDD, and IV.
-    Always robustness checks and placebo tests.
-    """,
-    max_turns=50
-)
-```
-
-### 会话管理
-
-REPLAgent 支持基于 SQLite 的会话持久化：
-
-```python
-from stata_mcp.agent_as import REPLAgent
-
-agent = REPLAgent(
-    work_dir="~/research",
-    session_id="my_experiment_1"  # 可选的自定义会话 ID
-)
-```
-
-会话存储在 `<work_dir>/.stata_sessions.db` 中用于对话历史。
 
 ## 故障排除
 
@@ -492,7 +394,7 @@ agent = REPLAgent(
 启用详细日志：
 ```bash
 export STATA_MCP__IS_DEBUG=true
-uvx stata-mcp agent run
+uvx stata-mcp doctor --verbose
 ```
 
 ## 最佳实践
@@ -500,14 +402,13 @@ uvx stata-mcp agent run
 1. **项目结构**：使用项目范围的 MCP 配置以获得更好的隔离
 2. **版本固定**：在生产环境中指定确切版本：`stata-mcp==1.16.3`
 3. **数据管理**：保持原始数据不可变；使用 processing/ 目录
-4. **会话清理**：定期归档或清理旧的 SQLite 会话数据库
-5. **API 密钥**：使用环境变量，切勿硬编码凭证
+4. **API 密钥**：使用环境变量，切勿硬编码凭证
 
 ## 其他资源
 
 - [概述](overview.md) - 架构和设计
 - [工具文档](tools.md) - 可用的 MCP 工具
-- [智能体指南](agents/index.md) - 智能体特定文档
+- [客户端指南](agents/index.md) - 客户端特定文档
 - [GitHub 仓库](https://github.com/sepinetam/mcp-for-stata) - 源代码和问题
 
 ## 贡献
