@@ -34,6 +34,10 @@
     "openaiDeveloperDocs": {
       "type": "http",
       "url": "https://developers.openai.com/mcp"
+    },
+    "claude-code-docs": {
+      "type": "http",
+      "url": "https://code.claude.com/docs/mcp"
     }
   }
 }
