@@ -1,0 +1,2541 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.statamcp.com/cli/">
+      
+      
+        <link rel="prev" href="../overview/">
+      
+      
+        <link rel="next" href="../usage/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../zh/cli/" hreflang="zh">
+        
+      
+      
+      <link rel="icon" href="https://r2.statamcp.com/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>CLI Reference - Stata-MCP Documents</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cli-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Stata-MCP Documents" class="md-header__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Stata-MCP Documents
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CLI Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../zh/cli/" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sepinetam/stata-mcp" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    stata-mcp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Stata-MCP Documents" class="md-nav__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    Stata-MCP Documents
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sepinetam/stata-mcp" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    stata-mcp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-mcp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start MCP Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Start MCP Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server-subcommand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server Subcommand
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doctor-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doctor Diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-tool-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Tool Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-to-ai-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install to AI Clients
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-based-installation-sandbox-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker-based Installation (sandbox-install)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doctor-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doctor Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sandbox-install-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sandbox-Install Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-with-uvx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using with uvx
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-contained-install-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-contained Install Scripts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit Codes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stata-not-found-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Stata not found" Error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permission Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transport-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transport Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../claude-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clients/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clients
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Summary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/claude_code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/openclaw/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenClaw
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoreTech
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CoreTech
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/finder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Finder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/do/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Runner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/help/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Help
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-mcp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start MCP Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Start MCP Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server-subcommand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server Subcommand
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doctor-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doctor Diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-tool-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Tool Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-to-ai-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install to AI Clients
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-based-installation-sandbox-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker-based Installation (sandbox-install)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doctor-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doctor Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sandbox-install-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sandbox-Install Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-with-uvx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using with uvx
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-contained-install-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-contained Install Scripts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit Codes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stata-not-found-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Stata not found" Error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permission Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transport-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transport Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="cli-reference">CLI Reference</h1>
+<p>MCP-for-Stata provides a command-line interface (CLI) for various operations including starting MCP servers, running agent mode, and installing to different AI clients.</p>
+<h2 id="installation">Installation</h2>
+<p>Verify your installation:</p>
+<pre><code class="language-bash">stata-mcp --version
+</code></pre>
+<p>Run diagnostics to check system health:</p>
+<pre><code class="language-bash">stata-mcp doctor
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> <code>--usable</code> has been deprecated since v1.14.3. It still works in current releases but <code>stata-mcp doctor</code> is the recommended replacement in v1.16+ and may be removed in a later major release.</p>
+</blockquote>
+<h2 id="commands">Commands</h2>
+<h3 id="start-mcp-server">Start MCP Server</h3>
+<p>Start the MCP server with different transport methods:</p>
+<pre><code class="language-bash"># Start with stdio transport (default)
+stata-mcp
+
+# Explicitly specify transport method
+stata-mcp -t stdio
+stata-mcp -t sse
+stata-mcp -t http
+</code></pre>
+<h4 id="server-subcommand">Server Subcommand</h4>
+<p>Use the <code>server</code> subcommand to control which MCP tools are registered:</p>
+<pre><code class="language-bash"># All tools, stdio transport (same as bare command)
+stata-mcp server
+
+# Core tools only (stata_do, get_data_info, help)
+stata-mcp server --core
+
+# All tools with HTTP transport
+stata-mcp server --all -t http
+
+# Core tools with SSE transport
+stata-mcp server --core -t sse
+</code></pre>
+<p><strong>Tool Profiles:</strong>
+- <code>--all</code> - Register all available tools (default)
+- <code>--core</code> - Register only core tools: <code>stata_do</code>, <code>get_data_info</code>, <code>help</code></p>
+<p><strong>Transport Options:</strong>
+- <code>stdio</code> - Standard input/output (default)
+- <code>sse</code> - Server-Sent Events
+- <code>http</code> - HTTP transport (automatically converted to streamable-http)</p>
+<h3 id="agent-mode">Agent Mode</h3>
+<blockquote>
+<p><strong>Deprecated</strong>: Agent mode is marked with <code>FutureWarning</code> since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (<code>stata-mcp server</code> or <code>stata-mcp install</code>).</p>
+</blockquote>
+<p>Run MCP-for-Stata in interactive agent mode:</p>
+<pre><code class="language-bash"># Start agent in current directory
+stata-mcp agent run
+
+# Start agent in specific directory
+stata-mcp agent run --work-dir /path/to/project
+</code></pre>
+<h3 id="doctor-diagnostics">Doctor Diagnostics</h3>
+<p>Run health checks to diagnose potential issues:</p>
+<pre><code class="language-bash"># Run all checks
+stata-mcp doctor
+
+# Show detailed information for each check
+stata-mcp doctor --verbose
+
+# Output in JSON format
+stata-mcp doctor --json
+
+# Run only specific checks (repeatable)
+stata-mcp doctor --check stata --check python
+
+# Preview cleanup actions without deleting (cleanup checks only)
+stata-mcp doctor --check cleanup --dry-run
+</code></pre>
+<p>Common check names include <code>stata</code>, <code>python</code>, and <code>cleanup</code>. The <code>--dry-run</code> flag is interpreted by cleanup-style checks and previews destructive operations instead of executing them; other checks ignore it.</p>
+<h3 id="update">Update</h3>
+<p>Update stata-mcp to the latest version:</p>
+<pre><code class="language-bash"># Auto-detect install method and update
+stata-mcp update
+
+# Check if a newer version is available
+stata-mcp update --check
+
+# Show detected method and available update without executing
+stata-mcp update --dry-run
+
+# Force specific update method
+stata-mcp update --method pip       # pip install
+stata-mcp update --method uv-tool   # uv tool upgrade
+stata-mcp update --method homebrew  # brew upgrade
+</code></pre>
+<p><strong>Update Methods:</strong> <code>auto</code> (default), <code>pip</code>, <code>uv-tool</code>, <code>homebrew</code></p>
+<blockquote>
+<p><strong>Note for uv tool users on versions before 1.17.2:</strong> Due to a detection bug in earlier versions, <code>stata-mcp update</code> may incorrectly detect pip and fail. Run <code>uv tool upgrade stata-mcp</code> once manually to reach 1.17.2 or later, after which <code>stata-mcp update</code> will work correctly.</p>
+</blockquote>
+<h3 id="local-tool-commands">Local Tool Commands</h3>
+<p>Run API-backed Stata tools directly from the CLI:</p>
+<pre><code class="language-bash"># Install an ado package from SSC (default source)
+stata-mcp tool ado-install reghdfe
+
+# Run a do-file and only read the log when execution fails
+stata-mcp tool do /path/to/analysis.do --read-log-when-error true
+
+# Read Stata help through the one-shot API helper
+stata-mcp tool help regress --enable-smcl true
+
+# Inspect a supported dataset
+stata-mcp tool data-info /path/to/data.dta
+
+# Read a generated log file
+stata-mcp tool read-log /path/to/output.log
+</code></pre>
+<p>Tool subcommands:
+- <code>stata-mcp tool ado-install &lt;package_name&gt; [--source ssc|net|github]</code>
+- <code>stata-mcp tool do &lt;dofile_path&gt; [--read-log-when-error true|false] [--enable-smcl true|false]</code>
+- <code>stata-mcp tool help &lt;command&gt; [--read-log-when-error true|false] [--enable-smcl true|false]</code>
+- <code>stata-mcp tool data-info &lt;data_path&gt; [--vars-list var1 var2 ...]</code>
+- <code>stata-mcp tool read-log &lt;log_path&gt; [--output-format full|core|dict]</code></p>
+<blockquote>
+<p>Note: <code>--read-log-when-error</code> replaces the older <code>--is-read-log</code> flag. Unlike the old flag (which unconditionally read the log), the new flag reads the log only when the underlying execution reports an error.</p>
+</blockquote>
+<h3 id="config-management">Config Management</h3>
+<p>Inspect and update local CLI configuration stored in <code>~/.statamcp/config.toml</code>:</p>
+<pre><code class="language-bash"># Print the entire config file
+stata-mcp config
+
+# Show a single value (cli is shorthand for STATA.STATA_CLI)
+stata-mcp config show cli
+stata-mcp config show STATA.STATA_CLI
+stata-mcp config show SECURITY.IS_GUARD
+
+# Set STATA_CLI explicitly
+stata-mcp config set cli /path/to/stata
+
+# Auto-detect STATA_CLI via StataFinder and persist it
+stata-mcp config set cli
+
+# Edit an existing key by dot-notation
+stata-mcp config edit STATA.STATA_CLI /path/to/stata
+stata-mcp config edit SECURITY.IS_GUARD false
+</code></pre>
+<p>The <code>set</code> subcommand currently accepts only the <code>cli</code> key. The <code>edit</code> subcommand accepts any existing <code>Section.Key</code> in the config file and rejects keys that are not already defined.</p>
+<h3 id="install-to-ai-clients">Install to AI Clients</h3>
+<p>Install MCP-for-Stata to various AI coding assistants:</p>
+<pre><code class="language-bash"># Install to all supported clients (no -c, no --json-file)
+stata-mcp install
+
+# Install to a specific client
+stata-mcp install -c claude-code
+stata-mcp install -c cursor
+
+# Install to all clients explicitly
+stata-mcp install --all
+
+# Install into a custom JSON config file
+stata-mcp install --json-file /path/to/config.json
+
+# Install into a nested key inside a custom JSON config file
+stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
+</code></pre>
+<p><strong>Supported Clients:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Client ID</th>
+<th>Target</th>
+<th>Aliases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>claude</code></td>
+<td>Claude Desktop</td>
+<td></td>
+</tr>
+<tr>
+<td><code>claude-code</code></td>
+<td>Claude Code</td>
+<td><code>cc</code></td>
+</tr>
+<tr>
+<td><code>cursor</code></td>
+<td>Cursor Editor</td>
+<td></td>
+</tr>
+<tr>
+<td><code>cline</code></td>
+<td>Cline (VS Code extension)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>codex</code></td>
+<td>Codex</td>
+<td></td>
+</tr>
+<tr>
+<td><code>gemini</code></td>
+<td>Gemini CLI</td>
+<td></td>
+</tr>
+<tr>
+<td><code>opencode</code></td>
+<td>OpenCode</td>
+<td></td>
+</tr>
+<tr>
+<td><code>openclaw</code></td>
+<td>OpenClaw</td>
+<td></td>
+</tr>
+<tr>
+<td><code>hermes</code></td>
+<td>Hermes</td>
+<td><code>hermes-agent</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="docker-based-installation-sandbox-install">Docker-based Installation (sandbox-install)</h3>
+<p>Install Docker-based MCP-for-Stata to AI clients. Requires Docker and a valid Stata license.</p>
+<pre><code class="language-bash"># Basic usage with default settings (StataNow 19.5 MP)
+uvx stata-mcp sandbox-install -l /path/to/stata.lic
+
+# Specify Stata version and edition
+uvx stata-mcp sandbox-install \
+  --version 19_5 \
+  --edition mp \
+  -l /path/to/stata.lic \
+  -c claude
+
+# With resource limits
+uvx stata-mcp sandbox-install \
+  -V 18 \
+  -e se \
+  -l /path/to/stata.lic \
+  --cpus 2 \
+  --memory 4g
+</code></pre>
+<p><strong>Stata Versions:</strong> <code>19_5</code>, <code>18_5</code>, <code>18</code></p>
+<p><strong>Stata Editions:</strong> <code>mp</code> (Multi-processor), <code>se</code> (Standard), <code>be</code> (Basic)</p>
+<h2 id="options">Options</h2>
+<h3 id="server-options">Server Options</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--core</code></td>
+<td>Register only core tools (stata_do, get_data_info, help)</td>
+</tr>
+<tr>
+<td><code>--all</code></td>
+<td>Register all tools (default)</td>
+</tr>
+<tr>
+<td><code>-t</code>, <code>--transport</code></td>
+<td>MCP transport method (stdio/sse/http)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="global-options">Global Options</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Short</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--version</code></td>
+<td><code>-v</code></td>
+<td>Show version information</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td><code>-h</code></td>
+<td>Show help message</td>
+</tr>
+<tr>
+<td><code>--usable</code></td>
+<td><code>-u</code></td>
+<td><em>(Deprecated)</em> Check system compatibility, use <code>stata-mcp doctor</code> instead</td>
+</tr>
+<tr>
+<td><code>--transport</code></td>
+<td><code>-t</code></td>
+<td>MCP transport method (stdio/sse/http)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="agent-options">Agent Options</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--work-dir</code></td>
+<td>Working directory for agent (default: current directory)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="config-options">Config Options</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stata-mcp config</code></td>
+<td>Print the raw <code>~/.statamcp/config.toml</code> content</td>
+</tr>
+<tr>
+<td><code>stata-mcp config show &lt;dot_key&gt;</code></td>
+<td>Show one value. <code>cli</code> is shorthand for <code>STATA.STATA_CLI</code>; otherwise use <code>Section.Key</code></td>
+</tr>
+<tr>
+<td><code>stata-mcp config set cli [value]</code></td>
+<td>Set <code>STATA.STATA_CLI</code>. Auto-detect via StataFinder when value is omitted</td>
+</tr>
+<tr>
+<td><code>stata-mcp config edit &lt;dot_key&gt; &lt;value&gt;</code></td>
+<td>Edit an existing <code>Section.Key</code> entry</td>
+</tr>
+</tbody>
+</table>
+<h3 id="install-options">Install Options</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Short</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--client</code></td>
+<td><code>-c</code></td>
+<td>Target client. Omitting both <code>-c</code> and <code>--json-file</code> is equivalent to <code>--all</code></td>
+</tr>
+<tr>
+<td><code>--all</code></td>
+<td><code>-a</code></td>
+<td>Install to all supported clients</td>
+</tr>
+<tr>
+<td><code>--json-file</code></td>
+<td></td>
+<td>Custom target client config file path</td>
+</tr>
+<tr>
+<td><code>--json-index</code></td>
+<td></td>
+<td>Dot-separated nested key path (e.g. <code>mcp.servers</code>); only valid together with <code>--json-file</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="doctor-options">Doctor Options</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--verbose</code></td>
+<td>Show detailed information for each check</td>
+</tr>
+<tr>
+<td><code>--json</code></td>
+<td>Output report in JSON format</td>
+</tr>
+<tr>
+<td><code>--check</code></td>
+<td>Run only specified check names (repeatable)</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>Preview cleanup actions without deleting files (cleanup-style checks only)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="update-options">Update Options</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--method</code></td>
+<td>Force specific update method (auto/pip/uv-tool/homebrew)</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>Show detected method without updating</td>
+</tr>
+<tr>
+<td><code>--check</code></td>
+<td>Only check if a newer version is available</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sandbox-install-options">Sandbox-Install Options</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Short</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--version</code></td>
+<td><code>-V</code></td>
+<td><code>19_5</code></td>
+<td>Stata version (19_5, 18_5, 18)</td>
+</tr>
+<tr>
+<td><code>--edition</code></td>
+<td><code>-e</code></td>
+<td><code>mp</code></td>
+<td>Stata edition (mp, se, be)</td>
+</tr>
+<tr>
+<td><code>--tag</code></td>
+<td></td>
+<td><code>latest</code></td>
+<td>Docker image tag</td>
+</tr>
+<tr>
+<td><code>--license-file</code></td>
+<td><code>-l</code></td>
+<td>(required)</td>
+<td>Path to Stata license file</td>
+</tr>
+<tr>
+<td><code>--client</code></td>
+<td><code>-c</code></td>
+<td><code>claude</code></td>
+<td>Target client</td>
+</tr>
+<tr>
+<td><code>--work-dir</code></td>
+<td></td>
+<td><code>./</code></td>
+<td>Working directory</td>
+</tr>
+<tr>
+<td><code>--cpus</code></td>
+<td></td>
+<td>(none)</td>
+<td>CPU core limit</td>
+</tr>
+<tr>
+<td><code>--memory</code></td>
+<td></td>
+<td>(none)</td>
+<td>Memory limit (e.g., 4g)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="examples">Examples</h2>
+<h3 id="basic-usage">Basic Usage</h3>
+<pre><code class="language-bash"># Check if MCP-for-Stata can run on your system
+stata-mcp doctor
+
+# Start MCP server for Claude Desktop
+stata-mcp
+
+# Start with SSE transport
+stata-mcp -t sse
+</code></pre>
+<h3 id="development-workflow">Development Workflow</h3>
+<pre><code class="language-bash"># 1. Run diagnostics
+stata-mcp doctor
+
+# 2. Install to Claude Code
+stata-mcp install -c claude-code
+
+# 3. Inspect a dataset before writing the analysis
+stata-mcp tool data-info /path/to/data.dta
+</code></pre>
+<h3 id="using-with-uvx">Using with uvx</h3>
+<p>If you prefer not to install MCP-for-Stata globally, you can use <code>uvx</code>:</p>
+<pre><code class="language-bash"># Check version
+uvx stata-mcp --version
+
+# Run diagnostics
+uvx stata-mcp doctor
+
+# Run a do-file directly
+uvx stata-mcp tool do /path/to/analysis.do
+
+# Start the MCP server
+uvx stata-mcp server
+
+# Install to a client
+uvx stata-mcp install -c cursor
+</code></pre>
+<h2 id="self-contained-install-scripts">Self-contained Install Scripts</h2>
+<p>The project root ships a set of self-contained installer scripts for users who do not already have <code>uv</code> or <code>pip</code> available. They bootstrap a Python toolchain and bring up <code>stata-mcp</code> in one step.</p>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>Target platform</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>install.sh</code></td>
+<td>Unix shells (Linux, macOS, WSL)</td>
+<td><code>bash install.sh</code></td>
+</tr>
+<tr>
+<td><code>install.command</code></td>
+<td>macOS Finder</td>
+<td>double-click to launch in Terminal</td>
+</tr>
+<tr>
+<td><code>install.ps1</code></td>
+<td>Windows PowerShell</td>
+<td><code>powershell -ExecutionPolicy Bypass -File install.ps1</code></td>
+</tr>
+<tr>
+<td><code>install.bat</code></td>
+<td>Windows command line</td>
+<td>double-click or run from <code>cmd.exe</code></td>
+</tr>
+</tbody>
+</table>
+<p>These scripts are intended for first-time bootstrap on machines without a Python package manager. On machines that already have <code>uv</code> or <code>pip</code>, the standard <code>uv tool install stata-mcp</code> / <code>pip install stata-mcp</code> flow is preferred.</p>
+<h2 id="exit-codes">Exit Codes</h2>
+<ul>
+<li><code>0</code> - Success</li>
+<li><code>1</code> - Error (invalid client, system incompatibility, etc.)</li>
+<li><code>2</code> - Command line argument error</li>
+</ul>
+<h2 id="environment-variables">Environment Variables</h2>
+<p>MCP-for-Stata behavior can be configured through environment variables. See <a href="../configuration/">Configuration</a> for details.</p>
+<p>Key environment variables:</p>
+<ul>
+<li><code>STATA_MCP_CWD</code> - Working directory for Stata operations</li>
+<li><code>STATA_MCP_LOGGING_ON</code> - Enable/disable logging</li>
+<li><code>STATA_MCP__IS_GUARD</code> - Enable security guard validation</li>
+<li><code>STATA_MCP__IS_MONITOR</code> - Enable RAM monitoring</li>
+</ul>
+<p>See the <a href="../configuration/">Configuration</a> document for the complete list.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="stata-not-found-error">"Stata not found" Error</h3>
+<p>Ensure Stata is installed and accessible:</p>
+<pre><code class="language-bash">stata-mcp doctor
+</code></pre>
+<p>This will run diagnostics and check if Stata can be found on your system.</p>
+<h3 id="permission-errors">Permission Errors</h3>
+<p>Some operations may require appropriate permissions:
+- Installing to Claude Desktop may need admin/user privileges
+- Working directories must be writable</p>
+<h3 id="transport-issues">Transport Issues</h3>
+<p>If you encounter issues with specific transport methods:
+- Default to <code>stdio</code> for most use cases
+- Use <code>--transport stdio</code> explicitly if auto-detection fails</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="../usage/">Usage Guide</a> - Detailed usage examples</li>
+<li><a href="../configuration/">Configuration</a> - Environment variables and settings</li>
+<li><a href="../security/">Security</a> - Security guard and validation</li>
+<li><a href="../monitoring/">Monitoring</a> - Resource monitoring configuration</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../overview/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Overview
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../usage/" class="md-footer__link md-footer__link--next" aria-label="Next: Usage">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Usage
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 - present <a href="https://github.com/sepinetam">Sepine Tam</a>. All Right Reserved. 
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/sepinetam/stata-mcp" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="mailto:sepinetam@gmail.com" target="_blank" rel="noopener" title="E-mail" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m20 8-8 5-8-5V6l8 5 8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.code.select", "navigation.path", "navigation.sections", "navigation.expand", "content.code.annotate", "navigation.footer", "navigation.top"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

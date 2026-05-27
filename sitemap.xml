@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://docs.statamcp.com/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/claude-plugin/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/claude-plugin/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/claude-plugin/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/cli/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/cli/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/cli/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/clients/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/clients/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/clients/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/configuration/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/configuration/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/monitoring/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/monitoring/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/monitoring/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/overview/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/overview/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/overview/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/security/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/security/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/security/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/usage/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/usage/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/usage/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/agents/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/agents/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/agents/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/agents/claude_code/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/agents/claude_code/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/agents/claude_code/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/agents/openclaw/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/agents/openclaw/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/agents/openclaw/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/api/overview/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/api/overview/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/api/overview/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/core/stata/do/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/core/stata/do/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/core/stata/do/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/core/stata/finder/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/core/stata/finder/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/core/stata/finder/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/core/stata/help/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/core/stata/help/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/core/stata/help/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/core/stata/package/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/core/stata/package/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/core/stata/package/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/mcp/resources/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/mcp/resources/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/mcp/resources/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/mcp/tools/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/mcp/tools/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/mcp/tools/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/skills/openclaw/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/skills/openclaw/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/skills/openclaw/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/claude-plugin/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/claude-plugin/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/claude-plugin/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/cli/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/cli/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/cli/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/clients/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/clients/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/clients/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/configuration/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/configuration/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/monitoring/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/monitoring/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/monitoring/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/overview/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/overview/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/overview/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/security/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/security/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/security/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/usage/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/usage/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/usage/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/agents/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/agents/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/agents/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/agents/claude_code/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/agents/claude_code/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/agents/claude_code/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/agents/openclaw/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/agents/openclaw/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/agents/openclaw/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/api/overview/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/api/overview/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/api/overview/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/core/stata/do/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/core/stata/do/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/core/stata/do/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/core/stata/finder/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/core/stata/finder/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/core/stata/finder/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/core/stata/help/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/core/stata/help/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/core/stata/help/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/core/stata/package/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/core/stata/package/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/core/stata/package/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/mcp/resources/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/mcp/resources/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/mcp/resources/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/mcp/tools/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/mcp/tools/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/mcp/tools/"/>
+    </url>
+    <url>
+        <loc>https://docs.statamcp.com/zh/skills/openclaw/</loc>
+        <lastmod>2026-05-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.statamcp.com/zh/skills/openclaw/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.statamcp.com/skills/openclaw/"/>
+    </url>
+</urlset>
