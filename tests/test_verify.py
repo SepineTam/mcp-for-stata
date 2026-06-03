@@ -10,8 +10,8 @@ import pytest
 
 from stata_mcp.cli._handlers import handle_verify
 from stata_mcp.cli._parsers import add_verify_parser
-from stata_mcp.utils.Installer import Installer
-from stata_mcp.utils.Verifier import (
+from stata_mcp.utils.installer import Installer
+from stata_mcp.utils.installer import (
     Verifier,
     VerifyOutcome,
 )

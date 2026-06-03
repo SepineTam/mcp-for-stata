@@ -178,7 +178,7 @@ def handle_config(args: Namespace) -> int:
 
 def handle_install(args: Namespace) -> int:
     """Handle the install subcommand."""
-    from ..utils.Installer import Installer
+    from ..utils.installer import Installer
 
     installer = Installer(sys_os=sys.platform)
 
@@ -236,7 +236,7 @@ def _parse_json_index(raw: str) -> "list[str]":
 
 def handle_verify(args: Namespace) -> int:
     """Handle the verify subcommand."""
-    from ..utils.Verifier import (
+    from ..utils.installer import (
         Verifier,
         VerifyOutcome,
         paint_green,
