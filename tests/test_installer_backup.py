@@ -6,8 +6,8 @@ from datetime import datetime as real_datetime
 
 import pytest
 
-import stata_mcp.utils.Installer.installer as installer_module
-from stata_mcp.utils.Installer import Installer
+import stata_mcp.utils.installer.installer as installer_module
+from stata_mcp.utils.installer import Installer
 
 
 class FixedDatetime(real_datetime):

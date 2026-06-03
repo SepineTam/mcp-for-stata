@@ -5,7 +5,7 @@
 #
 # @Author : Sepine Tam (谭淞)
 # @Email  : sepinetam@gmail.com
-# @File   : Verifier/verifier.py
+# @File   : utils/installer/verifier.py
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
-from ..Installer import Installer
+from .installer import Installer
 
 
 class VerifyOutcome(str, Enum):

@@ -5,7 +5,7 @@
 #
 # @Author : Sepine Tam
 # @Email  : sepinetam@gmail.com
-# @File   : installer.py
+# @File   : utils/installer/installer.py
 
 import json
 import os

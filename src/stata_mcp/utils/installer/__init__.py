@@ -1,3 +1,4 @@
+from .installer import Installer
 from .verifier import (
     Verifier,
     VerifyOutcome,
@@ -8,6 +9,7 @@ from .verifier import (
 )
 
 __all__ = [
+    "Installer",
     "Verifier",
     "VerifyOutcome",
     "VerifyResult",

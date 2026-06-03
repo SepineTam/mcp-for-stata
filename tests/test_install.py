@@ -69,7 +69,7 @@ def _make_args(**overrides) -> argparse.Namespace:
 @pytest.fixture
 def installer_stub(monkeypatch):
     """Stub Installer's side-effecting methods while keeping class attributes."""
-    from stata_mcp.utils.Installer import Installer as RealInstaller
+    from stata_mcp.utils.installer import Installer as RealInstaller
 
     install_all = MagicMock()
     install = MagicMock()
@@ -181,7 +181,7 @@ def test_client_only_routes_to_install(installer_stub):
 
 def test_client_default_key_table_excludes_opencode_and_codex():
     """opencode/codex are intentionally not in CLIENT_DEFAULT_KEY."""
-    from stata_mcp.utils.Installer import Installer
+    from stata_mcp.utils.installer import Installer
 
     assert "opencode" not in Installer.CLIENT_DEFAULT_KEY
     assert "codex" not in Installer.CLIENT_DEFAULT_KEY
