@@ -7,7 +7,7 @@ authors:
     email: "sepinetam@gmail.com"
 title: "MCP-for-Stata: Integrate Stata into your agent"
 version: 1.18.0
-date-released: 2026-05-22
+date-released: 2026-06-03
 url: "https://www.statamcp.com"
 repository-code: "https://github.com/sepinetam/mcp-for-stata"
 license: AGPL-3.0
