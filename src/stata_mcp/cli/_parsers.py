@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import sys
 import warnings
 from importlib.metadata import PackageNotFoundError, version
-from typing import Callable
+from pathlib import Path
+from typing import Callable, NoReturn
 
 BoolConverter = Callable[[str], bool]
 
@@ -333,3 +335,56 @@ def add_update_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
         help="Only check if a newer version is available",
     )
     return update_parser
+
+
+def add_verify_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
+    """Add the verify subcommand parser."""
+    verify_parser = subparsers.add_parser(
+        "verify",
+        help=(
+            "Check whether stata-mcp is installed in a target MCP client "
+            "or config file (read-only)."
+        ),
+    )
+
+    def _error(message: str) -> NoReturn:
+        verify_parser.print_usage(sys.stderr)
+        sys.stderr.write(
+            f"{verify_parser.prog}: error: {message}\n"
+        )
+        raise SystemExit(5)
+
+    verify_parser.error = _error  # type: ignore[assignment]
+
+    verify_parser.add_argument(
+        "-c",
+        "--client",
+        choices=[
+            "claude", "cc", "claude-code", "gemini", "cursor", "cline",
+            "codex", "opencode", "openclaw", "hermes", "hermes-agent",
+        ],
+        default=None,
+        help="Target client to check. Omit -c (and -f) to error.",
+    )
+    verify_parser.add_argument(
+        "-f",
+        "--file",
+        dest="file",
+        type=Path,
+        default=None,
+        help="Custom config file path. Must have .json or .toml extension.",
+    )
+    verify_parser.add_argument(
+        "--index",
+        default=None,
+        help=(
+            "Dot-separated nested key path (e.g. 'mcp.servers'). "
+            "Only used with -f."
+        ),
+    )
+    verify_parser.add_argument(
+        "--key",
+        default="stata-mcp",
+        help="Entry key inside the target dict (default: stata-mcp).",
+    )
+    return verify_parser

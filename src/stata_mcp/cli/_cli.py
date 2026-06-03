@@ -19,6 +19,7 @@ from ._handlers import (
     handle_tool,
     handle_update,
     handle_usable,
+    handle_verify,
 )
 from ._parsers import (
     add_config_parser,
@@ -27,6 +28,7 @@ from ._parsers import (
     add_server_parser,
     add_tool_parser,
     add_update_parser,
+    add_verify_parser,
     create_root_parser,
 )
 
@@ -42,6 +44,7 @@ def main() -> None:
     config_parser = add_config_parser(subparsers)
     add_install_parser(subparsers)
     add_update_parser(subparsers)
+    add_verify_parser(subparsers)
 
     args = parser.parse_args()
 
@@ -72,5 +75,8 @@ def main() -> None:
 
     if args.command == "update":
         sys.exit(handle_update(args))
+
+    if args.command == "verify":
+        sys.exit(handle_verify(args))
 
     handle_server(args)

@@ -283,6 +283,97 @@ class Installer:
         formatted = [f'"{item}"' if isinstance(item, str) else str(item) for item in lst]
         return "[" + ", ".join(formatted) + "]"
 
+    def find_config_path(self, client: str) -> Path:
+        """Return the config file path for the given client (read-only).
+
+        Mirrors the path-discovery blocks from ``install_to_<client>`` but does
+        not write any file. The caller is responsible for handling a missing
+        file with an appropriate "file not found" error.
+        """
+        if client in {"claude", "claude-desktop"}:
+            if self.sys_os.lower() == "darwin":
+                return Path(os.path.expanduser(
+                    "~/Library/Application Support/Claude/claude_desktop_config.json"
+                ))
+            if self.sys_os.lower() == "linux":
+                raise ValueError(f"There is not a Linux version of Claude yet: {client}")
+            if self.sys_os.lower() == "windows":
+                appdata = os.getenv("APPDATA", os.path.expanduser("~\\AppData\\Roaming"))
+                return Path(os.path.join(appdata, "Claude", "claude_desktop_config.json"))
+            raise ValueError(f"Unsupported platform: {self.sys_os}")
+
+        if client in {"cc", "claude-code"}:
+            return Path.home() / ".claude.json"
+
+        if client == "gemini":
+            return Path.home() / ".gemini" / "settings.json"
+
+        if client == "cursor":
+            return Path.home() / ".cursor" / "mcp.json"
+
+        if client == "cline":
+            if self.sys_os.lower() == "darwin":
+                return (
+                    Path.home()
+                    / "Library"
+                    / "Application Support"
+                    / "Code"
+                    / "User"
+                    / "globalStorage"
+                    / "saoudrizwan.claude-dev"
+                    / "settings"
+                    / "cline_mcp_settings.json"
+                )
+            if self.sys_os.lower() == "linux":
+                return (
+                    Path.home()
+                    / ".config"
+                    / "Code"
+                    / "User"
+                    / "globalStorage"
+                    / "saoudrizwan.claude-dev"
+                    / "settings"
+                    / "cline_mcp_settings.json"
+                )
+            if self.sys_os.lower() == "windows":
+                appdata = os.getenv("APPDATA", os.path.expanduser("~\\AppData\\Roaming"))
+                return (
+                    Path(appdata)
+                    / "Code"
+                    / "User"
+                    / "globalStorage"
+                    / "saoudrizwan.claude-dev"
+                    / "settings"
+                    / "cline_mcp_settings.json"
+                )
+            raise ValueError(f"Unsupported platform: {self.sys_os}")
+
+        if client == "opencode":
+            return Path.home() / ".config" / "opencode" / "opencode.json"
+
+        if client == "codex":
+            return Path.home() / ".codex" / "config.toml"
+
+        if client == "openclaw":
+            return Path.home() / ".openclaw" / "openclaw.json"
+
+        if client in {"hermes", "hermes-agent"}:
+            return Path.home() / ".hermes" / "config.yaml"
+
+        raise ValueError(f"unknown client: {client}")
+
+    def find_default_index(self, client: str) -> "str | list[str]":
+        """Return the default key path inside the client's config file."""
+        if client in self.CLIENT_DEFAULT_KEY:
+            return self.CLIENT_DEFAULT_KEY[client]
+        if client == "opencode":
+            return "mcp"
+        if client == "codex":
+            return "mcp_servers"
+        if client in {"hermes", "hermes-agent"}:
+            return "mcp_servers"
+        raise ValueError(f"unknown client: {client}")
+
     def install_from_cli(self, cli_bin: str, command: list[str]) -> bool:
         """Try to install via a CLI tool. Return True if successful."""
         if not shutil.which(cli_bin):

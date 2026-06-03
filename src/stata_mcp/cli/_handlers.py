@@ -234,6 +234,54 @@ def _parse_json_index(raw: str) -> "list[str]":
     return [segment for segment in raw.split(".") if segment]
 
 
+def handle_verify(args: Namespace) -> int:
+    """Handle the verify subcommand."""
+    from ..utils.Verifier import (
+        Verifier,
+        VerifyOutcome,
+        paint_green,
+        paint_red,
+        paint_yellow,
+    )
+
+    client = args.client
+    file = args.file
+    index = args.index
+    key = args.key
+
+    if client:
+        if file is not None:
+            print(
+                "warning: -c takes precedence; -f is ignored",
+                file=sys.stderr,
+            )
+        if index is not None:
+            print(
+                "warning: -c takes precedence; --index is ignored",
+                file=sys.stderr,
+            )
+        result = Verifier(sys_os=sys.platform).verify_client(client, key=key)
+    elif file is not None:
+        result = Verifier(sys_os=sys.platform).verify_file(file, index=index, key=key)
+    else:
+        print(
+            "error: must specify one of -c/--client or -f/--file",
+            file=sys.stderr,
+        )
+        return 5
+
+    if result.outcome == VerifyOutcome.VERIFIED:
+        print(paint_green(f"Verified: stata-mcp is installed at {result.location}."))
+        return 0
+    if result.outcome == VerifyOutcome.WARNING:
+        for w in result.warnings:
+            print(paint_yellow(w))
+        print(paint_green(f"Verified: stata-mcp is installed at {result.location}."))
+        return 0
+    print(paint_red(f"Failed: {result.reason}."))
+    return result.exit_code
+
+
 def handle_server(args: Namespace) -> None:
     """Handle the default behavior of starting the MCP server."""
     from ..mcp_servers import register_tools
