@@ -178,7 +178,7 @@ def handle_config(args: Namespace) -> int:
 
 def handle_install(args: Namespace) -> int:
     """Handle the install subcommand."""
-    from ..utils.installer import Installer
+    from ..utils.installer import Installer, colored_stdout
 
     installer = Installer(sys_os=sys.platform)
 
@@ -192,40 +192,45 @@ def handle_install(args: Namespace) -> int:
 
     # 2. --all wins, ignore everything else
     if args.all:
-        installer.install_all()
+        with colored_stdout():
+            installer.install_all()
         return 0
 
     # 3. --json-index requires --json-file
     if json_index and not json_file:
-        print("error: --json-index must be used together with --json-file", file=sys.stderr)
+        print("[ERROR]\t--json-index must be used together with --json-file", file=sys.stderr)
         return 1
 
     # 4. opencode / codex / hermes have client-specific schemas; ignore custom path
     if client in {"opencode", "codex", "hermes", "hermes-agent"}:
-        if json_file or json_index:
-            print(
-                f"warning: --json-file/--json-index are ignored for {client}; "
-                "using the default config path."
-            )
-        installer.install(client)
-        print(f"Stata-MCP has been installed to {client}.")
+        with colored_stdout():
+            if json_file or json_index:
+                print(
+                    f"[WARN]\t--json-file/--json-index are ignored for {client}; "
+                    "using the default config path."
+                )
+            installer.install(client)
+            print(f"[DONE]\tStata-MCP has been installed to {client}.")
         return 0
 
     # 5. -c CLIENT (generic-JSON clients)
     if client:
         if json_file:
             key = _parse_json_index(json_index) if json_index else Installer.CLIENT_DEFAULT_KEY[client]
-            installer.install_to_json_config(json_file, key=key)
-            print(f"Stata-MCP has been installed to {json_file}.")
+            with colored_stdout():
+                installer.install_to_json_config(json_file, key=key)
+                print(f"[DONE]\tStata-MCP has been installed to {json_file}.")
             return 0
-        installer.install(client)
-        print(f"Stata-MCP has been installed to {client}.")
+        with colored_stdout():
+            installer.install(client)
+            print(f"[DONE]\tStata-MCP has been installed to {client}.")
         return 0
 
     # 6. only --json-file (no -c)
     key = _parse_json_index(json_index) if json_index else "mcpServers"
-    installer.install_to_json_config(json_file, key=key)
-    print(f"Stata-MCP has been installed to {json_file}.")
+    with colored_stdout():
+        installer.install_to_json_config(json_file, key=key)
+        print(f"[DONE]\tStata-MCP has been installed to {json_file}.")
     return 0
 
 

@@ -10,7 +10,6 @@
 from __future__ import annotations
 
 import json
-import os
 import sys
 import tomllib
 from dataclasses import dataclass, field
@@ -19,6 +18,7 @@ from pathlib import Path
 from typing import Optional
 
 from .installer import Installer
+from .output import _should_color, _wrap
 
 
 class VerifyOutcome(str, Enum):
@@ -242,8 +242,6 @@ def paint_yellow(text: str) -> str:
 
 
 def _paint(text: str, code: str) -> str:
-    if os.environ.get("NO_COLOR"):
+    if not _should_color(sys.stdout):
         return text
-    if not sys.stdout.isatty():
-        return text
-    return f"\033[{code}m{text}\033[0m"
+    return _wrap(code, text)

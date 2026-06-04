@@ -3,12 +3,19 @@
 from __future__ import annotations
 
 import argparse
+import io
+import sys
 from unittest.mock import MagicMock
 
 import pytest
 
 from stata_mcp.cli._handlers import _parse_json_index, handle_install
 from stata_mcp.cli._parsers import add_install_parser
+
+
+class TtyStringIO(io.StringIO):
+    def isatty(self) -> bool:
+        return True
 
 
 # ---------- Parser tests ----------
@@ -120,7 +127,7 @@ def test_opencode_with_json_file_warns_and_uses_default(installer_stub, capsys):
     installer_stub.install.assert_called_once_with("opencode")
     installer_stub.install_to_json_config.assert_not_called()
     out = capsys.readouterr().out
-    assert "warning" in out.lower()
+    assert "[WARN]\t" in out
     assert "opencode" in out
 
 
@@ -130,7 +137,7 @@ def test_codex_with_json_index_warns_and_uses_default(installer_stub, capsys):
     assert rc == 0
     installer_stub.install.assert_called_once_with("codex")
     installer_stub.install_to_json_config.assert_not_called()
-    assert "warning" in capsys.readouterr().out.lower()
+    assert "[WARN]\t" in capsys.readouterr().out
 
 
 def test_openclaw_with_json_file_uses_nested_key(installer_stub):
@@ -187,3 +194,41 @@ def test_client_default_key_table_excludes_opencode_and_codex():
     assert "codex" not in Installer.CLIENT_DEFAULT_KEY
     assert Installer.CLIENT_DEFAULT_KEY["openclaw"] == ["mcp", "servers"]
     assert Installer.CLIENT_DEFAULT_KEY["claude"] == "mcpServers"
+
+
+def test_handle_install_colors_tagged_stdout_for_json_file(monkeypatch):
+    from stata_mcp.utils.installer import Installer as RealInstaller
+
+    def fake_install_to_json_config(
+        self,
+        config_path,
+        key="mcpServers",
+        custom_config=None,
+    ):
+        print("[ERROR]\tinstall error")
+        print("[DONE]\tinstall done")
+        print("[WARN]\tinstall warning")
+        print("[BACKUP]\tinstall backup")
+        print("✅ Successfully installed stata-mcp")
+
+    monkeypatch.setattr(RealInstaller, "_post_init", lambda self: None)
+    monkeypatch.setattr(
+        RealInstaller,
+        "install_to_json_config",
+        fake_install_to_json_config,
+    )
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    stdout = TtyStringIO()
+    monkeypatch.setattr(sys, "stdout", stdout)
+
+    rc = handle_install(_make_args(json_file="/tmp/x.json"))
+
+    assert rc == 0
+    out = stdout.getvalue()
+    assert "\033[31m[ERROR]\tinstall error\n\033[0m" in out
+    assert "\033[32m[DONE]\tinstall done\n\033[0m" in out
+    assert "\033[33m[WARN]\tinstall warning\n\033[0m" in out
+    assert "\033[36m[BACKUP]\tinstall backup\n\033[0m" in out
+    assert "\033[32m[DONE]\tStata-MCP has been installed to /tmp/x.json.\n\033[0m" in out
+    assert "✅ Successfully installed stata-mcp" in out
+    assert "\033[32m✅ Successfully installed stata-mcp" not in out
