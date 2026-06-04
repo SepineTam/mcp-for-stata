@@ -6,8 +6,8 @@ authors:
     orcid: "https://orcid.org/0009-0006-7449-1094"
     email: "sepinetam@gmail.com"
 title: "MCP-for-Stata: Integrate Stata into your agent"
-version: 1.18.1
-date-released: 2026-06-03
+version: 1.18.2
+date-released: 2026-06-04
 url: "https://www.statamcp.com"
 repository-code: "https://github.com/sepinetam/mcp-for-stata"
 license: AGPL-3.0
