@@ -1,8 +1,8 @@
-<h1 align="center">
+<div align="center">
   <a href="https://www.statamcp.com">
-    <img src="https://example-data.statamcp.com/logo_with_name.jpg" alt="logo" width="300"/>
+    <img src="https://example-data.statamcp.com/logo_with_name.jpg" alt="MCP-for-Stata: Integrate Stata into your agent" width="300"/>
   </a>
-</h1>
+</div>
 
 <h1 align="center">MCP-for-Stata: 将 Stata 集成到你的智能体中</h1>
 
@@ -56,8 +56,9 @@
 </details>
 
 ## 💡 快速开始
-### 为所有智能体安装
-如果你不想进行复杂的配置，只需运行以下命令：
+### 🚀 一键安装所有客户端！
+无需配置，无需手动编辑 JSON。一条命令即可为 **所有受支持的 agent**（Claude Code、Codex、OpenClaw、Cursor、Gemini CLI 等）安装 MCP-for-Stata：
+
 ```bash
 uvx stata-mcp install --all
 ```

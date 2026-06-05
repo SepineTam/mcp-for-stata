@@ -1,8 +1,8 @@
-<h1 align="center">
+<div align="center">
   <a href="https://www.statamcp.com">
-    <img src="https://example-data.statamcp.com/logo_with_name.jpg" alt="logo" width="300"/>
+    <img src="https://example-data.statamcp.com/logo_with_name.jpg" alt="MCP-for-Stata: Integrate Stata into your agent" width="300"/>
   </a>
-</h1>
+</div>
 
 <h1 align="center">MCP-for-Stata: Integrez Stata dans votre agent</h1>
 
@@ -56,8 +56,9 @@
 </details>
 
 ## 💡 Demarrage rapide
-### Installation pour tous les agents
-Si vous ne souhaitez pas passer par une configuration compliquee, executez simplement la commande suivante :
+### 🚀 Installation en un clic pour tous les clients !
+Aucune configuration, aucune édition manuelle de JSON. Une seule commande installe MCP-for-Stata pour **tous les agents pris en charge** (Claude Code, Codex, OpenClaw, Cursor, Gemini CLI et plus) :
+
 ```bash
 uvx stata-mcp install --all
 ```
