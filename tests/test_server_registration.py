@@ -5,9 +5,10 @@ from __future__ import annotations
 import importlib
 import logging
 import sys
+import asyncio
 from argparse import Namespace
 from types import ModuleType, SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -47,8 +48,12 @@ def loaded_modules(monkeypatch: pytest.MonkeyPatch):
             self.args = args
             self.kwargs = kwargs
 
+    class _Context:
+        pass
+
     fastmcp_module.FastMCP = _FastMCP
     fastmcp_module.Icon = _Icon
+    fastmcp_module.Context = _Context
 
     mcp_module = ModuleType("mcp")
     mcp_server_module = ModuleType("mcp.server")
@@ -87,12 +92,24 @@ class _DummyServer:
         return _decorator
 
 
-def _set_registry(monkeypatch: pytest.MonkeyPatch, mcp_servers, *, unix: bool, enable_write: bool) -> None:
+def _set_registry(
+    monkeypatch: pytest.MonkeyPatch,
+    mcp_servers,
+    *,
+    unix: bool,
+    enable_write: bool,
+    enable_ado_install: bool = False,
+) -> None:
     registry = {
         "stata_do": {"description": "d", "func": lambda: None, "profiles": {"core", "all"}},
         "get_data_info": {"description": "d", "func": lambda: None, "profiles": {"core", "all"}},
         "help": {"description": "d", "func": lambda: None, "profiles": {"core", "all"}, "unix_only": True},
         "read_log": {"description": "d", "func": lambda: None, "profiles": {"all"}},
+        "ado_package_install": {
+            "description": "d",
+            "func": lambda: None,
+            "profiles": {"unsafe"},
+        },
         "write_dofile": {
             "description": "d",
             "func": lambda: None,
@@ -106,7 +123,11 @@ def _set_registry(monkeypatch: pytest.MonkeyPatch, mcp_servers, *, unix: bool, e
     monkeypatch.setattr(
         mcp_servers,
         "config",
-        SimpleNamespace(IS_UNIX=unix, ENABLE_WRITE_DOFILE=enable_write),
+        SimpleNamespace(
+            IS_UNIX=unix,
+            ENABLE_WRITE_DOFILE=enable_write,
+            ENABLE_ADO_INSTALL=enable_ado_install,
+        ),
         raising=False,
     )
 
@@ -134,6 +155,41 @@ def test_register_tools_all_applies_platform_and_deprecated_filters(
 
     assert set(server.tools) == {"stata_do", "get_data_info", "read_log"}
     assert server.resources == []
+
+
+def test_register_tools_unsafe_requires_enablement_and_includes_standard_tools(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    mcp_servers, _ = loaded_modules
+    server = _DummyServer()
+    _set_registry(
+        monkeypatch,
+        mcp_servers,
+        unix=True,
+        enable_write=False,
+        enable_ado_install=False,
+    )
+
+    with pytest.raises(PermissionError, match="unsafe profile is disabled"):
+        mcp_servers.register_tools(server, profile="unsafe")
+
+    _set_registry(
+        monkeypatch,
+        mcp_servers,
+        unix=True,
+        enable_write=False,
+        enable_ado_install=True,
+    )
+    mcp_servers.register_tools(server, profile="unsafe")
+
+    assert set(server.tools) == {
+        "stata_do",
+        "get_data_info",
+        "help",
+        "read_log",
+        "ado_package_install",
+    }
 
 
 def test_register_tools_prevents_profile_switch(monkeypatch: pytest.MonkeyPatch, loaded_modules):
@@ -204,64 +260,99 @@ def test_handle_server_respects_core_profile_flag(monkeypatch: pytest.MonkeyPatc
     assert calls["transport"] == "stdio"
 
 
-def test_mcp_ado_install_refreshes_help_after_success(
+def test_handle_server_respects_unsafe_profile_flag(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    _, handlers = loaded_modules
+    calls: dict[str, str] = {}
+
+    class _McpRun:
+        def run(self, transport: str) -> None:
+            calls["transport"] = transport
+
+    fake_module = SimpleNamespace(
+        register_tools=lambda server, profile: calls.setdefault("profile", profile),
+        stata_mcp=_McpRun(),
+    )
+    monkeypatch.setitem(sys.modules, "stata_mcp.mcp_servers", fake_module)
+
+    handlers.handle_server(
+        Namespace(
+            transport="stdio",
+            core_profile=False,
+            all_profile=False,
+            unsafe_profile=True,
+        )
+    )
+
+    assert calls["profile"] == "unsafe"
+    assert calls["transport"] == "stdio"
+
+
+def test_mcp_ado_install_delegates_to_api_without_help_refresh(
     monkeypatch: pytest.MonkeyPatch,
     loaded_modules,
 ):
     mcp_servers, _ = loaded_modules
-    help_reader = SimpleNamespace(help=lambda *args, **kwargs: None)
-    refresh_help = Mock(wraps=help_reader.help)
-
-    class _Installer:
-        def __init__(self, *args, **kwargs) -> None:
-            pass
-
-        def install(self, package: str) -> str:
-            return "Installation State: True"
-
-        @staticmethod
-        def check_installed_from_msg(message: str) -> bool:
-            return True
-
-    fake_stata = ModuleType("stata_mcp.stata")
-    fake_stata.GITHUB_Install = _Installer
-    fake_stata.NET_Install = _Installer
-    fake_stata.SSC_Install = _Installer
-    monkeypatch.setitem(sys.modules, "stata_mcp.stata", fake_stata)
+    api_install = Mock(return_value="Installation State: True")
+    fake_api_module = ModuleType("stata_mcp.api.ado_install")
+    fake_api_module.ado_package_install = api_install
+    monkeypatch.setitem(sys.modules, "stata_mcp.api.ado_install", fake_api_module)
     monkeypatch.setattr(
         mcp_servers,
         "config",
-        SimpleNamespace(IS_UNIX=True, STATA_CLI="stata"),
-    )
-    monkeypatch.setattr(
-        mcp_servers,
-        "_load_help_cls",
-        lambda: SimpleNamespace(help=refresh_help),
+        SimpleNamespace(config_file="/tmp/config.toml"),
     )
 
-    mcp_servers.ado_package_install("reghdfe")
+    context = SimpleNamespace(
+        elicit=AsyncMock(
+            return_value=SimpleNamespace(
+                action="accept",
+                data=SimpleNamespace(approved=True),
+            )
+        )
+    )
 
-    refresh_help.assert_called_once_with("reghdfe", replace=True)
+    result = asyncio.run(
+        mcp_servers.ado_package_install(
+            "reghdfe",
+            is_replace=True,
+            ctx=context,
+        )
+    )
+
+    assert result == "Installation State: True"
+    api_install.assert_called_once_with(
+        package="reghdfe",
+        source="ssc",
+        is_replace=True,
+        package_source_from=None,
+        config_file="/tmp/config.toml",
+        confirm=True,
+    )
+    context.elicit.assert_awaited_once()
 
 
-def test_mcp_ado_install_rejects_unsafe_package_before_installer(
+def test_mcp_ado_install_fails_closed_without_user_approval(
     monkeypatch: pytest.MonkeyPatch,
     loaded_modules,
 ):
     mcp_servers, _ = loaded_modules
-    installer = Mock()
-    fake_stata = ModuleType("stata_mcp.stata")
-    fake_stata.GITHUB_Install = installer
-    fake_stata.NET_Install = installer
-    fake_stata.SSC_Install = installer
-    monkeypatch.setitem(sys.modules, "stata_mcp.stata", fake_stata)
-    monkeypatch.setattr(
-        mcp_servers,
-        "config",
-        SimpleNamespace(IS_UNIX=True, STATA_CLI="stata"),
+    api_install = Mock()
+    fake_api_module = ModuleType("stata_mcp.api.ado_install")
+    fake_api_module.ado_package_install = api_install
+    monkeypatch.setitem(sys.modules, "stata_mcp.api.ado_install", fake_api_module)
+    context = SimpleNamespace(
+        elicit=AsyncMock(
+            return_value=SimpleNamespace(
+                action="decline",
+                data=None,
+            )
+        )
     )
 
-    with pytest.raises(ValueError, match="Invalid ado package name"):
-        mcp_servers.ado_package_install("reghdfe\nshell echo pwn")
+    with pytest.raises(PermissionError, match="not approved"):
+        asyncio.run(mcp_servers.ado_package_install("reghdfe", ctx=context))
 
-    installer.assert_not_called()
+    api_install.assert_not_called()

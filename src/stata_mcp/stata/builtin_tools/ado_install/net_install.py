@@ -7,27 +7,50 @@
 # @Email  : sepinetam@gmail.com
 # @File   : net_install.py
 
-from ....guard import validate_ado_package_name, validate_net_source_location
+from collections.abc import Collection
+
+from ....guard import (
+    require_ado_install_confirmation,
+    validate_ado_package_name,
+    validate_net_source_location,
+)
 from .base import AdoInstallBase
 
 
 class NET_Install(AdoInstallBase):
-    def install(self, package: str, directory_or_url: str = None) -> str:
+    def install(
+        self,
+        package: str,
+        directory_or_url: str = None,
+        *,
+        confirm: bool = False,
+        allowed_hosts: Collection[str] = (),
+        allowed_sources: Collection[str] = (),
+    ) -> str:
+        require_ado_install_confirmation(confirm)
         package = validate_ado_package_name(package, source="net")
-        directory_or_url = validate_net_source_location(directory_or_url)
-        ex_from = ", " if directory_or_url and not self.REPLACE_MESSAGE else ""
-        from_message = f"{ex_from} from({directory_or_url})" if directory_or_url else ""
-
-        install_command = f"net install {package}{self.REPLACE_MESSAGE}{from_message}"
+        directory_or_url = validate_net_source_location(
+            directory_or_url,
+            allowed_hosts=allowed_hosts,
+            allowed_sources=allowed_sources,
+        )
+        options = []
+        if self.is_replace:
+            options.append("replace")
+        options.append(f"from({directory_or_url})")
+        install_command = f"net install {package}, {' '.join(options)}"
         runner_result = self.controller.run(install_command)
         return self._install_msg_template(runner_result)
 
     @staticmethod
     def check_install(message: str) -> bool:
-        wrong_signature_messages = [
-            # for sure error message
-            "not found",
-            "could not load"
+        normalized_message = str(message).lower()
+        success_signatures = [
+            "installing into ",
+            "installation complete",
+            "all files already exist and are up to date",
         ]
-
-        return any(signature_msg not in str(message) for signature_msg in wrong_signature_messages)
+        return any(
+            signature_msg in normalized_message
+            for signature_msg in success_signatures
+        )

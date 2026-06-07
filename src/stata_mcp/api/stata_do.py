@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from ..core.types import RAMLimitExceededError
-from ..guard import GuardValidator
+from ..guard import GuardValidator, PackageManagementGuardValidator
 from ..monitor import RAMMonitor
 from ..stata import StataDo, StataLog
 from ._runtime import create_runtime_context
@@ -39,6 +39,28 @@ def stata_do(
     config_file: str | Path | None = None,
 ) -> Dict[str, Any]:
     """Execute a Stata do-file and optionally return log content when errors occur."""
+    return _stata_do(
+        dofile_path=dofile_path,
+        log_file_name=log_file_name,
+        read_log_when_error=read_log_when_error,
+        is_replace_log=is_replace_log,
+        enable_smcl=enable_smcl,
+        config_file=config_file,
+        allow_package_management=False,
+    )
+
+
+def _stata_do(
+    dofile_path: str,
+    log_file_name: str = None,
+    read_log_when_error: bool = False,
+    is_replace_log: bool = True,
+    enable_smcl: bool = True,
+    config_file: str | Path | None = None,
+    *,
+    allow_package_management: bool = False,
+) -> Dict[str, Any]:
+    """Internal dofile executor with a controlled package-management bypass."""
     runtime = create_runtime_context(config_file=config_file, require_stata=True)
 
     try:
@@ -75,25 +97,20 @@ def stata_do(
             "allowed_directories": [allowed_dir.as_posix() for allowed_dir in allowed_dirs],
         }
 
-    if runtime.config.IS_GUARD:
-        try:
-            dofile_content = resolved_dofile_path.read_text(encoding="utf-8")
-        except Exception as error:
-            return {"error": f"Failed to read dofile for security check: {error}"}
+    try:
+        dofile_content = resolved_dofile_path.read_text(encoding="utf-8")
+    except Exception as error:
+        return {"error": f"Failed to read dofile for security check: {error}"}
 
+    if not allow_package_management:
+        package_report = PackageManagementGuardValidator().validate(dofile_content)
+        if not package_report.is_safe:
+            return _security_rejection(package_report)
+
+    if runtime.config.IS_GUARD:
         report = GuardValidator().validate(dofile_content)
         if not report.is_safe:
-            warning_message = "⚠️  Security warning: Dangerous commands detected:\n"
-            for item in report.dangerous_items:
-                warning_message += f"  - Line {item.line}: {item.type} '{item.content}'\n"
-            return {
-                "action": "Security check, dofile not executed",
-                "warning": warning_message,
-                "suggesting": (
-                    "Modify the dofile to ensure safety\n"
-                    "or set environment variable `STATA_MCP__IS_GUARD` to `false` (not recommended)"
-                ),
-            }
+            return _security_rejection(report)
     else:
         logging.warning("[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.")
 
@@ -145,6 +162,21 @@ def stata_do(
         result["log_content"] = log_content
 
     return result
+
+
+def _security_rejection(report) -> Dict[str, Any]:
+    """Return the standard response for a rejected dofile."""
+    warning_message = "⚠️  Security warning: Dangerous commands detected:\n"
+    for item in report.dangerous_items:
+        warning_message += f"  - Line {item.line}: {item.type} '{item.content}'\n"
+    return {
+        "action": "Security check, dofile not executed",
+        "warning": warning_message,
+        "suggesting": (
+            "Modify the dofile to ensure safety. Third-party package management "
+            "must use the controlled ado_package_install interface."
+        ),
+    }
 
 
 def _has_stata_error(content: str) -> bool:

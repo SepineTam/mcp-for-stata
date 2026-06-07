@@ -37,6 +37,16 @@ STATA_PREFIXES: Tuple[str, ...] = (
 # Dangerous Commands
 # ============================================================================
 
+#: Package-management commands that must only run through the controlled
+#: ado-package installation API, never through arbitrary dofiles.
+PACKAGE_MANAGEMENT_COMMANDS: Set[str] = {
+    "ssc",
+    "net",
+    "github",
+    "adoupdate",
+    "update",
+}
+
 #: Commands that allow execution of shell/system commands
 DANGEROUS_COMMANDS: Set[str] = {
     "!",          # Unix-style shell escape: !ls
@@ -100,5 +110,6 @@ DANGEROUS_PATTERNS: List[str] = [
 __all__ = [
     "DANGEROUS_COMMANDS",
     "DANGEROUS_PATTERNS",
+    "PACKAGE_MANAGEMENT_COMMANDS",
     "STATA_PREFIXES",
 ]

@@ -17,7 +17,12 @@ import re
 from dataclasses import dataclass, field
 from typing import List
 
-from .blacklist import DANGEROUS_COMMANDS, DANGEROUS_PATTERNS, STATA_PREFIXES
+from .blacklist import (
+    DANGEROUS_COMMANDS,
+    DANGEROUS_PATTERNS,
+    PACKAGE_MANAGEMENT_COMMANDS,
+    STATA_PREFIXES,
+)
 
 # ============================================================================
 # Data Structures
@@ -99,7 +104,15 @@ class GuardValidator:
         """
         cleaned_line = line
         prefix_pattern = re.compile(r"^\s*(\w+)\s*:?\s*", re.IGNORECASE)
+        version_prefix_pattern = re.compile(
+            r"^\s*version\s+\d+(?:\.\d+)?\s*:\s*",
+            re.IGNORECASE,
+        )
         while cleaned_line:
+            version_match = version_prefix_pattern.match(cleaned_line)
+            if version_match:
+                cleaned_line = cleaned_line[version_match.end():]
+                continue
             matched = prefix_pattern.match(cleaned_line)
             if not matched or matched.group(1).lower() not in prefixes:
                 break
@@ -172,7 +185,11 @@ class GuardValidator:
                 continue
 
             local_name, local_value = matched.group(1), self._strip_macro_value_quotes(matched.group(2))
-            first_value_token = local_value.split()[0].lower() if local_value.split() else ""
+            first_value_token = (
+                self._normalize_command_token(local_value.split()[0])
+                if local_value.split()
+                else ""
+            )
             if first_value_token in self.dangerous_commands:
                 dangerous_names.add(local_name)
 
@@ -217,7 +234,11 @@ class GuardValidator:
         items: List[RiskItem] = []
 
         # Get the first word (command)
-        first_word = line.split()[0].lower() if line.split() else ""
+        first_word = (
+            self._normalize_command_token(line.split()[0])
+            if line.split()
+            else ""
+        )
 
         if first_word in self.dangerous_commands:
             items.append(RiskItem(
@@ -235,6 +256,11 @@ class GuardValidator:
             ))
 
         return items
+
+    @staticmethod
+    def _normalize_command_token(token: str) -> str:
+        """Normalize command-position punctuation before blacklist matching."""
+        return token.lower().rstrip(",:")
 
     def _check_dangerous_patterns(self, line: str, line_num: int) -> List[RiskItem]:
         """Check if a line matches dangerous patterns.
@@ -259,6 +285,19 @@ class GuardValidator:
         return items
 
 
+class PackageManagementGuardValidator(GuardValidator):
+    """Always block package-management commands from arbitrary dofiles."""
+
+    def __init__(self) -> None:
+        self.dangerous_commands = PACKAGE_MANAGEMENT_COMMANDS
+        self.dangerous_patterns = [
+            r"^\s*`[A-Za-z_]\w*'\s*",
+            r"^\s*\$[A-Za-z_]\w*\s*",
+            r"^\s*\$\{[A-Za-z_]\w*\}\s*",
+        ]
+        self.stata_prefixes = set(STATA_PREFIXES)
+
+
 # ============================================================================
 # Exports
 # ============================================================================
@@ -267,4 +306,5 @@ __all__ = [
     "RiskItem",
     "SecurityReport",
     "GuardValidator",
+    "PackageManagementGuardValidator",
 ]

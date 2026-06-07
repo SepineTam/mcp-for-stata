@@ -20,20 +20,34 @@ Usage:
     ...     print(f"Dangerous items found: {report.dangerous_items}")
 """
 
-from .validator import GuardValidator, RiskItem, SecurityReport
+from .validator import (
+    GuardValidator,
+    PackageManagementGuardValidator,
+    RiskItem,
+    SecurityReport,
+)
 from .input_validation import (
+    require_ado_install_confirmation,
     validate_ado_package_name,
+    validate_ado_install_request,
+    validate_github_repository_allowed,
     validate_install_source,
     validate_net_source_location,
+    validate_ssc_package_allowed,
     validate_stata_identifier,
 )
 
 __all__ = [
     "GuardValidator",
+    "PackageManagementGuardValidator",
     "RiskItem",
     "SecurityReport",
+    "require_ado_install_confirmation",
     "validate_ado_package_name",
+    "validate_ado_install_request",
+    "validate_github_repository_allowed",
     "validate_install_source",
     "validate_net_source_location",
+    "validate_ssc_package_allowed",
     "validate_stata_identifier",
 ]

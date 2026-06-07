@@ -210,12 +210,17 @@ class Config:
 
     @staticmethod
     def _to_bool(value):
-        """Convert value to boolean."""
+        """Convert only explicit boolean values, failing closed otherwise."""
         if isinstance(value, bool):
             return value
         if isinstance(value, str):
-            return value.lower() == "true"
-        return bool(value)
+            normalized_value = value.strip().lower()
+            if normalized_value == "true":
+                return True
+            if normalized_value == "false":
+                return False
+            raise ValueError("Expected 'true' or 'false'.")
+        raise TypeError("Expected a boolean or a 'true'/'false' string.")
 
     @staticmethod
     def _to_int(value):
@@ -230,6 +235,16 @@ class Config:
     @staticmethod
     def _to_str(value):
         return str(value)
+
+    @staticmethod
+    def _to_str_tuple(value):
+        if isinstance(value, str):
+            values = value.split(",")
+        elif isinstance(value, (list, tuple, set)):
+            values = value
+        else:
+            raise TypeError("Expected a comma-separated string or string collection.")
+        return tuple(str(item).strip() for item in values if str(item).strip())
 
     @property
     def STATA_MCP_DIRECTORY(self) -> Path:
@@ -382,6 +397,61 @@ class Config:
             default=True,
             converter=self._to_bool,
             validator=lambda x: isinstance(x, bool)
+        )
+
+    @property
+    def ENABLE_ADO_INSTALL(self) -> bool:
+        """Return whether high-risk third-party ado installation is enabled."""
+        return self._get_config_value(
+            config_keys=["SECURITY", "ENABLE_ADO_INSTALL"],
+            env_var="STATA_MCP__ENABLE_ADO_INSTALL",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool),
+        )
+
+    @cached_property
+    def ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES(self) -> tuple[str, ...]:
+        """Return GitHub repositories explicitly allowed for ado installation."""
+        return self._get_config_value(
+            config_keys=["SECURITY", "ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES"],
+            env_var="STATA_MCP__ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES",
+            default=(),
+            converter=self._to_str_tuple,
+            validator=lambda x: isinstance(x, tuple),
+        )
+
+    @cached_property
+    def ADO_INSTALL_ALLOWED_NET_HOSTS(self) -> tuple[str, ...]:
+        """Return HTTPS hosts explicitly allowed for net package installation."""
+        return self._get_config_value(
+            config_keys=["SECURITY", "ADO_INSTALL_ALLOWED_NET_HOSTS"],
+            env_var="STATA_MCP__ADO_INSTALL_ALLOWED_NET_HOSTS",
+            default=(),
+            converter=self._to_str_tuple,
+            validator=lambda x: isinstance(x, tuple),
+        )
+
+    @cached_property
+    def ADO_INSTALL_ALLOWED_NET_SOURCES(self) -> tuple[str, ...]:
+        """Return exact HTTPS sources allowed for net package installation."""
+        return self._get_config_value(
+            config_keys=["SECURITY", "ADO_INSTALL_ALLOWED_NET_SOURCES"],
+            env_var="STATA_MCP__ADO_INSTALL_ALLOWED_NET_SOURCES",
+            default=(),
+            converter=self._to_str_tuple,
+            validator=lambda x: isinstance(x, tuple),
+        )
+
+    @cached_property
+    def ADO_INSTALL_ALLOWED_SSC_PACKAGES(self) -> tuple[str, ...]:
+        """Return SSC packages explicitly allowed for ado installation."""
+        return self._get_config_value(
+            config_keys=["SECURITY", "ADO_INSTALL_ALLOWED_SSC_PACKAGES"],
+            env_var="STATA_MCP__ADO_INSTALL_ALLOWED_SSC_PACKAGES",
+            default=(),
+            converter=self._to_str_tuple,
+            validator=lambda x: isinstance(x, tuple),
         )
 
     @property

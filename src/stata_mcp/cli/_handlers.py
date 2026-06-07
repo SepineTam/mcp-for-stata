@@ -93,6 +93,7 @@ def handle_tool(args: Namespace) -> int:
                 source=args.source,
                 is_replace=args.is_replace,
                 package_source_from=args.package_source_from,
+                confirm=args.yes,
             )
         elif args.tool_action == "do":
             result = stata_do(
@@ -293,7 +294,9 @@ def handle_server(args: Namespace) -> None:
     from ..mcp_servers import register_tools
     from ..mcp_servers import stata_mcp as mcp
 
-    if getattr(args, "core_profile", False):
+    if getattr(args, "unsafe_profile", False):
+        profile = "unsafe"
+    elif getattr(args, "core_profile", False):
         profile = "core"
     elif getattr(args, "all_profile", False):
         profile = "all"

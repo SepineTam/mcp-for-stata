@@ -1,3 +1,5 @@
+"""Internal installers. Use ``stata_mcp.api.ado_package_install`` instead."""
+
 from .github_install import GITHUB_Install
 from .net_install import NET_Install
 from .ssc_install import SSC_Install

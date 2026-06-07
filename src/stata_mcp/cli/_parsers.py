@@ -93,7 +93,16 @@ def add_server_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
         "--all",
         action="store_true",
         dest="all_profile",
-        help="Register all tools (default)",
+        help="Register all standard tools (default; excludes high-risk tools)",
+    )
+    profile_group.add_argument(
+        "--unsafe",
+        action="store_true",
+        dest="unsafe_profile",
+        help=(
+            "Register standard and high-risk tools; requires "
+            "SECURITY.ENABLE_ADO_INSTALL=true"
+        ),
     )
     server_parser.add_argument(
         "-t",
@@ -129,8 +138,13 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
     add_bool_argument(
         tool_ado_install_parser,
         "--is-replace",
-        default=True,
+        default=False,
         help_text="Replace existing package files when supported",
+    )
+    tool_ado_install_parser.add_argument(
+        "--yes",
+        action="store_true",
+        help="Confirm the approved third-party package and source",
     )
 
     tool_do_parser = tool_subparsers.add_parser("do", help="Run a do-file through the API module")

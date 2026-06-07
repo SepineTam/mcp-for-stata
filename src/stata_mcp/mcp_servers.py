@@ -15,7 +15,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Literal
 
-from mcp.server.fastmcp import FastMCP, Icon
+from mcp.server.fastmcp import Context, FastMCP, Icon
+from pydantic import BaseModel, Field
 
 from .config import Config
 
@@ -207,17 +208,32 @@ def stata_do(
             "allowed_directories": [d.as_posix() for d in allowed_dirs],
         }
 
+    try:
+        with open(dofile_path, 'r', encoding='utf-8') as f:
+            dofile_content = f.read()
+    except Exception as e:
+        logging.error(f"Failed to read dofile {dofile_path}: {str(e)}")
+        return {"error": f"Failed to read dofile for security check: {str(e)}"}
+
+    from .guard import PackageManagementGuardValidator
+
+    package_report = PackageManagementGuardValidator().validate(dofile_content)
+    if not package_report.is_safe:
+        warning_msg = "⚠️  Security warning: Package-management commands detected:\n"
+        for item in package_report.dangerous_items:
+            warning_msg += f"  - Line {item.line}: {item.type} '{item.content}'\n"
+        return {
+            "action": "Security check, dofile not executed",
+            "warning": warning_msg,
+            "suggesting": (
+                "Third-party package management must use the controlled "
+                "ado_package_install interface."
+            ),
+        }
+
     # Security check: validate dofile before execution
     if config.IS_GUARD:
         from .guard import GuardValidator
-
-        # Read dofile content
-        try:
-            with open(dofile_path, 'r', encoding='utf-8') as f:
-                dofile_content = f.read()
-        except Exception as e:
-            logging.error(f"Failed to read dofile {dofile_path}: {str(e)}")
-            return {"error": f"Failed to read dofile for security check: {str(e)}"}
 
         # Config guard validator (platform-independent)
         guard_validator = GuardValidator()  # TODO: It may be make an error for windows user
@@ -305,11 +321,20 @@ def stata_do(
     return result
 
 
-def ado_package_install(
+class _AdoInstallApproval(BaseModel):
+    """Structured user approval collected through MCP elicitation."""
+
+    approved: bool = Field(
+        description="Approve installation of the exact third-party package and source."
+    )
+
+
+async def ado_package_install(
         package: str,
         source: str = "ssc",
-        is_replace: bool = True,
-        package_source_from: str = None
+        is_replace: bool = False,
+        package_source_from: str = None,
+        ctx: Context = None,
 ) -> str:
     """
     Install a Stata package from SSC, GitHub, or net.
@@ -318,72 +343,52 @@ def ado_package_install(
         package (str): Package name. For GitHub, use "user/repo" format.
         source (str): "ssc" (default), "github", or "net".
         is_replace (bool): Force reinstallation if already present.
-        package_source_from (str): Directory or URL (required only for source="net").
+        package_source_from (str): Allowlisted HTTPS URL for source="net".
+        ctx (Context): MCP context used to request trusted user approval.
 
     Returns:
         str: Stata installation log as a string.
 
     Examples:
-        >>> ado_package_install(package="outreg2")
-        >>> ado_package_install(package="SepineTam/TexIV", source="github")
+        >>> await ado_package_install(package="outreg2", ctx=context)
+        >>> await ado_package_install(
+        ...     package="SepineTam/TexIV",
+        ...     source="github",
+        ...     ctx=context,
+        ... )
 
     Notes:
-        SSC installs can be slow; skip if the package is likely already installed.
+        This high-risk tool is registered only in the unsafe profile when
+        SECURITY.ENABLE_ADO_INSTALL is true.
     """
-    from .guard import (
-        validate_ado_package_name,
-        validate_install_source,
-        validate_net_source_location,
+    from .api.ado_install import ado_package_install as api_ado_package_install
+
+    if ctx is None:
+        raise PermissionError("MCP user approval context is required.")
+    approval = await ctx.elicit(
+        message=(
+            "Approve third-party Stata package installation? "
+            f"package={package!r}, source={source!r}, "
+            f"package_source_from={package_source_from!r}, "
+            f"is_replace={is_replace!r}"
+        ),
+        schema=_AdoInstallApproval,
     )
+    if (
+        approval.action != "accept"
+        or approval.data is None
+        or approval.data.approved is not True
+    ):
+        raise PermissionError("Ado package installation was not approved by the user.")
 
-    source = validate_install_source(source)
-    package = validate_ado_package_name(package, source=source)
-    package_source_from = validate_net_source_location(package_source_from)
-
-    if config.IS_UNIX:
-        from .stata import GITHUB_Install, NET_Install, SSC_Install
-
-        SOURCE_MAPPING: Dict = {
-            "github": GITHUB_Install,
-            "net": NET_Install,
-            "ssc": SSC_Install
-        }
-        installer = SOURCE_MAPPING[source]
-
-        logging.info(f"Try to use {installer.__name__} to install {package}.")
-
-        # set the args for the special cases
-        args = [package, package_source_from] if source == "net" else [package]
-        install_msg = installer(config.STATA_CLI, is_replace, timeout=300).install(*args)
-
-        if installer.check_installed_from_msg(install_msg):
-            logging.info(f"{package} is installed successfully.")
-            try:
-                _load_help_cls().help(package, replace=True)
-            except Exception as e:
-                logging.warning(
-                    f"Could not refresh help cache for installed package '{package}': {e}"
-                )
-        else:
-            error_summary = installer.extract_error_summary(install_msg)
-            install_msg += (
-                f"\nError: Failed to install package '{package}' from source '{source}'. "
-                f"Details: {error_summary}"
-            )
-            if source == "github":
-                install_msg += (
-                    "\nPlease check the GitHub repo URL, verify case sensitivity, "
-                    "and ensure the GitHub command is installed in Stata"
-                )
-            logging.error(f"{package} installation failed.")
-            logging.debug(f"Full installation message: {install_msg}")
-
-        return install_msg
-    else:
-        from_message = f"from({package_source_from})" if (package_source_from and source == "net") else ""
-        replace_str = "replace" if is_replace else ""
-        tmp_file = write_dofile(f"{source} install {package}, {replace_str} {from_message}")
-        return stata_do(tmp_file, read_log_when_error=False).get("log_content")
+    return api_ado_package_install(
+        package=package,
+        source=source,
+        is_replace=is_replace,
+        package_source_from=package_source_from,
+        config_file=config.config_file,
+        confirm=True,
+    )
 
 
 # =============================================================================
@@ -640,10 +645,11 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
     "ado_package_install": {
         "description": (
             "Install a Stata ado package from SSC, GitHub, or net sources. "
-            "Use before running commands that require third-party packages."
+            "This high-risk tool requires explicit operator enablement and "
+            "per-call user confirmation."
         ),
         "func": ado_package_install,
-        "profiles": {"all"},
+        "profiles": {"unsafe"},
     },
     "write_dofile": {
         "description": "write the stata-code to dofile",
@@ -660,8 +666,13 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
     """Register tools and resources based on a selected profile."""
     global _registered_profile
 
-    if profile not in {"core", "all"}:
+    if profile not in {"core", "all", "unsafe"}:
         raise ValueError(f"Unsupported profile: {profile}")
+    if profile == "unsafe" and not config.ENABLE_ADO_INSTALL:
+        raise PermissionError(
+            "The unsafe profile is disabled. Set "
+            "SECURITY.ENABLE_ADO_INSTALL=true only in trusted environments."
+        )
 
     if _registered_profile == profile:
         return
@@ -676,7 +687,8 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
             continue
         if meta.get("deprecated") and not config.ENABLE_WRITE_DOFILE:
             continue
-        if profile not in meta["profiles"]:
+        eligible_profiles = {"all", "unsafe"} if profile == "unsafe" else {profile}
+        if not eligible_profiles.intersection(meta["profiles"]):
             continue
 
         tool_func: ToolFunc | None = meta.get("func")

@@ -15,7 +15,7 @@ from ...stata_controller import StataController
 class AdoInstallBase(ABC):
     def __init__(self,
                  stata_cli,
-                 is_replace: bool = True,
+                 is_replace: bool = False,
                  timeout: int = 300):
         self.stata_cli = stata_cli
         self.is_replace = is_replace

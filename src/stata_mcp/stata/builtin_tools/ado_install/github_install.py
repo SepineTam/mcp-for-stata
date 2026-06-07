@@ -7,14 +7,34 @@
 # @Email  : sepinetam@gmail.com
 # @File   : github_install.py
 
-from ....guard import validate_ado_package_name
+from collections.abc import Collection
+
+from ....guard import (
+    require_ado_install_confirmation,
+    validate_github_repository_allowed,
+)
 from ..help import StataHelp
 from .base import AdoInstallBase
 
 
 class GITHUB_Install(AdoInstallBase):
-    def install(self, package: str) -> str:
-        package = validate_ado_package_name(package, source="github")
+    def install(
+        self,
+        package: str,
+        *,
+        confirm: bool = False,
+        allowed_repositories: Collection[str] = (),
+    ) -> str:
+        require_ado_install_confirmation(confirm)
+        package = validate_github_repository_allowed(
+            package,
+            allowed_repositories=allowed_repositories,
+        )
+        if not self.IS_EXIST_GITHUB:
+            raise RuntimeError(
+                "The Stata github helper is not installed. Install and verify it "
+                "manually before using GitHub as an ado package source."
+            )
         install_command = f"github install {package}{self.REPLACE_MESSAGE}"
         runner_result = self.controller.run(install_command)
         return self._install_msg_template(runner_result)
@@ -22,16 +42,6 @@ class GITHUB_Install(AdoInstallBase):
     @property
     def IS_EXIST_GITHUB(self) -> bool:
         return StataHelp(self.stata_cli).check_command_exist_with_help("github")
-
-    def __post_initialization(self):
-        # if not exist `GitHub` command, install it.
-        if not self.IS_EXIST_GITHUB:
-            self.__install_github()
-
-    def __install_github(self):
-        install_command = 'net install github, from("https://haghish.github.io/github/")'
-        runner_result = self.controller.run(install_command)
-        return runner_result
 
     @staticmethod
     def check_install(message: str) -> bool:

