@@ -206,14 +206,14 @@ For more details, see [Security Guard Documentation](security.md).
 
 #### Third-Party Ado Installation
 
-`ado_package_install` is disabled by default because installed ado packages execute
-third-party code inside Stata. Enabling it requires all of the following:
+MCP exposure of `ado_package_install` is disabled by default because installed
+ado packages execute third-party code inside Stata. Enabling it for MCP requires
+all of the following:
 
 - Set `SECURITY.ENABLE_ADO_INSTALL = true`
 - Add each approved GitHub `owner/repository` to the exact repository allowlist
 - Start the MCP server with `stata-mcp server --unsafe`
-- Accept the MCP user-approval prompt for each MCP call, pass `confirm=True` for
-  each API call, or pass `--yes` for each CLI call
+- Accept the MCP user-approval prompt for each MCP call
 
 ```toml
 [SECURITY]
@@ -230,6 +230,9 @@ segments, duplicate slashes, and non-default ports are rejected.
 
 The GitHub allowlist validates only the repository name. It does not inspect or
 protect the repository contents. Review the repository before installation.
+
+The Python API does not require `SECURITY.ENABLE_ADO_INSTALL` or caller
+confirmation. CLI calls prompt interactively unless `-y` or `--yes` is supplied.
 
 ### PROJECT Section
 

@@ -2,10 +2,12 @@
 
 ## Overview
 
-The package installation module is a high-risk, opt-in interface for installing
-approved Stata packages. It is disabled by default and requires exact source
-validation plus explicit approval. GitHub repositories additionally require an
-exact repository allowlist.
+The package installation module is a high-risk interface for installing
+approved Stata packages. The MCP tool is disabled by default and requires
+client-mediated approval. CLI calls prompt unless `-y` or `--yes` is supplied.
+The Python API does not require caller confirmation. All interfaces validate
+command arguments, and GitHub repositories require an exact repository
+allowlist.
 
 ## Key Features
 
@@ -78,7 +80,7 @@ The module handles common installation scenarios:
 
 ```python
 # Python API example after enabling installation
-ado_package_install("estout", confirm=True)
+ado_package_install("estout")
 ```
 
 ## Notes

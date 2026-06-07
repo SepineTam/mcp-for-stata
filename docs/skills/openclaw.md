@@ -28,7 +28,7 @@ If you want to know more about MCP-for-Stata, visit its [documents](https://docs
 ## CLI Tools (Fallback, mainly used by OpenClaw)
 
 ```bash
-uvx stata-mcp tool ado-install <package> --yes [--source ssc|github|net]
+uvx stata-mcp tool ado-install <package> [-y|--yes] [--source ssc|github|net]
 uvx stata-mcp tool do <dofile_path> [--log-file-name <name>]
 uvx stata-mcp tool help <command>          # Unix only
 uvx stata-mcp tool data-info <data_path> [--vars-list var1 var2]
@@ -48,5 +48,5 @@ uvx stata-mcp tool read-log <log_path> [--output-format full|core|dict]
 - Requires valid Stata license
 - `help` only works on macOS/Linux
 - Security guard blocks dangerous commands (shell, rm, etc.)
-- Ado installation is disabled by default and requires client-mediated approval; GitHub additionally requires an exact repository allowlist
+- MCP ado installation is disabled by default and requires client-mediated approval; CLI prompts unless `-y`/`--yes` is supplied; GitHub additionally requires an exact repository allowlist
 - Log location: `<cwd>/.statamcp/stata-mcp-log/`

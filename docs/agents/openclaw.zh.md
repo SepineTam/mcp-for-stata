@@ -55,10 +55,10 @@ stata-mcp tool ado-install estout --yes --is-replace false
 | `--source` | 安装源：ssc / net / github | ssc |
 | `--package-source-from` | net 安装的源 URL | - |
 | `--is-replace` | 替换已存在的包文件 | false |
-| `--yes` | 确认已批准的第三方包和来源 | false |
+| `-y`、`--yes` | 跳过交互式安装确认 | false |
 
-安装默认禁用。SSC 和 net 包名只能包含 ASCII 字母与数字。GitHub 仓库必须命中
-精确白名单，并在安装前人工查验其内容。
+CLI 未传入 `-y` 或 `--yes` 时会进行交互确认。SSC 和 net 包名只能包含 ASCII
+字母与数字。GitHub 仓库必须命中精确白名单，并在安装前人工查验其内容。
 
 ---
 

@@ -24,7 +24,7 @@ from stata_mcp.api import (
 info = get_data_info("/path/to/data.dta")
 
 # Install an enabled and approved package
-result = ado_package_install("outreg2", source="ssc", confirm=True)
+result = ado_package_install("outreg2", source="ssc")
 
 # Execute a do-file
 log = stata_do("/path/to/analysis.do")
@@ -202,7 +202,6 @@ def ado_package_install(
     package_source_from: str = None,
     config_file: str | Path | None = None,
     timeout: int = 300,
-    confirm: bool = False,
 ) -> str:
     ...
 ```
@@ -217,10 +216,9 @@ def ado_package_install(
 | `package_source_from` | `str` | `None` | Validated HTTPS URL for `net` installations |
 | `config_file` | `str \| Path` | `None` | Custom config file path |
 | `timeout` | `int` | `300` | Timeout in seconds |
-| `confirm` | `bool` | `False` | Explicitly acknowledge the approved third-party installation |
 
 **Input validation**:
-- `SECURITY.ENABLE_ADO_INSTALL` must be true and every call must set `confirm=True`
+- The Python API does not require `SECURITY.ENABLE_ADO_INSTALL` or caller confirmation
 - SSC and net package names may contain only ASCII letters and numbers
 - GitHub repositories must use `owner/repository` format and match the exact repository allowlist
 - GitHub repository contents receive no security protection; inspect them before installation
@@ -233,21 +231,20 @@ def ado_package_install(
 
 ```python
 # Install from SSC
-result = ado_package_install("outreg2", confirm=True)
+result = ado_package_install("outreg2")
 
 # Install from GitHub
-result = ado_package_install("SepineTam/TexIV", source="github", confirm=True)
+result = ado_package_install("SepineTam/TexIV", source="github")
 
 # Install from network
 result = ado_package_install(
     "custompkg",
     source="net",
     package_source_from="https://example.com/stata",
-    confirm=True,
 )
 
 # Check installation status
-result = ado_package_install("estout", is_replace=False, confirm=True)
+result = ado_package_install("estout", is_replace=False)
 ```
 
 ---

@@ -148,7 +148,7 @@ stata-mcp tool read-log /path/to/output.log
 ```
 
 工具子命令：
-- `stata-mcp tool ado-install <package_name> --yes [--source ssc|net|github]`
+- `stata-mcp tool ado-install <package_name> [-y|--yes] [--source ssc|net|github]`
 - `stata-mcp tool do <dofile_path> [--read-log-when-error true|false] [--enable-smcl true|false]`
 - `stata-mcp tool help <command> [--read-log-when-error true|false] [--enable-smcl true|false]`
 - `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
@@ -156,7 +156,7 @@ stata-mcp tool read-log /path/to/output.log
 
 > 说明：`--read-log-when-error` 取代了旧的 `--is-read-log`。旧参数会无条件读取 log，新参数仅在底层执行报告错误时才读取 log。
 
-> `ado-install` 默认禁用，每次 CLI 安装还必须传入 `--yes`。SSC 和 net 包名只能
+> `ado-install` 未传入 `-y` 或 `--yes` 时会进行交互确认。SSC 和 net 包名只能
 > 包含 ASCII 字母与数字。GitHub 仓库必须命中精确仓库白名单，并在安装前人工查验。
 
 ### 配置管理

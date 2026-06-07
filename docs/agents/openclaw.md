@@ -55,11 +55,12 @@ stata-mcp tool ado-install estout --yes --is-replace false
 | `--source` | Installation source: ssc / net / github | ssc |
 | `--package-source-from` | Source URL for net installations | - |
 | `--is-replace` | Replace existing package files | false |
-| `--yes` | Confirm the approved third-party package and source | false |
+| `-y`, `--yes` | Skip the interactive installation confirmation | false |
 
-Installation is disabled by default. SSC and net package names may contain only
-ASCII letters and numbers. GitHub repositories require an exact allowlist and
-their contents must be inspected before installation.
+Without `-y` or `--yes`, the CLI asks for interactive confirmation. SSC and net
+package names may contain only ASCII letters and numbers. GitHub repositories
+require an exact allowlist and their contents must be inspected before
+installation.
 
 ---
 

@@ -2,8 +2,9 @@
 
 ## 概述
 
-包安装模块是一个高风险、按需启用的接口，只用于安装已批准的 Stata 包。它默认
-禁用，并要求严格来源校验和显式批准。GitHub 仓库还必须命中精确仓库白名单。
+包安装模块是一个用于安装已批准 Stata 包的高风险接口。MCP 工具默认禁用，并要求
+客户端批准。CLI 未传入 `-y` 或 `--yes` 时会进行交互确认。Python API 不要求调用
+方确认。所有入口都会校验命令参数，GitHub 仓库还必须命中精确仓库白名单。
 
 ## 关键功能
 
@@ -76,7 +77,7 @@
 
 ```python
 # 启用安装后使用 Python API
-ado_package_install("estout", confirm=True)
+ado_package_install("estout")
 ```
 
 ## 注意事项

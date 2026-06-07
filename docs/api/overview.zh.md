@@ -24,7 +24,7 @@ from stata_mcp.api import (
 info = get_data_info("/path/to/data.dta")
 
 # 安装已启用且批准的包
-result = ado_package_install("outreg2", source="ssc", confirm=True)
+result = ado_package_install("outreg2", source="ssc")
 
 # 执行 do 文件
 log = stata_do("/path/to/analysis.do")
@@ -202,7 +202,6 @@ def ado_package_install(
     package_source_from: str = None,
     config_file: str | Path | None = None,
     timeout: int = 300,
-    confirm: bool = False,
 ) -> str:
     ...
 ```
@@ -217,10 +216,9 @@ def ado_package_install(
 | `package_source_from` | `str` | `None` | `net` 安装使用的经过校验的 HTTPS URL |
 | `config_file` | `str \| Path` | `None` | 自定义配置文件路径 |
 | `timeout` | `int` | `300` | 超时时间（秒） |
-| `confirm` | `bool` | `False` | 显式确认已批准的第三方安装 |
 
 **输入校验**：
-- 必须启用 `SECURITY.ENABLE_ADO_INSTALL`，且每次调用传入 `confirm=True`
+- Python API 不要求 `SECURITY.ENABLE_ADO_INSTALL` 或调用方确认
 - SSC 和 net 包名只能包含 ASCII 字母与数字
 - GitHub 仓库必须使用 `owner/repository` 格式并命中精确仓库白名单
 - GitHub 仓库内容没有安全防护，安装前必须人工查验
@@ -233,21 +231,20 @@ def ado_package_install(
 
 ```python
 # 从 SSC 安装
-result = ado_package_install("outreg2", confirm=True)
+result = ado_package_install("outreg2")
 
 # 从 GitHub 安装
-result = ado_package_install("SepineTam/TexIV", source="github", confirm=True)
+result = ado_package_install("SepineTam/TexIV", source="github")
 
 # 从网络安装
 result = ado_package_install(
     "custompkg",
     source="net",
     package_source_from="https://example.com/stata",
-    confirm=True,
 )
 
 # 检查安装状态
-result = ado_package_install("estout", is_replace=False, confirm=True)
+result = ado_package_install("estout", is_replace=False)
 ```
 
 ---

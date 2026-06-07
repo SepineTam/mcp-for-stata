@@ -206,14 +206,13 @@ hash_length = 12
 
 #### 第三方 Ado 包安装
 
-`ado_package_install` 默认禁用，因为安装后的 ado 包会在 Stata 中执行第三方代码。
-启用时必须同时满足以下条件：
+默认禁止通过 MCP 暴露 `ado_package_install`，因为安装后的 ado 包会在 Stata 中
+执行第三方代码。通过 MCP 启用时必须同时满足以下条件：
 
 - 设置 `SECURITY.ENABLE_ADO_INSTALL = true`
 - 将每个已批准的 GitHub `owner/repository` 加入精确仓库白名单
 - MCP server 必须通过 `stata-mcp server --unsafe` 启动
-- 每次 MCP 调用接受客户端弹出的用户批准请求；每次 API 调用传入 `confirm=True`；
-  每次 CLI 调用传入 `--yes`
+- 每次 MCP 调用接受客户端弹出的用户批准请求
 
 ```toml
 [SECURITY]
@@ -228,6 +227,9 @@ ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = ["SepineTam/TexIV"]
 重复斜杠和非默认端口都会被拒绝。
 
 GitHub 白名单只校验仓库名称，不会检查或保护仓库内容。安装前必须人工查验仓库。
+
+Python API 不要求 `SECURITY.ENABLE_ADO_INSTALL` 或调用方确认。CLI 未传入 `-y` 或
+`--yes` 时会进行交互确认。
 
 ### PROJECT 分区
 

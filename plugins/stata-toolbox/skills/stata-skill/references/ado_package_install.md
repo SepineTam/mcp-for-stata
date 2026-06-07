@@ -19,13 +19,16 @@ Install a Stata ado package from SSC, GitHub, or net sources.
 - `source` must be exactly `ssc`, `github`, or `net`; unknown values are rejected
 - Local paths, IP hosts, credentials, queries, fragments, and non-default ports are rejected
 - Every MCP call elicits approval from the user through the client and fails closed without it
+- The Python API does not require caller confirmation
+- The CLI prompts interactively unless `-y` or `--yes` is supplied
 - Validation occurs again immediately before the installer sends a command to Stata
 
 ## Operator Setup
 
-Configure the GitHub repository allowlist in `~/.statamcp/config.toml`, then start the MCP
-server with `stata-mcp server --unsafe`. The plugin's default MCP configuration
-does not expose this high-risk tool.
+Configure the GitHub repository allowlist in `~/.statamcp/config.toml`. To
+expose the MCP tool, enable installation and start the MCP server with
+`stata-mcp server --unsafe`. The plugin's default MCP configuration does not
+expose this high-risk tool.
 
 ```toml
 [SECURITY]
