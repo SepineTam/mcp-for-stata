@@ -7,11 +7,14 @@
 # @Email  : sepinetam@gmail.com
 # @File   : net_install.py
 
+from ....guard import validate_ado_package_name, validate_net_source_location
 from .base import AdoInstallBase
 
 
 class NET_Install(AdoInstallBase):
     def install(self, package: str, directory_or_url: str = None) -> str:
+        package = validate_ado_package_name(package, source="net")
+        directory_or_url = validate_net_source_location(directory_or_url)
         ex_from = ", " if directory_or_url and not self.REPLACE_MESSAGE else ""
         from_message = f"{ex_from} from({directory_or_url})" if directory_or_url else ""
 

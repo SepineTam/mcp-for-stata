@@ -7,17 +7,14 @@
 # @Email  : sepinetam@gmail.com
 # @File   : stata_help.py
 
-import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from ....guard import validate_stata_identifier
 from ...stata_controller import StataController
 
 if TYPE_CHECKING:
     from ...config import Config
-
-
-STATA_COMMAND_NAME_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 class StataHelp:
@@ -114,17 +111,7 @@ class StataHelp:
     @staticmethod
     def _validate_command_name(cmd: str) -> str:
         """Return a normalized Stata command name or reject unsafe input."""
-        if not isinstance(cmd, str):
-            raise TypeError("Stata command name must be a string.")
-
-        command = cmd.strip()
-        if not STATA_COMMAND_NAME_PATTERN.fullmatch(command):
-            raise ValueError(
-                "Invalid Stata command name. "
-                "It must start with a letter or underscore and contain only "
-                "letters, numbers, and underscores."
-            )
-        return command
+        return validate_stata_identifier(cmd, field_name="Stata command name")
 
     def _cache_and_save(self, cmd: str, content: str, force: bool = False) -> None:
         if force or self.IS_CACHE:

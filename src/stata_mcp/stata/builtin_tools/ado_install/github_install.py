@@ -7,12 +7,14 @@
 # @Email  : sepinetam@gmail.com
 # @File   : github_install.py
 
+from ....guard import validate_ado_package_name
 from ..help import StataHelp
 from .base import AdoInstallBase
 
 
 class GITHUB_Install(AdoInstallBase):
     def install(self, package: str) -> str:
+        package = validate_ado_package_name(package, source="github")
         install_command = f"github install {package}{self.REPLACE_MESSAGE}"
         runner_result = self.controller.run(install_command)
         return self._install_msg_template(runner_result)

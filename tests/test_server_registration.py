@@ -242,3 +242,26 @@ def test_mcp_ado_install_refreshes_help_after_success(
     mcp_servers.ado_package_install("reghdfe")
 
     refresh_help.assert_called_once_with("reghdfe", replace=True)
+
+
+def test_mcp_ado_install_rejects_unsafe_package_before_installer(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    mcp_servers, _ = loaded_modules
+    installer = Mock()
+    fake_stata = ModuleType("stata_mcp.stata")
+    fake_stata.GITHUB_Install = installer
+    fake_stata.NET_Install = installer
+    fake_stata.SSC_Install = installer
+    monkeypatch.setitem(sys.modules, "stata_mcp.stata", fake_stata)
+    monkeypatch.setattr(
+        mcp_servers,
+        "config",
+        SimpleNamespace(IS_UNIX=True, STATA_CLI="stata"),
+    )
+
+    with pytest.raises(ValueError, match="Invalid ado package name"):
+        mcp_servers.ado_package_install("reghdfe\nshell echo pwn")
+
+    installer.assert_not_called()

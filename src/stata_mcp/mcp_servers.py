@@ -330,7 +330,15 @@ def ado_package_install(
     Notes:
         SSC installs can be slow; skip if the package is likely already installed.
     """
-    source = source.lower()
+    from .guard import (
+        validate_ado_package_name,
+        validate_install_source,
+        validate_net_source_location,
+    )
+
+    source = validate_install_source(source)
+    package = validate_ado_package_name(package, source=source)
+    package_source_from = validate_net_source_location(package_source_from)
 
     if config.IS_UNIX:
         from .stata import GITHUB_Install, NET_Install, SSC_Install
@@ -340,7 +348,7 @@ def ado_package_install(
             "net": NET_Install,
             "ssc": SSC_Install
         }
-        installer = SOURCE_MAPPING.get(source, SSC_Install)
+        installer = SOURCE_MAPPING[source]
 
         logging.info(f"Try to use {installer.__name__} to install {package}.")
 

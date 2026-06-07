@@ -9,6 +9,11 @@
 
 from pathlib import Path
 
+from ..guard import (
+    validate_ado_package_name,
+    validate_install_source,
+    validate_net_source_location,
+)
 from ..stata import GITHUB_Install, NET_Install, SSC_Install
 from ._runtime import create_runtime_context
 from .stata_do import stata_do
@@ -30,11 +35,13 @@ def ado_package_install(
     timeout: int = 300,
 ) -> str:
     """Install an ado package from SSC, net, or GitHub."""
+    source = validate_install_source(source)
+    package = validate_ado_package_name(package, source=source)
+    package_source_from = validate_net_source_location(package_source_from)
     runtime = create_runtime_context(config_file=config_file, require_stata=True)
-    source = source.lower()
 
     if runtime.is_unix:
-        installer_cls = SOURCE_MAPPING.get(source, SSC_Install)
+        installer_cls = SOURCE_MAPPING[source]
         install_args = [package, package_source_from] if source == "net" else [package]
         install_message = installer_cls(runtime.stata_cli, is_replace, timeout=timeout).install(*install_args)
 

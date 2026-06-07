@@ -21,9 +21,19 @@ Usage:
 """
 
 from .validator import GuardValidator, RiskItem, SecurityReport
+from .input_validation import (
+    validate_ado_package_name,
+    validate_install_source,
+    validate_net_source_location,
+    validate_stata_identifier,
+)
 
 __all__ = [
     "GuardValidator",
     "RiskItem",
     "SecurityReport",
+    "validate_ado_package_name",
+    "validate_install_source",
+    "validate_net_source_location",
+    "validate_stata_identifier",
 ]

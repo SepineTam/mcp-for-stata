@@ -7,11 +7,13 @@
 # @Email  : sepinetam@gmail.com
 # @File   : ssc_install.py
 
+from ....guard import validate_ado_package_name
 from .base import AdoInstallBase
 
 
 class SSC_Install(AdoInstallBase):
     def install(self, package: str) -> str:
+        package = validate_ado_package_name(package, source="ssc")
         install_command = f"ssc install {package}{self.REPLACE_MESSAGE}"
         runner_result = self.controller.run(install_command)
         return self._install_msg_template(runner_result)
