@@ -7,6 +7,7 @@ import logging
 import sys
 from argparse import Namespace
 from types import ModuleType, SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
@@ -201,3 +202,43 @@ def test_handle_server_respects_core_profile_flag(monkeypatch: pytest.MonkeyPatc
 
     assert calls["profile"] == "core"
     assert calls["transport"] == "stdio"
+
+
+def test_mcp_ado_install_refreshes_help_after_success(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    mcp_servers, _ = loaded_modules
+    help_reader = SimpleNamespace(help=lambda *args, **kwargs: None)
+    refresh_help = Mock(wraps=help_reader.help)
+
+    class _Installer:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def install(self, package: str) -> str:
+            return "Installation State: True"
+
+        @staticmethod
+        def check_installed_from_msg(message: str) -> bool:
+            return True
+
+    fake_stata = ModuleType("stata_mcp.stata")
+    fake_stata.GITHUB_Install = _Installer
+    fake_stata.NET_Install = _Installer
+    fake_stata.SSC_Install = _Installer
+    monkeypatch.setitem(sys.modules, "stata_mcp.stata", fake_stata)
+    monkeypatch.setattr(
+        mcp_servers,
+        "config",
+        SimpleNamespace(IS_UNIX=True, STATA_CLI="stata"),
+    )
+    monkeypatch.setattr(
+        mcp_servers,
+        "_load_help_cls",
+        lambda: SimpleNamespace(help=refresh_help),
+    )
+
+    mcp_servers.ado_package_install("reghdfe")
+
+    refresh_help.assert_called_once_with("reghdfe", replace=True)

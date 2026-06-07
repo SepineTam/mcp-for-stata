@@ -350,6 +350,12 @@ def ado_package_install(
 
         if installer.check_installed_from_msg(install_msg):
             logging.info(f"{package} is installed successfully.")
+            try:
+                _load_help_cls().help(package, replace=True)
+            except Exception as e:
+                logging.warning(
+                    f"Could not refresh help cache for installed package '{package}': {e}"
+                )
         else:
             error_summary = installer.extract_error_summary(install_msg)
             install_msg += (

@@ -17,6 +17,7 @@ def stata_help(
     cmd: str,
     enable_smcl: bool = True,
     config_file: str | Path | None = None,
+    replace: bool = False,
 ) -> str:
     """Return help content for a Stata command through a one-shot helper."""
     runtime = create_runtime_context(config_file=config_file, require_stata=True)
@@ -27,4 +28,4 @@ def stata_help(
         cache_dir=runtime.config.HELP_CACHE_DIR,
         config=runtime.config,
     )
-    return help_reader.help(cmd)
+    return help_reader.help(cmd, replace=replace)

@@ -7,6 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : stata_help.py
 
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -16,13 +17,16 @@ if TYPE_CHECKING:
     from ...config import Config
 
 
+STATA_COMMAND_NAME_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
 class StataHelp:
     def __init__(
-            self,
-            stata_cli: str,
-            project_tmp_dir: Path | None = None,
-            cache_dir: Path | None = None,
-            config: "Config | None" = None,
+        self,
+        stata_cli: str,
+        project_tmp_dir: Path | None = None,
+        cache_dir: Path | None = None,
+        config: "Config | None" = None,
     ):
         self._config = config
         self.help_cache_dir = cache_dir or (
@@ -47,13 +51,13 @@ class StataHelp:
         return False
 
     def help(self, cmd: str, replace: bool = False) -> str:
+        cmd = self._validate_command_name(cmd)
+
         if not replace:
-            saved_help_result = self.load_from_project(cmd)
-            cached_help_result = self.load_from_cache(cmd)
-            if saved_help_result and self.IS_SAVE:
-                return f"Saved result for {cmd}\n" + saved_help_result
-            if cached_help_result and self.IS_CACHE:
-                return f"Cached result for {cmd}\n" + cached_help_result
+            cached_help_result = self._load_latest_cached_help(cmd)
+            if cached_help_result is not None:
+                cache_label, help_content = cached_help_result
+                return f"{cache_label} result for {cmd}\n" + help_content
 
         # If no cached help found, get from Stata
         try:
@@ -64,16 +68,77 @@ class StataHelp:
         self._cache_and_save(cmd, content=help_result, force=replace)
         return help_result
 
+    def _load_latest_cached_help(self, cmd: str) -> tuple[str, str] | None:
+        """Return the newest help result from the enabled cache locations."""
+        candidates: list[tuple[int, int, str, Path]] = []
+
+        if self.IS_SAVE and self.project_tmp_dir is not None:
+            project_help_file = self.project_tmp_dir / f"help__{cmd}.txt"
+            self._add_cache_candidate(
+                candidates,
+                path=project_help_file,
+                priority=1,
+                label="Saved",
+            )
+
+        if self.IS_CACHE:
+            cached_help_file = self.help_cache_dir / f"help__{cmd}.txt"
+            self._add_cache_candidate(
+                candidates,
+                path=cached_help_file,
+                priority=0,
+                label="Cached",
+            )
+
+        for _, _, label, path in sorted(candidates, reverse=True):
+            content = self._load_from_file(path)
+            if content:
+                return label, content
+        return None
+
+    @staticmethod
+    def _add_cache_candidate(
+        candidates: list[tuple[int, int, str, Path]],
+        *,
+        path: Path,
+        priority: int,
+        label: str,
+    ) -> None:
+        """Add an existing cache file to the freshness-ordered candidate list."""
+        try:
+            modified_at = path.stat().st_mtime_ns
+        except FileNotFoundError:
+            return
+        candidates.append((modified_at, priority, label, path))
+
+    @staticmethod
+    def _validate_command_name(cmd: str) -> str:
+        """Return a normalized Stata command name or reject unsafe input."""
+        if not isinstance(cmd, str):
+            raise TypeError("Stata command name must be a string.")
+
+        command = cmd.strip()
+        if not STATA_COMMAND_NAME_PATTERN.fullmatch(command):
+            raise ValueError(
+                "Invalid Stata command name. "
+                "Only letters, numbers, and underscores are allowed."
+            )
+        return command
+
     def _cache_and_save(self, cmd: str, content: str, force: bool = False) -> None:
         if force or self.IS_CACHE:
             try:
-                with open(self.help_cache_dir / f"help__{cmd}.txt", "w", encoding="utf-8") as f:
+                with open(
+                    self.help_cache_dir / f"help__{cmd}.txt", "w", encoding="utf-8"
+                ) as f:
                     f.write(content)
             except Exception:
                 pass
         if (force or self.IS_SAVE) and self.project_tmp_dir is not None:
             try:
-                with open(self.project_tmp_dir / f"help__{cmd}.txt", "w", encoding="utf-8") as f:
+                with open(
+                    self.project_tmp_dir / f"help__{cmd}.txt", "w", encoding="utf-8"
+                ) as f:
                     f.write(content)
             except Exception:
                 pass
@@ -108,9 +173,13 @@ class StataHelp:
         if help_result != std_error_msg:
             return help_result
         else:
-            raise Exception("No help found for the command in Stata ado locally: " + cmd)
+            raise Exception(
+                "No help found for the command in Stata ado locally: " + cmd
+            )
 
     def check_command_exist_with_help(self, cmd: str) -> bool:
+        cmd = self._validate_command_name(cmd)
+
         std_error_msg = (
             f"help {cmd}\r\n"
             f"help for {cmd} not found\r\n"

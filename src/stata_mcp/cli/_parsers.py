@@ -176,6 +176,12 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
         default=True,
         help_text="Generate the SMCL log file",
     )
+    add_bool_argument(
+        tool_help_parser,
+        "--replace",
+        default=False,
+        help_text="Bypass cached help and refresh it from Stata",
+    )
 
     tool_data_info_parser = tool_subparsers.add_parser(
         "data-info",
