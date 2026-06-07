@@ -42,6 +42,11 @@ IS_SAVE = true
 
 [SECURITY]
 IS_GUARD = true
+ENABLE_ADO_INSTALL = false
+ADO_INSTALL_ALLOWED_SSC_PACKAGES = []
+ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = []
+ADO_INSTALL_ALLOWED_NET_HOSTS = []
+ADO_INSTALL_ALLOWED_NET_SOURCES = []
 
 [PROJECT]
 WORKING_DIR = ""
@@ -201,6 +206,35 @@ hash_length = 12
   ```
 
 更多详情请参阅[安全守卫文档](security.md)。
+
+#### 第三方 Ado 包安装
+
+`ado_package_install` 默认禁用，因为安装后的 ado 包会在 Stata 中执行第三方代码。
+启用时必须同时满足以下条件：
+
+- 设置 `SECURITY.ENABLE_ADO_INSTALL = true`
+- 将准确的 SSC 包名、GitHub `owner/repository`，或 net HTTPS 主机名及精确来源
+  URL 加入对应白名单
+- MCP server 必须通过 `stata-mcp server --unsafe` 启动
+- 每次 MCP 调用接受客户端弹出的用户批准请求；每次 API 调用传入 `confirm=True`；
+  每次 CLI 调用传入 `--yes`
+
+```toml
+[SECURITY]
+ENABLE_ADO_INSTALL = true
+ADO_INSTALL_ALLOWED_SSC_PACKAGES = ["reghdfe", "estout"]
+ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = ["SepineTam/TexIV"]
+ADO_INSTALL_ALLOWED_NET_HOSTS = ["packages.example.com"]
+ADO_INSTALL_ALLOWED_NET_SOURCES = ["https://packages.example.com/stata"]
+```
+
+对应环境变量为 `STATA_MCP__ENABLE_ADO_INSTALL`、
+`STATA_MCP__ADO_INSTALL_ALLOWED_SSC_PACKAGES`、
+`STATA_MCP__ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES` 和
+`STATA_MCP__ADO_INSTALL_ALLOWED_NET_HOSTS` 和
+`STATA_MCP__ADO_INSTALL_ALLOWED_NET_SOURCES`。白名单环境变量使用逗号分隔。
+net 来源必须同时匹配已加入白名单的 HTTPS 主机和精确来源 URL；本地路径、
+IP 地址主机、凭据、查询参数、片段、点路径段、重复斜杠和非默认端口都会被拒绝。
 
 ### PROJECT 分区
 

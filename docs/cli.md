@@ -39,22 +39,26 @@ stata-mcp -t http
 Use the `server` subcommand to control which MCP tools are registered:
 
 ```bash
-# All tools, stdio transport (same as bare command)
+# Standard tools, stdio transport (same as bare command)
 stata-mcp server
 
 # Core tools only (stata_do, get_data_info, help)
 stata-mcp server --core
 
-# All tools with HTTP transport
+# Standard tools with HTTP transport
 stata-mcp server --all -t http
+
+# Standard tools plus high-risk ado installation
+stata-mcp server --unsafe
 
 # Core tools with SSE transport
 stata-mcp server --core -t sse
 ```
 
 **Tool Profiles:**
-- `--all` - Register all available tools (default)
+- `--all` - Register standard tools, excluding high-risk installation (default)
 - `--core` - Register only core tools: `stata_do`, `get_data_info`, `help`
+- `--unsafe` - Add `ado_package_install`; requires `SECURITY.ENABLE_ADO_INSTALL=true`
 
 **Transport Options:**
 - `stdio` - Standard input/output (default)
@@ -127,8 +131,8 @@ stata-mcp update --method homebrew  # brew upgrade
 Run API-backed Stata tools directly from the CLI:
 
 ```bash
-# Install an ado package from SSC (default source)
-stata-mcp tool ado-install reghdfe
+# Install an explicitly allowlisted ado package from SSC
+stata-mcp tool ado-install reghdfe --yes
 
 # Run a do-file and only read the log when execution fails
 stata-mcp tool do /path/to/analysis.do --read-log-when-error true
@@ -144,13 +148,16 @@ stata-mcp tool read-log /path/to/output.log
 ```
 
 Tool subcommands:
-- `stata-mcp tool ado-install <package_name> [--source ssc|net|github]`
+- `stata-mcp tool ado-install <package_name> --yes [--source ssc|net|github]`
 - `stata-mcp tool do <dofile_path> [--read-log-when-error true|false] [--enable-smcl true|false]`
 - `stata-mcp tool help <command> [--read-log-when-error true|false] [--enable-smcl true|false]`
 - `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
 - `stata-mcp tool read-log <log_path> [--output-format full|core|dict]`
 
 > Note: `--read-log-when-error` replaces the older `--is-read-log` flag. Unlike the old flag (which unconditionally read the log), the new flag reads the log only when the underlying execution reports an error.
+
+> `ado-install` is disabled by default. Enable it and configure exact source
+> allowlists under `[SECURITY]`; every CLI installation also requires `--yes`.
 
 ### Config Management
 
@@ -249,7 +256,8 @@ uvx stata-mcp sandbox-install \
 | Option | Description |
 |--------|-------------|
 | `--core` | Register only core tools (stata_do, get_data_info, help) |
-| `--all` | Register all tools (default) |
+| `--all` | Register standard tools, excluding high-risk installation (default) |
+| `--unsafe` | Add high-risk ado installation; requires explicit security configuration |
 | `-t`, `--transport` | MCP transport method (stdio/sse/http) |
 
 ### Global Options

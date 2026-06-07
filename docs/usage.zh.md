@@ -124,8 +124,8 @@ MCP-for-Stata 在 MCP 服务器之外还提供了多个实用命令。
 # 运行诊断
 stata-mcp doctor
 
-# 安装 ado 包
-stata-mcp tool ado-install reghdfe
+# 安装已启用并加入白名单的 ado 包
+stata-mcp tool ado-install reghdfe --yes
 
 # 查看数据集
 stata-mcp tool data-info /path/to/data.dta

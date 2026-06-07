@@ -34,17 +34,17 @@ stata-mcp tool --help
 Install ado packages from SSC, GitHub, or network sources.
 
 ```bash
-# Install from SSC (default)
-stata-mcp tool ado-install outreg2
+# Install an allowlisted SSC package after approval
+stata-mcp tool ado-install outreg2 --yes
 
 # Install from GitHub
-stata-mcp tool ado-install SepineTam/TexIV --source github
+stata-mcp tool ado-install SepineTam/TexIV --source github --yes
 
 # Install from network
-stata-mcp tool ado-install custompkg --source net --package-source-from "https://example.com/stata/"
+stata-mcp tool ado-install custompkg --source net --package-source-from "https://example.com/stata/" --yes
 
 # Don't replace existing package (useful for checking installation status)
-stata-mcp tool ado-install estout --is-replace false
+stata-mcp tool ado-install estout --yes --is-replace false
 ```
 
 **Parameters**:
@@ -54,7 +54,11 @@ stata-mcp tool ado-install estout --is-replace false
 | `package_name` | Package name (required) | - |
 | `--source` | Installation source: ssc / net / github | ssc |
 | `--package-source-from` | Source URL for net installations | - |
-| `--is-replace` | Replace existing package files | true |
+| `--is-replace` | Replace existing package files | false |
+| `--yes` | Confirm the approved third-party package and source | false |
+
+Installation is disabled by default and requires exact source allowlists under
+`[SECURITY]`. Net sources must use an allowlisted HTTPS hostname.
 
 ---
 
@@ -184,8 +188,8 @@ stata-mcp tool data-info /project/data/raw/survey.dta
 # 2. Get command help
 stata-mcp tool help regress
 
-# 3. Install required packages
-stata-mcp tool ado-install outreg2
+# 3. Install an enabled and allowlisted package after approval
+stata-mcp tool ado-install outreg2 --yes
 
 # 4. Execute analysis script
 stata-mcp tool do /project/stata-mcp-dofile/analysis.do

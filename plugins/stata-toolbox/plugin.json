@@ -1,6 +1,6 @@
 {
   "name": "stata-toolbox",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "The official working package of MCP-for-Stata plugin, including mcp config and stata lsp.",
   "author": {
     "name": "Song Tan",

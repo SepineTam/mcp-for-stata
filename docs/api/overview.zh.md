@@ -23,8 +23,8 @@ from stata_mcp.api import (
 # 获取数据信息
 info = get_data_info("/path/to/data.dta")
 
-# 安装包
-result = ado_package_install("outreg2", source="ssc")
+# 经批准后安装已启用且加入白名单的包
+result = ado_package_install("outreg2", source="ssc", confirm=True)
 
 # 执行 do 文件
 log = stata_do("/path/to/analysis.do")
@@ -198,10 +198,11 @@ print(info["vars_detail"].keys())  # 变量名
 def ado_package_install(
     package: str,
     source: str = "ssc",
-    is_replace: bool = True,
+    is_replace: bool = False,
     package_source_from: str = None,
     config_file: str | Path | None = None,
     timeout: int = 300,
+    confirm: bool = False,
 ) -> str:
     ...
 ```
@@ -212,16 +213,18 @@ def ado_package_install(
 |------|------|--------|------|
 | `package` | `str` | 必填 | 包名或 GitHub 的 `user/repo` |
 | `source` | `str` | `"ssc"` | 安装源：`ssc` / `net` / `github` |
-| `is_replace` | `bool` | `True` | 替换已存在的包 |
-| `package_source_from` | `str` | `None` | `net` 安装的源 URL |
+| `is_replace` | `bool` | `False` | 替换已存在的包 |
+| `package_source_from` | `str` | `None` | `net` 安装使用的已允许 HTTPS URL |
 | `config_file` | `str \| Path` | `None` | 自定义配置文件路径 |
 | `timeout` | `int` | `300` | 超时时间（秒） |
+| `confirm` | `bool` | `False` | 显式确认已批准的第三方安装 |
 
 **输入校验**：
-- SSC 和 net 包名必须是 Stata 标识符：以字母或下划线开头，后续仅包含字母、数字或下划线
-- GitHub 包必须使用安全的 `owner/repository` 格式
+- 必须启用 `SECURITY.ENABLE_ADO_INSTALL`，且每次调用传入 `confirm=True`
+- SSC 包和 GitHub 仓库必须位于各自的精确白名单中
+- net 包必须同时匹配已加入白名单的 HTTPS 主机和精确来源 URL
 - `source` 必须严格为 `ssc`、`net` 或 `github`；未知值会被拒绝
-- net 来源位置不能包含空白字符、Stata 语法分隔符或宏标记
+- 本地路径、IP 主机、凭据、查询参数、片段、点路径段、重复斜杠和非默认端口都会被拒绝
 
 **返回值**：`str`（安装日志或错误信息）
 
@@ -229,20 +232,21 @@ def ado_package_install(
 
 ```python
 # 从 SSC 安装
-result = ado_package_install("outreg2")
+result = ado_package_install("outreg2", confirm=True)
 
 # 从 GitHub 安装
-result = ado_package_install("SepineTam/TexIV", source="github")
+result = ado_package_install("SepineTam/TexIV", source="github", confirm=True)
 
 # 从网络安装
 result = ado_package_install(
     "custompkg",
     source="net",
-    package_source_from="https://example.com/stata/",
+    package_source_from="https://example.com/stata",
+    confirm=True,
 )
 
 # 检查安装状态
-result = ado_package_install("estout", is_replace=False)
+result = ado_package_install("estout", is_replace=False, confirm=True)
 ```
 
 ---

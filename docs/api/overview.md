@@ -23,8 +23,8 @@ from stata_mcp.api import (
 # Get data information
 info = get_data_info("/path/to/data.dta")
 
-# Install a package
-result = ado_package_install("outreg2", source="ssc")
+# Install an enabled and allowlisted package after approval
+result = ado_package_install("outreg2", source="ssc", confirm=True)
 
 # Execute a do-file
 log = stata_do("/path/to/analysis.do")
@@ -198,10 +198,11 @@ Install an ado package from SSC, net, or GitHub.
 def ado_package_install(
     package: str,
     source: str = "ssc",
-    is_replace: bool = True,
+    is_replace: bool = False,
     package_source_from: str = None,
     config_file: str | Path | None = None,
     timeout: int = 300,
+    confirm: bool = False,
 ) -> str:
     ...
 ```
@@ -212,16 +213,18 @@ def ado_package_install(
 |-----------|------|---------|-------------|
 | `package` | `str` | required | Package name or `user/repo` for GitHub |
 | `source` | `str` | `"ssc"` | Installation source: `ssc` / `net` / `github` |
-| `is_replace` | `bool` | `True` | Replace existing package |
-| `package_source_from` | `str` | `None` | Source URL for `net` installations |
+| `is_replace` | `bool` | `False` | Replace existing package |
+| `package_source_from` | `str` | `None` | Allowlisted HTTPS URL for `net` installations |
 | `config_file` | `str \| Path` | `None` | Custom config file path |
 | `timeout` | `int` | `300` | Timeout in seconds |
+| `confirm` | `bool` | `False` | Explicitly acknowledge the approved third-party installation |
 
 **Input validation**:
-- SSC and net package names must be Stata identifiers: start with a letter or underscore, followed by letters, numbers, or underscores
-- GitHub packages must use a safe `owner/repository` value
+- `SECURITY.ENABLE_ADO_INSTALL` must be true and every call must set `confirm=True`
+- SSC packages and GitHub repositories must be present in their exact allowlists
+- Net packages must match an allowlisted HTTPS hostname and exact source URL
 - `source` must be exactly `ssc`, `net`, or `github`; unknown values are rejected
-- Net source locations cannot contain whitespace or Stata syntax and macro delimiters
+- Local paths, IP hosts, credentials, queries, fragments, dot segments, duplicate slashes, and non-default ports are rejected
 
 **Returns**: `str` (installation log or error message)
 
@@ -229,20 +232,21 @@ def ado_package_install(
 
 ```python
 # Install from SSC
-result = ado_package_install("outreg2")
+result = ado_package_install("outreg2", confirm=True)
 
 # Install from GitHub
-result = ado_package_install("SepineTam/TexIV", source="github")
+result = ado_package_install("SepineTam/TexIV", source="github", confirm=True)
 
 # Install from network
 result = ado_package_install(
     "custompkg",
     source="net",
-    package_source_from="https://example.com/stata/",
+    package_source_from="https://example.com/stata",
+    confirm=True,
 )
 
 # Check installation status
-result = ado_package_install("estout", is_replace=False)
+result = ado_package_install("estout", is_replace=False, confirm=True)
 ```
 
 ---

@@ -1,6 +1,6 @@
 # MCP.Tools
 
-Tools are partitioned into two profiles inside `_TOOL_REGISTRY`. `stata-mcp server --core` registers only `stata_do`, `get_data_info`, and `help`. `stata-mcp server --all` (the default) registers every tool in the registry. The `help` tool carries an `unix_only` flag and is filtered out on Windows during `register_tools()`. The `write_dofile` tool is flagged deprecated and is skipped unless `ENABLE_WRITE_DOFILE` (TOML `[BETA]` section or env `STATA_MCP__ENABLE_WRITE_DOFILE`) is set to `true`.
+Tools are partitioned into three profiles inside `_TOOL_REGISTRY`. `stata-mcp server --core` registers only `stata_do`, `get_data_info`, and `help`. `stata-mcp server --all` (the default) registers standard tools but excludes high-risk third-party installation. `stata-mcp server --unsafe` adds `ado_package_install` only when `SECURITY.ENABLE_ADO_INSTALL=true`. The `help` tool is filtered out on Windows. The deprecated `write_dofile` tool is skipped unless `ENABLE_WRITE_DOFILE=true`.
 
 ---
 ## get_data_info
@@ -243,7 +243,7 @@ Error handling covers: `FileNotFoundError` for missing files, `IOError` for I/O 
 ```python
 def ado_package_install(package: str,
                         source: str = "ssc",
-                        is_replace: bool = True,
+                        is_replace: bool = False,
                         package_source_from: str | None = None) -> str:
     ...
 ```
@@ -255,13 +255,17 @@ def ado_package_install(package: str,
   - net: package name with `package_source_from` specifying source
 - `source`: Distribution source (optional, default: "ssc")
   - Options: "ssc", "github", "net"
-- `is_replace`: Force replacement flag (optional, default: true)
-- `package_source_from`: Source URL or directory for 'net' installations (optional)
+- `is_replace`: Force replacement flag (optional, default: false)
+- `package_source_from`: HTTPS source URL for `net` installations
 
-Inputs are validated before any Stata execution. SSC and net package names must
-be Stata identifiers, GitHub packages must use a safe `owner/repository` value,
-unknown sources are rejected, and net source locations cannot contain whitespace
-or Stata syntax and macro delimiters.
+This high-risk tool is unavailable from the default `all` profile. The operator
+must enable it, start the `unsafe` profile, and configure exact allowlists. SSC
+requires an exact package allowlist, GitHub requires an exact repository
+allowlist, and net requires both an allowlisted HTTPS hostname and exact source
+URL. Every MCP call also
+elicits user approval through the client and fails closed if approval is
+unavailable or declined. Local paths, IP hosts, credentials, queries, fragments,
+dot segments, duplicate slashes, and non-default ports are rejected.
 
 **Return Structure**:
 String containing complete Stata execution log from installation operation
@@ -275,18 +279,25 @@ ado_package_install("outreg2", source="ssc")
 ado_package_install("sepinetam/texiv", source="github")
 
 # Network installation
-ado_package_install("custompkg", source="net", package_source_from="https://example.com/stata/")
+ado_package_install("custompkg", source="net", package_source_from="https://example.com/stata")
 
 # Force reinstall
 ado_package_install("estout", source="ssc", is_replace=True)
 ```
 
 **Implementation Architecture**:
-The tool implements platform-divergent installation strategies. Unix systems (macOS/Linux) execute through specialized installer classes inheriting from base installer interface: `SSC_Install` invokes `ssc install <package>, replace` via Stata CLI; `GITHUB_Install` executes `github install <username/reponame>, replace`; `NET_Install` runs `net install <package> from(<source>), replace`. Windows systems bypass direct installation, instead generating temporary do-file via `write_dofile` and delegating to `stata_do` execution.
+The tool implements platform-divergent installation strategies. Unix systems
+execute through internal specialized installers. Windows generates a temporary,
+prevalidated dofile and uses an internal trusted execution path. Direct
+package-management commands submitted through `stata_do` are blocked on every
+platform.
 
 Installation verification occurs through message parsing where installer classes examine Stata output for success indicators. The `check_installed_from_msg()` method performs regex or substring matching to identify successful installation patterns. Failed installations trigger error logging with full message capture via debug-level logging.
 
-Performance considerations advise against unnecessary invocations due to network latency, repository lookup overhead, and redundant installation attempts when packages already exist in Stata's ado directory. The tool implements no local installation cache—each invocation queries remote repositories or filesystem.
+The GitHub helper is never installed implicitly, and successful installation does
+not automatically refresh the persistent help cache. Review and install the
+helper manually, and call `help(cmd, replace=True)` explicitly when a help refresh
+is desired.
 
 ---
 

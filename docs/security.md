@@ -46,6 +46,13 @@ The Security Guard blocks the following dangerous commands. Stata resolves any u
 | `do` | Execute do-file | Untrusted code execution |
 | `include` | Include another do-file | Untrusted code execution |
 
+### Package Management
+
+Direct package-management commands submitted through `stata_do` cannot execute
+`ssc`, `net`, `github`, `adoupdate`, or `update`. This separate boundary is
+always active, even when the general Guard is disabled. Approved third-party
+installation must use `ado_package_install`.
+
 ## Dofile Directory Boundary
 
 Since v1.16.2, `stata_do` rejects any dofile that resolves outside an approved root directory. The boundary check runs before the Guard validator and applies to both the MCP server and the CLI `stata-mcp tool do` entry point.
@@ -95,9 +102,37 @@ The macro tracker matches single-token dangerous values only. Concatenated assig
 
 ## Guard Disable Warning
 
-`STATA_MCP__IS_GUARD=false` (or `[SECURITY] IS_GUARD = false` in `~/.statamcp/config.toml`) disables the validator entirely. Disabling the Guard skips every blacklist, pattern, and macro check, so any dofile content reaches Stata unchanged. Each `stata_do` call emits the warning `[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.` to the log; the same line is recorded at server startup when the configuration is read.
+`STATA_MCP__IS_GUARD=false` (or `[SECURITY] IS_GUARD = false` in `~/.statamcp/config.toml`) disables the general validator. Disabling the Guard skips its blacklist, pattern, and macro checks. Each `stata_do` call emits the warning `[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.` to the log; the same line is recorded at server startup when the configuration is read.
 
-Disable the Guard only inside controlled environments such as the Docker sandbox installation or an ephemeral VM, and re-enable it once the trusted task completes. The directory boundary check above continues to apply even when the Guard is disabled.
+Disable the Guard only inside controlled environments such as the Docker sandbox installation or an ephemeral VM, and re-enable it once the trusted task completes. The directory boundary and package-management boundary continue to apply even when the general Guard is disabled.
+
+## Third-Party Ado Installation Boundary
+
+Installing an ado package executes third-party code inside Stata, so it is
+protected independently from the dofile Guard:
+
+1. Installation is disabled by default with `SECURITY.ENABLE_ADO_INSTALL=false`.
+2. The default `all` MCP profile does not expose `ado_package_install`; the
+   operator must explicitly start `stata-mcp server --unsafe`.
+3. SSC packages and GitHub repositories require exact allowlist entries. Net
+   installation requires both an exact HTTPS hostname and exact source URL
+   allowlist entry.
+4. Every MCP call requires client-mediated user elicitation, every API call
+   requires `confirm=True`, and every CLI call requires `--yes`.
+5. The installer validates again immediately before sending the command to
+   Stata. GitHub helper installation and help-cache refresh are never implicit.
+6. Direct package-management commands submitted through `stata_do` are blocked,
+   even when the general dofile Guard is disabled.
+
+These controls are cumulative. Disabling the dofile Guard does not bypass ado
+installation enablement, allowlists, or confirmation. Disabling the general
+Guard still permits other dangerous execution paths and is not a security
+boundary.
+
+Allowlisting controls which source may be used, but it does not prove that the
+remote source remains unchanged. Review upstream changes before installation;
+the current installer does not pin package versions or verify hashes or
+signatures.
 
 ## Configuration
 

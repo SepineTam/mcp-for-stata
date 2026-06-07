@@ -58,7 +58,7 @@ Operates as a stdio/HTTP/SSE server, responding to tool invocation requests from
 | `write_dofile` | Create timestamped do-files (deprecated, controlled by BETA config) |
 | `get_data_info` | Analyze CSV/DTA files with statistical summaries |
 | `help` | Retrieve Stata command documentation (cached) (Unix only) |
-| `ado_package_install` | Install packages from SSC/GitHub/net sources |
+| `ado_package_install` | Install approved, allowlisted packages (unsafe profile only) |
 | `read_log` | Read Stata log files (text and SMCL formats) |
 
 ## Data Processing Pipeline
@@ -183,4 +183,3 @@ Configurable language settings for localized error messages and documentation.
 ## Citation and Acknowledgments
 
 MCP-for-Stata is developed by the empirical research community to bridge AI assistance with domain-specific analytical tools. Contributions, bug reports, and feature requests are welcome via the [GitHub repository](https://github.com/sepinetam/mcp-for-stata).
-

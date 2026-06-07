@@ -1,6 +1,6 @@
 # MCP.Tools
 
-工具在 `_TOOL_REGISTRY` 中按两种 profile 划分。`stata-mcp server --core` 只注册 `stata_do`、`get_data_info`、`help` 三个工具；`stata-mcp server --all`（默认）则注册全部工具。`help` 工具带有 `unix_only` 标志，`register_tools()` 会在 Windows 平台上将其过滤掉。`write_dofile` 工具标记为 deprecated，是否注册由配置开关 `ENABLE_WRITE_DOFILE`（TOML `[BETA]` 段或环境变量 `STATA_MCP__ENABLE_WRITE_DOFILE`）控制，默认 `false` 时不会被注册。
+工具在 `_TOOL_REGISTRY` 中按三种 profile 划分。`stata-mcp server --core` 只注册 `stata_do`、`get_data_info`、`help`；`stata-mcp server --all`（默认）注册标准工具，但不包含高风险第三方安装；只有 `SECURITY.ENABLE_ADO_INSTALL=true` 时，`stata-mcp server --unsafe` 才会额外注册 `ado_package_install`。`help` 在 Windows 上会被过滤。已弃用的 `write_dofile` 仅在 `ENABLE_WRITE_DOFILE=true` 时注册。
 
 ---
 ## get_data_info
@@ -249,7 +249,7 @@ read_log("~/analysis/tables/results.txt", encoding="utf-8")
 ```python
 def ado_package_install(package: str,
                         source: str = "ssc",
-                        is_replace: bool = True,
+                        is_replace: bool = False,
                         package_source_from: str | None = None) -> str:
     ...
 ```
@@ -261,12 +261,14 @@ def ado_package_install(package: str,
   - net：包名，`package_source_from` 指定来源
 - `source`：分发源（可选，默认："ssc"）
   - 选项："ssc"、"github"、"net"
-- `is_replace`：强制替换标志（可选，默认：true）
-- `package_source_from`：'net' 安装的源 URL 或目录（可选）
+- `is_replace`：强制替换标志（可选，默认：false）
+- `package_source_from`：`net` 安装使用的 HTTPS URL
 
-所有输入都会在执行 Stata 前校验。SSC 和 net 包名必须是 Stata 标识符，GitHub
-包必须使用安全的 `owner/repository` 格式，未知安装源会被拒绝，net 来源位置不能
-包含空白字符、Stata 语法分隔符或宏标记。
+默认 `all` profile 不提供此高风险工具。运维人员必须启用安装功能、使用 `unsafe`
+profile 并配置精确白名单。SSC 需要精确包名白名单，GitHub 需要精确仓库白名单，
+net 需要同时匹配已允许的 HTTPS 主机名和精确来源 URL。每次 MCP 调用还会通过客户端向用户发起批准请求；
+无法请求批准或用户拒绝时会失败关闭。本地路径、IP 主机、凭据、查询参数、片段、
+点路径段、重复斜杠和非默认端口都会被拒绝。
 
 **返回结构**：
 包含安装操作完整 Stata 执行日志的字符串
@@ -280,18 +282,22 @@ ado_package_install("outreg2", source="ssc")
 ado_package_install("sepinetam/texiv", source="github")
 
 # 网络安装
-ado_package_install("custompkg", source="net", package_source_from="https://example.com/stata/")
+ado_package_install("custompkg", source="net", package_source_from="https://example.com/stata")
 
 # 强制重新安装
 ado_package_install("estout", source="ssc", is_replace=True)
 ```
 
 **实现架构**：
-该工具实现平台差异化的安装策略。Unix 系统（macOS/Linux）通过继承自基础安装器接口的专用安装器类执行：`SSC_Install` 通过 Stata CLI 调用 `ssc install <package>, replace`；`GITHUB_Install` 执行 `github install <username/reponame>, replace`；`NET_Install` 运行 `net install <package> from(<source>), replace`。Windows 系统绕过直接安装，而是通过 `write_dofile` 生成临时 do 文件并委托给 `stata_do` 执行。
+该工具实现平台差异化的安装策略。Unix 使用内部专用安装器；Windows 生成经过预先
+校验的临时 dofile，并使用内部可信执行路径。通过 `stata_do` 提交的直接包管理命令
+在所有平台上都会被阻止。
 
 安装验证通过消息解析进行，安装器类检查 Stata 输出中的成功指示器。`check_installed_from_msg()` 方法执行正则或子字符串匹配以识别成功安装模式。失败的安装触发错误日志记录，通过调试级日志记录完整消息捕获。
 
-性能考虑建议避免不必要的调用，因为网络延迟、仓库查找开销和包已存在时的冗余安装尝试。该工具不实现本地安装缓存——每次调用都查询远程仓库或文件系统。
+系统不会隐式安装 GitHub helper，安装成功后也不会自动刷新持久化 help 缓存。
+需要使用 GitHub 来源时应先人工审查并安装 helper；需要更新帮助文档时，应显式调用
+`help(cmd, replace=True)`。
 
 ---
 

@@ -39,22 +39,26 @@ stata-mcp -t http
 使用 `server` 子命令控制注册哪些 MCP 工具：
 
 ```bash
-# 所有工具，stdio 传输（与裸命令相同）
+# 标准工具，stdio 传输（与裸命令相同）
 stata-mcp server
 
 # 仅核心工具（stata_do、get_data_info、help）
 stata-mcp server --core
 
-# 所有工具，HTTP 传输
+# 标准工具，HTTP 传输
 stata-mcp server --all -t http
+
+# 标准工具加高风险 ado 安装
+stata-mcp server --unsafe
 
 # 核心工具，SSE 传输
 stata-mcp server --core -t sse
 ```
 
 **工具配置（Profile）：**
-- `--all` - 注册所有可用工具（默认）
+- `--all` - 注册标准工具，但不包含高风险安装（默认）
 - `--core` - 仅注册核心工具：`stata_do`、`get_data_info`、`help`
+- `--unsafe` - 增加 `ado_package_install`；要求 `SECURITY.ENABLE_ADO_INSTALL=true`
 
 **传输选项：**
 - `stdio` - 标准输入/输出（默认）
@@ -127,8 +131,8 @@ stata-mcp update --method homebrew  # brew upgrade
 直接从 CLI 运行由 API 模块驱动的 Stata 工具：
 
 ```bash
-# 从 SSC 安装 ado 包（默认源）
-stata-mcp tool ado-install reghdfe
+# 从 SSC 安装已明确加入白名单的 ado 包
+stata-mcp tool ado-install reghdfe --yes
 
 # 运行 do-file，仅在执行失败时读取 log
 stata-mcp tool do /path/to/analysis.do --read-log-when-error true
@@ -144,13 +148,16 @@ stata-mcp tool read-log /path/to/output.log
 ```
 
 工具子命令：
-- `stata-mcp tool ado-install <package_name> [--source ssc|net|github]`
+- `stata-mcp tool ado-install <package_name> --yes [--source ssc|net|github]`
 - `stata-mcp tool do <dofile_path> [--read-log-when-error true|false] [--enable-smcl true|false]`
 - `stata-mcp tool help <command> [--read-log-when-error true|false] [--enable-smcl true|false]`
 - `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
 - `stata-mcp tool read-log <log_path> [--output-format full|core|dict]`
 
 > 说明：`--read-log-when-error` 取代了旧的 `--is-read-log`。旧参数会无条件读取 log，新参数仅在底层执行报告错误时才读取 log。
+
+> `ado-install` 默认禁用。必须在 `[SECURITY]` 中启用并配置精确来源白名单；
+> 每次 CLI 安装还必须传入 `--yes`。
 
 ### 配置管理
 
@@ -249,7 +256,8 @@ uvx stata-mcp sandbox-install \
 | 选项 | 描述 |
 |--------|-------------|
 | `--core` | 仅注册核心工具（stata_do、get_data_info、help） |
-| `--all` | 注册所有工具（默认） |
+| `--all` | 注册标准工具，但不包含高风险安装（默认） |
+| `--unsafe` | 增加高风险 ado 安装；要求显式安全配置 |
 | `-t`, `--transport` | MCP 传输方式（stdio/sse/http） |
 
 ### 全局选项

@@ -34,17 +34,17 @@ stata-mcp tool --help
 从 SSC、GitHub 或网络安装 ado 包。
 
 ```bash
-# 从 SSC 安装（默认）
-stata-mcp tool ado-install outreg2
+# 经批准后安装已加入白名单的 SSC 包
+stata-mcp tool ado-install outreg2 --yes
 
 # 从 GitHub 安装
-stata-mcp tool ado-install SepineTam/TexIV --source github
+stata-mcp tool ado-install SepineTam/TexIV --source github --yes
 
 # 从网络安装
-stata-mcp tool ado-install custompkg --source net --package-source-from "https://example.com/stata/"
+stata-mcp tool ado-install custompkg --source net --package-source-from "https://example.com/stata/" --yes
 
 # 不替换已安装的包（可用于检查安装状态）
-stata-mcp tool ado-install estout --is-replace false
+stata-mcp tool ado-install estout --yes --is-replace false
 ```
 
 **参数**：
@@ -54,7 +54,11 @@ stata-mcp tool ado-install estout --is-replace false
 | `package_name` | 包名（必填） | - |
 | `--source` | 安装源：ssc / net / github | ssc |
 | `--package-source-from` | net 安装的源 URL | - |
-| `--is-replace` | 替换已存在的包文件 | true |
+| `--is-replace` | 替换已存在的包文件 | false |
+| `--yes` | 确认已批准的第三方包和来源 | false |
+
+安装默认禁用，并要求在 `[SECURITY]` 中配置精确来源白名单。net 来源必须使用
+已加入白名单的 HTTPS 主机名。
 
 ---
 
@@ -184,8 +188,8 @@ stata-mcp tool data-info /project/data/raw/survey.dta
 # 2. 获取命令帮助
 stata-mcp tool help regress
 
-# 3. 安装所需包
-stata-mcp tool ado-install outreg2
+# 3. 经批准后安装已启用且加入白名单的包
+stata-mcp tool ado-install outreg2 --yes
 
 # 4. 执行分析脚本
 stata-mcp tool do /project/stata-mcp-dofile/analysis.do

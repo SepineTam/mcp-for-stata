@@ -124,8 +124,8 @@ MCP-for-Stata provides several utility commands beyond the MCP server.
 # Run diagnostics
 stata-mcp doctor
 
-# Install an ado package
-stata-mcp tool ado-install reghdfe
+# Install an enabled and allowlisted ado package
+stata-mcp tool ado-install reghdfe --yes
 
 # Inspect a dataset
 stata-mcp tool data-info /path/to/data.dta

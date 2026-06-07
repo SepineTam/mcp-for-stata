@@ -46,6 +46,12 @@
 | `do` | 执行 do 文件 | 不受信任的代码执行 |
 | `include` | 包含另一个 do 文件 | 不受信任的代码执行 |
 
+### 包管理
+
+通过 `stata_do` 提交的直接包管理命令不能执行 `ssc`、`net`、`github`、
+`adoupdate` 或 `update`。这是一条始终生效的独立边界，即使通用 Guard 已禁用也
+不例外。已批准的第三方安装必须使用 `ado_package_install`。
+
 ## Dofile 目录边界
 
 自 v1.16.2 起，`stata_do` 会拒绝任何解析后位于受信任根目录之外的 dofile。边界校验在 Guard 验证器之前运行，对 MCP server 模式和 CLI `stata-mcp tool do` 入口同时生效。
@@ -95,9 +101,31 @@ macro 跟踪只匹配单 token 危险值。拼接式赋值如 `local cmd = "she"
 
 ## Guard 禁用警告
 
-`STATA_MCP__IS_GUARD=false`（或在 `~/.statamcp/config.toml` 中写入 `[SECURITY] IS_GUARD = false`）会整体禁用验证器。Guard 禁用后，所有黑名单、模式与 macro 检查都会被跳过，dofile 内容会原样进入 Stata。每次 `stata_do` 调用都会向日志写入 `[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.`；server 启动读取配置时也会写入同样一行。
+`STATA_MCP__IS_GUARD=false`（或在 `~/.statamcp/config.toml` 中写入 `[SECURITY] IS_GUARD = false`）会禁用通用验证器。Guard 禁用后，其黑名单、模式与 macro 检查都会被跳过。每次 `stata_do` 调用都会向日志写入 `[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.`；server 启动读取配置时也会写入同样一行。
 
-仅在受控环境中禁用 Guard，例如 Docker 沙箱安装或临时虚拟机，受控任务完成后立即恢复启用。即便 Guard 被禁用，上文所述的目录边界校验仍然生效。
+仅在受控环境中禁用 Guard，例如 Docker 沙箱安装或临时虚拟机，受控任务完成后立即恢复启用。即便通用 Guard 被禁用，上文所述的目录边界和包管理边界仍然生效。
+
+## 第三方 Ado 安装边界
+
+安装 ado 包会在 Stata 中执行第三方代码，因此它使用独立于 dofile Guard 的安全边界：
+
+1. `SECURITY.ENABLE_ADO_INSTALL=false`，默认禁止安装。
+2. 默认 `all` MCP profile 不暴露 `ado_package_install`；运维人员必须显式启动
+   `stata-mcp server --unsafe`。
+3. SSC 包和 GitHub 仓库要求精确白名单；net 安装要求同时匹配精确 HTTPS 主机和
+   精确来源 URL 白名单。
+4. 每次 MCP 调用必须通过客户端向用户发起批准请求；每次 API 调用必须传入
+   `confirm=True`；每次 CLI 调用必须传入 `--yes`。
+5. 安装器在向 Stata 发送命令前再次校验；系统不会隐式安装 GitHub helper，
+   也不会隐式刷新 help 缓存。
+6. 通过 `stata_do` 提交的直接包管理命令会被阻止，即使通用 dofile Guard 已关闭。
+
+这些控制需要同时满足。即使禁用 dofile Guard，也不能绕过 ado 安装的启用开关、
+白名单和逐次确认。禁用通用 Guard 后，其他危险执行路径仍可能可用，因此不能把
+Guard 关闭后的环境视为安全边界。
+
+白名单只能控制允许使用哪个来源，不能证明远端来源内容始终不变。安装前仍需审查
+上游变更；当前安装器尚未锁定包版本，也不会校验哈希或签名。
 
 ## 配置
 

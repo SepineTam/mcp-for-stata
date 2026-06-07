@@ -241,16 +241,16 @@ Built on the **OpenAI Agents SDK** (`openai-agents`):
 
 ### MCP Tools Provided
 
-Tools are registered based on profile selection (`--core` / `--all`):
+Tools are registered based on profile selection (`--core` / `--all` / `--unsafe`):
 
 | Profile | Tool | Notes |
 |---------|------|-------|
-| core, all | `stata_do` | Execute Stata do-files; restricted to `STATA_MCP_FOLDER.DO` or `WORKING_DIR` |
-| core, all | `get_data_info` | Analyze data files (CSV, DTA, XLSX, SPSS) |
-| core, all | `help` | Stata command documentation (Unix only) |
-| all | `read_log` | Read log files; supports `lines` param and `full`/`core`/`dict` formats |
-| all | `ado_package_install` | Install packages from SSC, GitHub, or net |
-| all | `write_dofile` | Create do-files (deprecated) |
+| core, all, unsafe | `stata_do` | Execute Stata do-files; package-management commands are always blocked |
+| core, all, unsafe | `get_data_info` | Analyze data files (CSV, DTA, XLSX, SPSS) |
+| core, all, unsafe | `help` | Stata command documentation (Unix only) |
+| all, unsafe | `read_log` | Read log files; supports `lines` param and `full`/`core`/`dict` formats |
+| unsafe | `ado_package_install` | Install approved, allowlisted packages after client-mediated approval |
+| all, unsafe | `write_dofile` | Create do-files (deprecated) |
 
 ## Testing
 

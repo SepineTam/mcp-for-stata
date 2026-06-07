@@ -2,7 +2,9 @@
 
 ## Overview
 
-The package installation module provides a convenient way to install Stata packages from the Statistical Software Components (SSC) archive. It supports automated package installation within MCP-for-Stata workflows, making it easy to extend Stata's functionality programmatically.
+The package installation module is a high-risk, opt-in interface for installing
+approved Stata packages. It is disabled by default and requires exact source
+allowlists plus explicit approval.
 
 ## Key Features
 
@@ -10,7 +12,7 @@ The package installation module provides a convenient way to install Stata packa
 
 Directly installs packages from the Boston College Statistical Software Components archive:
 
-- **Automatic Installation**: Installs packages with a single command
+- **Controlled Installation**: Installs only packages explicitly allowlisted by the operator
 - **Dependency Handling**: Stata's package manager handles dependencies automatically
 - **Version Management**: Supports updating existing packages with the `replace` option
 
@@ -34,19 +36,19 @@ The module provides built-in verification to ensure successful installation:
 
 - **Automated Setup**: Install required packages in automated research workflows
 - **Environment Initialization**: Prepare Stata environments with necessary packages
-- **Missing Package Recovery**: Automatically install packages when commands are not found
+- **Missing Package Recovery**: Install only after the exact package and source are approved
 - **CI/CD Pipelines**: Set up consistent Stata environments in automated testing
 
 ## How It Works
 
-1. **Command Construction**: Builds the appropriate `ssc install {package}` command
-2. **Stata Execution**: Sends the installation command to Stata CLI
-3. **Result Verification**: Checks the output for success indicators
-4. **Status Reporting**: Returns the installation status and any messages
+1. **Authorization**: Requires enablement, an exact source allowlist, and approval
+2. **Validation**: Revalidates the package and source immediately before execution
+3. **Stata Execution**: Sends the validated installation command to Stata
+4. **Result Verification**: Checks explicit success indicators
 
 ## Installation Behavior
 
-By default, the installer uses the `replace` option:
+By default, the installer does not use the `replace` option:
 
 - **New Packages**: Installs the package for the first time
 - **Existing Packages**: Replaces with the latest version from SSC
@@ -73,15 +75,9 @@ The module handles common installation scenarios:
 
 ## Example Workflow
 
-```stata
-// Install a package
-ssc install estout
-
-// The module handles:
-// 1. Downloading from SSC
-// 2. Installing to your Stata ado directory
-// 3. Setting up help files
-// 4. Verifying installation
+```python
+# Python API example after configuring the exact SSC allowlist
+ado_package_install("estout", confirm=True)
 ```
 
 ## Notes
@@ -90,3 +86,4 @@ ssc install estout
 - Installation speed depends on package size and network connection
 - Some packages may have additional system requirements
 - Always verify package functionality after installation
+- Direct package-management commands submitted through `stata_do` are blocked; use the controlled interface
