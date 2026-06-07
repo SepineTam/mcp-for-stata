@@ -3,7 +3,7 @@ name: stata-skill
 description: |
   A packaged Stata Runner skill via official MCP-for-Stata server including stata_do, ado_package_install, help, read_log and get_data_info tools. Use it when (1) need to execute Stata do-file; (2) missing ado-packages; (3) find code error caused by syntax in Stata; (4) want to read smcl and text format log file with rich text output; (5) first encounter a data file and want to understand its structure and content.
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
 ---
 
 # MCP-for-Stata
@@ -76,6 +76,10 @@ When the user mentions a Stata command does not exist or needs to install packag
 - `source`: "ssc" (default), "github", or "net"
 - `is_replace`: defaults to true, forces reinstallation
 - `package_source_from`: required only when source="net", specifies directory or URL
+
+**Validation:** SSC and net package names must be Stata identifiers. GitHub
+packages must use a safe `owner/repository` value. Unknown sources and net source
+locations containing whitespace or Stata syntax delimiters are rejected.
 
 **Examples:**
 - `ado_package_install("outreg2")` — install from SSC

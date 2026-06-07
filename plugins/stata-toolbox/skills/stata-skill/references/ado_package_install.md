@@ -11,6 +11,14 @@ Install a Stata ado package from SSC, GitHub, or net sources.
 | `is_replace` | `bool` | No | `true` | Force reinstallation if already present |
 | `package_source_from` | `str \| None` | No | `None` | Directory or URL (required only for `source="net"`) |
 
+## Input Validation
+
+- SSC and net package names must start with a letter or underscore and otherwise contain only letters, numbers, and underscores
+- GitHub packages must use a safe `owner/repository` value
+- `source` must be exactly `ssc`, `github`, or `net`; unknown values are rejected
+- Net source locations cannot contain whitespace or Stata syntax and macro delimiters
+- Validation occurs again immediately before the installer sends a command to Stata
+
 ## Returns
 
 String containing the Stata installation log.
