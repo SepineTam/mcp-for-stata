@@ -61,12 +61,15 @@ The `StataHelp` class manages help text retrieval with a three-tier caching stra
 1. **Project-level Cache** (`STATA_MCP__SAVE_HELP`, default: `true`):
    - Stores help text in `stata-mcp-tmp/help__{cmd}.txt`
    - Persists across sessions within the project directory
-   - Highest priority for retrieval
+   - Considered only when project-level caching is enabled
 
 2. **Global Cache** (`STATA_MCP__CACHE_HELP`, default: `true`):
    - Stores help text in `~/.statamcp/help/help__{cmd}.txt`
    - Shared across all projects
-   - Secondary priority if project cache miss
+   - Considered only when global caching is enabled
+
+When both enabled caches contain a non-empty result, the newest file by modification
+time is returned. If their modification times are equal, the project cache wins.
 
 3. **Live Stata Execution**:
    - Invokes Stata CLI with `help {cmd}` command
@@ -75,6 +78,7 @@ The `StataHelp` class manages help text retrieval with a three-tier caching stra
 
 **Cache Invalidation**:
 No automatic TTL-based expiration exists. Cache invalidation requires:
+- Calling `help(cmd, replace=True)` to query Stata and overwrite both cache files
 - Manual deletion of cache files (`rm ~/.statamcp/help/help__{cmd}.txt`)
 - Setting environment variable `STATA_MCP__CACHE_HELP=false` to disable caching
 - Setting environment variable `STATA_MCP__SAVE_HELP=false` to disable project-level caching

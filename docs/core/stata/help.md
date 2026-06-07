@@ -23,7 +23,7 @@ StataHelp queries the Stata help system installed on your machine:
 StataHelp includes a multi-level caching mechanism to improve performance:
 
 - **Project-Level Cache**: Saves help results to your project's temporary directory for quick access
-- **Global Cache**: Stores help files in `~/.stata_mcp/help/` for reuse across projects
+- **Global Cache**: Stores help files in `~/.statamcp/help/` for reuse across projects
 - **Environment Control**: Use `STATA_MCP__CACHE_HELP` and `STATA_MCP__SAVE_HELP` to control caching behavior
 
 ### Command Validation
@@ -43,11 +43,15 @@ Before executing a Stata command, you can use StataHelp to verify if the command
 
 ## How It Works
 
-1. **Cache Check**: First checks project-level cache, then global cache (if enabled)
-2. **Stata Query**: If not cached, sends `help {command}` request to Stata CLI
-3. **Documentation Retrieval**: Stata searches its local documentation for the specified command
-4. **Cache Storage**: Saves the result to cache (if enabled)
-5. **Result Return**: Returns the help text for display or processing
+1. **Command Validation**: Normalizes and validates the command name before any cache or Stata access
+2. **Cache Check**: Selects the newest non-empty result from the enabled project and global caches
+3. **Stata Query**: If not cached, sends `help {command}` request to Stata CLI
+4. **Documentation Retrieval**: Stata searches its local documentation for the specified command
+5. **Cache Storage**: Saves the result to cache (if enabled)
+6. **Result Return**: Returns the help text for display or processing
+
+Use `replace=True` to skip cache lookup, query Stata, and overwrite the project and
+global cache files. There is no automatic TTL-based refresh.
 
 ## Configuration
 
@@ -69,5 +73,5 @@ export STATA_MCP__SAVE_HELP=true
 
 ## File Locations
 
-- **Global Cache Directory**: `~/.stata_mcp/help/`
+- **Global Cache Directory**: `~/.statamcp/help/`
 - **Project Cache Directory**: `{project_tmp_dir}/` (usually in `stata-mcp-tmp/`)

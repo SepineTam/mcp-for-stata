@@ -61,12 +61,14 @@ help("varsoc")
 1. **项目级缓存**（`STATA_MCP__SAVE_HELP`，默认：`true`）：
    - 将帮助文本存储在 `stata-mcp-tmp/help__{cmd}.txt`
    - 在项目目录内跨会话持久化
-   - 检索优先级最高
+   - 仅在项目缓存启用时参与检索
 
 2. **全局缓存**（`STATA_MCP__CACHE_HELP`，默认：`true`）：
    - 将帮助文本存储在 `~/.statamcp/help/help__{cmd}.txt`
    - 在所有项目间共享
-   - 项目缓存未命中时的次要优先级
+   - 仅在全局缓存启用时参与检索
+
+当两个已启用缓存都包含非空结果时，返回文件修改时间最新的结果；如果修改时间相同，则优先返回项目缓存。
 
 3. **实时 Stata 执行**：
    - 以 `help {cmd}` 命令调用 Stata CLI
@@ -75,6 +77,7 @@ help("varsoc")
 
 **缓存失效**：
 不存在自动的基于 TTL 的过期。缓存失效需要：
+- 调用 `help(cmd, replace=True)`，实时查询 Stata 并覆盖两个缓存文件
 - 手动删除缓存文件（`rm ~/.statamcp/help/help__{cmd}.txt`）
 - 设置环境变量 `STATA_MCP__CACHE_HELP=false` 以禁用缓存
 - 设置环境变量 `STATA_MCP__SAVE_HELP=false` 以禁用项目级缓存
