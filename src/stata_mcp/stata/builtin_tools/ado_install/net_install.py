@@ -7,8 +7,6 @@
 # @Email  : sepinetam@gmail.com
 # @File   : net_install.py
 
-from collections.abc import Collection
-
 from ....guard import (
     require_ado_install_confirmation,
     validate_ado_package_name,
@@ -24,16 +22,10 @@ class NET_Install(AdoInstallBase):
         directory_or_url: str = None,
         *,
         confirm: bool = False,
-        allowed_hosts: Collection[str] = (),
-        allowed_sources: Collection[str] = (),
     ) -> str:
         require_ado_install_confirmation(confirm)
         package = validate_ado_package_name(package, source="net")
-        directory_or_url = validate_net_source_location(
-            directory_or_url,
-            allowed_hosts=allowed_hosts,
-            allowed_sources=allowed_sources,
-        )
+        directory_or_url = validate_net_source_location(directory_or_url)
         options = []
         if self.is_replace:
             options.append("replace")

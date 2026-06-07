@@ -33,7 +33,6 @@ from .input_validation import (
     validate_github_repository_allowed,
     validate_install_source,
     validate_net_source_location,
-    validate_ssc_package_allowed,
     validate_stata_identifier,
 )
 
@@ -48,6 +47,5 @@ __all__ = [
     "validate_github_repository_allowed",
     "validate_install_source",
     "validate_net_source_location",
-    "validate_ssc_package_allowed",
     "validate_stata_identifier",
 ]

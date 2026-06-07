@@ -12,7 +12,6 @@ from stata_mcp.guard import (
     validate_github_repository_allowed,
     validate_install_source,
     validate_net_source_location,
-    validate_ssc_package_allowed,
     validate_stata_identifier,
 )
 from stata_mcp.stata.builtin_tools.ado_install import (
@@ -54,11 +53,25 @@ def test_validate_install_source_rejects_unknown_source() -> None:
 
 
 @pytest.mark.parametrize("source", ["ssc", "net"])
-def test_validate_ado_package_name_uses_stata_identifier_rules(source: str) -> None:
-    assert validate_ado_package_name("  reghdfe  ", source=source) == "reghdfe"
+@pytest.mark.parametrize("package", ["reghdfe", "ivreg2", "123abc", "  abc123  "])
+def test_validate_ado_package_name_accepts_only_ascii_alphanumeric(
+    source: str,
+    package: str,
+) -> None:
+    assert validate_ado_package_name(package, source=source) == package.strip()
 
-    with pytest.raises(ValueError, match="Invalid ado package name"):
-        validate_ado_package_name("reghdfe, replace shell", source=source)
+
+@pytest.mark.parametrize("source", ["ssc", "net"])
+@pytest.mark.parametrize(
+    "package",
+    ["", "_pkg", "pkg_name", "pkg-name", "pkg.name", "pkg shell", "包名"],
+)
+def test_validate_ado_package_name_rejects_non_alphanumeric(
+    source: str,
+    package: str,
+) -> None:
+    with pytest.raises(ValueError, match="only ASCII letters and numbers"):
+        validate_ado_package_name(package, source=source)
 
 
 def test_validate_github_repository_allows_only_owner_repository() -> None:
@@ -90,23 +103,9 @@ def test_validate_github_repository_requires_exact_allowlist() -> None:
         )
 
 
-def test_validate_ssc_package_requires_exact_allowlist() -> None:
-    assert validate_ssc_package_allowed(
-        "reghdfe",
-        allowed_packages=["REGHDFE"],
-    ) == "reghdfe"
-
-    with pytest.raises(PermissionError, match="not allowlisted"):
-        validate_ssc_package_allowed("reghdfe", allowed_packages=["estout"])
-
-
-def test_validate_net_source_location_requires_allowlisted_https_host() -> None:
+def test_validate_net_source_location_requires_safe_https_url() -> None:
     assert (
-        validate_net_source_location(
-            "https://example.com/stata",
-            allowed_hosts=["EXAMPLE.COM"],
-            allowed_sources=["https://example.com/stata"],
-        )
+        validate_net_source_location("https://example.com/stata")
         == "https://example.com/stata"
     )
 
@@ -129,25 +128,7 @@ def test_validate_net_source_location_requires_allowlisted_https_host() -> None:
         "https://127.0.0.1/stata",
     ):
         with pytest.raises(ValueError):
-            validate_net_source_location(
-                unsafe_location,
-                allowed_hosts=["example.com", "127.0.0.1"],
-                allowed_sources=[unsafe_location],
-            )
-
-    with pytest.raises(PermissionError, match="not allowlisted"):
-        validate_net_source_location(
-            "https://packages.example.com/stata",
-            allowed_hosts=["example.com"],
-            allowed_sources=["https://packages.example.com/stata"],
-        )
-
-    with pytest.raises(PermissionError, match="source .* is not allowlisted"):
-        validate_net_source_location(
-            "https://example.com/other",
-            allowed_hosts=["example.com"],
-            allowed_sources=["https://example.com/stata"],
-        )
+            validate_net_source_location(unsafe_location)
 
 
 def test_validate_complete_install_request_rejects_source_for_non_net() -> None:
@@ -156,7 +137,6 @@ def test_validate_complete_install_request_rejects_source_for_non_net() -> None:
             "reghdfe",
             "ssc",
             "https://example.com/stata",
-            allowed_ssc_packages=["reghdfe"],
         )
 
 
@@ -197,13 +177,8 @@ def test_installers_validate_and_normalize_before_controller_run(
         )
 
     install_kwargs = {"confirm": True}
-    if installer_cls is SSC_Install:
-        install_kwargs["allowed_packages"] = ["reghdfe"]
-    elif installer_cls is GITHUB_Install:
+    if installer_cls is GITHUB_Install:
         install_kwargs["allowed_repositories"] = ["SepineTam/TexIV"]
-    elif installer_cls is NET_Install:
-        install_kwargs["allowed_hosts"] = ["example.com"]
-        install_kwargs["allowed_sources"] = ["https://example.com/stata"]
     installer.install(package, *install_args, **install_kwargs)
 
     controller.run.assert_called_once_with(expected_command)
@@ -233,13 +208,8 @@ def test_installers_reject_unsafe_values_before_controller_run(
     installer.is_replace = True
 
     install_kwargs = {"confirm": True}
-    if installer_cls is SSC_Install:
-        install_kwargs["allowed_packages"] = ["reghdfe"]
-    elif installer_cls is GITHUB_Install:
+    if installer_cls is GITHUB_Install:
         install_kwargs["allowed_repositories"] = ["SepineTam/TexIV"]
-    elif installer_cls is NET_Install:
-        install_kwargs["allowed_hosts"] = ["example.com"]
-        install_kwargs["allowed_sources"] = ["https://example.com/stata"]
     with pytest.raises(ValueError):
         installer.install(package, *install_args, **install_kwargs)
 
@@ -313,9 +283,6 @@ def test_api_rejects_unsafe_install_input_before_runtime_creation(
     config = SimpleNamespace(
         ENABLE_ADO_INSTALL=True,
         ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=("SepineTam/TexIV",),
-        ADO_INSTALL_ALLOWED_NET_HOSTS=("example.com",),
-        ADO_INSTALL_ALLOWED_NET_SOURCES=("https://example.com/stata",),
-        ADO_INSTALL_ALLOWED_SSC_PACKAGES=("reghdfe",),
     )
     monkeypatch.setattr(ado_install_api, "Config", lambda **kwargs: config)
     monkeypatch.setattr(ado_install_api, "create_runtime_context", create_runtime_context)
@@ -351,9 +318,6 @@ def test_api_requires_enablement_and_confirmation_before_runtime_creation(
         lambda **kwargs: SimpleNamespace(
             ENABLE_ADO_INSTALL=True,
             ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=(),
-            ADO_INSTALL_ALLOWED_NET_HOSTS=(),
-            ADO_INSTALL_ALLOWED_NET_SOURCES=(),
-            ADO_INSTALL_ALLOWED_SSC_PACKAGES=(),
         ),
     )
     with pytest.raises(PermissionError, match="confirm=True"):
@@ -362,19 +326,8 @@ def test_api_requires_enablement_and_confirmation_before_runtime_creation(
     create_runtime_context.assert_not_called()
 
 
-@pytest.mark.parametrize(
-    ("package", "source", "package_source_from"),
-    [
-        ("reghdfe", "ssc", None),
-        ("SepineTam/TexIV", "github", None),
-        ("custompkg", "net", "https://example.com/stata"),
-    ],
-)
-def test_api_rejects_unallowlisted_source_before_runtime_creation(
+def test_api_rejects_unallowlisted_github_repository_before_runtime_creation(
     monkeypatch: pytest.MonkeyPatch,
-    package: str,
-    source: str,
-    package_source_from: str | None,
 ) -> None:
     create_runtime_context = Mock()
     monkeypatch.setattr(
@@ -383,33 +336,26 @@ def test_api_rejects_unallowlisted_source_before_runtime_creation(
         lambda **kwargs: SimpleNamespace(
             ENABLE_ADO_INSTALL=True,
             ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=(),
-            ADO_INSTALL_ALLOWED_NET_HOSTS=(),
-            ADO_INSTALL_ALLOWED_NET_SOURCES=(),
-            ADO_INSTALL_ALLOWED_SSC_PACKAGES=(),
         ),
     )
     monkeypatch.setattr(ado_install_api, "create_runtime_context", create_runtime_context)
 
     with pytest.raises(PermissionError, match="not allowlisted"):
         ado_install_api.ado_package_install(
-            package,
-            source=source,
-            package_source_from=package_source_from,
+            "SepineTam/TexIV",
+            source="github",
             confirm=True,
         )
 
     create_runtime_context.assert_not_called()
 
 
-def test_api_forwards_ssc_allowlist_to_installer(
+def test_api_forwards_validated_ssc_package_to_installer(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     config = SimpleNamespace(
         ENABLE_ADO_INSTALL=True,
         ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=(),
-        ADO_INSTALL_ALLOWED_NET_HOSTS=(),
-        ADO_INSTALL_ALLOWED_NET_SOURCES=(),
-        ADO_INSTALL_ALLOWED_SSC_PACKAGES=("reghdfe",),
     )
     installer = Mock()
     installer.install.return_value = "Installation State: True"
@@ -434,7 +380,6 @@ def test_api_forwards_ssc_allowlist_to_installer(
     installer.install.assert_called_once_with(
         "reghdfe",
         confirm=True,
-        allowed_packages=("reghdfe",),
     )
 
 
@@ -470,9 +415,6 @@ def test_api_windows_builds_and_verifies_install_command(
     config = SimpleNamespace(
         ENABLE_ADO_INSTALL=True,
         ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=("SepineTam/TexIV",),
-        ADO_INSTALL_ALLOWED_NET_HOSTS=("example.com",),
-        ADO_INSTALL_ALLOWED_NET_SOURCES=("https://example.com/stata",),
-        ADO_INSTALL_ALLOWED_SSC_PACKAGES=("reghdfe",),
     )
     write_dofile = Mock(return_value="/tmp/install.do")
     stata_do = Mock(return_value={"log_file_path": {"text": "/tmp/install.log"}})
@@ -516,9 +458,6 @@ def test_api_windows_reports_failed_install(
     config = SimpleNamespace(
         ENABLE_ADO_INSTALL=True,
         ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=(),
-        ADO_INSTALL_ALLOWED_NET_HOSTS=(),
-        ADO_INSTALL_ALLOWED_NET_SOURCES=(),
-        ADO_INSTALL_ALLOWED_SSC_PACKAGES=("reghdfe",),
     )
     monkeypatch.setattr(ado_install_api, "Config", lambda **kwargs: config)
     monkeypatch.setattr(

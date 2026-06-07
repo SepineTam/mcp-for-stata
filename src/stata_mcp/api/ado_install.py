@@ -36,7 +36,11 @@ def ado_package_install(
     timeout: int = 300,
     confirm: bool = False,
 ) -> str:
-    """Install an explicitly enabled, confirmed, and allowlisted ado package."""
+    """Install an explicitly enabled and confirmed ado package.
+
+    GitHub repositories are allowlisted by name only and receive no content-level
+    security protection. Inspect the repository before installation.
+    """
     config = Config(config_file=config_file)
     if not config.ENABLE_ADO_INSTALL:
         raise PermissionError(
@@ -51,9 +55,6 @@ def ado_package_install(
         allowed_github_repositories=(
             config.ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES
         ),
-        allowed_net_hosts=config.ADO_INSTALL_ALLOWED_NET_HOSTS,
-        allowed_net_sources=config.ADO_INSTALL_ALLOWED_NET_SOURCES,
-        allowed_ssc_packages=config.ADO_INSTALL_ALLOWED_SSC_PACKAGES,
     )
     runtime = create_runtime_context(config_file=config_file, require_stata=True)
 
@@ -64,13 +65,6 @@ def ado_package_install(
         if source == "github":
             install_kwargs["allowed_repositories"] = (
                 config.ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES
-            )
-        elif source == "net":
-            install_kwargs["allowed_hosts"] = config.ADO_INSTALL_ALLOWED_NET_HOSTS
-            install_kwargs["allowed_sources"] = config.ADO_INSTALL_ALLOWED_NET_SOURCES
-        else:
-            install_kwargs["allowed_packages"] = (
-                config.ADO_INSTALL_ALLOWED_SSC_PACKAGES
             )
         install_message = installer_cls(
             runtime.stata_cli,

@@ -421,39 +421,6 @@ class Config:
             validator=lambda x: isinstance(x, tuple),
         )
 
-    @cached_property
-    def ADO_INSTALL_ALLOWED_NET_HOSTS(self) -> tuple[str, ...]:
-        """Return HTTPS hosts explicitly allowed for net package installation."""
-        return self._get_config_value(
-            config_keys=["SECURITY", "ADO_INSTALL_ALLOWED_NET_HOSTS"],
-            env_var="STATA_MCP__ADO_INSTALL_ALLOWED_NET_HOSTS",
-            default=(),
-            converter=self._to_str_tuple,
-            validator=lambda x: isinstance(x, tuple),
-        )
-
-    @cached_property
-    def ADO_INSTALL_ALLOWED_NET_SOURCES(self) -> tuple[str, ...]:
-        """Return exact HTTPS sources allowed for net package installation."""
-        return self._get_config_value(
-            config_keys=["SECURITY", "ADO_INSTALL_ALLOWED_NET_SOURCES"],
-            env_var="STATA_MCP__ADO_INSTALL_ALLOWED_NET_SOURCES",
-            default=(),
-            converter=self._to_str_tuple,
-            validator=lambda x: isinstance(x, tuple),
-        )
-
-    @cached_property
-    def ADO_INSTALL_ALLOWED_SSC_PACKAGES(self) -> tuple[str, ...]:
-        """Return SSC packages explicitly allowed for ado installation."""
-        return self._get_config_value(
-            config_keys=["SECURITY", "ADO_INSTALL_ALLOWED_SSC_PACKAGES"],
-            env_var="STATA_MCP__ADO_INSTALL_ALLOWED_SSC_PACKAGES",
-            default=(),
-            converter=self._to_str_tuple,
-            validator=lambda x: isinstance(x, tuple),
-        )
-
     @property
     def IS_MONITOR(self) -> bool:
         return self._get_config_value(

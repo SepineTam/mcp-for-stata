@@ -7,6 +7,7 @@ from urllib.parse import urlsplit
 
 
 STATA_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+ADO_PACKAGE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9]+$")
 GITHUB_REPOSITORY_PATTERN = re.compile(
     r"^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?/"
     r"[A-Za-z0-9_.-]+$"
@@ -47,13 +48,18 @@ def validate_install_source(source: str) -> str:
 def validate_ado_package_name(package: str, *, source: str) -> str:
     """Validate a package name according to its installation source."""
     normalized_source = validate_install_source(source)
-    if normalized_source != "github":
-        return validate_stata_identifier(package, field_name="ado package name")
-
     if not isinstance(package, str):
-        raise TypeError("GitHub repository must be a string.")
+        raise TypeError("Ado package name must be a string.")
 
     normalized_package = package.strip()
+    if normalized_source != "github":
+        if not ADO_PACKAGE_NAME_PATTERN.fullmatch(normalized_package):
+            raise ValueError(
+                "Invalid ado package name. SSC and net package names may contain "
+                "only ASCII letters and numbers."
+            )
+        return normalized_package
+
     if (
         not GITHUB_REPOSITORY_PATTERN.fullmatch(normalized_package)
         or normalized_package.endswith(".")
@@ -96,33 +102,8 @@ def validate_github_repository_allowed(
     return normalized_repository
 
 
-def validate_ssc_package_allowed(
-    package: str,
-    *,
-    allowed_packages: Collection[str] = (),
-) -> str:
-    """Require an SSC package to be explicitly allowlisted."""
-    normalized_package = validate_ado_package_name(package, source="ssc")
-    normalized_allowlist = {
-        str(item).strip().lower()
-        for item in allowed_packages
-        if str(item).strip()
-    }
-    if normalized_package.lower() not in normalized_allowlist:
-        raise PermissionError(
-            f"SSC package '{normalized_package}' is not allowlisted. "
-            "Configure SECURITY.ADO_INSTALL_ALLOWED_SSC_PACKAGES before installing."
-        )
-    return normalized_package
-
-
-def validate_net_source_location(
-    location: str | None,
-    *,
-    allowed_hosts: Collection[str] = (),
-    allowed_sources: Collection[str] = (),
-) -> str:
-    """Validate an allowlisted HTTPS source interpolated into ``from(...)``."""
+def validate_net_source_location(location: str | None) -> str:
+    """Validate an HTTPS source interpolated into Stata's ``from(...)``."""
     if location is None:
         raise ValueError("A net package source location is required.")
     if not isinstance(location, str):
@@ -167,11 +148,6 @@ def validate_net_source_location(
             "unsafe path characters are allowed."
         )
 
-    normalized_hosts = {
-        str(host).strip().lower().rstrip(".")
-        for host in allowed_hosts
-        if str(host).strip()
-    }
     source_host = parsed_location.hostname.lower().rstrip(".")
     try:
         ip_address(source_host)
@@ -182,22 +158,6 @@ def validate_net_source_location(
             "Invalid net package source location. IP-address hosts are not allowed."
         )
 
-    if source_host not in normalized_hosts:
-        raise PermissionError(
-            f"Net package source host '{source_host}' is not allowlisted. "
-            "Configure SECURITY.ADO_INSTALL_ALLOWED_NET_HOSTS before installing."
-        )
-
-    normalized_sources = {
-        str(source).strip()
-        for source in allowed_sources
-        if str(source).strip()
-    }
-    if normalized_location not in normalized_sources:
-        raise PermissionError(
-            f"Net package source '{normalized_location}' is not allowlisted. "
-            "Configure SECURITY.ADO_INSTALL_ALLOWED_NET_SOURCES before installing."
-        )
     return normalized_location
 
 
@@ -207,9 +167,6 @@ def validate_ado_install_request(
     package_source_from: str | None,
     *,
     allowed_github_repositories: Collection[str] = (),
-    allowed_net_hosts: Collection[str] = (),
-    allowed_net_sources: Collection[str] = (),
-    allowed_ssc_packages: Collection[str] = (),
 ) -> tuple[str, str, str | None]:
     """Validate and normalize a complete ado installation request."""
     normalized_source = validate_install_source(source)
@@ -218,11 +175,6 @@ def validate_ado_install_request(
             package,
             allowed_repositories=allowed_github_repositories,
         )
-    elif normalized_source == "ssc":
-        normalized_package = validate_ssc_package_allowed(
-            package,
-            allowed_packages=allowed_ssc_packages,
-        )
     else:
         normalized_package = validate_ado_package_name(
             package,
@@ -230,11 +182,7 @@ def validate_ado_install_request(
         )
 
     if normalized_source == "net":
-        normalized_location = validate_net_source_location(
-            package_source_from,
-            allowed_hosts=allowed_net_hosts,
-            allowed_sources=allowed_net_sources,
-        )
+        normalized_location = validate_net_source_location(package_source_from)
     elif package_source_from is not None:
         raise ValueError("package_source_from is only valid when source='net'.")
     else:
@@ -249,7 +197,6 @@ __all__ = [
     "validate_github_repository_allowed",
     "validate_install_source",
     "validate_net_source_location",
-    "validate_ssc_package_allowed",
     "validate_stata_identifier",
     "require_ado_install_confirmation",
 ]

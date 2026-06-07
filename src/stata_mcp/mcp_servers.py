@@ -343,7 +343,7 @@ async def ado_package_install(
         package (str): Package name. For GitHub, use "user/repo" format.
         source (str): "ssc" (default), "github", or "net".
         is_replace (bool): Force reinstallation if already present.
-        package_source_from (str): Allowlisted HTTPS URL for source="net".
+        package_source_from (str): Validated HTTPS URL for source="net".
         ctx (Context): MCP context used to request trusted user approval.
 
     Returns:
@@ -360,6 +360,8 @@ async def ado_package_install(
     Notes:
         This high-risk tool is registered only in the unsafe profile when
         SECURITY.ENABLE_ADO_INSTALL is true.
+        GitHub repositories receive no content-level security protection.
+        Inspect the repository before installation.
     """
     from .api.ado_install import ado_package_install as api_ado_package_install
 

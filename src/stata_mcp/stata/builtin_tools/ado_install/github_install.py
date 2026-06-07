@@ -25,6 +25,11 @@ class GITHUB_Install(AdoInstallBase):
         confirm: bool = False,
         allowed_repositories: Collection[str] = (),
     ) -> str:
+        """Install an allowlisted GitHub repository.
+
+        GitHub repositories receive no content-level security protection.
+        Inspect the repository before installation.
+        """
         require_ado_install_confirmation(confirm)
         package = validate_github_repository_allowed(
             package,

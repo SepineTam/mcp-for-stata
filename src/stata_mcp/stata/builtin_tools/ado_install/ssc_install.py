@@ -7,9 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : ssc_install.py
 
-from collections.abc import Collection
-
-from ....guard import require_ado_install_confirmation, validate_ssc_package_allowed
+from ....guard import require_ado_install_confirmation, validate_ado_package_name
 from .base import AdoInstallBase
 
 
@@ -19,13 +17,9 @@ class SSC_Install(AdoInstallBase):
         package: str,
         *,
         confirm: bool = False,
-        allowed_packages: Collection[str] = (),
     ) -> str:
         require_ado_install_confirmation(confirm)
-        package = validate_ssc_package_allowed(
-            package,
-            allowed_packages=allowed_packages,
-        )
+        package = validate_ado_package_name(package, source="ssc")
         install_command = f"ssc install {package}{self.REPLACE_MESSAGE}"
         runner_result = self.controller.run(install_command)
         return self._install_msg_template(runner_result)

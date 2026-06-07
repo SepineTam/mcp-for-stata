@@ -7,69 +7,40 @@ def test_ado_install_security_config_defaults_to_disabled(tmp_path) -> None:
     config = Config(config_file=tmp_path / "missing.toml")
 
     assert config.ENABLE_ADO_INSTALL is False
-    assert config.ADO_INSTALL_ALLOWED_SSC_PACKAGES == ()
     assert config.ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES == ()
-    assert config.ADO_INSTALL_ALLOWED_NET_HOSTS == ()
-    assert config.ADO_INSTALL_ALLOWED_NET_SOURCES == ()
 
 
-def test_ado_install_security_config_reads_allowlists(tmp_path) -> None:
+def test_ado_install_security_config_reads_github_allowlist(tmp_path) -> None:
     config_path = tmp_path / "config.toml"
     config_path.write_text(
         """
 [SECURITY]
 ENABLE_ADO_INSTALL = true
-ADO_INSTALL_ALLOWED_SSC_PACKAGES = ["reghdfe"]
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = ["SepineTam/TexIV"]
-ADO_INSTALL_ALLOWED_NET_HOSTS = ["packages.example.com"]
-ADO_INSTALL_ALLOWED_NET_SOURCES = ["https://packages.example.com/stata"]
 """.strip(),
         encoding="utf-8",
     )
     config = Config(config_file=config_path)
 
     assert config.ENABLE_ADO_INSTALL is True
-    assert config.ADO_INSTALL_ALLOWED_SSC_PACKAGES == ("reghdfe",)
     assert config.ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES == ("SepineTam/TexIV",)
-    assert config.ADO_INSTALL_ALLOWED_NET_HOSTS == ("packages.example.com",)
-    assert config.ADO_INSTALL_ALLOWED_NET_SOURCES == (
-        "https://packages.example.com/stata",
-    )
 
 
-def test_ado_install_security_config_reads_environment_allowlists(
+def test_ado_install_security_config_reads_environment_github_allowlist(
     monkeypatch,
     tmp_path,
 ) -> None:
     monkeypatch.setenv("STATA_MCP__ENABLE_ADO_INSTALL", "true")
-    monkeypatch.setenv("STATA_MCP__ADO_INSTALL_ALLOWED_SSC_PACKAGES", "reghdfe, estout")
     monkeypatch.setenv(
         "STATA_MCP__ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES",
         "SepineTam/TexIV, owner/repository",
     )
-    monkeypatch.setenv(
-        "STATA_MCP__ADO_INSTALL_ALLOWED_NET_HOSTS",
-        "packages.example.com, mirror.example.com",
-    )
-    monkeypatch.setenv(
-        "STATA_MCP__ADO_INSTALL_ALLOWED_NET_SOURCES",
-        "https://packages.example.com/stata, https://mirror.example.com/stata",
-    )
     config = Config(config_file=tmp_path / "missing.toml")
 
     assert config.ENABLE_ADO_INSTALL is True
-    assert config.ADO_INSTALL_ALLOWED_SSC_PACKAGES == ("reghdfe", "estout")
     assert config.ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES == (
         "SepineTam/TexIV",
         "owner/repository",
-    )
-    assert config.ADO_INSTALL_ALLOWED_NET_HOSTS == (
-        "packages.example.com",
-        "mirror.example.com",
-    )
-    assert config.ADO_INSTALL_ALLOWED_NET_SOURCES == (
-        "https://packages.example.com/stata",
-        "https://mirror.example.com/stata",
     )
 
 
