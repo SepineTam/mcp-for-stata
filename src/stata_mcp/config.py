@@ -399,17 +399,6 @@ class Config:
             validator=lambda x: isinstance(x, bool)
         )
 
-    @property
-    def ENABLE_ADO_INSTALL(self) -> bool:
-        """Return whether high-risk third-party ado installation is enabled."""
-        return self._get_config_value(
-            config_keys=["SECURITY", "ENABLE_ADO_INSTALL"],
-            env_var="STATA_MCP__ENABLE_ADO_INSTALL",
-            default=False,
-            converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool),
-        )
-
     @cached_property
     def ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES(self) -> tuple[str, ...]:
         """Return GitHub repositories explicitly allowed for ado installation."""

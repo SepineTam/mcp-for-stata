@@ -98,7 +98,6 @@ def _set_registry(
     *,
     unix: bool,
     enable_write: bool,
-    enable_ado_install: bool = False,
 ) -> None:
     registry = {
         "stata_do": {"description": "d", "func": lambda: None, "profiles": {"core", "all"}},
@@ -126,7 +125,6 @@ def _set_registry(
         SimpleNamespace(
             IS_UNIX=unix,
             ENABLE_WRITE_DOFILE=enable_write,
-            ENABLE_ADO_INSTALL=enable_ado_install,
         ),
         raising=False,
     )
@@ -157,7 +155,7 @@ def test_register_tools_all_applies_platform_and_deprecated_filters(
     assert server.resources == []
 
 
-def test_register_tools_unsafe_requires_enablement_and_includes_standard_tools(
+def test_register_tools_unsafe_includes_standard_and_high_risk_tools(
     monkeypatch: pytest.MonkeyPatch,
     loaded_modules,
 ):
@@ -168,18 +166,6 @@ def test_register_tools_unsafe_requires_enablement_and_includes_standard_tools(
         mcp_servers,
         unix=True,
         enable_write=False,
-        enable_ado_install=False,
-    )
-
-    with pytest.raises(PermissionError, match="unsafe profile is disabled"):
-        mcp_servers.register_tools(server, profile="unsafe")
-
-    _set_registry(
-        monkeypatch,
-        mcp_servers,
-        unix=True,
-        enable_write=False,
-        enable_ado_install=True,
     )
     mcp_servers.register_tools(server, profile="unsafe")
 

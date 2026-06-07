@@ -358,8 +358,7 @@ async def ado_package_install(
         ... )
 
     Notes:
-        This high-risk tool is registered only in the unsafe profile when
-        SECURITY.ENABLE_ADO_INSTALL is true.
+        This high-risk tool is registered only in the unsafe profile.
         GitHub repositories receive no content-level security protection.
         Inspect the repository before installation.
     """
@@ -669,11 +668,6 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
 
     if profile not in {"core", "all", "unsafe"}:
         raise ValueError(f"Unsupported profile: {profile}")
-    if profile == "unsafe" and not config.ENABLE_ADO_INSTALL:
-        raise PermissionError(
-            "The unsafe profile is disabled. Set "
-            "SECURITY.ENABLE_ADO_INSTALL=true only in trusted environments."
-        )
 
     if _registered_profile == profile:
         return

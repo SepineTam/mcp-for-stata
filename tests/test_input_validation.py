@@ -322,7 +322,6 @@ def test_api_installs_without_enablement_or_caller_confirmation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     config = SimpleNamespace(
-        ENABLE_ADO_INSTALL=False,
         ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=(),
     )
     installer = Mock()

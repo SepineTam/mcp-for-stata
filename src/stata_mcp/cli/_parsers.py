@@ -99,10 +99,7 @@ def add_server_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
         "--unsafe",
         action="store_true",
         dest="unsafe_profile",
-        help=(
-            "Register standard and high-risk tools; requires "
-            "SECURITY.ENABLE_ADO_INSTALL=true"
-        ),
+        help="Register standard and high-risk tools",
     )
     server_parser.add_argument(
         "-t",
