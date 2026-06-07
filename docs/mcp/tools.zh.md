@@ -264,6 +264,10 @@ def ado_package_install(package: str,
 - `is_replace`：强制替换标志（可选，默认：true）
 - `package_source_from`：'net' 安装的源 URL 或目录（可选）
 
+所有输入都会在执行 Stata 前校验。SSC 和 net 包名必须是 Stata 标识符，GitHub
+包必须使用安全的 `owner/repository` 格式，未知安装源会被拒绝，net 来源位置不能
+包含空白字符、Stata 语法分隔符或宏标记。
+
 **返回结构**：
 包含安装操作完整 Stata 执行日志的字符串
 

@@ -258,6 +258,11 @@ def ado_package_install(package: str,
 - `is_replace`: Force replacement flag (optional, default: true)
 - `package_source_from`: Source URL or directory for 'net' installations (optional)
 
+Inputs are validated before any Stata execution. SSC and net package names must
+be Stata identifiers, GitHub packages must use a safe `owner/repository` value,
+unknown sources are rejected, and net source locations cannot contain whitespace
+or Stata syntax and macro delimiters.
+
 **Return Structure**:
 String containing complete Stata execution log from installation operation
 
@@ -321,4 +326,3 @@ Caching architecture maintains help text cache at `~/.statamcp/help/` directory 
 Currently registered only as an MCP tool. Resource registration (URI pattern `help://stata/{cmd}`) was disabled in v1.16.1 due to a URI template parameter mismatch with FastMCP; tool form remains fully functional. The tool is gated by the `unix_only` flag in `_TOOL_REGISTRY` and is only available on macOS and Linux.
 
 Cache invalidation requires manual deletion of cache files or environment variable configuration; no TTL-based expiration exists. Help text language depends on Stata installation locale; multilingual support requires separate Stata installations or locale reconfiguration.
-

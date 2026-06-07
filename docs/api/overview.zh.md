@@ -217,6 +217,12 @@ def ado_package_install(
 | `config_file` | `str \| Path` | `None` | 自定义配置文件路径 |
 | `timeout` | `int` | `300` | 超时时间（秒） |
 
+**输入校验**：
+- SSC 和 net 包名必须是 Stata 标识符：以字母或下划线开头，后续仅包含字母、数字或下划线
+- GitHub 包必须使用安全的 `owner/repository` 格式
+- `source` 必须严格为 `ssc`、`net` 或 `github`；未知值会被拒绝
+- net 来源位置不能包含空白字符、Stata 语法分隔符或宏标记
+
 **返回值**：`str`（安装日志或错误信息）
 
 **示例**：

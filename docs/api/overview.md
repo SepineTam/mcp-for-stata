@@ -217,6 +217,12 @@ def ado_package_install(
 | `config_file` | `str \| Path` | `None` | Custom config file path |
 | `timeout` | `int` | `300` | Timeout in seconds |
 
+**Input validation**:
+- SSC and net package names must be Stata identifiers: start with a letter or underscore, followed by letters, numbers, or underscores
+- GitHub packages must use a safe `owner/repository` value
+- `source` must be exactly `ssc`, `net`, or `github`; unknown values are rejected
+- Net source locations cannot contain whitespace or Stata syntax and macro delimiters
+
 **Returns**: `str` (installation log or error message)
 
 **Example**:
