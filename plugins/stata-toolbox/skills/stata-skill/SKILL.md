@@ -3,7 +3,7 @@ name: stata-skill
 description: |
   A packaged Stata Runner skill via official MCP-for-Stata server including stata_do, ado_package_install, help, read_log and get_data_info tools. Use it when (1) need to execute Stata do-file; (2) missing ado-packages; (3) find code error caused by syntax in Stata; (4) want to read smcl and text format log file with rich text output; (5) first encounter a data file and want to understand its structure and content.
 metadata:
-  version: "1.0.6"
+  version: "1.0.7"
 ---
 
 # MCP-for-Stata
@@ -72,7 +72,7 @@ When the user asks to run Stata commands, perform regression analysis, generate 
 Treat `ado_package_install` as a high-risk, opt-in tool. Do not call it merely
 because a command is missing. First identify the exact package and source, then
 ask the user to approve that package and source. The MCP tool is available only
-when the operator enabled it and started the MCP server with the unsafe profile.
+when the operator starts the MCP server with the unsafe profile.
 
 **Key parameters:**
 - `package`: package name. For GitHub source, use "user/repo" format

@@ -111,22 +111,21 @@ Disable the Guard only inside controlled environments such as the Docker sandbox
 Installing an ado package executes third-party code inside Stata, so it is
 protected independently from the dofile Guard:
 
-1. MCP installation is disabled by default with `SECURITY.ENABLE_ADO_INSTALL=false`.
-2. The default `all` MCP profile does not expose `ado_package_install`; the
+1. The default `all` MCP profile does not expose `ado_package_install`; the
    operator must explicitly start `stata-mcp server --unsafe`.
-3. SSC and net package names may contain only ASCII letters and numbers.
+2. SSC and net package names may contain only ASCII letters and numbers.
    GitHub repositories must use `owner/repository` format and match the exact
    GitHub repository allowlist. Net sources must use validated HTTPS URLs.
-4. Every MCP call requires client-mediated user elicitation. CLI calls prompt
+3. Every MCP call requires client-mediated user elicitation. CLI calls prompt
    interactively unless `-y` or `--yes` is supplied. The Python API performs
    validation but does not require enablement or confirmation.
-5. The installer validates again immediately before sending the command to
+4. The installer validates again immediately before sending the command to
    Stata. GitHub helper installation and help-cache refresh are never implicit.
-6. Direct package-management commands submitted through `stata_do` are blocked,
+5. Direct package-management commands submitted through `stata_do` are blocked,
    even when the general dofile Guard is disabled.
 
 These MCP controls are cumulative. Disabling the dofile Guard does not bypass
-MCP installation enablement, GitHub allowlisting, or MCP confirmation. Disabling the general
+the unsafe profile, GitHub allowlisting, or MCP confirmation. Disabling the general
 Guard still permits other dangerous execution paths and is not a security
 boundary.
 

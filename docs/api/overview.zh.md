@@ -218,7 +218,7 @@ def ado_package_install(
 | `timeout` | `int` | `300` | 超时时间（秒） |
 
 **输入校验**：
-- Python API 不要求 `SECURITY.ENABLE_ADO_INSTALL` 或调用方确认
+- Python API 不要求调用方确认
 - SSC 和 net 包名只能包含 ASCII 字母与数字
 - GitHub 仓库必须使用 `owner/repository` 格式并命中精确仓库白名单
 - GitHub 仓库内容没有安全防护，安装前必须人工查验

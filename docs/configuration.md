@@ -42,7 +42,6 @@ IS_SAVE = true
 
 [SECURITY]
 IS_GUARD = true
-ENABLE_ADO_INSTALL = false
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = []
 
 [PROJECT]
@@ -206,24 +205,22 @@ For more details, see [Security Guard Documentation](security.md).
 
 #### Third-Party Ado Installation
 
-MCP exposure of `ado_package_install` is disabled by default because installed
-ado packages execute third-party code inside Stata. Enabling it for MCP requires
-all of the following:
+MCP exposure of `ado_package_install` is disabled by the default profile because
+installed ado packages execute third-party code inside Stata. Exposing it for
+MCP requires all of the following:
 
-- Set `SECURITY.ENABLE_ADO_INSTALL = true`
 - Add each approved GitHub `owner/repository` to the exact repository allowlist
 - Start the MCP server with `stata-mcp server --unsafe`
 - Accept the MCP user-approval prompt for each MCP call
 
 ```toml
 [SECURITY]
-ENABLE_ADO_INSTALL = true
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = ["SepineTam/TexIV"]
 ```
 
-The matching environment variables are `STATA_MCP__ENABLE_ADO_INSTALL`,
-and `STATA_MCP__ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES`. The GitHub allowlist
-environment variable uses comma-separated values. SSC and net package names may
+The matching environment variable is
+`STATA_MCP__ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES`. It uses comma-separated
+values. SSC and net package names may
 contain only ASCII letters and numbers. Net sources must use validated HTTPS
 URLs; local paths, IP-address hosts, credentials, queries, fragments, dot
 segments, duplicate slashes, and non-default ports are rejected.
@@ -231,8 +228,8 @@ segments, duplicate slashes, and non-default ports are rejected.
 The GitHub allowlist validates only the repository name. It does not inspect or
 protect the repository contents. Review the repository before installation.
 
-The Python API does not require `SECURITY.ENABLE_ADO_INSTALL` or caller
-confirmation. CLI calls prompt interactively unless `-y` or `--yes` is supplied.
+The Python API does not require caller confirmation. CLI calls prompt
+interactively unless `-y` or `--yes` is supplied.
 
 ### PROJECT Section
 

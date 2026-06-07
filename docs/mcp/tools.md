@@ -1,6 +1,6 @@
 # MCP.Tools
 
-Tools are partitioned into three profiles inside `_TOOL_REGISTRY`. `stata-mcp server --core` registers only `stata_do`, `get_data_info`, and `help`. `stata-mcp server --all` (the default) registers standard tools but excludes high-risk third-party installation. `stata-mcp server --unsafe` adds `ado_package_install` only when `SECURITY.ENABLE_ADO_INSTALL=true`. The `help` tool is filtered out on Windows. The deprecated `write_dofile` tool is skipped unless `ENABLE_WRITE_DOFILE=true`.
+Tools are partitioned into three profiles inside `_TOOL_REGISTRY`. `stata-mcp server --core` registers only `stata_do`, `get_data_info`, and `help`. `stata-mcp server --all` (the default) registers standard tools but excludes high-risk third-party installation. `stata-mcp server --unsafe` adds `ado_package_install`. The `help` tool is filtered out on Windows. The deprecated `write_dofile` tool is skipped unless `ENABLE_WRITE_DOFILE=true`.
 
 ---
 ## get_data_info

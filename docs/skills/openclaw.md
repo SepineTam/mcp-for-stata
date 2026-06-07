@@ -48,5 +48,5 @@ uvx stata-mcp tool read-log <log_path> [--output-format full|core|dict]
 - Requires valid Stata license
 - `help` only works on macOS/Linux
 - Security guard blocks dangerous commands (shell, rm, etc.)
-- MCP ado installation is disabled by default and requires client-mediated approval; CLI prompts unless `-y`/`--yes` is supplied; GitHub additionally requires an exact repository allowlist
+- The default MCP profile excludes ado installation; the unsafe profile requires client-mediated approval; CLI prompts unless `-y`/`--yes` is supplied; GitHub additionally requires an exact repository allowlist
 - Log location: `<cwd>/.statamcp/stata-mcp-log/`

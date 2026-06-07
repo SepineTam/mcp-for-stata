@@ -58,7 +58,7 @@ stata-mcp server --core -t sse
 **工具配置（Profile）：**
 - `--all` - 注册标准工具，但不包含高风险安装（默认）
 - `--core` - 仅注册核心工具：`stata_do`、`get_data_info`、`help`
-- `--unsafe` - 增加 `ado_package_install`；要求 `SECURITY.ENABLE_ADO_INSTALL=true`
+- `--unsafe` - 增加高风险工具 `ado_package_install`
 
 **传输选项：**
 - `stdio` - 标准输入/输出（默认）

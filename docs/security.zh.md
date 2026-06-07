@@ -109,20 +109,19 @@ macro 跟踪只匹配单 token 危险值。拼接式赋值如 `local cmd = "she"
 
 安装 ado 包会在 Stata 中执行第三方代码，因此它使用独立于 dofile Guard 的安全边界：
 
-1. `SECURITY.ENABLE_ADO_INSTALL=false`，默认禁止通过 MCP 安装。
-2. 默认 `all` MCP profile 不暴露 `ado_package_install`；运维人员必须显式启动
+1. 默认 `all` MCP profile 不暴露 `ado_package_install`；运维人员必须显式启动
    `stata-mcp server --unsafe`。
-3. SSC 和 net 包名只能包含 ASCII 字母与数字。GitHub 仓库必须使用
+2. SSC 和 net 包名只能包含 ASCII 字母与数字。GitHub 仓库必须使用
    `owner/repository` 格式并命中精确 GitHub 仓库白名单。net 来源必须使用经过
    校验的 HTTPS URL。
-4. 每次 MCP 调用必须通过客户端向用户发起批准请求。CLI 未传入 `-y` 或 `--yes`
+3. 每次 MCP 调用必须通过客户端向用户发起批准请求。CLI 未传入 `-y` 或 `--yes`
    时会进行交互确认。Python API 会执行输入校验，但不要求启用开关或确认。
-5. 安装器在向 Stata 发送命令前再次校验；系统不会隐式安装 GitHub helper，
+4. 安装器在向 Stata 发送命令前再次校验；系统不会隐式安装 GitHub helper，
    也不会隐式刷新 help 缓存。
-6. 通过 `stata_do` 提交的直接包管理命令会被阻止，即使通用 dofile Guard 已关闭。
+5. 通过 `stata_do` 提交的直接包管理命令会被阻止，即使通用 dofile Guard 已关闭。
 
-这些 MCP 控制需要同时满足。即使禁用 dofile Guard，也不能绕过 MCP 安装的启用
-开关、GitHub 白名单和逐次确认。禁用通用 Guard 后，其他危险执行路径仍可能可用，因此
+这些 MCP 控制需要同时满足。即使禁用 dofile Guard，也不能绕过 unsafe profile、
+GitHub 白名单和逐次确认。禁用通用 Guard 后，其他危险执行路径仍可能可用，因此
 不能把 Guard 关闭后的环境视为安全边界。
 
 GitHub 白名单只校验仓库名称，不提供仓库内容层面的安全防护。安装前必须人工查验

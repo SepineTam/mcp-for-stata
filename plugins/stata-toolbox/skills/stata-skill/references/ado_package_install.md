@@ -26,13 +26,12 @@ Install a Stata ado package from SSC, GitHub, or net sources.
 ## Operator Setup
 
 Configure the GitHub repository allowlist in `~/.statamcp/config.toml`. To
-expose the MCP tool, enable installation and start the MCP server with
+expose the MCP tool, start the MCP server with
 `stata-mcp server --unsafe`. The plugin's default MCP configuration does not
 expose this high-risk tool.
 
 ```toml
 [SECURITY]
-ENABLE_ADO_INSTALL = true
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = ["SepineTam/TexIV"]
 ```
 

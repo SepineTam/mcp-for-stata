@@ -1,6 +1,6 @@
 # MCP.Tools
 
-工具在 `_TOOL_REGISTRY` 中按三种 profile 划分。`stata-mcp server --core` 只注册 `stata_do`、`get_data_info`、`help`；`stata-mcp server --all`（默认）注册标准工具，但不包含高风险第三方安装；只有 `SECURITY.ENABLE_ADO_INSTALL=true` 时，`stata-mcp server --unsafe` 才会额外注册 `ado_package_install`。`help` 在 Windows 上会被过滤。已弃用的 `write_dofile` 仅在 `ENABLE_WRITE_DOFILE=true` 时注册。
+工具在 `_TOOL_REGISTRY` 中按三种 profile 划分。`stata-mcp server --core` 只注册 `stata_do`、`get_data_info`、`help`；`stata-mcp server --all`（默认）注册标准工具，但不包含高风险第三方安装；`stata-mcp server --unsafe` 会额外注册 `ado_package_install`。`help` 在 Windows 上会被过滤。已弃用的 `write_dofile` 仅在 `ENABLE_WRITE_DOFILE=true` 时注册。
 
 ---
 ## get_data_info

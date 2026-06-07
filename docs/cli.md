@@ -58,7 +58,7 @@ stata-mcp server --core -t sse
 **Tool Profiles:**
 - `--all` - Register standard tools, excluding high-risk installation (default)
 - `--core` - Register only core tools: `stata_do`, `get_data_info`, `help`
-- `--unsafe` - Add `ado_package_install`; requires `SECURITY.ENABLE_ADO_INSTALL=true`
+- `--unsafe` - Add the high-risk `ado_package_install` tool
 
 **Transport Options:**
 - `stdio` - Standard input/output (default)

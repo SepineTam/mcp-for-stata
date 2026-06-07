@@ -218,7 +218,7 @@ def ado_package_install(
 | `timeout` | `int` | `300` | Timeout in seconds |
 
 **Input validation**:
-- The Python API does not require `SECURITY.ENABLE_ADO_INSTALL` or caller confirmation
+- The Python API does not require caller confirmation
 - SSC and net package names may contain only ASCII letters and numbers
 - GitHub repositories must use `owner/repository` format and match the exact repository allowlist
 - GitHub repository contents receive no security protection; inspect them before installation
