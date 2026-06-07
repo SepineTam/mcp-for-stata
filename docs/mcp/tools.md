@@ -296,10 +296,12 @@ platform.
 
 Installation verification occurs through message parsing where installer classes examine Stata output for success indicators. The `check_installed_from_msg()` method performs regex or substring matching to identify successful installation patterns. Failed installations trigger error logging with full message capture via debug-level logging.
 
-The GitHub helper is never installed implicitly, and successful installation does
-not automatically refresh the persistent help cache. Review and install the
-helper manually, and call `help(cmd, replace=True)` explicitly when a help refresh
-is desired.
+The GitHub helper is never installed implicitly. After any successful install,
+the shared installer attempts to refresh help with `replace=True` for the likely
+command name: the SSC/net package name, or the GitHub repository name. Refresh
+failure is logged and does not convert the completed installation into a failed
+installation. If a package exposes commands with different names, call
+`help(cmd, replace=True)` for those commands explicitly.
 
 ---
 

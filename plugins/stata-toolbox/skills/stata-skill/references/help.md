@@ -64,7 +64,7 @@ help(cmd="xtreg", replace=true)
 ## Notes
 
 - There is no automatic TTL-based refresh; use `replace=true` after an external package update
-- Successful package installation attempts to refresh help for the package name, but packages may provide commands with different names
+- Successful package installation attempts to refresh help for the likely command name, but packages may provide commands with different names
 - `cmd` must be a single Stata command name that starts with a letter or underscore and otherwise contains only letters, numbers, and underscores
 - Help text retrieval uses the Stata CLI's `help` command internally
 - If the command does not exist, Stata returns an error message in the help text

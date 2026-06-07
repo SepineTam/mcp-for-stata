@@ -328,6 +328,7 @@ def test_api_installs_without_enablement_or_caller_confirmation(
     installer.install.return_value = "Installation State: True"
     installer_cls = Mock(return_value=installer)
     installer_cls.check_installed_from_msg.return_value = True
+    stata_help = Mock()
     monkeypatch.setattr(ado_install_api, "Config", lambda **kwargs: config)
     monkeypatch.setattr(
         ado_install_api,
@@ -339,6 +340,7 @@ def test_api_installs_without_enablement_or_caller_confirmation(
         "SOURCE_MAPPING",
         {"ssc": installer_cls},
     )
+    monkeypatch.setattr(ado_install_api, "stata_help", stata_help)
 
     result = ado_install_api.ado_package_install("reghdfe")
 
@@ -347,6 +349,54 @@ def test_api_installs_without_enablement_or_caller_confirmation(
     installer.install.assert_called_once_with(
         "reghdfe",
         confirm=True,
+    )
+    stata_help.assert_called_once_with(
+        "reghdfe",
+        config_file=None,
+        replace=True,
+    )
+
+
+def test_api_github_install_refreshes_repository_name_help(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = SimpleNamespace(
+        ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=("SepineTam/TexIV",),
+    )
+    installer = Mock()
+    installer.install.return_value = "Installation State: True"
+    installer_cls = Mock(return_value=installer)
+    installer_cls.check_installed_from_msg.return_value = True
+    stata_help = Mock()
+    monkeypatch.setattr(ado_install_api, "Config", lambda **kwargs: config)
+    monkeypatch.setattr(
+        ado_install_api,
+        "create_runtime_context",
+        lambda **kwargs: SimpleNamespace(is_unix=True, stata_cli="stata"),
+    )
+    monkeypatch.setattr(
+        ado_install_api,
+        "SOURCE_MAPPING",
+        {"github": installer_cls},
+    )
+    monkeypatch.setattr(ado_install_api, "stata_help", stata_help)
+
+    result = ado_install_api.ado_package_install(
+        "SepineTam/TexIV",
+        source="github",
+        config_file="/tmp/config.toml",
+    )
+
+    assert result == "Installation State: True"
+    installer.install.assert_called_once_with(
+        "SepineTam/TexIV",
+        confirm=True,
+        allowed_repositories=("SepineTam/TexIV",),
+    )
+    stata_help.assert_called_once_with(
+        "TexIV",
+        config_file="/tmp/config.toml",
+        replace=True,
     )
 
 
@@ -385,6 +435,7 @@ def test_api_windows_builds_and_verifies_install_command(
     write_dofile = Mock(return_value="/tmp/install.do")
     stata_do = Mock(return_value={"log_file_path": {"text": "/tmp/install.log"}})
     read_log = Mock(return_value="installation complete")
+    stata_help = Mock()
     monkeypatch.setattr(ado_install_api, "Config", lambda **kwargs: config)
     monkeypatch.setattr(
         ado_install_api,
@@ -394,6 +445,7 @@ def test_api_windows_builds_and_verifies_install_command(
     monkeypatch.setattr(ado_install_api, "write_dofile", write_dofile)
     monkeypatch.setattr(ado_install_api, "_stata_do", stata_do)
     monkeypatch.setattr(ado_install_api, "read_log", read_log)
+    monkeypatch.setattr(ado_install_api, "stata_help", stata_help)
 
     result = ado_install_api.ado_package_install(
         package,
@@ -414,6 +466,12 @@ def test_api_windows_builds_and_verifies_install_command(
         "/tmp/install.log",
         output_format="core",
         config_file=None,
+    )
+    expected_help_command = package.rsplit("/", maxsplit=1)[-1]
+    stata_help.assert_called_once_with(
+        expected_help_command,
+        config_file=None,
+        replace=True,
     )
 
 
@@ -440,12 +498,52 @@ def test_api_windows_reports_failed_install(
         "read_log",
         lambda *args, **kwargs: "package not found\nr(601)",
     )
+    stata_help = Mock()
+    monkeypatch.setattr(ado_install_api, "stata_help", stata_help)
 
     result = ado_install_api.ado_package_install("reghdfe")
 
     assert result.startswith("Installation State: False")
     assert "Failed to install package 'reghdfe'" in result
     assert "r(601)" in result
+    stata_help.assert_not_called()
+
+
+def test_api_keeps_success_when_help_refresh_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    config = SimpleNamespace(
+        ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=(),
+    )
+    installer = Mock()
+    installer.install.return_value = "Installation State: True"
+    installer_cls = Mock(return_value=installer)
+    installer_cls.check_installed_from_msg.return_value = True
+    stata_help = Mock(side_effect=RuntimeError("help unavailable"))
+    monkeypatch.setattr(ado_install_api, "Config", lambda **kwargs: config)
+    monkeypatch.setattr(
+        ado_install_api,
+        "create_runtime_context",
+        lambda **kwargs: SimpleNamespace(is_unix=True, stata_cli="stata"),
+    )
+    monkeypatch.setattr(
+        ado_install_api,
+        "SOURCE_MAPPING",
+        {"ssc": installer_cls},
+    )
+    monkeypatch.setattr(ado_install_api, "stata_help", stata_help)
+
+    with caplog.at_level("WARNING"):
+        result = ado_install_api.ado_package_install("reghdfe")
+
+    assert result == "Installation State: True"
+    stata_help.assert_called_once_with(
+        "reghdfe",
+        config_file=None,
+        replace=True,
+    )
+    assert "could not refresh help" in caplog.text
 
 
 @pytest.mark.parametrize(

@@ -276,7 +276,7 @@ def test_handle_server_respects_unsafe_profile_flag(
     assert calls["transport"] == "stdio"
 
 
-def test_mcp_ado_install_delegates_to_api_without_help_refresh(
+def test_mcp_ado_install_delegates_to_api(
     monkeypatch: pytest.MonkeyPatch,
     loaded_modules,
 ):

@@ -297,9 +297,10 @@ ado_package_install("estout", source="ssc", is_replace=True)
 
 安装验证通过消息解析进行，安装器类检查 Stata 输出中的成功指示器。`check_installed_from_msg()` 方法执行正则或子字符串匹配以识别成功安装模式。失败的安装触发错误日志记录，通过调试级日志记录完整消息捕获。
 
-系统不会隐式安装 GitHub helper，安装成功后也不会自动刷新持久化 help 缓存。
-需要使用 GitHub 来源时应先人工审查并安装 helper；需要更新帮助文档时，应显式调用
-`help(cmd, replace=True)`。
+系统不会隐式安装 GitHub helper。任意来源安装成功后，共用安装器都会尝试用
+`replace=True` 刷新最可能的命令名：SSC/net 使用包名，GitHub 使用仓库名部分。
+刷新失败只会记录日志，不会把已经完成的安装改判为失败。如果包提供的是其他命令名，
+需要对那些命令显式调用 `help(cmd, replace=True)`。
 
 ---
 

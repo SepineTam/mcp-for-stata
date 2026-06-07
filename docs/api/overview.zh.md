@@ -225,6 +225,10 @@ def ado_package_install(
 - `source` 必须严格为 `ssc`、`net` 或 `github`；未知值会被拒绝
 - 本地路径、IP 主机、凭据、查询参数、片段、点路径段、重复斜杠和非默认端口都会被拒绝
 
+安装成功后，API 会尝试调用 `stata_help(..., replace=True)` 刷新 help 缓存。
+SSC 和 net 使用包名；GitHub 使用仓库名部分。如果包实际提供的是其他命令名，
+需要再对那些命令显式调用 `stata_help(command, replace=True)`。
+
 **返回值**：`str`（安装日志或错误信息）
 
 **示例**：

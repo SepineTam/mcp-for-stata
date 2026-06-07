@@ -89,5 +89,6 @@ ado_package_install("estout")
 - Installation speed depends on package size and network connection
 - Some packages may have additional system requirements
 - Always verify package functionality after installation
+- Successful installs attempt to refresh help with `replace=True` for the likely command name
 - GitHub repository contents receive no security protection; inspect them before installation
 - Direct package-management commands submitted through `stata_do` are blocked; use the controlled interface

@@ -225,6 +225,11 @@ def ado_package_install(
 - `source` must be exactly `ssc`, `net`, or `github`; unknown values are rejected
 - Local paths, IP hosts, credentials, queries, fragments, dot segments, duplicate slashes, and non-default ports are rejected
 
+After a successful installation, the API attempts `stata_help(..., replace=True)`
+to refresh the help cache. SSC and net use the package name; GitHub uses the
+repository name part. If a package exposes commands with different names, refresh
+those commands explicitly with `stata_help(command, replace=True)`.
+
 **Returns**: `str` (installation log or error message)
 
 **Example**:

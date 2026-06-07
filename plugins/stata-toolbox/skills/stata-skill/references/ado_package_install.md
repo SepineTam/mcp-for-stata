@@ -91,9 +91,12 @@ On Windows, package installation is handled by writing and executing a temporary
 
 ## Post-Installation
 
-The tool does not implicitly install the GitHub helper or refresh the help cache.
-Review the installation result, then call `help(cmd="package_name", replace=true)`
-explicitly if refreshed help is needed.
+The tool does not implicitly install the GitHub helper. After a successful
+install, it attempts to refresh help with `replace=true` for the likely command
+name: the SSC/net package name, or the GitHub repository name. Refresh failure
+does not make the completed installation fail. If the package exposes commands
+with different names, call `help(cmd="command_name", replace=true)` explicitly
+for those commands.
 
 ## Example
 

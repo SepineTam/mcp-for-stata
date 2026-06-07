@@ -3,7 +3,7 @@ name: stata-skill
 description: |
   A packaged Stata Runner skill via official MCP-for-Stata server including stata_do, ado_package_install, help, read_log and get_data_info tools. Use it when (1) need to execute Stata do-file; (2) missing ado-packages; (3) find code error caused by syntax in Stata; (4) want to read smcl and text format log file with rich text output; (5) first encounter a data file and want to understand its structure and content.
 metadata:
-  version: "1.0.7"
+  version: "1.0.8"
 ---
 
 # MCP-for-Stata
@@ -94,9 +94,10 @@ The Python API does not require caller confirmation. The CLI prompts unless
 - `ado_package_install("SepineTam/TexIV", source="github")` — request approval to install an allowlisted GitHub repository
 
 **Note:** GitHub repository contents receive no security protection. Inspect the
-repository before installation. The tool never installs the GitHub helper or refreshes help automatically.
-After reviewing a successful install, call `help(cmd=..., replace=true)` only
-when the user wants fresh help content.
+repository before installation. The tool never installs the GitHub helper.
+Successful installs automatically attempt `help(..., replace=true)` for the
+likely command name; if the package exposes other commands, refresh those
+commands explicitly.
 
 ---
 

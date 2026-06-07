@@ -7,6 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : ado_install.py
 
+import logging
 from pathlib import Path
 
 from ..config import Config
@@ -15,6 +16,7 @@ from ..stata.builtin_tools.ado_install import GITHUB_Install, NET_Install, SSC_I
 from ._runtime import create_runtime_context
 from .read_log import read_log
 from .stata_do import _stata_do
+from .stata_help import stata_help
 from .write_dofile import write_dofile
 
 SOURCE_MAPPING = {
@@ -62,12 +64,13 @@ def ado_package_install(
             timeout=timeout,
         ).install(*install_args, **install_kwargs)
 
-        return _finalize_install_message(
+        return _finalize_install(
             installer_cls,
             package,
             source,
             install_message,
             installer_cls.check_installed_from_msg(install_message),
+            config_file=config_file,
         )
 
     options = []
@@ -99,24 +102,32 @@ def ado_package_install(
     installer_cls = SOURCE_MAPPING[source]
     is_installed = installer_cls.check_install(log_content)
     install_message = f"Installation State: {is_installed}\n{log_content}"
-    return _finalize_install_message(
+    return _finalize_install(
         installer_cls,
         package,
         source,
         install_message,
         is_installed,
+        config_file=config_file,
     )
 
 
-def _finalize_install_message(
+def _finalize_install(
     installer_cls,
     package: str,
     source: str,
     install_message: str,
     is_installed: bool,
+    *,
+    config_file: str | Path | None,
 ) -> str:
-    """Append consistent failure details to a platform-specific install log."""
+    """Refresh help after success or append consistent installation failure details."""
     if is_installed:
+        _refresh_installed_package_help(
+            package,
+            source=source,
+            config_file=config_file,
+        )
         return install_message
 
     error_summary = installer_cls.extract_error_summary(install_message)
@@ -130,3 +141,26 @@ def _finalize_install_message(
             "and ensure the github command is installed in Stata."
         )
     return install_message
+
+
+def _refresh_installed_package_help(
+    package: str,
+    *,
+    source: str,
+    config_file: str | Path | None,
+) -> None:
+    """Best-effort refresh the likely command help after a successful install."""
+    help_command = package.rsplit("/", maxsplit=1)[-1] if source == "github" else package
+    try:
+        stata_help(
+            help_command,
+            config_file=config_file,
+            replace=True,
+        )
+    except Exception as error:
+        logging.warning(
+            "Installed package '%s', but could not refresh help for '%s': %s",
+            package,
+            help_command,
+            error,
+        )
