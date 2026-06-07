@@ -264,11 +264,13 @@ def ado_package_install(package: str,
 - `is_replace`：强制替换标志（可选，默认：false）
 - `package_source_from`：`net` 安装使用的 HTTPS URL
 
-默认 `all` profile 不提供此高风险工具。运维人员必须启用安装功能、使用 `unsafe`
-profile 并配置精确白名单。SSC 需要精确包名白名单，GitHub 需要精确仓库白名单，
-net 需要同时匹配已允许的 HTTPS 主机名和精确来源 URL。每次 MCP 调用还会通过客户端向用户发起批准请求；
+默认 `all` profile 不提供此高风险工具。运维人员必须启用安装功能并使用 `unsafe`
+profile。SSC 和 net 包名只能包含 ASCII 字母与数字。GitHub 必须使用
+`owner/repository` 格式并命中精确仓库白名单。每次 MCP 调用还会通过客户端向用户发起批准请求；
 无法请求批准或用户拒绝时会失败关闭。本地路径、IP 主机、凭据、查询参数、片段、
 点路径段、重复斜杠和非默认端口都会被拒绝。
+
+GitHub 仓库内容没有安全防护，安装前必须人工查验。
 
 **返回结构**：
 包含安装操作完整 Stata 执行日志的字符串

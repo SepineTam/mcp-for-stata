@@ -259,13 +259,15 @@ def ado_package_install(package: str,
 - `package_source_from`: HTTPS source URL for `net` installations
 
 This high-risk tool is unavailable from the default `all` profile. The operator
-must enable it, start the `unsafe` profile, and configure exact allowlists. SSC
-requires an exact package allowlist, GitHub requires an exact repository
-allowlist, and net requires both an allowlisted HTTPS hostname and exact source
-URL. Every MCP call also
+must enable it and start the `unsafe` profile. SSC and net package names may
+contain only ASCII letters and numbers. GitHub requires `owner/repository`
+format and an exact repository allowlist. Every MCP call also
 elicits user approval through the client and fails closed if approval is
 unavailable or declined. Local paths, IP hosts, credentials, queries, fragments,
 dot segments, duplicate slashes, and non-default ports are rejected.
+
+GitHub repository contents receive no security protection. Inspect the
+repository before installation.
 
 **Return Structure**:
 String containing complete Stata execution log from installation operation

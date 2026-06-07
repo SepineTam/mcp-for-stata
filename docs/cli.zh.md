@@ -131,7 +131,7 @@ stata-mcp update --method homebrew  # brew upgrade
 直接从 CLI 运行由 API 模块驱动的 Stata 工具：
 
 ```bash
-# 从 SSC 安装已明确加入白名单的 ado 包
+# 从 SSC 安装已批准的 ado 包
 stata-mcp tool ado-install reghdfe --yes
 
 # 运行 do-file，仅在执行失败时读取 log
@@ -156,8 +156,8 @@ stata-mcp tool read-log /path/to/output.log
 
 > 说明：`--read-log-when-error` 取代了旧的 `--is-read-log`。旧参数会无条件读取 log，新参数仅在底层执行报告错误时才读取 log。
 
-> `ado-install` 默认禁用。必须在 `[SECURITY]` 中启用并配置精确来源白名单；
-> 每次 CLI 安装还必须传入 `--yes`。
+> `ado-install` 默认禁用，每次 CLI 安装还必须传入 `--yes`。SSC 和 net 包名只能
+> 包含 ASCII 字母与数字。GitHub 仓库必须命中精确仓库白名单，并在安装前人工查验。
 
 ### 配置管理
 

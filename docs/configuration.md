@@ -43,10 +43,7 @@ IS_SAVE = true
 [SECURITY]
 IS_GUARD = true
 ENABLE_ADO_INSTALL = false
-ADO_INSTALL_ALLOWED_SSC_PACKAGES = []
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = []
-ADO_INSTALL_ALLOWED_NET_HOSTS = []
-ADO_INSTALL_ALLOWED_NET_SOURCES = []
 
 [PROJECT]
 WORKING_DIR = ""
@@ -213,8 +210,7 @@ For more details, see [Security Guard Documentation](security.md).
 third-party code inside Stata. Enabling it requires all of the following:
 
 - Set `SECURITY.ENABLE_ADO_INSTALL = true`
-- Add the exact SSC package, GitHub `owner/repository`, or both the net HTTPS
-  hostname and exact source URL to the corresponding allowlists
+- Add each approved GitHub `owner/repository` to the exact repository allowlist
 - Start the MCP server with `stata-mcp server --unsafe`
 - Accept the MCP user-approval prompt for each MCP call, pass `confirm=True` for
   each API call, or pass `--yes` for each CLI call
@@ -222,21 +218,18 @@ third-party code inside Stata. Enabling it requires all of the following:
 ```toml
 [SECURITY]
 ENABLE_ADO_INSTALL = true
-ADO_INSTALL_ALLOWED_SSC_PACKAGES = ["reghdfe", "estout"]
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = ["SepineTam/TexIV"]
-ADO_INSTALL_ALLOWED_NET_HOSTS = ["packages.example.com"]
-ADO_INSTALL_ALLOWED_NET_SOURCES = ["https://packages.example.com/stata"]
 ```
 
 The matching environment variables are `STATA_MCP__ENABLE_ADO_INSTALL`,
-`STATA_MCP__ADO_INSTALL_ALLOWED_SSC_PACKAGES`,
-`STATA_MCP__ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES`, and
-`STATA_MCP__ADO_INSTALL_ALLOWED_NET_HOSTS`, and
-`STATA_MCP__ADO_INSTALL_ALLOWED_NET_SOURCES`. Allowlist environment variables
-use comma-separated values. Net sources must match both an allowlisted HTTPS
-hostname and an exact source URL; local paths, IP-address hosts, credentials,
-queries, fragments, dot segments, duplicate slashes, and non-default ports are
-rejected.
+and `STATA_MCP__ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES`. The GitHub allowlist
+environment variable uses comma-separated values. SSC and net package names may
+contain only ASCII letters and numbers. Net sources must use validated HTTPS
+URLs; local paths, IP-address hosts, credentials, queries, fragments, dot
+segments, duplicate slashes, and non-default ports are rejected.
+
+The GitHub allowlist validates only the repository name. It does not inspect or
+protect the repository contents. Review the repository before installation.
 
 ### PROJECT Section
 

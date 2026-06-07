@@ -9,13 +9,13 @@ Install a Stata ado package from SSC, GitHub, or net sources.
 | `package` | `str` | Yes | — | Package name. For GitHub, use "user/repo" format |
 | `source` | `"ssc" \| "github" \| "net"` | No | `"ssc"` | Package source |
 | `is_replace` | `bool` | No | `false` | Force reinstallation if already present |
-| `package_source_from` | `str \| None` | No | `None` | Allowlisted HTTPS URL required for `source="net"` |
+| `package_source_from` | `str \| None` | No | `None` | Validated HTTPS URL required for `source="net"` |
 
 ## Input Validation
 
 - The operator must enable installation and start the MCP server with the unsafe profile
-- SSC packages and GitHub repositories require exact allowlist entries
-- Net sources require an allowlisted HTTPS hostname and exact source URL
+- SSC and net package names may contain only ASCII letters and numbers
+- GitHub repositories must use `owner/repository` format and match the exact repository allowlist
 - `source` must be exactly `ssc`, `github`, or `net`; unknown values are rejected
 - Local paths, IP hosts, credentials, queries, fragments, and non-default ports are rejected
 - Every MCP call elicits approval from the user through the client and fails closed without it
@@ -23,17 +23,14 @@ Install a Stata ado package from SSC, GitHub, or net sources.
 
 ## Operator Setup
 
-Configure exact allowlists in `~/.statamcp/config.toml`, then start the MCP
+Configure the GitHub repository allowlist in `~/.statamcp/config.toml`, then start the MCP
 server with `stata-mcp server --unsafe`. The plugin's default MCP configuration
 does not expose this high-risk tool.
 
 ```toml
 [SECURITY]
 ENABLE_ADO_INSTALL = true
-ADO_INSTALL_ALLOWED_SSC_PACKAGES = ["reghdfe"]
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = ["SepineTam/TexIV"]
-ADO_INSTALL_ALLOWED_NET_HOSTS = ["packages.example.com"]
-ADO_INSTALL_ALLOWED_NET_SOURCES = ["https://packages.example.com/stata"]
 ```
 
 ## Returns
@@ -63,11 +60,12 @@ ado_package_install("SepineTam/TexIV", source="github")
 ```
 
 **Note:** The package repository must follow Stata package conventions with a valid `.pkg` file.
+GitHub repository contents receive no security protection. Inspect the repository
+before installation.
 
 ### Net
 
-For packages hosted on explicitly allowlisted HTTPS web servers. Local
-directories are rejected.
+For packages hosted on HTTPS web servers. Local directories are rejected.
 
 ```python
 ado_package_install("mypackage", source="net", package_source_from="https://example.com/stata")

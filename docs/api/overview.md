@@ -23,7 +23,7 @@ from stata_mcp.api import (
 # Get data information
 info = get_data_info("/path/to/data.dta")
 
-# Install an enabled and allowlisted package after approval
+# Install an enabled and approved package
 result = ado_package_install("outreg2", source="ssc", confirm=True)
 
 # Execute a do-file
@@ -214,15 +214,16 @@ def ado_package_install(
 | `package` | `str` | required | Package name or `user/repo` for GitHub |
 | `source` | `str` | `"ssc"` | Installation source: `ssc` / `net` / `github` |
 | `is_replace` | `bool` | `False` | Replace existing package |
-| `package_source_from` | `str` | `None` | Allowlisted HTTPS URL for `net` installations |
+| `package_source_from` | `str` | `None` | Validated HTTPS URL for `net` installations |
 | `config_file` | `str \| Path` | `None` | Custom config file path |
 | `timeout` | `int` | `300` | Timeout in seconds |
 | `confirm` | `bool` | `False` | Explicitly acknowledge the approved third-party installation |
 
 **Input validation**:
 - `SECURITY.ENABLE_ADO_INSTALL` must be true and every call must set `confirm=True`
-- SSC packages and GitHub repositories must be present in their exact allowlists
-- Net packages must match an allowlisted HTTPS hostname and exact source URL
+- SSC and net package names may contain only ASCII letters and numbers
+- GitHub repositories must use `owner/repository` format and match the exact repository allowlist
+- GitHub repository contents receive no security protection; inspect them before installation
 - `source` must be exactly `ssc`, `net`, or `github`; unknown values are rejected
 - Local paths, IP hosts, credentials, queries, fragments, dot segments, duplicate slashes, and non-default ports are rejected
 

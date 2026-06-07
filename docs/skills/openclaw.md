@@ -21,7 +21,7 @@ If you want to know more about MCP-for-Stata, visit its [documents](https://docs
 |------|---------|------------|
 | `help` | Get Stata command docs | `cmd` (Unix only) |
 | `stata_do` | Execute .do file | `dofile_path`, `read_log_when_error` |
-| `ado_package_install` | Install approved, allowlisted packages | `package`, `source`; client elicits approval |
+| `ado_package_install` | Install approved packages; GitHub requires an allowlist | `package`, `source`; client elicits approval |
 | `get_data_info` | Analyze data files | `data_path`, `vars_list` |
 | `read_log` | Read log files | `file_path`, `output_format` |
 
@@ -41,12 +41,12 @@ uvx stata-mcp tool read-log <log_path> [--output-format full|core|dict]
 2. `Edit` or `Write` -> to create a do-file
 3. `stata_do` -> execute analysis with capture output
 4. `help` -> learn Stata commands (Unix) if there are any command error
-5. After explicit approval, use `ado_package_install` only for allowlisted sources
+5. After explicit approval, use `ado_package_install`; inspect GitHub repositories first
 
 ## Notes
 
 - Requires valid Stata license
 - `help` only works on macOS/Linux
 - Security guard blocks dangerous commands (shell, rm, etc.)
-- Ado installation is disabled by default and requires exact allowlists plus client-mediated approval
+- Ado installation is disabled by default and requires client-mediated approval; GitHub additionally requires an exact repository allowlist
 - Log location: `<cwd>/.statamcp/stata-mcp-log/`

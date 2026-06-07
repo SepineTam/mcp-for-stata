@@ -58,7 +58,7 @@ Operates as a stdio/HTTP/SSE server, responding to tool invocation requests from
 | `write_dofile` | Create timestamped do-files (deprecated, controlled by BETA config) |
 | `get_data_info` | Analyze CSV/DTA files with statistical summaries |
 | `help` | Retrieve Stata command documentation (cached) (Unix only) |
-| `ado_package_install` | Install approved, allowlisted packages (unsafe profile only) |
+| `ado_package_install` | Install approved packages; GitHub requires an allowlist (unsafe profile only) |
 | `read_log` | Read Stata log files (text and SMCL formats) |
 
 ## Data Processing Pipeline

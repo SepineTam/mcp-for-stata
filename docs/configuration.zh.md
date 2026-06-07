@@ -43,10 +43,7 @@ IS_SAVE = true
 [SECURITY]
 IS_GUARD = true
 ENABLE_ADO_INSTALL = false
-ADO_INSTALL_ALLOWED_SSC_PACKAGES = []
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = []
-ADO_INSTALL_ALLOWED_NET_HOSTS = []
-ADO_INSTALL_ALLOWED_NET_SOURCES = []
 
 [PROJECT]
 WORKING_DIR = ""
@@ -213,8 +210,7 @@ hash_length = 12
 启用时必须同时满足以下条件：
 
 - 设置 `SECURITY.ENABLE_ADO_INSTALL = true`
-- 将准确的 SSC 包名、GitHub `owner/repository`，或 net HTTPS 主机名及精确来源
-  URL 加入对应白名单
+- 将每个已批准的 GitHub `owner/repository` 加入精确仓库白名单
 - MCP server 必须通过 `stata-mcp server --unsafe` 启动
 - 每次 MCP 调用接受客户端弹出的用户批准请求；每次 API 调用传入 `confirm=True`；
   每次 CLI 调用传入 `--yes`
@@ -222,19 +218,16 @@ hash_length = 12
 ```toml
 [SECURITY]
 ENABLE_ADO_INSTALL = true
-ADO_INSTALL_ALLOWED_SSC_PACKAGES = ["reghdfe", "estout"]
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = ["SepineTam/TexIV"]
-ADO_INSTALL_ALLOWED_NET_HOSTS = ["packages.example.com"]
-ADO_INSTALL_ALLOWED_NET_SOURCES = ["https://packages.example.com/stata"]
 ```
 
 对应环境变量为 `STATA_MCP__ENABLE_ADO_INSTALL`、
-`STATA_MCP__ADO_INSTALL_ALLOWED_SSC_PACKAGES`、
-`STATA_MCP__ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES` 和
-`STATA_MCP__ADO_INSTALL_ALLOWED_NET_HOSTS` 和
-`STATA_MCP__ADO_INSTALL_ALLOWED_NET_SOURCES`。白名单环境变量使用逗号分隔。
-net 来源必须同时匹配已加入白名单的 HTTPS 主机和精确来源 URL；本地路径、
-IP 地址主机、凭据、查询参数、片段、点路径段、重复斜杠和非默认端口都会被拒绝。
+和 `STATA_MCP__ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES`。GitHub 白名单环境变量
+使用逗号分隔。SSC 和 net 包名只能包含 ASCII 字母与数字。net 来源必须使用经过
+校验的 HTTPS URL；本地路径、IP 地址主机、凭据、查询参数、片段、点路径段、
+重复斜杠和非默认端口都会被拒绝。
+
+GitHub 白名单只校验仓库名称，不会检查或保护仓库内容。安装前必须人工查验仓库。
 
 ### PROJECT 分区
 

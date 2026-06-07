@@ -4,7 +4,8 @@
 
 The package installation module is a high-risk, opt-in interface for installing
 approved Stata packages. It is disabled by default and requires exact source
-allowlists plus explicit approval.
+validation plus explicit approval. GitHub repositories additionally require an
+exact repository allowlist.
 
 ## Key Features
 
@@ -12,7 +13,7 @@ allowlists plus explicit approval.
 
 Directly installs packages from the Boston College Statistical Software Components archive:
 
-- **Controlled Installation**: Installs only packages explicitly allowlisted by the operator
+- **Controlled Installation**: SSC package names may contain only ASCII letters and numbers
 - **Dependency Handling**: Stata's package manager handles dependencies automatically
 - **Version Management**: Supports updating existing packages with the `replace` option
 
@@ -41,7 +42,7 @@ The module provides built-in verification to ensure successful installation:
 
 ## How It Works
 
-1. **Authorization**: Requires enablement, an exact source allowlist, and approval
+1. **Authorization**: Requires enablement and approval; GitHub also requires an exact repository allowlist
 2. **Validation**: Revalidates the package and source immediately before execution
 3. **Stata Execution**: Sends the validated installation command to Stata
 4. **Result Verification**: Checks explicit success indicators
@@ -76,7 +77,7 @@ The module handles common installation scenarios:
 ## Example Workflow
 
 ```python
-# Python API example after configuring the exact SSC allowlist
+# Python API example after enabling installation
 ado_package_install("estout", confirm=True)
 ```
 
@@ -86,4 +87,5 @@ ado_package_install("estout", confirm=True)
 - Installation speed depends on package size and network connection
 - Some packages may have additional system requirements
 - Always verify package functionality after installation
+- GitHub repository contents receive no security protection; inspect them before installation
 - Direct package-management commands submitted through `stata_do` are blocked; use the controlled interface

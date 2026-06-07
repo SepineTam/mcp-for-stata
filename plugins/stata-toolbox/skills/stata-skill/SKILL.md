@@ -3,7 +3,7 @@ name: stata-skill
 description: |
   A packaged Stata Runner skill via official MCP-for-Stata server including stata_do, ado_package_install, help, read_log and get_data_info tools. Use it when (1) need to execute Stata do-file; (2) missing ado-packages; (3) find code error caused by syntax in Stata; (4) want to read smcl and text format log file with rich text output; (5) first encounter a data file and want to understand its structure and content.
 metadata:
-  version: "1.0.4"
+  version: "1.0.5"
 ---
 
 # MCP-for-Stata
@@ -78,20 +78,21 @@ the operator enabled it and started the MCP server with the unsafe profile.
 - `package`: package name. For GitHub source, use "user/repo" format
 - `source`: "ssc" (default), "github", or "net"
 - `is_replace`: defaults to false
-- `package_source_from`: required only when source="net", specifies an allowlisted HTTPS URL
+- `package_source_from`: required only when source="net", specifies a validated HTTPS URL
 
-**Authorization and validation:** SSC packages and GitHub repositories require
-exact allowlist entries. Net sources require an allowlisted HTTPS hostname and
-exact source URL.
+**Authorization and validation:** SSC and net package names may contain only
+ASCII letters and numbers. GitHub repositories must use `owner/repository`
+format and match the exact repository allowlist.
 Unknown sources, local paths, IP hosts, credentials, queries, fragments, and
 non-default ports are rejected. The MCP client will ask the user to approve the
 exact request during the tool call; do not attempt to bypass or pre-answer it.
 
 **Examples:**
-- `ado_package_install("outreg2")` — request approval to install an allowlisted SSC package
+- `ado_package_install("outreg2")` — request approval to install an SSC package
 - `ado_package_install("SepineTam/TexIV", source="github")` — request approval to install an allowlisted GitHub repository
 
-**Note:** The tool never installs the GitHub helper or refreshes help automatically.
+**Note:** GitHub repository contents receive no security protection. Inspect the
+repository before installation. The tool never installs the GitHub helper or refreshes help automatically.
 After reviewing a successful install, call `help(cmd=..., replace=true)` only
 when the user wants fresh help content.
 
@@ -145,7 +146,7 @@ This tool is disabled by default and only available when `STATA_MCP__ENABLE_WRIT
 
 1. `get_data_info` — explore data structure
 2. Write do-file based on data characteristics (Write tool)
-3. Ask for approval and use `ado_package_install` only if the exact source is allowlisted
+3. Ask for approval and use `ado_package_install`; inspect GitHub repositories first
 4. `stata_do` — execute the do-file
 5. `read_log` — inspect execution results if needed
 
@@ -158,7 +159,7 @@ This tool is disabled by default and only available when `STATA_MCP__ENABLE_WRIT
 ### Scenario C: Install and Use a New Package
 
 1. Confirm the exact package and source with the user
-2. `ado_package_install("pkg_name")` — request approval and install an allowlisted source
+2. `ado_package_install("pkgname")` — request approval and install the package
 3. `help(cmd="pkg_name", replace=true)` — explicitly refresh and check package usage
 4. Use the package commands in the do-file
 5. `stata_do` — execute

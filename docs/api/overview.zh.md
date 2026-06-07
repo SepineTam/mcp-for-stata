@@ -23,7 +23,7 @@ from stata_mcp.api import (
 # 获取数据信息
 info = get_data_info("/path/to/data.dta")
 
-# 经批准后安装已启用且加入白名单的包
+# 安装已启用且批准的包
 result = ado_package_install("outreg2", source="ssc", confirm=True)
 
 # 执行 do 文件
@@ -214,15 +214,16 @@ def ado_package_install(
 | `package` | `str` | 必填 | 包名或 GitHub 的 `user/repo` |
 | `source` | `str` | `"ssc"` | 安装源：`ssc` / `net` / `github` |
 | `is_replace` | `bool` | `False` | 替换已存在的包 |
-| `package_source_from` | `str` | `None` | `net` 安装使用的已允许 HTTPS URL |
+| `package_source_from` | `str` | `None` | `net` 安装使用的经过校验的 HTTPS URL |
 | `config_file` | `str \| Path` | `None` | 自定义配置文件路径 |
 | `timeout` | `int` | `300` | 超时时间（秒） |
 | `confirm` | `bool` | `False` | 显式确认已批准的第三方安装 |
 
 **输入校验**：
 - 必须启用 `SECURITY.ENABLE_ADO_INSTALL`，且每次调用传入 `confirm=True`
-- SSC 包和 GitHub 仓库必须位于各自的精确白名单中
-- net 包必须同时匹配已加入白名单的 HTTPS 主机和精确来源 URL
+- SSC 和 net 包名只能包含 ASCII 字母与数字
+- GitHub 仓库必须使用 `owner/repository` 格式并命中精确仓库白名单
+- GitHub 仓库内容没有安全防护，安装前必须人工查验
 - `source` 必须严格为 `ssc`、`net` 或 `github`；未知值会被拒绝
 - 本地路径、IP 主机、凭据、查询参数、片段、点路径段、重复斜杠和非默认端口都会被拒绝
 

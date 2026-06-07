@@ -34,7 +34,7 @@ stata-mcp tool --help
 从 SSC、GitHub 或网络安装 ado 包。
 
 ```bash
-# 经批准后安装已加入白名单的 SSC 包
+# 安装已批准的 SSC 包
 stata-mcp tool ado-install outreg2 --yes
 
 # 从 GitHub 安装
@@ -57,8 +57,8 @@ stata-mcp tool ado-install estout --yes --is-replace false
 | `--is-replace` | 替换已存在的包文件 | false |
 | `--yes` | 确认已批准的第三方包和来源 | false |
 
-安装默认禁用，并要求在 `[SECURITY]` 中配置精确来源白名单。net 来源必须使用
-已加入白名单的 HTTPS 主机名。
+安装默认禁用。SSC 和 net 包名只能包含 ASCII 字母与数字。GitHub 仓库必须命中
+精确白名单，并在安装前人工查验其内容。
 
 ---
 
@@ -188,7 +188,7 @@ stata-mcp tool data-info /project/data/raw/survey.dta
 # 2. 获取命令帮助
 stata-mcp tool help regress
 
-# 3. 经批准后安装已启用且加入白名单的包
+# 3. 安装已启用且批准的包
 stata-mcp tool ado-install outreg2 --yes
 
 # 4. 执行分析脚本

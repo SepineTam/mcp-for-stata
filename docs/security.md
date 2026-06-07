@@ -114,9 +114,9 @@ protected independently from the dofile Guard:
 1. Installation is disabled by default with `SECURITY.ENABLE_ADO_INSTALL=false`.
 2. The default `all` MCP profile does not expose `ado_package_install`; the
    operator must explicitly start `stata-mcp server --unsafe`.
-3. SSC packages and GitHub repositories require exact allowlist entries. Net
-   installation requires both an exact HTTPS hostname and exact source URL
-   allowlist entry.
+3. SSC and net package names may contain only ASCII letters and numbers.
+   GitHub repositories must use `owner/repository` format and match the exact
+   GitHub repository allowlist. Net sources must use validated HTTPS URLs.
 4. Every MCP call requires client-mediated user elicitation, every API call
    requires `confirm=True`, and every CLI call requires `--yes`.
 5. The installer validates again immediately before sending the command to
@@ -125,14 +125,14 @@ protected independently from the dofile Guard:
    even when the general dofile Guard is disabled.
 
 These controls are cumulative. Disabling the dofile Guard does not bypass ado
-installation enablement, allowlists, or confirmation. Disabling the general
+installation enablement, GitHub allowlisting, or confirmation. Disabling the general
 Guard still permits other dangerous execution paths and is not a security
 boundary.
 
-Allowlisting controls which source may be used, but it does not prove that the
-remote source remains unchanged. Review upstream changes before installation;
-the current installer does not pin package versions or verify hashes or
-signatures.
+GitHub allowlisting validates only the repository name and provides no
+content-level security protection. Review the repository before installation.
+Remote sources may change; the current installer does not pin package versions
+or verify hashes or signatures.
 
 ## Configuration
 

@@ -131,7 +131,7 @@ stata-mcp update --method homebrew  # brew upgrade
 Run API-backed Stata tools directly from the CLI:
 
 ```bash
-# Install an explicitly allowlisted ado package from SSC
+# Install an approved ado package from SSC
 stata-mcp tool ado-install reghdfe --yes
 
 # Run a do-file and only read the log when execution fails
@@ -156,8 +156,10 @@ Tool subcommands:
 
 > Note: `--read-log-when-error` replaces the older `--is-read-log` flag. Unlike the old flag (which unconditionally read the log), the new flag reads the log only when the underlying execution reports an error.
 
-> `ado-install` is disabled by default. Enable it and configure exact source
-> allowlists under `[SECURITY]`; every CLI installation also requires `--yes`.
+> `ado-install` is disabled by default, and every CLI installation requires
+> `--yes`. SSC and net package names may contain only ASCII letters and numbers.
+> GitHub repositories require an exact repository allowlist and must be
+> inspected before installation.
 
 ### Config Management
 

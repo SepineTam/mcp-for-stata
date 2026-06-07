@@ -58,7 +58,7 @@ MCP-for-Stata 通过四个架构层运行：
 | `write_dofile` | 创建带时间戳的 do 文件（已弃用，由 BETA 配置控制） |
 | `get_data_info` | 分析 CSV/DTA 文件并生成统计摘要 |
 | `help` | 检索 Stata 命令文档（缓存）（仅 Unix） |
-| `ado_package_install` | 安装已批准且加入白名单的包（仅 unsafe profile） |
+| `ado_package_install` | 安装已批准的包；GitHub 要求白名单（仅 unsafe profile） |
 | `read_log` | 读取 Stata 日志文件（文本和 SMCL 格式） |
 
 ## 数据处理流水线

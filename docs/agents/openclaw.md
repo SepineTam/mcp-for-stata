@@ -34,7 +34,7 @@ stata-mcp tool --help
 Install ado packages from SSC, GitHub, or network sources.
 
 ```bash
-# Install an allowlisted SSC package after approval
+# Install an approved SSC package
 stata-mcp tool ado-install outreg2 --yes
 
 # Install from GitHub
@@ -57,8 +57,9 @@ stata-mcp tool ado-install estout --yes --is-replace false
 | `--is-replace` | Replace existing package files | false |
 | `--yes` | Confirm the approved third-party package and source | false |
 
-Installation is disabled by default and requires exact source allowlists under
-`[SECURITY]`. Net sources must use an allowlisted HTTPS hostname.
+Installation is disabled by default. SSC and net package names may contain only
+ASCII letters and numbers. GitHub repositories require an exact allowlist and
+their contents must be inspected before installation.
 
 ---
 
@@ -188,7 +189,7 @@ stata-mcp tool data-info /project/data/raw/survey.dta
 # 2. Get command help
 stata-mcp tool help regress
 
-# 3. Install an enabled and allowlisted package after approval
+# 3. Install an enabled and approved package
 stata-mcp tool ado-install outreg2 --yes
 
 # 4. Execute analysis script
