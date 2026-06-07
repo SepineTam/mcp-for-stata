@@ -121,7 +121,8 @@ class StataHelp:
         if not STATA_COMMAND_NAME_PATTERN.fullmatch(command):
             raise ValueError(
                 "Invalid Stata command name. "
-                "Only letters, numbers, and underscores are allowed."
+                "It must start with a letter or underscore and contain only "
+                "letters, numbers, and underscores."
             )
         return command
 
@@ -153,16 +154,19 @@ class StataHelp:
             return None
 
     def load_from_cache(self, cmd: str):
+        cmd = self._validate_command_name(cmd)
         cached_cmd_help_file = self.help_cache_dir / f"help__{cmd}.txt"
         return self._load_from_file(cached_cmd_help_file)
 
     def load_from_project(self, cmd: str):
+        cmd = self._validate_command_name(cmd)
         if self.project_tmp_dir is None:
             return None
         project_help_file = self.project_tmp_dir / f"help__{cmd}.txt"
         return self._load_from_file(project_help_file)
 
     def load_from_stata(self, cmd: str):
+        cmd = self._validate_command_name(cmd)
         std_error_msg = (
             f"help {cmd}\r\n"
             f"help for {cmd} not found\r\n"

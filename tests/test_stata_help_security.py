@@ -170,3 +170,28 @@ def test_check_command_exist_uses_normalized_command(stata_help: StataHelp) -> N
 
     assert stata_help.check_command_exist_with_help("  github  ") is True
     stata_help.controller.run.assert_called_once_with("help github")
+
+
+def test_load_from_stata_rejects_unsafe_direct_call(stata_help: StataHelp) -> None:
+    with pytest.raises(ValueError, match="Invalid Stata command name"):
+        stata_help.load_from_stata("regress\nshell echo pwn")
+
+    stata_help.controller.run.assert_not_called()
+
+
+def test_load_from_stata_normalizes_direct_call(stata_help: StataHelp) -> None:
+    stata_help.controller.run.return_value = "regress help content"
+
+    assert stata_help.load_from_stata("  regress  ") == "regress help content"
+    stata_help.controller.run.assert_called_once_with("help regress")
+
+
+@pytest.mark.parametrize("method_name", ["load_from_cache", "load_from_project"])
+def test_direct_cache_loaders_reject_unsafe_command_names(
+    stata_help: StataHelp,
+    method_name: str,
+) -> None:
+    loader = getattr(stata_help, method_name)
+
+    with pytest.raises(ValueError, match="Invalid Stata command name"):
+        loader("../secret")
