@@ -14,11 +14,11 @@ Retrieve documentation and usage information for a Stata command.
 String containing Stata help text. If the result is from cache, the prefix shows:
 
 ```
-Cached result for regress:
-----
-[regress]
-    ...help text...
+Cached result for regress
+...help text...
 ```
+
+Project-cache results use the prefix `Saved result for {cmd}`.
 
 ## When to Use
 
@@ -34,17 +34,22 @@ Cached result for regress:
 
 Help text is cached at two levels:
 
-1. **In-memory cache**: persists for the MCP server session
-2. **Disk cache**: stored at `~/.statamcp/help/{cmd}.txt`
+1. **Project cache**: stored at `<WORKING_DIR>/.statamcp/stata-mcp-tmp/help__{cmd}.txt`
+2. **Global cache**: stored at `~/.statamcp/help/help__{cmd}.txt`
+
+Only enabled cache locations are considered. If both contain a non-empty result,
+the newest file by modification time is returned. If their timestamps match, the
+project cache is preferred.
 
 Caching is controlled by environment variables:
 
 | Variable | Default | Description |
 |:---|:---|:---|
-| `STATA_MCP__CACHE_HELP` | `true` | Use cached help text when available |
-| `STATA_MCP__SAVE_HELP` | `true` | Save fetched help text to disk cache |
+| `STATA_MCP__CACHE_HELP` | `true` | Enable the global help cache |
+| `STATA_MCP__SAVE_HELP` | `true` | Enable the project help cache |
 
-If cached content seems stale or incorrect, set `STATA_MCP__CACHE_HELP=false` to force a fresh fetch, or pass `replace=true`.
+If cached content seems stale or incorrect, pass `replace=true`. This bypasses
+cache lookup, queries Stata, and overwrites both project and global cache files.
 
 ## Example
 
@@ -58,6 +63,8 @@ help(cmd="xtreg", replace=true)
 
 ## Notes
 
-- The `replace` parameter only refreshes the in-memory cache; to also clear disk cache, manually delete `~/.statamcp/help/{cmd}.txt`
+- There is no automatic TTL-based refresh; use `replace=true` after an external package update
+- Successful package installation attempts to refresh help for the package name, but packages may provide commands with different names
+- `cmd` must be a single Stata command name that starts with a letter or underscore and otherwise contains only letters, numbers, and underscores
 - Help text retrieval uses the Stata CLI's `help` command internally
 - If the command does not exist, Stata returns an error message in the help text

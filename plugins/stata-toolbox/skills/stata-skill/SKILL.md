@@ -1,8 +1,9 @@
 ---
 name: stata-skill
-version: 1.0.1
 description: |
   A packaged Stata Runner skill via official MCP-for-Stata server including stata_do, ado_package_install, help, read_log and get_data_info tools. Use it when (1) need to execute Stata do-file; (2) missing ado-packages; (3) find code error caused by syntax in Stata; (4) want to read smcl and text format log file with rich text output; (5) first encounter a data file and want to understand its structure and content.
+metadata:
+  version: "1.0.2"
 ---
 
 # MCP-for-Stata
@@ -90,13 +91,15 @@ When the user asks about the syntax, options, or usage of a Stata command, or wa
 
 **Key parameter:**
 - `cmd`: Stata command name (e.g., "regress", "describe", "xtset")
+- `replace`: defaults to false. When true, bypasses cached help and refreshes it from Stata
 
-**Return value:** Stata help text string. If cache is hit, prefix shows "Cached result for {cmd}: ..."
+**Return value:** Stata help text string. A cache hit is prefixed with
+`Saved result for {cmd}` or `Cached result for {cmd}`.
 
 **Notes:**
 - **Unix only** (macOS/Linux), not available on Windows
-- Caching is enabled by default (in-memory + disk at `~/.statamcp/help/`)
-- If cached content seems incorrect, set `STATA_MCP__CACHE_HELP=false` to force a refresh
+- Enabled project and global caches are considered, and the newest non-empty result is returned
+- If cached content seems stale or incorrect, call `help(cmd=..., replace=true)` to refresh it
 
 ---
 
@@ -169,4 +172,3 @@ This tool is disabled by default and only available when `STATA_MCP__ENABLE_WRIT
 | Documentation | [docs.statamcp.com](https://docs.statamcp.com) | Full user documentation |
 | Homepage | [statamcp.com](https://statamcp.com) | Project homepage |
 | Source Code | [github.com/sepinetam/mcp-for-stata](https://github.com/sepinetam/mcp-for-stata) | GitHub repository |
-
