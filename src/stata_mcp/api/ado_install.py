@@ -10,10 +10,7 @@
 from pathlib import Path
 
 from ..config import Config
-from ..guard import (
-    require_ado_install_confirmation,
-    validate_ado_install_request,
-)
+from ..guard import validate_ado_install_request
 from ..stata.builtin_tools.ado_install import GITHUB_Install, NET_Install, SSC_Install
 from ._runtime import create_runtime_context
 from .read_log import read_log
@@ -34,20 +31,13 @@ def ado_package_install(
     package_source_from: str = None,
     config_file: str | Path | None = None,
     timeout: int = 300,
-    confirm: bool = False,
 ) -> str:
-    """Install an explicitly enabled and confirmed ado package.
+    """Install an ado package after validating its command arguments.
 
     GitHub repositories are allowlisted by name only and receive no content-level
     security protection. Inspect the repository before installation.
     """
     config = Config(config_file=config_file)
-    if not config.ENABLE_ADO_INSTALL:
-        raise PermissionError(
-            "Ado package installation is disabled. Set "
-            "SECURITY.ENABLE_ADO_INSTALL=true only in trusted environments."
-        )
-    require_ado_install_confirmation(confirm)
     package, source, package_source_from = validate_ado_install_request(
         package,
         source,

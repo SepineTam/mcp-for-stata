@@ -88,12 +88,14 @@ def handle_tool(args: Namespace) -> int:
 
     try:
         if args.tool_action == "ado-install":
+            if not args.yes and not _confirm_ado_install(args):
+                print("Ado package installation cancelled.", file=sys.stderr)
+                return 1
             result = ado_package_install(
                 package=args.package_name,
                 source=args.source,
                 is_replace=args.is_replace,
                 package_source_from=args.package_source_from,
-                confirm=args.yes,
             )
         elif args.tool_action == "do":
             result = stata_do(
@@ -129,6 +131,25 @@ def handle_tool(args: Namespace) -> int:
 
     print_cli_result(result)
     return 0
+
+
+def _confirm_ado_install(args: Namespace) -> bool:
+    """Prompt for confirmation before a CLI ado package installation."""
+    source_details = (
+        f", source URL={args.package_source_from!r}"
+        if args.package_source_from is not None
+        else ""
+    )
+    prompt = (
+        "Install third-party Stata package "
+        f"{args.package_name!r} from {args.source!r}"
+        f"{source_details}, replace={args.is_replace!r}? [y/N]: "
+    )
+    try:
+        response = input(prompt)
+    except (EOFError, KeyboardInterrupt):
+        return False
+    return response.strip().lower() in {"y", "yes"}
 
 
 def handle_config(args: Namespace) -> int:

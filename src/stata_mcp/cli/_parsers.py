@@ -142,9 +142,10 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
         help_text="Replace existing package files when supported",
     )
     tool_ado_install_parser.add_argument(
+        "-y",
         "--yes",
         action="store_true",
-        help="Confirm the approved third-party package and source",
+        help="Skip the interactive third-party installation confirmation",
     )
 
     tool_do_parser = tool_subparsers.add_parser("do", help="Run a do-file through the API module")

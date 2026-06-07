@@ -389,7 +389,6 @@ async def ado_package_install(
         is_replace=is_replace,
         package_source_from=package_source_from,
         config_file=config.config_file,
-        confirm=True,
     )
 
 

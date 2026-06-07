@@ -329,7 +329,6 @@ def test_mcp_ado_install_delegates_to_api_without_help_refresh(
         is_replace=True,
         package_source_from=None,
         config_file="/tmp/config.toml",
-        confirm=True,
     )
     context.elicit.assert_awaited_once()
 

@@ -281,7 +281,6 @@ def test_api_rejects_unsafe_install_input_before_runtime_creation(
 ) -> None:
     create_runtime_context = Mock()
     config = SimpleNamespace(
-        ENABLE_ADO_INSTALL=True,
         ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=("SepineTam/TexIV",),
     )
     monkeypatch.setattr(ado_install_api, "Config", lambda **kwargs: config)
@@ -292,36 +291,7 @@ def test_api_rejects_unsafe_install_input_before_runtime_creation(
             package,
             source=source,
             package_source_from=package_source_from,
-            confirm=True,
         )
-
-    create_runtime_context.assert_not_called()
-
-
-def test_api_requires_enablement_and_confirmation_before_runtime_creation(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    create_runtime_context = Mock()
-    monkeypatch.setattr(ado_install_api, "create_runtime_context", create_runtime_context)
-    monkeypatch.setattr(
-        ado_install_api,
-        "Config",
-        lambda **kwargs: SimpleNamespace(ENABLE_ADO_INSTALL=False),
-    )
-
-    with pytest.raises(PermissionError, match="disabled"):
-        ado_install_api.ado_package_install("reghdfe", confirm=True)
-
-    monkeypatch.setattr(
-        ado_install_api,
-        "Config",
-        lambda **kwargs: SimpleNamespace(
-            ENABLE_ADO_INSTALL=True,
-            ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=(),
-        ),
-    )
-    with pytest.raises(PermissionError, match="confirm=True"):
-        ado_install_api.ado_package_install("reghdfe")
 
     create_runtime_context.assert_not_called()
 
@@ -334,7 +304,6 @@ def test_api_rejects_unallowlisted_github_repository_before_runtime_creation(
         ado_install_api,
         "Config",
         lambda **kwargs: SimpleNamespace(
-            ENABLE_ADO_INSTALL=True,
             ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=(),
         ),
     )
@@ -344,17 +313,16 @@ def test_api_rejects_unallowlisted_github_repository_before_runtime_creation(
         ado_install_api.ado_package_install(
             "SepineTam/TexIV",
             source="github",
-            confirm=True,
         )
 
     create_runtime_context.assert_not_called()
 
 
-def test_api_forwards_validated_ssc_package_to_installer(
+def test_api_installs_without_enablement_or_caller_confirmation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     config = SimpleNamespace(
-        ENABLE_ADO_INSTALL=True,
+        ENABLE_ADO_INSTALL=False,
         ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=(),
     )
     installer = Mock()
@@ -373,7 +341,7 @@ def test_api_forwards_validated_ssc_package_to_installer(
         {"ssc": installer_cls},
     )
 
-    result = ado_install_api.ado_package_install("reghdfe", confirm=True)
+    result = ado_install_api.ado_package_install("reghdfe")
 
     assert result == "Installation State: True"
     installer_cls.assert_called_once_with("stata", False, timeout=300)
@@ -413,7 +381,6 @@ def test_api_windows_builds_and_verifies_install_command(
     expected_command: str,
 ) -> None:
     config = SimpleNamespace(
-        ENABLE_ADO_INSTALL=True,
         ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=("SepineTam/TexIV",),
     )
     write_dofile = Mock(return_value="/tmp/install.do")
@@ -434,7 +401,6 @@ def test_api_windows_builds_and_verifies_install_command(
         source=source,
         is_replace=is_replace,
         package_source_from=package_source_from,
-        confirm=True,
     )
 
     assert result.startswith("Installation State: True")
@@ -456,7 +422,6 @@ def test_api_windows_reports_failed_install(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     config = SimpleNamespace(
-        ENABLE_ADO_INSTALL=True,
         ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=(),
     )
     monkeypatch.setattr(ado_install_api, "Config", lambda **kwargs: config)
@@ -477,7 +442,7 @@ def test_api_windows_reports_failed_install(
         lambda *args, **kwargs: "package not found\nr(601)",
     )
 
-    result = ado_install_api.ado_package_install("reghdfe", confirm=True)
+    result = ado_install_api.ado_package_install("reghdfe")
 
     assert result.startswith("Installation State: False")
     assert "Failed to install package 'reghdfe'" in result
