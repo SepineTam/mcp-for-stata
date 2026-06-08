@@ -44,10 +44,14 @@ The module provides built-in verification to ensure successful installation:
 
 ## How It Works
 
-1. **Authorization**: Requires enablement and approval; GitHub also requires an exact repository allowlist
+1. **Authorization**: MCP requires client approval, CLI prompts unless `-y` or
+   `--yes` is supplied, and GitHub also requires an exact repository allowlist
 2. **Validation**: Revalidates the package and source immediately before execution
 3. **Stata Execution**: Sends the validated installation command to Stata
-4. **Result Verification**: Checks explicit success indicators
+4. **Result Verification**: Unix treats a normal Controller return as success because
+   Stata return-code errors, timeouts, and terminated sessions raise exceptions.
+   Windows conservatively verifies installation logs; GitHub requires an explicit
+   terminal success message and rejects any error signal.
 
 ## Installation Behavior
 

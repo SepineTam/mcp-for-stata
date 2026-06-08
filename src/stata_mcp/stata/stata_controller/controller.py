@@ -25,6 +25,8 @@ class StataController:
         self.stata_cli_path = stata_cli
         self.child = None
         self.timeout = timeout
+        self._last_error_code = None
+        self._last_error_output = None
         self.start()
 
     @property
@@ -61,6 +63,10 @@ class StataController:
             self.child.send(" ")
             return self._expect_prompt(timeout)  # Recurse until actual prompt
         elif index == 3:  # Error prompt
+            error_match = re.search(r"r\((\d+)\);", str(self.child.after))
+            self._last_error_code = error_match.group(1) if error_match else None
+            self._last_error_output = self.child.before.strip()
+
             # Continue waiting until standard prompt appears
             try:
                 self.child.expect(r"\r\n\. ", timeout=5)
@@ -71,10 +77,10 @@ class StataController:
             # Try sending a newline to trigger the prompt
             self.child.sendline("")
             try:
-                return self.child.expect(
-                    [r"\r\n\. ", pexpect.TIMEOUT], timeout=5)
+                self.child.expect([r"\r\n\. ", pexpect.TIMEOUT], timeout=5)
             except pexpect.TIMEOUT:
-                return index
+                pass
+            return index
 
         return index
 
@@ -95,6 +101,9 @@ class StataController:
         if timeout is None:
             timeout = self.timeout
 
+        self._last_error_code = None
+        self._last_error_output = None
+
         # Send the command
         self.child.sendline(command)
 
@@ -102,14 +111,19 @@ class StataController:
         result = self._expect_prompt(timeout)
 
         # Capture the output
-        output = self.child.before.strip()
+        output = (
+            self._last_error_output
+            if result == 3 and self._last_error_output is not None
+            else self.child.before.strip()
+        )
 
         # Check for errors
         if result == 3:  # Error prompt index
-            error_match = re.search(r"r\((\d+)\);", output)
-            if error_match:
-                error_code = error_match.group(1)
-                raise RuntimeError(f"Stata error r({error_code}): {output}")
+            if self._last_error_code is not None:
+                raise RuntimeError(
+                    f"Stata error r({self._last_error_code}): {output}"
+                )
+            raise RuntimeError(f"Stata command failed: {output}")
         elif result == 4:  # Timeout
             raise RuntimeError(f"Command timed out (> {timeout}s): {command}")
         elif result == 5:  # EOF

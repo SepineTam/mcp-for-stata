@@ -184,6 +184,38 @@ def test_installers_validate_and_normalize_before_controller_run(
     controller.run.assert_called_once_with(expected_command)
 
 
+@pytest.mark.parametrize("installer_cls", [SSC_Install, GITHUB_Install, NET_Install])
+def test_unix_installers_treat_normal_controller_return_as_success(
+    monkeypatch: pytest.MonkeyPatch,
+    installer_cls,
+) -> None:
+    controller = SimpleNamespace(run=Mock(return_value="plain command output"))
+    monkeypatch.setattr(installer_cls, "controller", property(lambda self: controller))
+    installer = installer_cls.__new__(installer_cls)
+    installer.is_replace = False
+    if installer_cls is GITHUB_Install:
+        monkeypatch.setattr(
+            installer_cls,
+            "IS_EXIST_GITHUB",
+            property(lambda self: True),
+        )
+
+    install_args = (
+        ("SepineTam/TexIV",)
+        if installer_cls is GITHUB_Install
+        else ("custompkg", "https://example.com/stata")
+        if installer_cls is NET_Install
+        else ("reghdfe",)
+    )
+    install_kwargs = {"confirm": True}
+    if installer_cls is GITHUB_Install:
+        install_kwargs["allowed_repositories"] = ["SepineTam/TexIV"]
+
+    result = installer.install(*install_args, **install_kwargs)
+
+    assert result == "Installation State: True\nplain command output"
+
+
 @pytest.mark.parametrize(
     ("installer_cls", "package", "install_args"),
     [
@@ -509,6 +541,48 @@ def test_api_windows_reports_failed_install(
     stata_help.assert_not_called()
 
 
+def test_api_windows_github_connection_messages_do_not_prove_installation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = SimpleNamespace(
+        ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES=("SepineTam/TexIV",),
+    )
+    monkeypatch.setattr(ado_install_api, "Config", lambda **kwargs: config)
+    monkeypatch.setattr(
+        ado_install_api,
+        "create_runtime_context",
+        lambda **kwargs: SimpleNamespace(is_unix=False),
+    )
+    monkeypatch.setattr(
+        ado_install_api,
+        "write_dofile",
+        lambda *args, **kwargs: "/tmp/install.do",
+    )
+    monkeypatch.setattr(
+        ado_install_api,
+        "_stata_do",
+        lambda *args, **kwargs: {"log_file_path": {"text": "/tmp/install.log"}},
+    )
+    monkeypatch.setattr(
+        ado_install_api,
+        "read_log",
+        lambda *args, **kwargs: (
+            "connected to github.com\nrepository exists: SepineTam/TexIV"
+        ),
+    )
+    stata_help = Mock()
+    monkeypatch.setattr(ado_install_api, "stata_help", stata_help)
+
+    result = ado_install_api.ado_package_install(
+        "SepineTam/TexIV",
+        source="github",
+    )
+
+    assert result.startswith("Installation State: False")
+    assert "Failed to install package 'SepineTam/TexIV'" in result
+    stata_help.assert_not_called()
+
+
 def test_api_keeps_success_when_help_refresh_fails(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
@@ -560,3 +634,23 @@ def test_api_keeps_success_when_help_refresh_fails(
 )
 def test_net_install_success_detection(message: str, expected: bool) -> None:
     assert NET_Install.check_install(message) is expected
+
+
+@pytest.mark.parametrize(
+    ("message", "expected"),
+    [
+        ("installation complete", True),
+        ("all files already exist and are up to date", True),
+        ("connected to github.com", False),
+        ("repository exists: owner/repository", False),
+        (
+            "connected to github.com\nrepository exists: owner/repository",
+            False,
+        ),
+        ("installation complete\npackage not found\nr(601);", False),
+        ("installation complete\npermission denied", False),
+        ("", False),
+    ],
+)
+def test_github_windows_log_success_detection(message: str, expected: bool) -> None:
+    assert GITHUB_Install.check_install(message) is expected

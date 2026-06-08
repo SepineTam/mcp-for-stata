@@ -295,7 +295,11 @@ ado_package_install("estout", source="ssc", is_replace=True)
 校验的临时 dofile，并使用内部可信执行路径。通过 `stata_do` 提交的直接包管理命令
 在所有平台上都会被阻止。
 
-安装验证通过消息解析进行，安装器类检查 Stata 输出中的成功指示器。`check_installed_from_msg()` 方法执行正则或子字符串匹配以识别成功安装模式。失败的安装触发错误日志记录，通过调试级日志记录完整消息捕获。
+Unix 下，安装成功以交互式 Stata Controller 正常返回为准。Controller 遇到
+Stata `r(n)` 返回码错误、超时或会话异常退出时会抛出异常，因此成功判断不依赖
+匹配提示性输出文本。Windows 使用保守的日志兜底判断；其中 GitHub 安装只接受
+明确的终态成功文本，任何错误信号都会使其失败，并且连接成功或仓库存在不能证明
+安装完成。
 
 系统不会隐式安装 GitHub helper。任意来源安装成功后，共用安装器都会尝试用
 `replace=True` 刷新最可能的命令名：SSC/net 使用包名，GitHub 使用仓库名部分。

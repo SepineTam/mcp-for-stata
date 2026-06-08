@@ -66,7 +66,13 @@ class AdoInstallBase(ABC):
         return state_str in ("true", "1", "yes")
 
     def _install_msg_template(self, runner_result: str) -> str:
-        return f"Installation State: {self.check_install(runner_result)}\n" + runner_result
+        """Mark a completed interactive install successful.
+
+        StataController raises for Stata return-code errors, timeouts, and
+        terminated sessions. Reaching this point therefore represents a
+        successful Unix installation command.
+        """
+        return "Installation State: True\n" + runner_result
 
     @staticmethod
     def extract_error_summary(message: str) -> str:

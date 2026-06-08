@@ -7,6 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : github_install.py
 
+import re
 from collections.abc import Collection
 
 from ....guard import (
@@ -50,15 +51,29 @@ class GITHUB_Install(AdoInstallBase):
 
     @staticmethod
     def check_install(message: str) -> bool:
-        # I am not sure whether this is robust, if not please email me.
-        signature_messages = [
-            # GitHub specific success messages
-            "connected to github.com",
-            "repository exists:",
-            "installation complete",
+        """Conservatively verify a GitHub installation from a Windows log."""
+        normalized_message = str(message).lower()
+        if re.search(r"r\(\d+\);?", normalized_message):
+            return False
 
-            # for replace arg, the package is already exist and up to date
+        failure_signatures = [
+            "not found",
+            "could not",
+            "failed",
+            "error",
+            "invalid",
+            "unable to",
+            "permission denied",
+            "timed out",
+        ]
+        if any(signature in normalized_message for signature in failure_signatures):
+            return False
+
+        terminal_success_signatures = [
+            "installation complete",
             "all files already exist and are up to date",
         ]
-
-        return any(signature_msg in str(message).lower() for signature_msg in signature_messages)
+        return any(
+            signature in normalized_message
+            for signature in terminal_success_signatures
+        )

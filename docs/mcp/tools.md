@@ -294,7 +294,13 @@ prevalidated dofile and uses an internal trusted execution path. Direct
 package-management commands submitted through `stata_do` are blocked on every
 platform.
 
-Installation verification occurs through message parsing where installer classes examine Stata output for success indicators. The `check_installed_from_msg()` method performs regex or substring matching to identify successful installation patterns. Failed installations trigger error logging with full message capture via debug-level logging.
+On Unix, installation success is based on the interactive Stata Controller
+returning normally. The Controller raises on Stata `r(n)` return-code errors,
+timeouts, or terminated sessions, so success does not depend on matching
+informational output text. Windows uses a conservative log fallback. In
+particular, GitHub installation accepts only explicit terminal success messages,
+rejects any error signal, and does not treat connection or repository-existence
+messages as proof of installation.
 
 The GitHub helper is never installed implicitly. After any successful install,
 the shared installer attempts to refresh help with `replace=True` for the likely
