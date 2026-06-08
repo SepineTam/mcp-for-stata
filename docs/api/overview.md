@@ -86,6 +86,7 @@ def stata_do(
     is_replace_log: bool = True,
     enable_smcl: bool = True,
     config_file: str | Path | None = None,
+    timeout: float | None = None,
 ) -> Dict[str, Any]:
     ...
 ```
@@ -100,6 +101,7 @@ def stata_do(
 | `is_replace_log` | `bool` | `True` | Replace existing log file |
 | `enable_smcl` | `bool` | `True` | Generate SMCL format log |
 | `config_file` | `str \| Path` | `None` | Custom config file path |
+| `timeout` | `float \| None` | `None` | Maximum execution time in seconds; `None` means no timeout |
 
 **Returns**: `Dict[str, Any]`
 
@@ -128,6 +130,9 @@ result = stata_do(
     log_file_name="my_results",
     enable_smcl=False,
 )
+
+# Stop Stata if execution exceeds five minutes
+result = stata_do("/project/analysis.do", timeout=300)
 
 # Error handling
 if "error" in result:

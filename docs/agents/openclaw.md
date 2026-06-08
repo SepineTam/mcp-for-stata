@@ -80,6 +80,9 @@ stata-mcp tool do /path/to/analysis.do --is-read-log false
 
 # Disable SMCL format logging
 stata-mcp tool do /path/to/analysis.do --enable-smcl false
+
+# Stop execution after five minutes
+stata-mcp tool do /path/to/analysis.do --timeout 300
 ```
 
 **Parameters**:
@@ -88,6 +91,7 @@ stata-mcp tool do /path/to/analysis.do --enable-smcl false
 |-----------|-------------|---------|
 | `dofile_path` | Path to do-file (required) | - |
 | `--log-file-name` | Log filename without extension | auto-generated |
+| `--timeout` | Maximum execution time in seconds | no timeout |
 | `--is-read-log` | Read log content after execution | true |
 | `--is-replace-log` | Replace existing log file | true |
 | `--enable-smcl` | Generate SMCL format log | true |

@@ -21,6 +21,11 @@ Every time a do file is executed, StataDo automatically:
 2. Records the complete Stata execution process and output results
 3. Saves log files in the `stata-mcp-log` directory for easy review and analysis
 
+### Optional Execution Timeout
+
+Set `timeout` to a positive number of seconds to stop a long-running Stata process.
+The default value is `None`, so execution time is unlimited unless the caller opts in.
+
 ### Security Guarantees
 
 StataDo includes built-in security check mechanisms:
@@ -74,3 +79,4 @@ StataDo follows the MCP-for-Stata directory structure conventions:
 2. **Path Handling**: On Windows systems, spaces in paths are automatically handled
 3. **Log Overwriting**: By default, existing log files will be overwritten; this behavior can be controlled via parameters
 4. **Error Handling**: Exceptions are thrown when execution fails; callers should properly handle these exceptions
+5. **Execution Timeout**: Execution is unlimited by default; pass a positive `timeout` value to enforce a limit

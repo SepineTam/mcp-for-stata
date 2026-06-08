@@ -63,7 +63,8 @@ def stata_do(dofile_path: str,
              log_file_name: str | None = None,
              read_log_when_error: bool = False,
              is_replace_log: bool = True,
-             enable_smcl: bool = True) -> Dict[str, Union[str, None]]:
+             enable_smcl: bool = True,
+             timeout: float | None = None) -> Dict[str, Union[str, None]]:
     ...
 ```
 
@@ -73,6 +74,7 @@ def stata_do(dofile_path: str,
 - `read_log_when_error`: Boolean flag that gates log payload retrieval; the tool only reads the log when a Stata return-code error (e.g. `r(198)`) is detected, keeping the success path I/O-free (default: false)
 - `is_replace_log`: Boolean flag controlling whether an existing log file with the same name is overwritten (default: true)
 - `enable_smcl`: Boolean flag toggling SMCL formatted logging; when true the Stata CLI is invoked without the `nolog` redirection so both `.smcl` and `.log` artifacts are produced (default: true)
+- `timeout`: Optional maximum execution time in seconds. The default `null` value allows Stata to run without a time limit.
 
 **Return Structure**:
 Dictionary containing execution metadata and optional log payload:
@@ -100,6 +102,9 @@ stata_do("/tmp/estimation.do",
          read_log_when_error=True,
          is_replace_log=False,
          enable_smcl=False)
+
+# Stop Stata if execution exceeds five minutes
+stata_do("/tmp/estimation.do", timeout=300)
 ```
 
 **Implementation Architecture**:

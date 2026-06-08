@@ -63,7 +63,8 @@ def stata_do(dofile_path: str,
              log_file_name: str | None = None,
              read_log_when_error: bool = False,
              is_replace_log: bool = True,
-             enable_smcl: bool = True) -> Dict[str, Union[str, None]]:
+             enable_smcl: bool = True,
+             timeout: float | None = None) -> Dict[str, Union[str, None]]:
     ...
 ```
 
@@ -73,6 +74,7 @@ def stata_do(dofile_path: str,
 - `read_log_when_error`：仅在 Stata 返回错误码（如 `r(198)`）时才读取并返回日志内容的开关，用以降低成功路径的 I/O 开销（默认：false）
 - `is_replace_log`：是否覆盖同名 log 文件的开关（默认：true）
 - `enable_smcl`：是否启用 SMCL 格式日志输出的开关，true 时 Stata CLI 不附加 `nolog` 重定向参数,同时产出 `.smcl` 和 `.log`（默认：true）
+- `timeout`：可选的最大执行秒数。默认值 `null` 表示不限制 Stata 的执行时间。
 
 **返回结构**：
 包含执行元数据和可选日志负载的字典：
@@ -100,6 +102,9 @@ stata_do("/tmp/estimation.do",
          read_log_when_error=True,
          is_replace_log=False,
          enable_smcl=False)
+
+# 执行超过五分钟时终止 Stata
+stata_do("/tmp/estimation.do", timeout=300)
 ```
 
 **实现架构**：

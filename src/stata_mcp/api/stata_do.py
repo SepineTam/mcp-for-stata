@@ -37,6 +37,7 @@ def stata_do(
     is_replace_log: bool = True,
     enable_smcl: bool = True,
     config_file: str | Path | None = None,
+    timeout: float | None = None,
 ) -> Dict[str, Any]:
     """Execute a Stata do-file and optionally return log content when errors occur."""
     return _stata_do(
@@ -46,6 +47,7 @@ def stata_do(
         is_replace_log=is_replace_log,
         enable_smcl=enable_smcl,
         config_file=config_file,
+        timeout=timeout,
         allow_package_management=False,
     )
 
@@ -57,6 +59,7 @@ def _stata_do(
     is_replace_log: bool = True,
     enable_smcl: bool = True,
     config_file: str | Path | None = None,
+    timeout: float | None = None,
     *,
     allow_package_management: bool = False,
 ) -> Dict[str, Any]:
@@ -132,6 +135,7 @@ def _stata_do(
             log_file_name,
             is_replace_log,
             enable_smcl,
+            timeout=timeout,
         )
         text_log_path = log_file_path_mapping["text"]
     except RAMLimitExceededError as error:

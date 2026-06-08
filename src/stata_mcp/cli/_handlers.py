@@ -104,6 +104,7 @@ def handle_tool(args: Namespace) -> int:
                 read_log_when_error=args.is_read_log,
                 is_replace_log=args.is_replace_log,
                 enable_smcl=args.enable_smcl,
+                timeout=args.timeout,
             )
         elif args.tool_action == "help":
             result = stata_help(

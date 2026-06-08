@@ -141,7 +141,8 @@ def stata_do(
         log_file_name: str = None,
         read_log_when_error: bool = False,
         is_replace_log: bool = True,
-        enable_smcl: bool = True
+        enable_smcl: bool = True,
+        timeout: float | None = None,
 ) -> Dict[str, Any]:
     """
     Execute a Stata do-file and return log file paths.
@@ -153,6 +154,7 @@ def stata_do(
             (e.g. r(198)) is present. If no error is found, returns a short confirmation instead.
         is_replace_log (bool): Overwrite existing log files. Defaults to True.
         enable_smcl (bool): Also generate .smcl log (Unix only). Defaults to True.
+        timeout (float, optional): Maximum execution time in seconds. Defaults to no timeout.
 
     Returns:
         Dict[str, Any]: "log_file_path" (text/smcl) and optionally "log_content".
@@ -283,7 +285,11 @@ def stata_do(
 
     try:
         log_file_path_mapping: Dict[str, Path] = stata_executor.execute_dofile(
-            dofile_path, log_file_name, is_replace_log, enable_smcl
+            dofile_path,
+            log_file_name,
+            is_replace_log,
+            enable_smcl,
+            timeout=timeout,
         )
         text_log = log_file_path_mapping.get("text").as_posix()
         logging.info(f"{dofile_path} is executed successfully. Log file path: {text_log}")

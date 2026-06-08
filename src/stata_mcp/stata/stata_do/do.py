@@ -8,6 +8,7 @@
 # @File   : do.py
 
 import logging
+import math
 import os
 import re
 import subprocess
@@ -60,7 +61,8 @@ class StataDo:
         dofile_path: Path,
         log_file_name: str = None,
         is_replace: bool = True,
-        enable_smcl: bool = True
+        enable_smcl: bool = True,
+        timeout: float | None = None,
     ) -> Dict[str, Path]:
         """
         Execute Stata do file and return log file path
@@ -70,6 +72,7 @@ class StataDo:
             log_file_name (str, optional): File name of log
             is_replace (bool): Whether replace the log file if exists before. Default is True
             enable_smcl (bool): Whether enable .smcl format log. Default is True
+            timeout: Maximum execution time in seconds. None means no timeout.
 
         Returns:
             Dict[str, Path]: Dictionary of generated log file paths.
@@ -80,6 +83,7 @@ class StataDo:
             ValueError: Unsupported operating system
             RuntimeError: Stata execution error
         """
+        timeout = self._validate_timeout(timeout)
         nowtime = get_nowtime()
         log_name = log_file_name or nowtime
         self._validate_log_name(log_name)
@@ -87,18 +91,34 @@ class StataDo:
         log_file = self.generate_log_file(log_name)
 
         if self.is_unix:
-            args = dofile_path, log_name, is_replace, enable_smcl
             if self.IS_MONITOR:
-                return self._execute_unix_like_with_monitors(*args)
+                return self._execute_unix_like_with_monitors(
+                    dofile_path,
+                    log_name,
+                    is_replace,
+                    enable_smcl,
+                    timeout,
+                )
             else:
-                return self._execute_unix_like(*args)
+                return self._execute_unix_like(
+                    dofile_path,
+                    log_name,
+                    is_replace,
+                    enable_smcl,
+                    timeout,
+                )
         else:
             # As I do not have a Windows device, I can't test this feature.
             # Therefore, Windows is not supported yet.
             if self.IS_MONITOR:
-                self._execute_windows_with_monitors(dofile_path, log_file, is_replace)
+                self._execute_windows_with_monitors(
+                    dofile_path,
+                    log_file,
+                    is_replace,
+                    timeout,
+                )
             else:
-                self._execute_windows(dofile_path, log_file, is_replace)
+                self._execute_windows(dofile_path, log_file, is_replace, timeout)
 
         return {"text": log_file}
 
@@ -127,6 +147,32 @@ class StataDo:
             except subprocess.TimeoutExpired:
                 proc.kill()
                 proc.wait()
+
+    @staticmethod
+    def _validate_timeout(timeout: float | None) -> float | None:
+        """Validate and normalize an optional execution timeout."""
+        if timeout is None:
+            return None
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)):
+            raise ValueError(
+                "Invalid timeout. Use a positive, finite number of seconds or None."
+            )
+        try:
+            normalized_timeout = float(timeout)
+        except OverflowError as error:
+            raise ValueError(
+                "Invalid timeout. Use a positive, finite number of seconds or None."
+            ) from error
+        if not math.isfinite(normalized_timeout) or normalized_timeout <= 0:
+            raise ValueError(
+                "Invalid timeout. Use a positive, finite number of seconds or None."
+            )
+        return normalized_timeout
+
+    @staticmethod
+    def _timeout_error(timeout: float) -> RuntimeError:
+        """Build a consistent Stata execution timeout error."""
+        return RuntimeError(f"Stata execution timed out after {timeout:g} seconds.")
 
     @staticmethod
     def generate_log_command(log_file: Path, is_replace: bool = True, log_type: Literal['smcl', 'text'] = 'text'):
@@ -167,7 +213,8 @@ class StataDo:
         dofile_path: Path,
         log_name: str,
         is_replace: bool = True,
-        enable_smcl: bool = True
+        enable_smcl: bool = True,
+        timeout: float | None = None,
     ) -> Dict[str, Path]:
         """
         Execute Stata on macOS/Linux systems
@@ -177,6 +224,7 @@ class StataDo:
             log_name: name of log file
             is_replace: Whether replace the log file if exists.
             enable_smcl: Whether to generate SMCL format log.
+            timeout: Maximum execution time in seconds. None means no timeout.
 
         Returns:
             Dict[str, Path]: Dictionary of generated log file paths.
@@ -214,7 +262,7 @@ class StataDo:
             clear
             exit, STATA
             """
-            _, stderr = proc.communicate(input=commands)  # Send commands and wait for completion
+            _, stderr = proc.communicate(input=commands, timeout=timeout)
 
             if proc.returncode != 0:
                 logging.error(f"Stata execution failed: {stderr}")
@@ -226,10 +274,19 @@ class StataDo:
             if enable_smcl:
                 log_path_mapping["smcl"] = smcl_file
             return log_path_mapping
+        except subprocess.TimeoutExpired as error:
+            logging.warning(f"Stata execution timed out after {timeout:g} seconds")
+            raise self._timeout_error(timeout) from error
         finally:
             self._cleanup_process(proc)
 
-    def _execute_windows(self, dofile_path: Path, log_file: Path, is_replace: bool = True):
+    def _execute_windows(
+        self,
+        dofile_path: Path,
+        log_file: Path,
+        is_replace: bool = True,
+        timeout: float | None = None,
+    ):
         """
         Execute Stata on Windows systems
 
@@ -237,6 +294,7 @@ class StataDo:
             dofile_path: Path to do file
             log_file: Path to log file
             is_replace: Whether replace the log file if exists.
+            timeout: Maximum execution time in seconds. None means no timeout.
         """
         # Windows approach - use the /e flag to run a batch command
         # Create a temporary batch file in system temp directory
@@ -258,7 +316,8 @@ class StataDo:
                 shell=True,  # Windows Stata requires shell execution for proper path resolution and startup
                 capture_output=True,
                 text=True,
-                cwd=self.cwd
+                cwd=self.cwd,
+                timeout=timeout,
             )
             if result.returncode != 0:
                 logging.error(f"Stata execution failed on Windows: {result.stderr}")
@@ -266,6 +325,9 @@ class StataDo:
             else:
                 logging.info(f"Stata execution completed successfully on Windows. Log file: {log_file}")
 
+        except subprocess.TimeoutExpired as error:
+            logging.warning(f"Stata execution timed out after {timeout:g} seconds")
+            raise self._timeout_error(timeout) from error
         except Exception as e:
             logging.error(f"Error during Windows Stata execution: {str(e)}")
             raise
@@ -283,7 +345,8 @@ class StataDo:
         dofile_path: Path,
         log_name: str,
         is_replace: bool = True,
-        enable_smcl: bool = True
+        enable_smcl: bool = True,
+        timeout: float | None = None,
     ) -> Dict[str, Path]:
         """
         Execute Stata on macOS/Linux systems with monitoring enabled.
@@ -293,6 +356,7 @@ class StataDo:
             log_name: name of log file
             is_replace: Whether replace the log file if exists.
             enable_smcl: Whether to generate SMCL format log.
+            timeout: Maximum execution time in seconds. None means no timeout.
 
         Returns:
             Dict[str, Path]: Dictionary of generated log file paths.
@@ -337,7 +401,7 @@ class StataDo:
             for monitor in self.monitors:
                 monitor.start(proc)
 
-            _, stderr = proc.communicate(input=commands)  # Send commands and wait for completion
+            _, stderr = proc.communicate(input=commands, timeout=timeout)
 
             if proc.returncode != 0:
                 logging.error(f"Stata execution failed: {stderr}")
@@ -349,6 +413,9 @@ class StataDo:
             if enable_smcl:
                 generated_log_paths["smcl"] = smcl_file
             return generated_log_paths
+        except subprocess.TimeoutExpired as error:
+            logging.warning(f"Stata execution timed out after {timeout:g} seconds")
+            raise self._timeout_error(timeout) from error
         finally:
             # Stop monitors first
             for monitor in self.monitors:
@@ -359,7 +426,13 @@ class StataDo:
             # Then cleanup process
             self._cleanup_process(proc)
 
-    def _execute_windows_with_monitors(self, dofile_path: Path, log_file: Path, is_replace: bool = True):
+    def _execute_windows_with_monitors(
+        self,
+        dofile_path: Path,
+        log_file: Path,
+        is_replace: bool = True,
+        timeout: float | None = None,
+    ):
         """
         Execute Stata on Windows systems with monitoring enabled.
 
@@ -367,6 +440,7 @@ class StataDo:
             dofile_path: Path to do file
             log_file: Path to log file
             is_replace: Whether replace the log file if exists.
+            timeout: Maximum execution time in seconds. None means no timeout.
 
         Raises:
             RuntimeError: Stata execution error
@@ -404,7 +478,7 @@ class StataDo:
                 monitor.start(proc)
 
             # Wait for process to complete
-            _, stderr = proc.communicate()
+            _, stderr = proc.communicate(timeout=timeout)
 
             if proc.returncode != 0:
                 logging.error(f"Stata execution failed on Windows: {stderr}")
@@ -412,6 +486,9 @@ class StataDo:
             else:
                 logging.info(f"Stata execution completed successfully on Windows. Log file: {log_file}")
 
+        except subprocess.TimeoutExpired as error:
+            logging.warning(f"Stata execution timed out after {timeout:g} seconds")
+            raise self._timeout_error(timeout) from error
         except RuntimeError:
             # Re-raise RuntimeError (includes monitor errors)
             raise

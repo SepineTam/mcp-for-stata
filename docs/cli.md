@@ -135,7 +135,10 @@ Run API-backed Stata tools directly from the CLI:
 stata-mcp tool ado-install reghdfe --yes
 
 # Run a do-file and only read the log when execution fails
-stata-mcp tool do /path/to/analysis.do --read-log-when-error true
+stata-mcp tool do /path/to/analysis.do --is-read-log true
+
+# Stop a do-file if execution exceeds five minutes
+stata-mcp tool do /path/to/analysis.do --timeout 300
 
 # Read Stata help through the one-shot API helper
 stata-mcp tool help regress --enable-smcl true
@@ -149,12 +152,12 @@ stata-mcp tool read-log /path/to/output.log
 
 Tool subcommands:
 - `stata-mcp tool ado-install <package_name> [-y|--yes] [--source ssc|net|github]`
-- `stata-mcp tool do <dofile_path> [--read-log-when-error true|false] [--enable-smcl true|false]`
+- `stata-mcp tool do <dofile_path> [--is-read-log true|false] [--enable-smcl true|false] [--timeout <seconds>]`
 - `stata-mcp tool help <command> [--read-log-when-error true|false] [--enable-smcl true|false]`
 - `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
 - `stata-mcp tool read-log <log_path> [--output-format full|core|dict]`
 
-> Note: `--read-log-when-error` replaces the older `--is-read-log` flag. Unlike the old flag (which unconditionally read the log), the new flag reads the log only when the underlying execution reports an error.
+> Note: `--is-read-log true` returns log content only when the underlying execution reports a Stata return-code error.
 
 > Without `-y` or `--yes`, `ado-install` asks for interactive confirmation.
 > SSC and net package names may contain only ASCII letters and numbers. GitHub

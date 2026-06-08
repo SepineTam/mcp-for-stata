@@ -78,18 +78,13 @@ def _configure_base(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, do_dir:
     )
 
 
-def _patch_stata_module(monkeypatch: pytest.MonkeyPatch, log_file: Path) -> None:
+def _patch_stata_module(monkeypatch: pytest.MonkeyPatch, log_file: Path) -> Mock:
     fake_stata = ModuleType("stata_mcp.stata")
-
-    class _FakeStataDo:
-        def __init__(self, *args, **kwargs) -> None:
-            pass
-
-        def execute_dofile(self, *args, **kwargs):
-            return {"text": log_file}
-
-    fake_stata.StataDo = _FakeStataDo
+    fake_executor = Mock()
+    fake_executor.execute_dofile.return_value = {"text": log_file}
+    fake_stata.StataDo = Mock(return_value=fake_executor)
     monkeypatch.setitem(sys.modules, "stata_mcp.stata", fake_stata)
+    return fake_executor
 
 
 def test_is_within_allowed_directories_uses_input_path_directly(loaded_mcp_servers, tmp_path: Path):
@@ -120,6 +115,35 @@ def test_stata_do_allows_dofile_in_working_dir(monkeypatch: pytest.MonkeyPatch, 
 
     assert "error" not in result
     assert result["log_file_path"]["text"] == log_file.as_posix()
+
+
+def test_mcp_stata_do_forwards_optional_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_mcp_servers,
+    tmp_path: Path,
+):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofile = work_dir / "ok.do"
+    dofile.write_text("display 1")
+    log_file = tmp_path / "run.log"
+    log_file.write_text("ok")
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    fake_executor = _patch_stata_module(monkeypatch, log_file)
+
+    result = loaded_mcp_servers.stata_do(dofile.as_posix(), timeout=12.5)
+
+    assert "error" not in result
+    fake_executor.execute_dofile.assert_called_once_with(
+        dofile,
+        None,
+        True,
+        True,
+        timeout=12.5,
+    )
 
 
 def test_stata_do_rejects_dofile_outside_whitelist(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):

@@ -78,6 +78,9 @@ stata-mcp tool do /path/to/analysis.do --is-read-log false
 
 # 禁用 SMCL 格式日志
 stata-mcp tool do /path/to/analysis.do --enable-smcl false
+
+# 执行超过五分钟时终止
+stata-mcp tool do /path/to/analysis.do --timeout 300
 ```
 
 **参数**：
@@ -86,6 +89,7 @@ stata-mcp tool do /path/to/analysis.do --enable-smcl false
 |------|------|--------|
 | `dofile_path` | do 文件路径（必填） | - |
 | `--log-file-name` | 日志文件名（不含扩展名） | 自动生成 |
+| `--timeout` | 最大执行秒数 | 不限制 |
 | `--is-read-log` | 执行后读取日志内容 | true |
 | `--is-replace-log` | 替换已存在的日志文件 | true |
 | `--enable-smcl` | 生成 SMCL 格式日志 | true |

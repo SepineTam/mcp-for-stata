@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 import sys
 import warnings
 from importlib.metadata import PackageNotFoundError, version
@@ -15,6 +16,17 @@ BoolConverter = Callable[[str], bool]
 def _parse_bool(value: str) -> bool:
     """Convert CLI boolean input to a Python bool."""
     return str(value).lower() == "true"
+
+
+def _parse_positive_float(value: str) -> float:
+    """Convert CLI input to a positive, finite float."""
+    try:
+        parsed_value = float(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("must be a number") from error
+    if not math.isfinite(parsed_value) or parsed_value <= 0:
+        raise argparse.ArgumentTypeError("must be a positive, finite number")
+    return parsed_value
 
 
 def add_bool_argument(
@@ -169,6 +181,13 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
         "--enable-smcl",
         default=True,
         help_text="Generate the SMCL log file",
+    )
+    tool_do_parser.add_argument(
+        "--timeout",
+        type=_parse_positive_float,
+        default=None,
+        metavar="SECONDS",
+        help="Maximum execution time in seconds (default: no timeout)",
     )
 
     tool_help_parser = tool_subparsers.add_parser(

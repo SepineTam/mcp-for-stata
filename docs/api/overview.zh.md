@@ -86,6 +86,7 @@ def stata_do(
     is_replace_log: bool = True,
     enable_smcl: bool = True,
     config_file: str | Path | None = None,
+    timeout: float | None = None,
 ) -> Dict[str, Any]:
     ...
 ```
@@ -100,6 +101,7 @@ def stata_do(
 | `is_replace_log` | `bool` | `True` | 替换已存在的日志文件 |
 | `enable_smcl` | `bool` | `True` | 生成 SMCL 格式日志 |
 | `config_file` | `str \| Path` | `None` | 自定义配置文件路径 |
+| `timeout` | `float \| None` | `None` | 最大执行秒数；`None` 表示不限制执行时间 |
 
 **返回值**：`Dict[str, Any]`
 
@@ -128,6 +130,9 @@ result = stata_do(
     log_file_name="my_results",
     enable_smcl=False,
 )
+
+# 执行超过五分钟时终止 Stata
+result = stata_do("/project/analysis.do", timeout=300)
 
 # 错误处理
 if "error" in result:

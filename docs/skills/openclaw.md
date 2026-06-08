@@ -20,7 +20,7 @@ If you want to know more about MCP-for-Stata, visit its [documents](https://docs
 | Tool | Purpose | Key Params |
 |------|---------|------------|
 | `help` | Get Stata command docs | `cmd` (Unix only) |
-| `stata_do` | Execute .do file | `dofile_path`, `read_log_when_error` |
+| `stata_do` | Execute .do file | `dofile_path`, `read_log_when_error`, optional `timeout` |
 | `ado_package_install` | Install approved packages; GitHub requires an allowlist | `package`, `source`; client elicits approval |
 | `get_data_info` | Analyze data files | `data_path`, `vars_list` |
 | `read_log` | Read log files | `file_path`, `output_format` |
@@ -29,7 +29,7 @@ If you want to know more about MCP-for-Stata, visit its [documents](https://docs
 
 ```bash
 uvx stata-mcp tool ado-install <package> [-y|--yes] [--source ssc|github|net]
-uvx stata-mcp tool do <dofile_path> [--log-file-name <name>]
+uvx stata-mcp tool do <dofile_path> [--log-file-name <name>] [--timeout <seconds>]
 uvx stata-mcp tool help <command>          # Unix only
 uvx stata-mcp tool data-info <data_path> [--vars-list var1 var2]
 uvx stata-mcp tool read-log <log_path> [--output-format full|core|dict]
