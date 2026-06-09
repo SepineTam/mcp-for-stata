@@ -5,7 +5,6 @@ from collections.abc import Collection
 from ipaddress import ip_address
 from urllib.parse import urlsplit
 
-
 STATA_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 ADO_PACKAGE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9]+$")
 GITHUB_REPOSITORY_PATTERN = re.compile(

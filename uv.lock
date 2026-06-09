@@ -1518,7 +1518,7 @@ wheels = [
 
 [[package]]
 name = "stata-mcp"
-version = "1.18.2"
+version = "1.19.0"
 source = { editable = "." }
 dependencies = [
     { name = "mcp", extra = ["cli"] },

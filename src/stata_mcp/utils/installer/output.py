@@ -7,7 +7,6 @@ import os
 import sys
 from typing import Iterator, TextIO
 
-
 TAG_COLORS = {
     "[ERROR]\t": "31",
     "[DONE]\t": "32",
