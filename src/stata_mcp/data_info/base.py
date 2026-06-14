@@ -591,7 +591,8 @@ class DataInfoBase(ABC):
         if var_type == "str":
             return StringSeries(data=non_na_series, max_display=self.string_keep_number)
         else:  # float type
-            return NumericSeries(data=non_na_series, max_decimal_places=self.decimal_places)
+            numeric_series = pd.to_numeric(non_na_series, errors='raise')
+            return NumericSeries(data=numeric_series, max_decimal_places=self.decimal_places)
 
     def _get_head(self) -> List[Dict[str, Any]] | None:
         """Get preview rows from the DataFrame, filtered by vars_list."""
