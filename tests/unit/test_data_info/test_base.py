@@ -6,6 +6,8 @@
 测试基类的核心功能，不依赖具体文件格式。
 """
 
+import numpy as np
+import pandas as pd
 import pytest
 
 from stata_mcp.data_info.base import DataInfoBase
@@ -68,3 +70,55 @@ class TestFileValidation:
 
         with pytest.raises(TypeError):
             CsvDataInfo([])  # type: ignore
+
+
+class TestDetermineVariableType:
+    """测试 _determine_variable_type 静态方法"""
+
+    def test_empty_series_returns_float(self):
+        """空序列应默认判定为 float"""
+        series = pd.Series([], dtype="float64")
+
+        assert DataInfoBase._determine_variable_type(series) == "float"
+
+    def test_all_na_series_returns_float(self):
+        """全为 NA 的序列应判定为 float"""
+        series = pd.Series([np.nan, np.nan, np.nan])
+
+        assert DataInfoBase._determine_variable_type(series) == "float"
+
+    def test_string_dtype_numeric_returns_float(self):
+        """string dtype 且值为数字时应判定为 float"""
+        series = pd.Series(["11", "22", "33"], dtype="string")
+
+        assert DataInfoBase._determine_variable_type(series) == "float"
+
+    def test_object_dtype_numeric_returns_float(self):
+        """object dtype 且值为数字时应判定为 float"""
+        series = pd.Series(["11", "22", "33"], dtype="object")
+
+        assert DataInfoBase._determine_variable_type(series) == "float"
+
+    def test_decimal_strings_returns_float(self):
+        """小数数字字符串应判定为 float"""
+        series = pd.Series(["1.5", "2.5", "3.5"], dtype="string")
+
+        assert DataInfoBase._determine_variable_type(series) == "float"
+
+    def test_negative_strings_returns_float(self):
+        """负数字符串应判定为 float"""
+        series = pd.Series(["-1", "-2", "-3"], dtype="string")
+
+        assert DataInfoBase._determine_variable_type(series) == "float"
+
+    def test_mixed_numeric_non_numeric_returns_str(self):
+        """混合数字和非数字时应判定为 str"""
+        series = pd.Series(["11", "22", "xx"], dtype="string")
+
+        assert DataInfoBase._determine_variable_type(series) == "str"
+
+    def test_non_numeric_strings_returns_str(self):
+        """纯文本字符串应判定为 str"""
+        series = pd.Series(["A", "B", "C"], dtype="string")
+
+        assert DataInfoBase._determine_variable_type(series) == "str"

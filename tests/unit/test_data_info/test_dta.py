@@ -6,8 +6,6 @@
 测试 Stata DTA 文件读取功能。
 """
 
-import pytest
-
 from stata_mcp.data_info.dta import DtaDataInfo
 
 
@@ -96,3 +94,75 @@ class TestDtaSummary:
 
         assert make_info["type"] == "str"
         assert "obs" in make_info["summary"]
+
+
+class TestDtaStringNumericColumn:
+    """测试字符串类型但内容为数值的列"""
+
+    def test_string_dtype_numeric_values_summary(self, tmp_path):
+        """string dtype 且值为数字时应按 float 计算摘要"""
+        import pandas as pd
+
+        dta_path = tmp_path / "string_numeric.dta"
+        df = pd.DataFrame({
+            "code": pd.Series(["11", "22", "33", "44", "55"], dtype="string"),
+        })
+        df.to_stata(dta_path, write_index=False)
+
+        data_info = DtaDataInfo(dta_path)
+        summary = data_info.summary()
+
+        code_info = summary["vars_detail"]["code"]
+        assert code_info["type"] == "float"
+        assert code_info["summary"]["mean"] == 33.0
+
+    def test_object_dtype_numeric_values_summary(self, tmp_path):
+        """object dtype 且值为数字时应按 float 计算摘要"""
+        import pandas as pd
+
+        dta_path = tmp_path / "object_numeric.dta"
+        df = pd.DataFrame({
+            "code": pd.Series(["11", "22", "33", "44", "55"], dtype="object"),
+        })
+        df.to_stata(dta_path, write_index=False)
+
+        data_info = DtaDataInfo(dta_path)
+        summary = data_info.summary()
+
+        code_info = summary["vars_detail"]["code"]
+        assert code_info["type"] == "float"
+        assert code_info["summary"]["mean"] == 33.0
+
+    def test_mixed_numeric_and_text_strings_summary(self, tmp_path):
+        """混合数字和文本的字符串列应保持为 str"""
+        import pandas as pd
+
+        dta_path = tmp_path / "mixed.dta"
+        df = pd.DataFrame({
+            "code": pd.Series(["11", "22", "xx", "44", "55"], dtype="string"),
+        })
+        df.to_stata(dta_path, write_index=False)
+
+        data_info = DtaDataInfo(dta_path)
+        summary = data_info.summary()
+
+        code_info = summary["vars_detail"]["code"]
+        assert code_info["type"] == "str"
+        assert "value_list" in code_info["summary"]
+
+    def test_actual_string_column_summary(self, tmp_path):
+        """普通字符串列应保持为 str"""
+        import pandas as pd
+
+        dta_path = tmp_path / "actual_string.dta"
+        df = pd.DataFrame({
+            "name": ["A", "B", "C", "D", "E"],
+        })
+        df.to_stata(dta_path, write_index=False)
+
+        data_info = DtaDataInfo(dta_path)
+        summary = data_info.summary()
+
+        name_info = summary["vars_detail"]["name"]
+        assert name_info["type"] == "str"
+        assert "value_list" in name_info["summary"]
