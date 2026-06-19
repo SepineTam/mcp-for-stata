@@ -176,3 +176,24 @@ def test_global_macro_with_braces_is_flagged() -> None:
     report = GuardValidator().validate(code)
     assert report.is_safe is False
     assert any(item.type == "macro" and item.content == "$cmd" for item in report.dangerous_items)
+
+
+def test_inline_block_comment_does_not_hide_dangerous_command() -> None:
+    report = GuardValidator().validate("/* */ shell whoami")
+
+    assert report.is_safe is False
+    assert any(item.type == "command" and item.content == "shell" for item in report.dangerous_items)
+
+
+def test_multiline_block_comment_does_not_hide_dangerous_command() -> None:
+    report = GuardValidator().validate("/* ignored\nignored */ !whoami")
+
+    assert report.is_safe is False
+    assert any(item.type == "command" and item.content == "!" for item in report.dangerous_items)
+
+
+def test_frame_prefix_is_stripped_before_command_check() -> None:
+    report = GuardValidator().validate("frame default: shell whoami")
+
+    assert report.is_safe is False
+    assert any(item.type == "command" and item.content == "shell" for item in report.dangerous_items)

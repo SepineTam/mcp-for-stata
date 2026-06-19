@@ -108,16 +108,57 @@ class GuardValidator:
             r"^\s*version\s+\d+(?:\.\d+)?\s*:\s*",
             re.IGNORECASE,
         )
+        frame_prefix_pattern = re.compile(
+            r"^\s*frame\s+[A-Za-z_][A-Za-z0-9_]*\s*:\s*",
+            re.IGNORECASE,
+        )
         while cleaned_line:
             version_match = version_prefix_pattern.match(cleaned_line)
             if version_match:
                 cleaned_line = cleaned_line[version_match.end():]
+                continue
+            frame_match = frame_prefix_pattern.match(cleaned_line)
+            if frame_match:
+                cleaned_line = cleaned_line[frame_match.end():]
                 continue
             matched = prefix_pattern.match(cleaned_line)
             if not matched or matched.group(1).lower() not in prefixes:
                 break
             cleaned_line = cleaned_line[matched.end():]
         return cleaned_line.strip()
+
+    @staticmethod
+    def _iter_executable_lines(lines: List[str]) -> List[tuple[int, str]]:
+        """Return lines after removing Stata block comments."""
+        executable_lines: List[tuple[int, str]] = []
+        in_block_comment = False
+
+        for line_num, line in enumerate(lines, start=1):
+            index = 0
+            cleaned_parts: List[str] = []
+
+            while index < len(line):
+                if in_block_comment:
+                    comment_end = line.find("*/", index)
+                    if comment_end == -1:
+                        index = len(line)
+                    else:
+                        index = comment_end + 2
+                        in_block_comment = False
+                    continue
+
+                comment_start = line.find("/*", index)
+                if comment_start == -1:
+                    cleaned_parts.append(line[index:])
+                    break
+
+                cleaned_parts.append(line[index:comment_start])
+                index = comment_start + 2
+                in_block_comment = True
+
+            executable_lines.append((line_num, "".join(cleaned_parts)))
+
+        return executable_lines
 
     def validate(self, code: str) -> SecurityReport:
         """Validate Stata dofile code for security risks.
@@ -132,10 +173,11 @@ class GuardValidator:
 
         # Split code into lines for line number tracking
         lines = code.split("\n")
+        executable_lines = self._iter_executable_lines(lines)
 
-        dangerous_local_names = self._collect_dangerous_local_names(lines)
+        dangerous_local_names = self._collect_dangerous_local_names(executable_lines)
 
-        for line_num, line in enumerate(lines, start=1):
+        for line_num, line in executable_lines:
             # Skip empty lines and comments
             stripped_line = line.strip()
             if (
@@ -169,12 +211,12 @@ class GuardValidator:
         is_safe = len(dangerous_items) == 0
         return SecurityReport(is_safe=is_safe, dangerous_items=dangerous_items)
 
-    def _collect_dangerous_local_names(self, lines: List[str]) -> set[str]:
+    def _collect_dangerous_local_names(self, lines: List[tuple[int, str]]) -> set[str]:
         """Collect macro names whose values are dangerous commands."""
         dangerous_names: set[str] = set()
         macro_pattern = re.compile(r"^\s*(?:local|global)\s+(\w+)\s+(.+)$", re.IGNORECASE)
 
-        for line in lines:
+        for _line_num, line in lines:
             stripped_line = line.strip()
             if not stripped_line or stripped_line.startswith("*") or stripped_line.startswith("//"):
                 continue
