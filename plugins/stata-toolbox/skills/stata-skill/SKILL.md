@@ -186,6 +186,6 @@ This tool is disabled by default and only available when `STATA_MCP__ENABLE_WRIT
 | help | `@references/help.md` | Detailed guide for the documentation tool |
 | read_log | `@references/read_log.md` | Detailed guide for the log reader tool |
 | ado_package_install | `@references/ado_package_install.md` | Detailed guide for the package installer tool |
-| Documentation | [docs.statamcp.com](https://docs.statamcp.com) | Full user documentation |
+| Documentation | [sepinetam.github.io/mcp-for-stata](https://sepinetam.github.io/mcp-for-stata) | Full user documentation |
 | Homepage | [statamcp.com](https://statamcp.com) | Project homepage |
 | Source Code | [github.com/sepinetam/mcp-for-stata](https://github.com/sepinetam/mcp-for-stata) | GitHub repository |

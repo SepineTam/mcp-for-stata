@@ -36,7 +36,7 @@
 ---
 **动态**：
 - 更多内容请关注微信公众号：[Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ)，以及 [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
-- 🦞 **OpenClaw 支持**：独立的 OpenClaw 集成 CLI 工具（`stata-mcp tool`），详见 [OpenClaw 指南](https://docs.statamcp.com/agents/openclaw.md)
+- 🦞 **OpenClaw 支持**：独立的 OpenClaw 集成 CLI 工具（`stata-mcp tool`），详见 [OpenClaw 指南](https://sepinetam.github.io/mcp-for-stata/agents/openclaw.md)
 - ✨ **Claude Code 插件支持**：官方插件包，包含 MCP 服务器和 Stata LSP 集成
 - 在 Claude Code 中使用 MCP-for-Stata，请查看[这里](#高级用法--claude-code)，或在 Codex 中使用请查看[这里](#高级用法--codex)
 
@@ -197,7 +197,7 @@ codex mcp add stata-mcp -- uvx stata-mcp
 }
 ```
 
-更多详细使用信息，请访问[使用指南](https://docs.statamcp.com/usage)。
+更多详细使用信息，请访问[使用指南](https://sepinetam.github.io/mcp-for-stata/usage)。
 
 ### 前提条件
 - [uv](https://github.com/astral-sh/uv) - 包安装器和虚拟环境管理器
@@ -260,19 +260,19 @@ Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 | **最佳适用** | 智能体驱动分析（Claude Code、Codex、OpenClaw） | 在 VSCode 中自行编写和运行 Stata 代码的用户 | 研究工作流（复现、稳健性检验、发表 QA） |
 
 ## 📝 文档
-> MCP-for-Stata 文档请访问 https://docs.statamcp.com
+> MCP-for-Stata 文档请访问 https://sepinetam.github.io/mcp-for-stata
 
 ### 核心文档
-- **[完整文档](https://docs.statamcp.com/)**：包含所有功能的完整文档站点
-- **[配置指南](https://docs.statamcp.com/configuration)**：基于 TOML 的统一配置系统
-- **[安全守卫](https://docs.statamcp.com/security)**：危险命令的安全验证
-- **[监控系统](https://docs.statamcp.com/monitoring)**：内存监控和资源限制
-- **[架构概览](https://docs.statamcp.com/overview)**：系统设计和集成模式
+- **[完整文档](https://sepinetam.github.io/mcp-for-stata/)**：包含所有功能的完整文档站点
+- **[配置指南](https://sepinetam.github.io/mcp-for-stata/configuration)**：基于 TOML 的统一配置系统
+- **[安全守卫](https://sepinetam.github.io/mcp-for-stata/security)**：危险命令的安全验证
+- **[监控系统](https://sepinetam.github.io/mcp-for-stata/monitoring)**：内存监控和资源限制
+- **[架构概览](https://sepinetam.github.io/mcp-for-stata/overview)**：系统设计和集成模式
 
 ### 主要功能
-- **[安全守卫](https://docs.statamcp.com/security)**：拦截危险命令（`!`、`shell`、`erase` 等）
-- **[内存监控](https://docs.statamcp.com/monitoring)**：通过可配置限制防止内存耗尽
-- **[统一配置](https://docs.statamcp.com/configuration)**：TOML 配置 + 环境变量
+- **[安全守卫](https://sepinetam.github.io/mcp-for-stata/security)**：拦截危险命令（`!`、`shell`、`erase` 等）
+- **[内存监控](https://sepinetam.github.io/mcp-for-stata/monitoring)**：通过可配置限制防止内存耗尽
+- **[统一配置](https://sepinetam.github.io/mcp-for-stata/configuration)**：TOML 配置 + 环境变量
 - 跨平台支持（macOS、Windows、Linux）
 - 自动日志捕获和错误报告
 

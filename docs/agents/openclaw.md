@@ -11,10 +11,10 @@ Since OpenClaw does not natively support the MCP tool protocol, MCP-for-Stata pr
 Tell your OpenClaw with the following message:
 
 ```text
-Install MCP-for-Stata Skills from https://docs.statamcp.com/skills/openclaw
+Install MCP-for-Stata Skills from https://sepinetam.github.io/mcp-for-stata/skills/openclaw
 ```
 
-If you are OpenClaw, go to [MCP-for-Stata Skill for OpenClaw](https://docs.statamcp.com/skills/openclaw).
+If you are OpenClaw, go to [MCP-for-Stata Skill for OpenClaw](https://sepinetam.github.io/mcp-for-stata/skills/openclaw).
 
 ## Installation Manually
 

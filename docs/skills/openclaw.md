@@ -3,7 +3,7 @@ name: stata-mcp-skill
 description: Execute Stata commands, install ado packages, read help documents, and analyze data. Use when working with Stata for (1) Running do-files, (2) Installing packages from SSC/GitHub, (3) Getting command help, (4) Analyzing data files (.dta, .csv, .xlsx), (5) Reading execution logs. Supports both MCP tools (Claude Code) and CLI commands (OpenClaw).
 ---
 
-> The skill could install or update from https://docs.statamcp.com/skills/openclaw or 
+> The skill could install or update from https://sepinetam.github.io/mcp-for-stata/skills/openclaw or 
 > ```bash
 > mkdir -p /path/to/skill/base/stata-mcp-skill
 > curl -o /path/to/skill/base/stata-mcp-skill/SKILL.md https://github.com/SepineTam/mcp-for-stata/raw/refs/heads/master/docs/agents/openclaw.md
@@ -13,7 +13,7 @@ description: Execute Stata commands, install ado packages, read help documents, 
 
 MCP-for-Stata enables LLMs to execute Stata commands. Use MCP tools when available; fall back to CLI for clients without MCP support.
 
-If you want to know more about MCP-for-Stata, visit its [documents](https://docs.statamcp.com) or [GitHub](https://github.com/statamcp/stata-mcp).
+If you want to know more about MCP-for-Stata, visit its [documents](https://sepinetam.github.io/mcp-for-stata) or [GitHub](https://github.com/statamcp/stata-mcp).
 
 ## MCP Tools (Preferred, used by Claude Code, Codex, Cursor or others)
 

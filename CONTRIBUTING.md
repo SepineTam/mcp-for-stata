@@ -246,11 +246,11 @@ When making changes, ensure you:
 
 ### Getting Help
 
-- **Documentation**: See [docs.statamcp.com](https://docs.statamcp.com/) for complete guides
-- **Architecture**: Read [Architecture Overview](https://docs.statamcp.com/overview) for system design
-- **Configuration**: Refer to [Configuration Guide](https://docs.statamcp.com/configuration)
-- **Security**: Check [Security Guard](https://docs.statamcp.com/security)
-- **Monitoring**: See [Monitoring System](https://docs.statamcp.com/monitoring)
+- **Documentation**: See [sepinetam.github.io/mcp-for-stata](https://sepinetam.github.io/mcp-for-stata/) for complete guides
+- **Architecture**: Read [Architecture Overview](https://sepinetam.github.io/mcp-for-stata/overview) for system design
+- **Configuration**: Refer to [Configuration Guide](https://sepinetam.github.io/mcp-for-stata/configuration)
+- **Security**: Check [Security Guard](https://sepinetam.github.io/mcp-for-stata/security)
+- **Monitoring**: See [Monitoring System](https://sepinetam.github.io/mcp-for-stata/monitoring)
 
 ## Issue Reporting
 

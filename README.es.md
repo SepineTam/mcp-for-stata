@@ -36,7 +36,7 @@
 ---
 **Novedades**:
 - Encuentra mas en WeChat: [Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ), y [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
-- 🦞 **Soporte para OpenClaw**: Herramientas CLI independientes para la integracion con OpenClaw (`stata-mcp tool`), consulta la [guia de OpenClaw](https://docs.statamcp.com/agents/openclaw.md)
+- 🦞 **Soporte para OpenClaw**: Herramientas CLI independientes para la integracion con OpenClaw (`stata-mcp tool`), consulta la [guia de OpenClaw](https://sepinetam.github.io/mcp-for-stata/agents/openclaw.md)
 - ✨ **Soporte para plugin de Claude Code**: Paquete oficial de plugin con servidor MCP e integracion con Stata LSP
 - Usa MCP-for-Stata en Claude Code, mira [aqui](#avanzado---claude-code), o Codex [aqui](#avanzado---codex)
 
@@ -197,7 +197,7 @@ La configuracion JSON estandar es la siguiente, puedes personalizar tu configura
 }
 ```
 
-Para obtener informacion de uso mas detallada, visita la [guia de uso](https://docs.statamcp.com/usage).
+Para obtener informacion de uso mas detallada, visita la [guia de uso](https://sepinetam.github.io/mcp-for-stata/usage).
 
 ### Requisitos previos
 - [uv](https://github.com/astral-sh/uv) - Instalador de paquetes y gestor de entornos virtuales
@@ -260,19 +260,19 @@ Existen varios proyectos MCP relacionados con Stata. La tabla siguiente fue gene
 | **Mejor para**            | Analisis impulsado por agentes (Claude Code, Codex, OpenClaw) | Usuarios que escriben y ejecutan codigo Stata dentro de VSCode ellos mismos | Flujos de trabajo de investigacion (replicacion, robustez, QA de publicacion) |
 
 ## 📝 Documentacion
-> Los documentos de MCP-for-Stata estan en https://docs.statamcp.com
+> Los documentos de MCP-for-Stata estan en https://sepinetam.github.io/mcp-for-stata
 
 ### Documentacion principal
-- **[Documentacion completa](https://docs.statamcp.com/)**: Sitio de documentacion completo con todas las funcionalidades
-- **[Guia de configuracion](https://docs.statamcp.com/configuration)**: Sistema de configuracion unificado basado en TOML
-- **[Guardia de seguridad](https://docs.statamcp.com/security)**: Validacion de seguridad para comandos peligrosos
-- **[Sistema de monitoreo](https://docs.statamcp.com/monitoring)**: Monitoreo de RAM y limites de recursos
-- **[Vision general de la arquitectura](https://docs.statamcp.com/overview)**: Diseno del sistema y patrones de integracion
+- **[Documentacion completa](https://sepinetam.github.io/mcp-for-stata/)**: Sitio de documentacion completo con todas las funcionalidades
+- **[Guia de configuracion](https://sepinetam.github.io/mcp-for-stata/configuration)**: Sistema de configuracion unificado basado en TOML
+- **[Guardia de seguridad](https://sepinetam.github.io/mcp-for-stata/security)**: Validacion de seguridad para comandos peligrosos
+- **[Sistema de monitoreo](https://sepinetam.github.io/mcp-for-stata/monitoring)**: Monitoreo de RAM y limites de recursos
+- **[Vision general de la arquitectura](https://sepinetam.github.io/mcp-for-stata/overview)**: Diseno del sistema y patrones de integracion
 
 ### Caracteristicas clave
-- **[Guardia de seguridad](https://docs.statamcp.com/security)**: Bloquea comandos peligrosos (`!`, `shell`, `erase`, etc.)
-- **[Monitoreo de RAM](https://docs.statamcp.com/monitoring)**: Previene el agotamiento de memoria con limites configurables
-- **[Configuracion unificada](https://docs.statamcp.com/configuration)**: Configuracion TOML + variables de entorno
+- **[Guardia de seguridad](https://sepinetam.github.io/mcp-for-stata/security)**: Bloquea comandos peligrosos (`!`, `shell`, `erase`, etc.)
+- **[Monitoreo de RAM](https://sepinetam.github.io/mcp-for-stata/monitoring)**: Previene el agotamiento de memoria con limites configurables
+- **[Configuracion unificada](https://sepinetam.github.io/mcp-for-stata/configuration)**: Configuracion TOML + variables de entorno
 - Soporte multiplataforma (macOS, Windows, Linux)
 - Captura automatica de registros y reporte de errores
 

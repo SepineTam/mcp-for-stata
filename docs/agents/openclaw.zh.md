@@ -11,10 +11,10 @@
 复制下面的信息发送给你的 OpenClaw：
 
 ```text
-Install MCP-for-Stata Skills from https://docs.statamcp.com/skills/openclaw
+Install MCP-for-Stata Skills from https://sepinetam.github.io/mcp-for-stata/skills/openclaw
 ```
 
-如果你是 OpenClaw，请直接访问 [MCP-for-Stata Skill for OpenClaw](https://docs.statamcp.com/skills/openclaw)。
+如果你是 OpenClaw，请直接访问 [MCP-for-Stata Skill for OpenClaw](https://sepinetam.github.io/mcp-for-stata/skills/openclaw)。
 
 ## 手动安装
 

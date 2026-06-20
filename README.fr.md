@@ -36,7 +36,7 @@
 ---
 **Actualites** :
 - Retrouvez-nous sur WeChat : [Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ), et [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
-- 🦞 **Support OpenClaw** : Outils CLI autonomes pour l'integration OpenClaw (`stata-mcp tool`), consultez le [guide OpenClaw](https://docs.statamcp.com/agents/openclaw.md)
+- 🦞 **Support OpenClaw** : Outils CLI autonomes pour l'integration OpenClaw (`stata-mcp tool`), consultez le [guide OpenClaw](https://sepinetam.github.io/mcp-for-stata/agents/openclaw.md)
 - ✨ **Support du plugin Claude Code** : Package officiel de plugin avec serveur MCP et integration Stata LSP
 - Utilisez MCP-for-Stata dans Claude Code, consultez [ici](#avance---claude-code), ou Codex [ici](#avance---codex)
 
@@ -197,7 +197,7 @@ La configuration JSON standard est la suivante, vous pouvez personnaliser votre 
 }
 ```
 
-Pour plus d'informations detaillees sur l'utilisation, consultez le [Guide d'utilisation](https://docs.statamcp.com/usage).
+Pour plus d'informations detaillees sur l'utilisation, consultez le [Guide d'utilisation](https://sepinetam.github.io/mcp-for-stata/usage).
 
 ### Prerequis
 - [uv](https://github.com/astral-sh/uv) - Gestionnaire d'installation de packages et d'environnements virtuels
@@ -260,19 +260,19 @@ Il existe plusieurs projets MCP lies a Stata. Le tableau ci-dessous a ete genere
 | **Ideal pour** | Analyse pilotee par agent (Claude Code, Codex, OpenClaw) | Utilisateurs qui ecrivent et executent du code Stata dans VSCode eux-memes | Flux de travail de recherche (replication, robustesse, QA publication) |
 
 ## 📝 Documentation
-> Les documents de MCP-for-Stata sont disponibles sur https://docs.statamcp.com
+> Les documents de MCP-for-Stata sont disponibles sur https://sepinetam.github.io/mcp-for-stata
 
 ### Documentation principale
-- **[Documentation complete](https://docs.statamcp.com/)** : Site de documentation complet avec toutes les fonctionnalites
-- **[Guide de configuration](https://docs.statamcp.com/configuration)** : Systeme de configuration unifie base sur TOML
-- **[Garde de securite](https://docs.statamcp.com/security)** : Validation de securite pour les commandes dangereuses
-- **[Systeme de surveillance](https://docs.statamcp.com/monitoring)** : Surveillance RAM et limites de ressources
-- **[Vue d'ensemble de l'architecture](https://docs.statamcp.com/overview)** : Conception du systeme et modeles d'integration
+- **[Documentation complete](https://sepinetam.github.io/mcp-for-stata/)** : Site de documentation complet avec toutes les fonctionnalites
+- **[Guide de configuration](https://sepinetam.github.io/mcp-for-stata/configuration)** : Systeme de configuration unifie base sur TOML
+- **[Garde de securite](https://sepinetam.github.io/mcp-for-stata/security)** : Validation de securite pour les commandes dangereuses
+- **[Systeme de surveillance](https://sepinetam.github.io/mcp-for-stata/monitoring)** : Surveillance RAM et limites de ressources
+- **[Vue d'ensemble de l'architecture](https://sepinetam.github.io/mcp-for-stata/overview)** : Conception du systeme et modeles d'integration
 
 ### Fonctionnalites cles
-- **[Garde de securite](https://docs.statamcp.com/security)** : Bloque les commandes dangereuses (`!`, `shell`, `erase`, etc.)
-- **[Surveillance RAM](https://docs.statamcp.com/monitoring)** : Empeche l'epuisement de la memoire avec des limites configurables
-- **[Configuration unifiee](https://docs.statamcp.com/configuration)** : Configuration TOML + variables d'environnement
+- **[Garde de securite](https://sepinetam.github.io/mcp-for-stata/security)** : Bloque les commandes dangereuses (`!`, `shell`, `erase`, etc.)
+- **[Surveillance RAM](https://sepinetam.github.io/mcp-for-stata/monitoring)** : Empeche l'epuisement de la memoire avec des limites configurables
+- **[Configuration unifiee](https://sepinetam.github.io/mcp-for-stata/configuration)** : Configuration TOML + variables d'environnement
 - Support multiplateforme (macOS, Windows, Linux)
 - Capture automatique des journaux et rapport d'erreurs
 
