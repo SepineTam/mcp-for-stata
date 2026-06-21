@@ -1,3 +1,12 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2025 - Present Sepine Tam, Inc. All Rights Reserved
+#
+# @Author : Sepine Tam (谭淞)
+# @Email  : sepinetam@gmail.com
+# @File   : __init__.py
+
 import warnings
 from importlib.metadata import PackageNotFoundError, version
 
@@ -10,7 +19,7 @@ except PackageNotFoundError:
         RuntimeWarning,
         stacklevel=1,
     )
-__author__ = "Song Tan <sepine@statamcp.com>"
+__author__ = "Song Tan <sepinetan@gmail.com>"
 
 _default_server_cache = None
 
@@ -29,7 +38,7 @@ def _get_default_server():
         register_tools(server, profile="all")
     except AttributeError as error:
         raise RuntimeError(
-            "Failed to initialize the default 'stata_mcp' server due to an internal attribute error."
+            "Failed to initialize the default 'mcp-for-stata' server due to an internal attribute error."
         ) from error
 
     _default_server_cache = server
@@ -54,5 +63,5 @@ __all__ = [
 
 
 if __name__ == "__main__":
-    print(f"Hello Stata-MCP@v{__version__}")
+    print(f"Hello MCP-for-Stata@v{__version__}")
     __getattr__("main")()
