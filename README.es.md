@@ -22,10 +22,14 @@
 <!-- mcp-name: io.github.SepineTam/mcp-for-stata -->
 
 ---
+<details>
+<summary>¿Por que la licencia AGPL 3.0?</summary>
+
+La licencia AGPL 3.0 es un tipo de licencia de codigo abierto. No afecta su uso diario y le permite usar, modificar y distribuir este software de forma gratuita, siempre que cumpla con sus terminos, como conservar los avisos de derechos de autor originales.
+
 **Notas**: Aunque nos esforzamos por hacer que el codigo abierto sea accesible para todos, lamentamos no poder mantener ya la licencia Apache-2.0. Debido a que algunas personas han copiado directamente este proyecto y se han atribuido ser sus mantenedores, hemos decidido cambiar la licencia a AGPL-3.0 para evitar usos indebidos del proyecto que vayan en contra de nuestra vision original.
 
-<details>
-<summary>Motivo</summary>
+Motivo:
 
 **Antecedentes**: El [repositorio](https://github.com/jackdark425/aigroup-stata-mcp) de @jackdark425 copio directamente este proyecto y afirmo ser el unico mantenedor. Damos la bienvenida a la colaboracion de codigo abierto basada en forks, incluyendo pero no limitado a agregar nuevas funcionalidades, corregir errores existentes o proporcionar sugerencias valiosas para el proyecto, pero nos oponemos firmemente al plagio y a la atribucion falsa.
 

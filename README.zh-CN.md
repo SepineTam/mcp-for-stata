@@ -22,10 +22,14 @@
 <!-- mcp-name: io.github.SepineTam/mcp-for-stata -->
 
 ---
+<details>
+<summary>为什么使用 AGPL 3.0 License？</summary>
+
+AGPL 3.0 License 是开源协议中的一种，它不会影响您的日常使用，该协议允许您免费使用、修改和分发本软件，但必须遵守相关条款，如保留源代码版权信息等。
+
 **说明**：尽管我们希望尽可能让所有人都能从开源中获益，但我们很遗憾地宣布无法继续保持 Apache-2.0 License。由于有人直接抄袭本项目并标榜其为项目维护者，我们不得不将 License 更改为 AGPL-3.0，以防止有人滥用本项目进行违背项目初心的事情。
 
-<details>
-<summary>原因</summary>
+原因如下：
 
 **背景**：@jackdark425 的[仓库](https://github.com/jackdark425/aigroup-stata-mcp)直接抄袭了本项目并标榜为项目唯一维护者。我们欢迎基于 fork 的开源协作，包括但不限于添加新的 feature、修改已有 bug 或对项目提出宝贵的意见，但坚决反对抄袭和虚假署名行为。
 
