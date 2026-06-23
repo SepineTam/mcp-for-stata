@@ -1,6 +1,6 @@
 # MCP-for-Stata
 
-**让 LLM 帮助你使用 Stata 完成回归分析。**
+**将 Stata 集成到你的智能体中。**
 
 ## 🆕 MCP-for-Stata 现已支持 OpenClaw
 

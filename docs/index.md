@@ -1,6 +1,6 @@
 # MCP-for-Stata
 
-**Let LLM help you achieve your regression with Stata.**
+**Integrate Stata into your agent.**
 
 ## 🆕 MCP-for-Stata Now Supports OpenClaw
 
