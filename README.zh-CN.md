@@ -44,7 +44,7 @@ AGPL 3.0 License 是开源协议中的一种，它不会影响您的日常使用
 - ✨ **Claude Code 插件支持**：官方插件包，包含 MCP 服务器和 Stata LSP 集成
 - 在 Claude Code 中使用 MCP-for-Stata，请查看[这里](#高级用法--claude-code)，或在 Codex 中使用请查看[这里](#高级用法--codex)
 
-> 想了解我们的**最新研究**？点击[这里](source/reports/README.md)或访问[研究报告网站](https://www.statamcp.com/reports)。
+> 想了解我们的**最新研究**？点击[此处](https://aidea-labs.com/mcp-for-stata/reports)查看。
 
 <details>
 <summary>寻找其他资源？</summary>

@@ -44,7 +44,7 @@ Motivo:
 - ✨ **Soporte para plugin de Claude Code**: Paquete oficial de plugin con servidor MCP e integracion con Stata LSP
 - Usa MCP-for-Stata en Claude Code, mira [aqui](#avanzado---claude-code), o Codex [aqui](#avanzado---codex)
 
-> ¿Buscas nuestra **investigacion mas reciente**? Haz clic [aqui](source/reports/README.md) o visita el [sitio web de reportes](https://www.statamcp.com/reports).
+> ¿Buscas nuestra **investigacion mas reciente**? Encuentrala [aqui](https://aidea-labs.com/mcp-for-stata/reports).
 
 <details>
 <summary>¿Buscas otros?</summary>
