@@ -56,7 +56,6 @@ AGPL 3.0 License 是开源协议中的一种，它不会影响您的日常使用
 > **数据集与信息**
 > - [STOP Dataset](https://opendata.ai4cssci.com)：StataMCP-Team 开放数据项目 📊，我们开源了一套面向社会科学研究的综合数据集，旨在推动 AI 驱动和数据驱动的研究范式。
 > - [Trace DID](https://github.com/asjadnaqvi/DiD)：如果你想获取关于 DID（双重差分法）的最新信息，点击[这里](https://asjadnaqvi.github.io/DiD/)。现已有 [Sepine Tam](https://github.com/sepine) 和 [StataMCP-Team](https://github.com/statamcp-team) 提供的中文翻译 🎉
-> - Jupyter Lab 用法（注意：Stata 17+）[详见此处](source/docs/JupyterStata.md) 和 [nbstata](https://github.com/hugetim/nbstata)
 </details>
 
 ## 💡 快速开始

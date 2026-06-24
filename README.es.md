@@ -56,7 +56,6 @@ Motivo:
 > **Conjuntos de datos e informacion**
 > - [STOP Dataset](https://opendata.ai4cssci.com): StataMCP-Team Opendata Project 📊, hemos publicado de forma abierta una coleccion integral de conjuntos de datos para la investigacion en ciencias sociales, con el objetivo de impulsar el futuro de los paradigmas de investigacion impulsados por IA y datos.
 > - [Trace DID](https://github.com/asjadnaqvi/DiD): Si deseas obtener la informacion mas reciente sobre DID (Diferencias en Diferencias), haz clic [aqui](https://asjadnaqvi.github.io/DiD/). Ahora hay una traduccion al chino realizada por [Sepine Tam](https://github.com/sepine) y [StataMCP-Team](https://github.com/statamcp-team) 🎉
-> - Uso de Jupyter Lab (Importante: Stata 17+) [aqui](source/docs/JupyterStata.md) y [nbstata](https://github.com/hugetim/nbstata)
 </details>
 
 ## 💡 Inicio rapido

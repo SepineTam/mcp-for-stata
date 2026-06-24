@@ -56,7 +56,6 @@ Raison :
 > **Jeux de donnees et informations**
 > - [STOP Dataset](https://opendata.ai4cssci.com) : StataMCP-Team Opendata Project 📊, nous avons open-source une collection complete de jeux de donnees pour la recherche en sciences sociales, dans le but de favoriser l'avenir des paradigmes de recherche pilotee par l'IA et alimentee par les donnees.
 > - [Trace DID](https://github.com/asjadnaqvi/DiD) : Si vous souhaitez obtenir les informations les plus recentes sur le DID (Difference-in-Difference), cliquez [ici](https://asjadnaqvi.github.io/DiD/). Il existe maintenant une traduction en chinois par [Sepine Tam](https://github.com/sepine) et [StataMCP-Team](https://github.com/statamcp-team) 🎉
-> - Utilisation de Jupyter Lab (Important : Stata 17+) [ici](source/docs/JupyterStata.md) et [nbstata](https://github.com/hugetim/nbstata)
 </details>
 
 ## 💡 Demarrage rapide
