@@ -82,6 +82,7 @@ nav:
   - Configuration: configuration.md
   - Security: security.md
   - Monitoring: monitoring.md
+  - Troubleshooting: troubleshooting.md
   - Tools: mcp/tools.md
   - Resources: mcp/resources.md
 

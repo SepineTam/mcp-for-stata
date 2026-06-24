@@ -2,6 +2,8 @@
 
 **将 Stata 集成到你的智能体中。**
 
+> 针对处于中国大陆用户的提示：如果出现失败，大概率是因为网络问题，请考虑使用 THU 的镜像，具体配置详见 [包下载缓慢或失败](troubleshooting.zh.md#包下载缓慢或失败)。
+
 ## 🆕 MCP-for-Stata 现已支持 OpenClaw
 
 **MCP-for-Stata 现已支持 OpenClaw！** MCP-for-Stata 提供独立的 CLI 工具，将以下命令粘贴到你的 OpenClaw 中，它会自动安装 skill。
@@ -79,6 +81,7 @@ claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --di
 - **[Docker](docker.md)**：在容器化环境中运行 MCP-for-Stata
 - **[安全守卫](security.md)**：危险命令的安全验证系统
 - **[监控系统](monitoring.md)**：RAM 监控和资源限制
+- **[故障排查](troubleshooting.zh.md)**：常见问题与网络问题解决方案
 
 ### 核心组件
 

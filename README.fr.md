@@ -240,7 +240,7 @@ Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 </details>
 
 > Notes :
-> 1. Si vous vous trouvez en Chine, un court document d'utilisation de uv est disponible [ici](source/docs/ChinaUsers/uv.md).
+> 1. Si vous vous trouvez en Chine et que le telechargement des packages est lent, consultez la [solution](docs/troubleshooting.md#package-download-is-slow-or-fails).
 > 2. Claude est le meilleur choix pour MCP-for-Stata. Pour les utilisateurs chinois, je recommande d'utiliser DeepSeek comme fournisseur de modele car il est bon marche et puissant, et obtient le meilleur score chez les fournisseurs chinois. Si cela vous interesse, consultez le rapport [How to use StataMCP improve your social science research](https://statamcp.com/reports/2025/09/21/stata_mcp_a_research_report_on_ai_assisted_empirical_research).
 
 ## Comparaison
