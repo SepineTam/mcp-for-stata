@@ -11,6 +11,7 @@ assignees: ''
 - [ ] 我已确认使用的是最新版本的 stata-mcp（如不是，请先更新）
 - [ ] 我已运行 `uvx stata-mcp doctor` 检查环境，如有异常会在下面附上输出
 - [ ] 我已先尝试让 AI（Claude / ChatGPT 等）帮助分析和解决问题
+- [ ] 如果这是安全问题，我会按照 SECURITY.md 中的说明通过邮件私下报告，而不是公开提交 issue
 
 ## 使用客户端 / IDE
 <!-- 请选择您使用的客户端或 IDE -->

@@ -11,6 +11,7 @@ assignees: ''
 - [ ] I have confirmed I am using the latest version of stata-mcp (if not, please update first)
 - [ ] I have run `uvx stata-mcp doctor` to check the environment and will paste the output below if there is any abnormality
 - [ ] I have tried to get AI (Claude / ChatGPT / etc.) to help analyze and resolve the issue
+- [ ] If this is a security issue, I will report it privately as described in SECURITY.md instead of opening a public issue
 
 ## Client / IDE
 <!-- Please select the client or IDE you are using -->

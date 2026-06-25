@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    about: Please report security issues privately via email. Do not open a public issue.
+    url: mailto:sepinetam@gmail.com
+  - name: 报告安全漏洞
+    about: 请通过邮件私下报告安全问题，不要公开提交 issue。
+    url: mailto:sepinetam@gmail.com
