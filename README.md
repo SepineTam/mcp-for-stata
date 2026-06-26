@@ -1,10 +1,12 @@
 <div align="center">
-  <a href="https://www.statamcp.com">
+  <a href="https://aidea-labs.com/mcp-for-stata">
     <img src="https://example-data.statamcp.com/logo_with_name.jpg" alt="MCP-for-Stata: Integrate Stata into your agent" width="300"/>
   </a>
 </div>
 
-<h1 align="center">MCP-for-Stata: Integrate Stata into your agent</h1>
+# MCP-for-Stata: Integrate Stata into your agent
+
+Enable Claude Code, Codex, OpenClaw, and other AI agents to safely invoke Stata on your local device for data analysis.
 
 > Stata is a registered trademark of StataCorp LLC. This project is an independent community-developed tool and is not affiliated with, endorsed by, or sponsored by StataCorp LLC.
 
@@ -22,6 +24,25 @@
 <!-- mcp-name: io.github.SepineTam/mcp-for-stata -->
 
 ---
+## 🆕 News
+- Find more in WeChat: [Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ), and [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
+- 🦞 **OpenClaw Support**: Standalone CLI tools for OpenClaw integration (`stata-mcp tool`), see [OpenClaw guide](https://sepinetam.github.io/mcp-for-stata/agents/openclaw.md)
+- ✨ **Claude Code Plugin Support**: Official plugin package with MCP server and Stata LSP integration
+- Use MCP-for-Stata in Claude Code, see [Claude Code advanced usage](#advanced-claude-code), or in Codex see [Codex advanced usage](#advanced-codex)
+
+> Finding our **newest research**? [View latest research reports](https://aidea-labs.com/mcp-for-stata/reports).
+
+<details>
+<summary>Looking for others?</summary>
+
+> **MCP or AI about Stata**
+> - A session based MCP server for Stata, [mcp-stata](https://github.com/tmonk/mcp-stata)
+> - IDEs (VScode or Cursor) integrated [stata-mcp for VSCode](https://github.com/hanlulong/stata-mcp). Confused them? 💡 [Comparison](#comparison)
+> 
+> **Datasets and Information**  
+> - [STOP Dataset](https://opendata.ai4cssci.com): StataMCP-Team Opendata Project 📊, we have open-sourced a comprehensive dataset collection for social science research, aiming to enable the future of AI-driven and data-powered research paradigms.
+</details>
+
 <details>
 <summary>Why AGPL 3.0 License?</summary>
 
@@ -35,34 +56,15 @@ Reason following:
 
 **Background**: @jackdark425's [repository](https://github.com/jackdark425/aigroup-stata-mcp) directly copied this project and claimed to be the sole maintainer. We welcome open source collaboration based on forks, including but not limited to adding new features, fixing existing bugs, or providing valuable suggestions for the project, but we firmly oppose plagiarism and false attribution.
 
-**Update**: The infringing project has been taken down via GitHub DMCA. Click [here](https://github.com/github/dmca/blob/master/2025/12/2025-12-30-stata-mcp.md) to learn about.
+**Update**: The infringing project has been taken down via GitHub DMCA. [View DMCA takedown details](https://github.com/github/dmca/blob/master/2025/12/2025-12-30-stata-mcp.md).
 
 **背景**: @jackdark425 的[仓库](https://github.com/jackdark425/aigroup-stata-mcp)直接抄袭了本项目并标榜为项目唯一维护者。我们欢迎基于fork的开源协作，包括但不限于添加新的feature、修改已有bug或对项目提出您宝贵的意见，但坚决反对抄袭和虚假署名行为。
 
-**更新**: 侵权项目已通过GitHub DMCA被takedown，点击[这里](https://github.com/github/dmca/blob/master/2025/12/2025-12-30-stata-mcp.md)查看详情。
+**更新**: 侵权项目已通过GitHub DMCA被takedown，[查看DMCA下架详情](https://github.com/github/dmca/blob/master/2025/12/2025-12-30-stata-mcp.md)。
 
 </details>
 
 ---
-**News**:
-- Find more in WeChat: [Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ), and [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
-- 🦞 **OpenClaw Support**: Standalone CLI tools for OpenClaw integration (`stata-mcp tool`), see [OpenClaw guide](https://sepinetam.github.io/mcp-for-stata/agents/openclaw.md)
-- ✨ **Claude Code Plugin Support**: Official plugin package with MCP server and Stata LSP integration
-- Use MCP-for-Stata in Claude Code, look [here](#advanced---claude-code), or Codex [here](#advanced---codex)
-
-> Finding our **newest research**? Find it [here](https://aidea-labs.com/mcp-for-stata/reports).
-
-<details>
-<summary>Looking for others?</summary>
-
-> **MCP or AI about Stata**
-> - A session based MCP server for Stata, [mcp-stata](https://github.com/tmonk/mcp-stata)
-> - IDEs (VScode or Cursor) integrated [here](https://github.com/hanlulong/stata-mcp). Confused them? 💡 [Comparison](#comparison)
-> 
-> **Datasets and Information**  
-> - [STOP Dataset](https://opendata.ai4cssci.com): StataMCP-Team Opendata Project 📊, we have open-sourced a comprehensive dataset collection for social science research, aiming to enable the future of AI-driven and data-powered research paradigms.  
-> - [Trace DID](https://github.com/asjadnaqvi/DiD): If you want to fetch the newest information about DID (Difference-in-Difference), click [here](https://asjadnaqvi.github.io/DiD/). Now there is a Chinese translation by [Sepine Tam](https://github.com/sepine) and [StataMCP-Team](https://github.com/statamcp-team) 🎉
-</details>
 
 ## 💡 Quickly Start
 ### 🚀 One-click installation for all clients!
@@ -90,7 +92,7 @@ We have found that Claude and DeepSeek are the two best models across any framew
 
 </details>
 
-If you don't have `uv`, visit [here](https://docs.astral.sh/uv/getting-started/installation) to install it. 
+If you don't have `uv`, [see the uv installation guide](https://docs.astral.sh/uv/getting-started/installation) to install it. 
 Or, use our beta install script (auto-installs `uv` if missing):
 
 **macOS / Linux:**
@@ -103,7 +105,9 @@ curl -fsSL https://raw.githubusercontent.com/SepineTam/mcp-for-stata/master/scri
 irm https://raw.githubusercontent.com/SepineTam/mcp-for-stata/master/scripts/install.ps1 | iex
 ```
 
-If you don't know how to use them, try click [here](https://github.com/SepineTam/mcp-for-stata/tree/master/scripts) and download the installation scripts and double-click it in your device. `install.bat` for Windows users, and `install.command` for macOS users. 
+If you don't know how to use them, [download the installation scripts](https://github.com/SepineTam/mcp-for-stata/tree/master/scripts) and double-click it in your device. `install.bat` for Windows users, and `install.command` for macOS users. 
+
+<a name="advanced-claude-code"></a>
 
 ### Advanced - Claude Code
 As we find Claude Code is the best agent for MCP-for-Stata as its prefect agentic ability, we recommend using it, and there are lots of advanced usage following:
@@ -154,6 +158,8 @@ claude plugin install stata-toolbox -s project
 ```
 
 > The language server gives AI-generated Stata code better syntax awareness and completion, which improves output quality. We package the LSP in compliance with its license and give full attribution to the original author.
+
+<a name="advanced-codex"></a>
 
 ### Advanced - Codex
 We find that many researchers are using Codex as their agent, therefore we also provide instructions for Codex users. 

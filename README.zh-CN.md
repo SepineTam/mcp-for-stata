@@ -1,10 +1,11 @@
 <div align="center">
-  <a href="https://www.statamcp.com">
-    <img src="https://example-data.statamcp.com/logo_with_name.jpg" alt="MCP-for-Stata: Integrate Stata into your agent" width="300"/>
+  <a href="https://aidea-labs.com/mcp-for-stata">
+    <img src="https://example-data.statamcp.com/logo_with_name.jpg" alt="MCP-for-Stata：将 Stata 集成到你的智能体中" width="300"/>
   </a>
 </div>
 
-<h1 align="center">MCP-for-Stata: 将 Stata 集成到你的智能体中</h1>
+# MCP-for-Stata：将 Stata 集成到你的智能体中
+让 Claude Code，Codex，OpenClaw 等 AI 智能体直接调用你设备中的 Stata 在本地 **安全地** 进行数据分析。
 
 > Stata 是 StataCorp LLC 的注册商标。本项目为独立社区开发工具，与 StataCorp LLC 无任何关联、背书或赞助关系。
 
@@ -22,6 +23,25 @@
 <!-- mcp-name: io.github.SepineTam/mcp-for-stata -->
 
 ---
+## 🆕 动态
+- 更多内容请关注微信公众号：[Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ)，以及 [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
+- 🦞 **OpenClaw 支持**：独立的 OpenClaw 集成 CLI 工具（`stata-mcp tool`），详见 [OpenClaw 指南](https://sepinetam.github.io/mcp-for-stata/agents/openclaw.md)
+- ✨ **Claude Code 插件支持**：官方插件包，包含 MCP 服务器和 Stata LSP 集成
+- 在 Claude Code 中使用 MCP-for-Stata，请查看 [Claude Code 高级用法](#advanced-claude-code)，或在 Codex 中使用请查看 [Codex 高级用法](#advanced-codex)
+
+> 想了解我们的**最新研究**？查看最新研究报告。
+
+<details>
+<summary>寻找其他资源？</summary>
+
+> **MCP 或 AI 相关的 Stata 工具**
+> - 基于会话的 Stata MCP 服务器，[mcp-stata](https://github.com/tmonk/mcp-stata)
+> - IDE 集成（VSCode 或 Cursor）[在 VScode 里使用 Stata](https://github.com/hanlulong/stata-mcp)。分不清区别？💡 [查看对比](#对比)
+>
+> **数据集与信息**
+> - [STOP Dataset](https://opendata.ai4cssci.com)：StataMCP-Team 开放数据项目 📊，我们开源了一套面向社会科学研究的综合数据集，旨在推动 AI 驱动和数据驱动的研究范式。
+</details>
+
 <details>
 <summary>为什么使用 AGPL 3.0 License？</summary>
 
@@ -33,29 +53,8 @@ AGPL 3.0 License 是开源协议中的一种，它不会影响您的日常使用
 
 **背景**：@jackdark425 的[仓库](https://github.com/jackdark425/aigroup-stata-mcp)直接抄袭了本项目并标榜为项目唯一维护者。我们欢迎基于 fork 的开源协作，包括但不限于添加新的 feature、修改已有 bug 或对项目提出宝贵的意见，但坚决反对抄袭和虚假署名行为。
 
-**更新**：侵权项目已通过 GitHub DMCA 被下架，点击[这里](https://github.com/github/dmca/blob/master/2025/12/2025-12-30-stata-mcp.md)了解详情。
+**更新**：侵权项目已通过 GitHub DMCA 被下架，[查看 DMCA 下架详情](https://github.com/github/dmca/blob/master/2025/12/2025-12-30-stata-mcp.md)。
 
-</details>
-
----
-**动态**：
-- 更多内容请关注微信公众号：[Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ)，以及 [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
-- 🦞 **OpenClaw 支持**：独立的 OpenClaw 集成 CLI 工具（`stata-mcp tool`），详见 [OpenClaw 指南](https://sepinetam.github.io/mcp-for-stata/agents/openclaw.md)
-- ✨ **Claude Code 插件支持**：官方插件包，包含 MCP 服务器和 Stata LSP 集成
-- 在 Claude Code 中使用 MCP-for-Stata，请查看[这里](#高级用法--claude-code)，或在 Codex 中使用请查看[这里](#高级用法--codex)
-
-> 想了解我们的**最新研究**？点击[此处](https://aidea-labs.com/mcp-for-stata/reports)查看。
-
-<details>
-<summary>寻找其他资源？</summary>
-
-> **MCP 或 AI 相关的 Stata 工具**
-> - 基于会话的 Stata MCP 服务器，[mcp-stata](https://github.com/tmonk/mcp-stata)
-> - IDE 集成（VSCode 或 Cursor）[详见此处](https://github.com/hanlulong/stata-mcp)。分不清区别？💡 [对比](#对比)
->
-> **数据集与信息**
-> - [STOP Dataset](https://opendata.ai4cssci.com)：StataMCP-Team 开放数据项目 📊，我们开源了一套面向社会科学研究的综合数据集，旨在推动 AI 驱动和数据驱动的研究范式。
-> - [Trace DID](https://github.com/asjadnaqvi/DiD)：如果你想获取关于 DID（双重差分法）的最新信息，点击[这里](https://asjadnaqvi.github.io/DiD/)。现已有 [Sepine Tam](https://github.com/sepine) 和 [StataMCP-Team](https://github.com/statamcp-team) 提供的中文翻译 🎉
 </details>
 
 ## 💡 快速开始
@@ -84,7 +83,7 @@ uvx stata-mcp install --all
 
 </details>
 
-如果你还没有安装 `uv`，请访问[这里](https://docs.astral.sh/uv/getting-started/installation)进行安装。
+如果你还没有安装 `uv`，请[查看 uv 安装指南](https://docs.astral.sh/uv/getting-started/installation)进行安装。
 或者，使用我们的测试版安装脚本（如未安装 `uv` 会自动安装）：
 
 **macOS / Linux：**
@@ -97,7 +96,9 @@ curl -fsSL https://raw.githubusercontent.com/SepineTam/mcp-for-stata/master/scri
 irm https://raw.githubusercontent.com/SepineTam/mcp-for-stata/master/scripts/install.ps1 | iex
 ```
 
-如果你不知道如何使用它们，可以点击[这里](https://github.com/SepineTam/mcp-for-stata/tree/master/scripts)下载安装脚本并在设备上双击运行。Windows 用户使用 `install.bat`，macOS 用户使用 `install.command`。
+如果你不知道如何使用它们，可以[下载安装脚本](https://github.com/SepineTam/mcp-for-stata/tree/master/scripts)并在设备上双击运行。Windows 用户使用 `install.bat`，macOS 用户使用 `install.command`。
+
+<a name="advanced-claude-code"></a>
 
 ### 高级用法 - Claude Code
 由于我们发现 Claude Code 凭借其出色的智能体能力是最适合 MCP-for-Stata 的工具，我们推荐使用它，以下是多种高级用法：
@@ -148,6 +149,8 @@ claude plugin install stata-toolbox -s project
 ```
 
 > 语言服务器为 AI 生成的 Stata 代码提供更好的语法感知和补全功能，从而提高输出质量。我们在遵守其许可证的前提下打包了 LSP，并对原作者给予完整的署名。
+
+<a name="advanced-codex"></a>
 
 ### 高级用法 - Codex
 我们发现许多研究人员正在使用 Codex 作为他们的智能体，因此我们也为 Codex 用户提供了使用说明。
