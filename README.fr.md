@@ -250,20 +250,21 @@ Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 
 Il existe plusieurs projets MCP lies a Stata. Le tableau ci-dessous a ete genere par Claude Code apres analyse directe de chaque base de code.
 
-| Fonctionnalite | MCP-for-Stata (ceci) | hanlulong/stata-mcp | tmonk/mcp-stata |
-|---|---|---|---|
-| **Agents** | Tous | La fenetre VSCode doit rester active | Tous |
-| **Type** | Serveur MCP + boite a outils CLI | Extension VSCode (serveur localhost, pas MCP autonome) | Serveur MCP base sur les sessions |
-| **Execution** | do-file via subprocess | Executeur integre a l'IDE via localhost :4000 | pystata (Stata 17+) |
-| **Securite** | Garde de commandes + surveillance RAM | — | — |
-| **Analyse de donnees** | Gestionnaires CSV, DTA, XLSX, SPSS | — | `describe` / `codebook` en session |
-| **Journaux** | Lecteurs texte + SMCL | — | Lecteur de journal integre |
-| **Graphiques** | — | — | Export, cache, SVG/PNG |
-| **Support CLI** | Natif (memes outils que le serveur MCP) | — | — |
-| **Sessions** | — | — | Multi-session, taches en arriere-plan |
-| **Plugin IDE** | — | VSCode / Cursor natif | Stata Workbench (VS Code) |
-| **Installation** | `uvx stata-mcp install` | VS Code Marketplace | `uvx` ou script d'installation |
-| **Ideal pour** | Analyse pilotee par agent (Claude Code, Codex, OpenClaw) | Utilisateurs qui ecrivent et executent du code Stata dans VSCode eux-memes | Flux de travail de recherche (replication, robustesse, QA publication) |
+| Fonctionnalite | MCP-for-Stata (ceci) | haoyu-haoyu/stata-ai-fusion | hanlulong/stata-mcp | tmonk/mcp-stata |
+|---|---|---|---|---|
+| **Ideal pour** | Analyse pilotee par agent (Claude Code, Codex, OpenClaw) | Sessions interactives, export de graphiques et connaissances Stata curatees | Utilisateurs qui ecrivent et executent du code Stata dans VSCode eux-memes | Flux de travail de recherche (replication, robustesse, QA publication) |
+| **Agents** | Tous | Tous | La fenetre VSCode doit rester active | Tous |
+| **Type** | Serveur MCP + boite a outils CLI | Serveur MCP + Base de connaissances Skill + Extension VS Code | Extension VSCode (serveur localhost, pas MCP autonome) | Serveur MCP base sur les sessions |
+| **Execution** | do-file via subprocess | Session interactive pexpect + fallback batch | Executeur integre a l'IDE via localhost :4000 | pystata (Stata 17+) |
+| **Securite** | Garde de commandes + surveillance RAM | Annulation de commande + nettoyage de session | — | — |
+| **Analyse de donnees** | Gestionnaires CSV, DTA, XLSX, SPSS | `inspect_data` / `codebook` en session | — | `describe` / `codebook` en session |
+| **Journaux** | Lecteurs texte + SMCL | `search_log` en session | — | Lecteur de journal integre |
+| **Graphiques** | — | Detection automatique + `export_graph` PNG/SVG/PDF | — | Export, cache, SVG/PNG |
+| **Support CLI** | Natif (memes outils que le serveur MCP) | Point d'entree basique | — | — |
+| **Sessions** | — | Sessions nommees multiples avec delai d'inactivite | — | Multi-session, taches en arriere-plan |
+| **Plugin IDE** | — | Extension native VS Code / Cursor | VSCode / Cursor natif | Stata Workbench (VS Code) |
+| **Skill / Connaissances** | Skill axe sur les outils pour MCP-for-Stata (742 lignes) | Base de connaissances generale Stata de 5 653 lignes | — | 20+ skills de recherche specialises (inference causale, replication, QA publication, etc.) |
+| **Installation** | `uvx stata-mcp install` | `uvx --from stata-ai-fusion stata-ai-fusion` | VS Code Marketplace | `uvx` ou script d'installation |
 
 ## 📝 Documentation
 > Les documents de MCP-for-Stata sont disponibles sur https://sepinetam.github.io/mcp-for-stata

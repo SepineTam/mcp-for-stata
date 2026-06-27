@@ -250,20 +250,21 @@ Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 
 目前有多个与 Stata 相关的 MCP 项目。下表由 Claude Code 在直接分析每个代码库后生成。
 
-| 功能 | MCP-for-Stata (本项目) | hanlulong/stata-mcp | tmonk/mcp-stata |
-|---|---|---|---|
-| **智能体** | 全部支持 | VSCode 窗口必须保持激活 | 全部支持 |
-| **类型** | MCP 服务器 + CLI 工具包 | VSCode 扩展（本地服务器，非独立 MCP） | 基于会话的 MCP 服务器 |
-| **执行方式** | 通过子进程运行 do-file | 通过本地 4000 端口的 IDE 嵌入式运行器 | pystata（Stata 17+） |
-| **安全性** | 命令守卫 + 内存监控 | — | — |
-| **数据分析** | CSV、DTA、XLSX、SPSS 处理器 | — | 会话内 `describe` / `codebook` |
-| **日志** | 文本 + SMCL 读取器 | — | 内置日志读取器 |
-| **图表** | — | — | 导出、缓存、SVG/PNG |
-| **CLI 支持** | 原生支持（与 MCP 服务器相同工具） | — | — |
-| **会话** | — | — | 多会话、后台任务 |
-| **IDE 插件** | — | 原生 VSCode / Cursor | Stata Workbench (VS Code) |
-| **安装方式** | `uvx stata-mcp install` | VS Code 应用市场 | `uvx` 或安装脚本 |
-| **最佳适用** | 智能体驱动分析（Claude Code、Codex、OpenClaw） | 在 VSCode 中自行编写和运行 Stata 代码的用户 | 研究工作流（复现、稳健性检验、发表 QA） |
+| 功能 | MCP-for-Stata (本项目) | haoyu-haoyu/stata-ai-fusion | hanlulong/stata-mcp | tmonk/mcp-stata |
+|---|---|---|---|---|
+| **最佳适用** | 智能体驱动分析（Claude Code、Codex、OpenClaw） | 交互式会话、图表导出、精选 Stata 知识库 | 在 VSCode 中自行编写和运行 Stata 代码的用户 | 研究工作流（复现、稳健性检验、发表 QA） |
+| **智能体** | 全部支持 | 全部支持 | VSCode 窗口必须保持激活 | 全部支持 |
+| **类型** | MCP 服务器 + CLI 工具包 | MCP 服务器 + Skill 知识库 + VS Code 扩展 | VSCode 扩展（本地服务器，非独立 MCP） | 基于会话的 MCP 服务器 |
+| **执行方式** | 通过子进程运行 do-file | pexpect 交互式会话 + 批处理降级 | 通过本地 4000 端口的 IDE 嵌入式运行器 | pystata（Stata 17+） |
+| **安全性** | 命令守卫 + 内存监控 | 取消命令 + 会话清理 | — | — |
+| **数据分析** | CSV、DTA、XLSX、SPSS 处理器 | 会话内 `inspect_data` / `codebook` | — | 会话内 `describe` / `codebook` |
+| **日志** | 文本 + SMCL 读取器 | 会话内 `search_log` | — | 内置日志读取器 |
+| **图表** | — | 自动检测 + `export_graph` PNG/SVG/PDF | — | 导出、缓存、SVG/PNG |
+| **CLI 支持** | 原生支持（与 MCP 服务器相同工具） | 基础入口点 | — | — |
+| **会话** | — | 多命名会话，支持空闲超时 | — | 多会话、后台任务 |
+| **IDE 插件** | — | 原生 VS Code / Cursor 扩展 | 原生 VSCode / Cursor | Stata Workbench (VS Code) |
+| **技能 / 知识库** | 面向 MCP-for-Stata 的工具型技能（742 行） | 5,653 行通用 Stata 技能知识库 | — | 20+ 专业研究技能（因果推断、复现、发表 QA 等） |
+| **安装方式** | `uvx stata-mcp install` | `uvx --from stata-ai-fusion stata-ai-fusion` | VS Code 应用市场 | `uvx` 或安装脚本 |
 
 ## 📝 文档
 > MCP-for-Stata 文档请访问 https://sepinetam.github.io/mcp-for-stata
