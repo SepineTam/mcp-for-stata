@@ -13,6 +13,9 @@ from pathlib import Path
 from .base import StataLogBase, StataLogInfo
 
 
+MAX_SMCL_EXPANSION = 10_000
+
+
 class StataLogSMCL(StataLogBase):
     """This class is made by Claude Code"""
     """Processor for SMCL (.smcl) Stata log files."""
@@ -56,6 +59,13 @@ class StataLogSMCL(StataLogBase):
 
     # 续行模式
     CONTINUATION_PATTERN = re.compile(r'^>')
+
+    @staticmethod
+    def _bounded_count(value: str | None, default: int) -> int:
+        """Return a safe SMCL expansion count."""
+        if not value:
+            return default
+        return min(int(value), MAX_SMCL_EXPANSION)
 
     def _convert_to_dataclass(self) -> StataLogInfo:
         """
@@ -101,13 +111,13 @@ class StataLogSMCL(StataLogBase):
 
         # 处理 hline
         result = self._HLINE_PATTERN.sub(
-            lambda m: '-' * int(m.group(1)) if m.group(1) else '-' * 13,
+            lambda m: '-' * self._bounded_count(m.group(1), 13),
             result
         )
 
         # 处理 space
         result = self._SPACE_PATTERN.sub(
-            lambda m: ' ' * int(m.group(1)),
+            lambda m: ' ' * self._bounded_count(m.group(1), 0),
             result
         )
 
