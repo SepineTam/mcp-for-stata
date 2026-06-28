@@ -250,7 +250,7 @@ Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 
 目前有多个与 Stata 相关的 MCP 项目。下表由 Claude Code 在直接分析每个代码库后生成。
 
-| 功能 | MCP-for-Stata (本项目) | haoyu-haoyu/stata-ai-fusion | hanlulong/stata-mcp | tmonk/mcp-stata |
+| 功能 | [MCP-for-Stata](https://aidea-labs.com/mcp-for-stata) (本项目) | [haoyu-haoyu/stata-ai-fusion](https://github.com/haoyu-haoyu/stata-ai-fusion) | [hanlulong/stata-mcp](https://github.com/hanlulong/stata-mcp) | [tmonk/mcp-stata](https://github.com/tmonk/mcp-stata) |
 |---|---|---|---|---|
 | **最佳适用** | 智能体驱动分析（Claude Code、Codex、OpenClaw） | 交互式会话、图表导出、精选 Stata 知识库 | 在 VSCode 中自行编写和运行 Stata 代码的用户 | 研究工作流（复现、稳健性检验、发表 QA） |
 | **智能体** | 全部支持 | 全部支持 | VSCode 窗口必须保持激活 | 全部支持 |

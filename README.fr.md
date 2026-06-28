@@ -250,7 +250,7 @@ Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 
 Il existe plusieurs projets MCP lies a Stata. Le tableau ci-dessous a ete genere par Claude Code apres analyse directe de chaque base de code.
 
-| Fonctionnalite | MCP-for-Stata (ceci) | haoyu-haoyu/stata-ai-fusion | hanlulong/stata-mcp | tmonk/mcp-stata |
+| Fonctionnalite | [MCP-for-Stata](https://aidea-labs.com/mcp-for-stata) (ceci) | [haoyu-haoyu/stata-ai-fusion](https://github.com/haoyu-haoyu/stata-ai-fusion) | [hanlulong/stata-mcp](https://github.com/hanlulong/stata-mcp) | [tmonk/mcp-stata](https://github.com/tmonk/mcp-stata) |
 |---|---|---|---|---|
 | **Ideal pour** | Analyse pilotee par agent (Claude Code, Codex, OpenClaw) | Sessions interactives, export de graphiques et connaissances Stata curatees | Utilisateurs qui ecrivent et executent du code Stata dans VSCode eux-memes | Flux de travail de recherche (replication, robustesse, QA publication) |
 | **Agents** | Tous | Tous | La fenetre VSCode doit rester active | Tous |
