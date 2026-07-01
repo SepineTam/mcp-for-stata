@@ -186,8 +186,7 @@ stata-mcp/
 │   │   └── data_info/      # Data processing
 │   ├── guard/              # Security validation
 │   ├── monitor/            # Performance monitoring
-│   ├── cli/                # Command-line interface
-│   └── agent_as/           # Agent mode implementation
+│   └── cli/                # Command-line interface
 ├── docs/                   # Documentation
 ├── tests/                  # Test files (if applicable)
 └── config.example.toml     # Example configuration

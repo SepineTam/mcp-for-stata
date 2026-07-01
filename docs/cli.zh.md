@@ -1,6 +1,6 @@
 # CLI 参考
 
-MCP-for-Stata 提供命令行界面（CLI）用于各种操作，包括启动 MCP 服务器、运行智能体模式以及安装到不同的 AI 客户端。
+MCP-for-Stata 提供命令行界面（CLI）用于各种操作，包括启动 MCP 服务器以及安装到不同的 AI 客户端。
 
 ## 安装
 
@@ -64,20 +64,6 @@ stata-mcp server --core -t sse
 - `stdio` - 标准输入/输出（默认）
 - `sse` - Server-Sent Events
 - `http` - HTTP 传输（自动转换为 streamable-http）
-
-### 智能体模式
-
-> **Deprecated**: 智能体模式自 v1.16.x 起带有 `FutureWarning`，并将在后续版本中移除。新的工作流应改用 MCP server 模式（`stata-mcp server` 或 `stata-mcp install`）。
-
-以交互式智能体模式运行 MCP-for-Stata：
-
-```bash
-# 在当前目录启动智能体
-stata-mcp agent run
-
-# 在指定目录启动智能体
-stata-mcp agent run --work-dir /path/to/project
-```
 
 ### 诊断检查（doctor）
 
@@ -224,34 +210,6 @@ stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 | `openclaw` | OpenClaw | |
 | `hermes` | Hermes | `hermes-agent` |
 
-### 基于 Docker 的安装（sandbox-install）
-
-将基于 Docker 的 MCP-for-Stata 安装到 AI 客户端。需要 Docker 和有效的 Stata 许可证。
-
-```bash
-# 使用默认设置的基本用法（StataNow 19.5 MP）
-uvx stata-mcp sandbox-install -l /path/to/stata.lic
-
-# 指定 Stata 版本和版本类型
-uvx stata-mcp sandbox-install \
-  --version 19_5 \
-  --edition mp \
-  -l /path/to/stata.lic \
-  -c claude
-
-# 带资源限制
-uvx stata-mcp sandbox-install \
-  -V 18 \
-  -e se \
-  -l /path/to/stata.lic \
-  --cpus 2 \
-  --memory 4g
-```
-
-**Stata 版本：** `19_5`、`18_5`、`18`
-
-**Stata 版本类型：** `mp`（多处理器）、`se`（标准版）、`be`（基础版）
-
 ## 选项
 
 ### Server 选项
@@ -271,12 +229,6 @@ uvx stata-mcp sandbox-install \
 | `--help` | `-h` | 显示帮助信息 |
 | `--usable` | `-u` | *（已弃用）* 检查系统兼容性，请改用 `stata-mcp doctor` |
 | `--transport` | `-t` | MCP 传输方式（stdio/sse/http） |
-
-### 智能体选项
-
-| 选项 | 描述 |
-|--------|-------------|
-| `--work-dir` | 智能体的工作目录（默认：当前目录） |
 
 ### 配置选项
 
@@ -312,19 +264,6 @@ uvx stata-mcp sandbox-install \
 | `--method` | 强制指定更新方式（auto/pip/uv-tool/homebrew） |
 | `--dry-run` | 显示检测到的方式但不执行更新 |
 | `--check` | 仅检查是否有新版本可用 |
-
-### Sandbox-Install 选项
-
-| 选项 | 简写 | 默认值 | 描述 |
-|--------|-------|---------|-------------|
-| `--version` | `-V` | `19_5` | Stata 版本（19_5, 18_5, 18） |
-| `--edition` | `-e` | `mp` | Stata 版本类型（mp, se, be） |
-| `--tag` | | `latest` | Docker 镜像标签 |
-| `--license-file` | `-l` | （必填） | Stata 许可证文件路径 |
-| `--client` | `-c` | `claude` | 目标客户端 |
-| `--work-dir` | | `./` | 工作目录 |
-| `--cpus` | | （无） | CPU 核心限制 |
-| `--memory` | | （无） | 内存限制（如 4g） |
 
 ## 示例
 

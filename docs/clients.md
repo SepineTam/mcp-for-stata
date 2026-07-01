@@ -347,9 +347,6 @@ mcp_servers:
 | `STATA_MCP__CWD`         | Working directory for Stata operations                        | `"/Users/user/research"`        |
 | `STATA_MCP_CWD`          | Legacy alias for `STATA_MCP__CWD` (kept for back-compat)      | `"/Users/user/research"`        |
 | `STATA_CLI`              | Path to specific Stata executable                             | `"/Applications/Stata/StataMP"` |
-| `STATA_MCP_MODEL`        | Used by deprecated agent mode; not needed for MCP server mode | `"gpt-4"`                       |
-| `STATA_MCP_API_KEY`      | Used by deprecated agent mode; not needed for MCP server mode | `"sk-..."`                      |
-| `STATA_MCP_API_BASE_URL` | Used by deprecated agent mode; not needed for MCP server mode | `"https://api.openai.com/v1"`   |
 
 #### Security Variables
 

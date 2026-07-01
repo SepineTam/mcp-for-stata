@@ -1,6 +1,6 @@
 # CLI Reference
 
-MCP-for-Stata provides a command-line interface (CLI) for various operations including starting MCP servers, running agent mode, and installing to different AI clients.
+MCP-for-Stata provides a command-line interface (CLI) for various operations including starting MCP servers and installing to different AI clients.
 
 ## Installation
 
@@ -64,20 +64,6 @@ stata-mcp server --core -t sse
 - `stdio` - Standard input/output (default)
 - `sse` - Server-Sent Events
 - `http` - HTTP transport (automatically converted to streamable-http)
-
-### Agent Mode
-
-> **Deprecated**: Agent mode is marked with `FutureWarning` since v1.16.x and will be removed in a future release. New workflows should use MCP server mode (`stata-mcp server` or `stata-mcp install`).
-
-Run MCP-for-Stata in interactive agent mode:
-
-```bash
-# Start agent in current directory
-stata-mcp agent run
-
-# Start agent in specific directory
-stata-mcp agent run --work-dir /path/to/project
-```
 
 ### Doctor Diagnostics
 
@@ -226,34 +212,6 @@ stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 | `openclaw` | OpenClaw | |
 | `hermes` | Hermes | `hermes-agent` |
 
-### Docker-based Installation (sandbox-install)
-
-Install Docker-based MCP-for-Stata to AI clients. Requires Docker and a valid Stata license.
-
-```bash
-# Basic usage with default settings (StataNow 19.5 MP)
-uvx stata-mcp sandbox-install -l /path/to/stata.lic
-
-# Specify Stata version and edition
-uvx stata-mcp sandbox-install \
-  --version 19_5 \
-  --edition mp \
-  -l /path/to/stata.lic \
-  -c claude
-
-# With resource limits
-uvx stata-mcp sandbox-install \
-  -V 18 \
-  -e se \
-  -l /path/to/stata.lic \
-  --cpus 2 \
-  --memory 4g
-```
-
-**Stata Versions:** `19_5`, `18_5`, `18`
-
-**Stata Editions:** `mp` (Multi-processor), `se` (Standard), `be` (Basic)
-
 ## Options
 
 ### Server Options
@@ -273,12 +231,6 @@ uvx stata-mcp sandbox-install \
 | `--help` | `-h` | Show help message |
 | `--usable` | `-u` | *(Deprecated)* Check system compatibility, use `stata-mcp doctor` instead |
 | `--transport` | `-t` | MCP transport method (stdio/sse/http) |
-
-### Agent Options
-
-| Option | Description |
-|--------|-------------|
-| `--work-dir` | Working directory for agent (default: current directory) |
 
 ### Config Options
 
@@ -314,19 +266,6 @@ uvx stata-mcp sandbox-install \
 | `--method` | Force specific update method (auto/pip/uv-tool/homebrew) |
 | `--dry-run` | Show detected method without updating |
 | `--check` | Only check if a newer version is available |
-
-### Sandbox-Install Options
-
-| Option | Short | Default | Description |
-|--------|-------|---------|-------------|
-| `--version` | `-V` | `19_5` | Stata version (19_5, 18_5, 18) |
-| `--edition` | `-e` | `mp` | Stata edition (mp, se, be) |
-| `--tag` | | `latest` | Docker image tag |
-| `--license-file` | `-l` | (required) | Path to Stata license file |
-| `--client` | `-c` | `claude` | Target client |
-| `--work-dir` | | `./` | Working directory |
-| `--cpus` | | (none) | CPU core limit |
-| `--memory` | | (none) | Memory limit (e.g., 4g) |
 
 ## Examples
 

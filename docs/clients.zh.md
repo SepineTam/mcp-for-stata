@@ -347,9 +347,6 @@ mcp_servers:
 | `STATA_MCP__CWD`         | Stata 操作的工作目录                                       | `"/Users/user/research"`        |
 | `STATA_MCP_CWD`          | `STATA_MCP__CWD` 的旧别名（保留向后兼容）                  | `"/Users/user/research"`        |
 | `STATA_CLI`              | 特定 Stata 可执行文件路径                                  | `"/Applications/Stata/StataMP"` |
-| `STATA_MCP_MODEL`        | 仅 deprecated 的 agent 模式使用，MCP server 模式无需配置   | `"gpt-4"`                       |
-| `STATA_MCP_API_KEY`      | 仅 deprecated 的 agent 模式使用，MCP server 模式无需配置   | `"sk-..."`                      |
-| `STATA_MCP_API_BASE_URL` | 仅 deprecated 的 agent 模式使用，MCP server 模式无需配置   | `"https://api.openai.com/v1"`   |
 
 #### 安全变量
 

@@ -104,8 +104,6 @@ export STATA_MCP__RAM_LIMIT=16384
 2. **Run MCP-for-Stata normally**:
    ```bash
    stata-mcp
-   # or
-   stata-mcp agent run
    ```
 
 3. **Monitoring is automatic** when enabled:

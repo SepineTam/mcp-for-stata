@@ -132,50 +132,11 @@ stata-mcp tool data-info /path/to/data.dta
 
 # Update to latest version
 stata-mcp update
-
-# Docker-based sandbox install
-stata-mcp sandbox-install -l /path/to/stata.lic
 ```
 
 See [CLI Reference](cli.md) for complete documentation.
 
 ## Usage in Python
-
-### Using OpenAI Agents SDK
-
-MCP-for-Stata can be integrated with Python agents using the OpenAI Agents SDK.
-
-#### Method 1: Direct MCP Server Integration
-
-```python
-# !uv pip install openai-agents
-from agents import Agent, Runner
-from agents.mcp import MCPServerStdio, MCPServerStdioParams
-
-# Create MCP server connection
-stata_mcp_server = MCPServerStdio(
-    name="MCP-for-Stata",
-    params=MCPServerStdioParams(
-        command="uvx",
-        args=["stata-mcp"]
-    )
-)
-
-# Initialize agent with MCP server
-agent = Agent(
-    name="Research Assistant",
-    instructions="You are a helpful economics research assistant.",
-    mcp_servers=[stata_mcp_server]
-)
-
-# Run analysis
-result = await Runner.run(
-    agent,
-    input="Run a regression: log(wage) ~ age, educ, exper with nlsw88 data and report coefficients."
-)
-
-print(f"Result: \n> {result.final_output}")
-```
 
 ## Usage in Coding Agents
 
@@ -381,7 +342,7 @@ MCP-for-Stata supports several environment variables for customization:
 - Use `StataFinder` configuration guide for custom paths
 
 **"Module not found" errors**
-- Ensure dependencies: `uv pip install openai-agents stata-mcp`
+- Ensure dependencies: `uv pip install stata-mcp`
 - Check Python version: 3.11+ required
 
 **MCP server not connecting**
@@ -408,7 +369,6 @@ uvx stata-mcp doctor --verbose
 
 - [Overview](overview.md) - Architecture and design
 - [Tools Documentation](tools.md) - Available MCP tools
-- [Agents Guide](agents/index.md) - Agent-specific documentation
 - [GitHub Repository](https://github.com/sepinetam/mcp-for-stata) - Source code and issues
 
 ## Contributing

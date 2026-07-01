@@ -6,7 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Stata-MCP is an MCP (Model Context Protocol) server that enables LLMs to execute Stata commands and perform statistical/regression analysis. It supports:
 - **MCP server mode**: FastMCP-based server exposing Stata tools to LLMs
-- **Agent mode**: Interactive Stata analysis via OpenAI Agents SDK
 - **CLI tools**: Direct command-line access to all Stata capabilities
 
 License: **AGPL-3.0** | Python: **>=3.11**
@@ -87,7 +86,6 @@ stata-mcp --version
 ```bash
 # Run without local installation
 uvx stata-mcp --version
-uvx stata-mcp agent run
 uvx stata-mcp doctor
 ```
 
@@ -135,12 +133,6 @@ src/stata_mcp/
 ├── monitor/                 # Process monitoring
 │   ├── base.py              # MonitorBase ABC
 │   └── ram_monitor.py       # RAMMonitor (threading + psutil)
-├── agent_as/                # Agent-mode components
-│   ├── agent_base.py        # AgentBase ABC (OpenAI Agents SDK)
-│   ├── repl_agents.py       # REPLAgent with SQLiteSession + MCP server
-│   ├── set_model.py         # Model configuration helpers
-│   ├── agent_as_tool/       # stata_agent, adversarial_thinking_agent, any_as_tools
-│   └── agent_as_rag/        # RAG-based agent with handoff capability
 ├── evaluate/                # Evaluation and scoring
 │   ├── _model.py            # OpenAI client config (DEFAULT/CHAT/THINKING models)
 │   ├── score_it.py          # Scoring module
@@ -201,7 +193,7 @@ All handlers extend `DataInfoBase` and return `Series` dataclasses with typed nu
 ### 5. CLI Interface (`src/stata_mcp/cli/`)
 
 Modular architecture:
-- `_parsers.py` defines argument parsers for: `agent`, `server`, `doctor`, `tool`, `config`, `install`, `sandbox-install`, `update`
+- `_parsers.py` defines argument parsers for: `server`, `doctor`, `tool`, `config`, `install`, `update`
 - `_handlers.py` implements the corresponding handler functions
 - `_cli.py` routes subcommands and serves as the package entry point
 
@@ -230,14 +222,6 @@ Config file location: `~/.statamcp/config.toml`. See `src/stata_mcp/config.py` f
 - Terminates process when usage exceeds `MAX_RAM_MB`
 - Raises `RAMLimitExceededError` with usage details
 - Configurable via `IS_MONITOR` and `MAX_RAM_MB` settings
-
-### 9. Agent System (`src/stata_mcp/agent_as/`)
-
-Built on the **OpenAI Agents SDK** (`openai-agents`):
-- `REPLAgent`: Interactive REPL with `SQLiteSession` for persistent message history, `MCPServerStdio` for live MCP tool access
-- `AgentBase`: Abstract base class for all agent types
-- `agent_as_tool/`: Compose agents as tools (stata agent, adversarial thinking, generic tool wrappers)
-- `agent_as_rag/`: RAG-based agent variants with handoff capability
 
 ### MCP Tools Provided
 
@@ -275,7 +259,6 @@ Pattern for adding tests:
 | `mcp[cli]>=1.23.0` | MCP protocol and FastMCP server |
 | `pandas>=3.0.0,<4.0.0` | Data processing (lazy-loaded) |
 | `pexpect>=4.9.0` | Interactive Stata sessions |
-| `openai-agents>=0.3.2` | Agent mode (OpenAI Agents SDK) |
 | `openai>=1.109.1` | LLM API client |
 | `psutil>=6.0.0` | RAM monitoring |
 | `pyreadstat>=1.2.0` | SPSS file reading |

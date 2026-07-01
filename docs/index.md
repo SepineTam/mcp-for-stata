@@ -62,7 +62,7 @@ For detailed usage guide, visit [agents/claude_code.md](agents/claude_code.md).
 
 ---
 
-If you want to explore more [clients](clients.md) or [agents](agents/index.md), visit their respective documentation.
+If you want to explore more [clients](clients.md), visit the clients documentation.
 
 ## Documentation
 
@@ -91,9 +91,8 @@ If you want to explore more [clients](clients.md) or [agents](agents/index.md), 
 - **[MCP Tools](mcp/tools.md)**: Available MCP tools and usage
 - **[MCP Resources](mcp/resources.md)**: MCP resources and capabilities
 
-### Agents
+### Client Integration
 
-- **[Agent Index](agents/index.md)**: Overview of agent modes
 - **[Claude Code Integration](agents/claude_code.md)**: Detailed Claude Code setup
 
 ## Quick Links

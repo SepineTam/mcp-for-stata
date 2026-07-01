@@ -64,7 +64,7 @@ claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --di
 
 ---
 
-如果你想探索更多[客户端](clients.md)或[智能体](agents/index.md)，请访问它们各自的文档。
+如果你想探索更多[客户端](clients.md)，请访问客户端文档。
 
 ## 文档
 
@@ -94,9 +94,8 @@ claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --di
 - **[MCP 工具](mcp/tools.md)**：可用的 MCP 工具和用法
 - **[MCP 资源](mcp/resources.md)**：MCP 资源和能力
 
-### 智能体
+### 客户端集成
 
-- **[智能体索引](agents/index.md)**：智能体模式概述
 - **[Claude Code 集成](agents/claude_code.md)**：详细的 Claude Code 设置
 
 ## 快速链接

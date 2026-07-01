@@ -104,8 +104,6 @@ export STATA_MCP__RAM_LIMIT=16384
 2. **正常运行 MCP-for-Stata**：
    ```bash
    stata-mcp
-   # 或
-   stata-mcp agent run
    ```
 
 3. **启用时监控自动进行**：

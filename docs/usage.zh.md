@@ -132,50 +132,11 @@ stata-mcp tool data-info /path/to/data.dta
 
 # 更新到最新版本
 stata-mcp update
-
-# 基于 Docker 的沙盒安装
-stata-mcp sandbox-install -l /path/to/stata.lic
 ```
 
 完整文档请参阅 [CLI 参考](cli.md)。
 
 ## 在 Python 中使用
-
-### 使用 OpenAI Agents SDK
-
-MCP-for-Stata 可以使用 OpenAI Agents SDK 与 Python 智能体集成。
-
-#### 方法 1：直接 MCP 服务器集成
-
-```python
-# !uv pip install openai-agents
-from agents import Agent, Runner
-from agents.mcp import MCPServerStdio, MCPServerStdioParams
-
-# 创建 MCP 服务器连接
-stata_mcp_server = MCPServerStdio(
-    name="MCP-for-Stata",
-    params=MCPServerStdioParams(
-        command="uvx",
-        args=["stata-mcp"]
-    )
-)
-
-# 使用 MCP 服务器初始化智能体
-agent = Agent(
-    name="Research Assistant",
-    instructions="You are a helpful economics research assistant.",
-    mcp_servers=[stata_mcp_server]
-)
-
-# 运行分析
-result = await Runner.run(
-    agent,
-    input="Run a regression: log(wage) ~ age, educ, exper with nlsw88 data and report coefficients."
-)
-
-print(f"Result: \n> {result.final_output}")
-```
 
 ## 在编码智能体中使用
 
@@ -381,7 +342,7 @@ MCP-for-Stata 支持多个环境变量进行自定义：
 - 使用 `StataFinder` 配置指南设置自定义路径
 
 **"Module not found" 错误**
-- 确保依赖已安装：`uv pip install openai-agents stata-mcp`
+- 确保依赖已安装：`uv pip install stata-mcp`
 - 检查 Python 版本：需要 3.11+
 
 **MCP 服务器无法连接**
@@ -408,7 +369,6 @@ uvx stata-mcp doctor --verbose
 
 - [概述](overview.md) - 架构和设计
 - [工具文档](tools.md) - 可用的 MCP 工具
-- [客户端指南](agents/index.md) - 客户端特定文档
 - [GitHub 仓库](https://github.com/sepinetam/mcp-for-stata) - 源代码和问题
 
 ## 贡献
