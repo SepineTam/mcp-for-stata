@@ -208,6 +208,18 @@ Error attributes:
 - `ram_used_mb`: Actual RAM used when limit exceeded
 - `ram_limit_mb`: Configured RAM limit
 
+## SMCL Log Expansion Limits
+
+SMCL (Stata Markup and Control Language) logs can contain tags such as `{space N}` and `{hline N}` that expand into repeated spaces or dashes. A malformed or malicious log with an extremely large `N` could cause the parser to allocate excessive memory while converting SMCL to plain text.
+
+To prevent this, the SMCL parser applies a hard upper bound to every expansion:
+
+- **Maximum expansion**: 10,000 characters per tag
+- **Affected tags**: `{space N}`, `{hline N}`
+- **Default fallback**: `{hline}` without a count expands to 13 dashes
+
+This limit is applied automatically whenever SMCL logs are read through the `read_log` tool or when SMCL output is enabled via `--enable-smcl true`. It is not configurable and is independent of the RAM monitor, but serves the same goal of preventing resource exhaustion.
+
 ## Extensibility
 
 ### Creating Custom Monitors
