@@ -1,0 +1,1633 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://sepinetam.github.io/mcp-for-stata/zh/mcp/tools/">
+      
+      
+        <link rel="prev" href="../../troubleshooting/">
+      
+      
+        <link rel="next" href="../resources/">
+      
+      
+        
+          <link rel="alternate" href="../../../mcp/tools/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="zh">
+        
+      
+      
+      <link rel="icon" href="https://r2.statamcp.com/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Tools - Stata-MCP Documents</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mcptools" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../../" title="Stata-MCP Documents" class="md-header__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Stata-MCP Documents
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Tools
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../../mcp/tools/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SepineTam/mcp-for-stata" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mcp-for-stata
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../" title="Stata-MCP Documents" class="md-nav__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    Stata-MCP Documents
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SepineTam/mcp-for-stata" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mcp-for-stata
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../docker.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../claude-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clients
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#get_data_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_data_info
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stata_do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stata_do
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#write_dofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        write_dofile
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#read_log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_log
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ado_package_install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ado_package_install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        help
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../agents/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Summary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agents/claude_code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agents/openclaw/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenClaw
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoreTech
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CoreTech
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/stata/finder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Finder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/stata/do/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Runner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/stata/help/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Help
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/stata/package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#get_data_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_data_info
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stata_do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stata_do
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#write_dofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        write_dofile
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#read_log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_log
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ado_package_install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ado_package_install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        help
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="mcptools">MCP.Tools</h1>
+<p>工具在 <code>_TOOL_REGISTRY</code> 中按三种 profile 划分。<code>stata-mcp server --core</code> 只注册 <code>stata_do</code>、<code>get_data_info</code>、<code>help</code>；<code>stata-mcp server --all</code>（默认）注册标准工具，但不包含高风险第三方安装；<code>stata-mcp server --unsafe</code> 会额外注册 <code>ado_package_install</code>。<code>help</code> 在 Windows 上会被过滤。已弃用的 <code>write_dofile</code> 仅在 <code>ENABLE_WRITE_DOFILE=true</code> 时注册。</p>
+<hr />
+<h2 id="get_data_info">get_data_info</h2>
+<pre><code class="language-python">def get_data_info(data_path: str | Path,
+                  vars_list: List[str] | None = None,
+                  encoding: str = &quot;utf-8&quot;,
+                  head: int = 0) -&gt; str:
+    ...
+</code></pre>
+<p><strong>输入参数</strong>：
+- <code>data_path</code>：数据文件的绝对文件系统路径或 URL（必填）
+- <code>vars_list</code>：可选变量子集规范，用于选择性分析（默认：null，所有变量）
+- <code>encoding</code>：文本格式文件的字符编码（默认：UTF-8，.dta 格式忽略）
+- <code>head</code>：预览数据集时显示的行数（默认：0，禁用预览以避免大样本上下文溢出）</p>
+<p><strong>返回结构</strong>：
+包含多层元数据的序列化 JSON 字符串：</p>
+<pre><code class="language-json">{
+  &quot;overview&quot;: {&quot;source&quot;: &lt;path&gt;, &quot;obs&quot;: &lt;int&gt;, &quot;var_numbers&quot;: &lt;int&gt;, &quot;var_list&quot;: [&lt;array&gt;]},
+  &quot;info_config&quot;: {&quot;metrics&quot;: [&lt;array&gt;], &quot;max_display&quot;: &lt;int&gt;, &quot;decimal_places&quot;: &lt;int&gt;},
+  &quot;vars_detail&quot;: {&lt;variable_name&gt;: {&quot;var&quot;: &lt;str&gt;, &quot;type&quot;: &lt;str&gt;, &quot;summary&quot;: {...}}},
+  &quot;saved_path&quot;: &lt;cache_file_path&gt;
+}
+</code></pre>
+<p><strong>操作示例</strong>：</p>
+<pre><code class="language-python"># 本地文件分析
+get_data_info(&quot;/data/econometrics/survey.dta&quot;)
+get_data_info(&quot;~/Documents/exports/quarterly.csv&quot;, vars_list=[&quot;gdp&quot;, &quot;inflation&quot;, &quot;unemployment&quot;])
+
+# 远程数据获取
+get_data_info(&quot;https://repository.org/datasets/panel_data.xlsx&quot;)
+
+# 编码源处理
+get_data_info(&quot;/data/legacy/latin1_data.csv&quot;, encoding=&quot;latin1&quot;)
+</code></pre>
+<p><strong>支持格式</strong>：
+- <strong>Stata</strong>：<code>.dta</code>
+- <strong>CSV/文本</strong>：<code>.csv</code>、<code>.tsv</code>、<code>.psv</code>
+- <strong>Excel</strong>：<code>.xlsx</code>、<code>.xls</code>
+- <strong>SPSS</strong>：<code>.sav</code>、<code>.zsav</code></p>
+<p><strong>实现架构</strong>：
+该工具通过多层抽象级联运行。基础是多态类层次结构，其中 <code>DataInfoBase</code> 定义了格式特定处理器（<code>DtaDataInfo</code>、<code>CsvDataInfo</code>、<code>ExcelDataInfo</code>、<code>SpssDataInfo</code>）的抽象接口。内容完整性验证使用 MD5 哈希，可配置后缀长度用于缓存标识。配置传播遵循优先级链：运行时参数覆盖环境变量（<code>STATA_MCP_DATA_INFO_DECIMAL_PLACES</code>、<code>STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER</code>），环境变量又覆盖 <code>~/.statamcp/config.toml</code> 中的 TOML 配置。</p>
+<p>统计计算利用 pandas DataFrame 操作，后端为 NumPy。指标系统实现可配置的计算流水线，默认指标（<code>obs</code>、<code>mean</code>、<code>stderr</code>、<code>min</code>、<code>max</code>）可通过配置扩展以包含四分位数（<code>q1</code>、<code>q3</code>）和分布形状度量（<code>skewness</code>、<code>kurtosis</code>）。类型分派将字符串变量（在 <code>max_display</code> 阈值下的观测计数和唯一值采样）与数值变量（带 <code>decimal_places</code> 精度舍入的中心趋势、离散度和分布形状计算）分开。</p>
+<p>缓存策略采用内容可寻址存储，哈希计算决定缓存文件命名：<code>data_info__&lt;name&gt;_&lt;ext&gt;__hash_&lt;suffix&gt;.json</code>。缓存解析在调用时进行，当内容哈希分歧时自动重新生成。缓存目录默认为 <code>~/.statamcp/.cache/</code>，但可通过 <code>cache_dir</code> 参数覆盖为项目特定的 <code>stata-mcp-tmp/</code> 位置。</p>
+<hr />
+<h2 id="stata_do">stata_do</h2>
+<pre><code class="language-python">def stata_do(dofile_path: str,
+             log_file_name: str | None = None,
+             read_log_when_error: bool = False,
+             is_replace_log: bool = True,
+             enable_smcl: bool = True,
+             timeout: float | None = None) -&gt; Dict[str, Union[str, None]]:
+    ...
+</code></pre>
+<p><strong>输入参数</strong>：
+- <code>dofile_path</code>：目标 .do 文件的绝对或相对路径（必填）
+- <code>log_file_name</code>：不带时间戳的自定义日志文件名（可选，如为 null 则自动生成）
+- <code>read_log_when_error</code>：仅在 Stata 返回错误码（如 <code>r(198)</code>）时才读取并返回日志内容的开关，用以降低成功路径的 I/O 开销（默认：false）
+- <code>is_replace_log</code>：是否覆盖同名 log 文件的开关（默认：true）
+- <code>enable_smcl</code>：是否启用 SMCL 格式日志输出的开关，true 时 Stata CLI 不附加 <code>nolog</code> 重定向参数,同时产出 <code>.smcl</code> 和 <code>.log</code>（默认：true）
+- <code>timeout</code>：可选的最大执行秒数。默认值 <code>null</code> 表示不限制 Stata 的执行时间。</p>
+<p><strong>返回结构</strong>：
+包含执行元数据和可选日志负载的字典：</p>
+<pre><code class="language-python">{
+  &quot;log_file_path&quot;: {&quot;text&quot;: &quot;&lt;absolute_path_to_log&gt;&quot;, &quot;smcl&quot;: &quot;&lt;absolute_path_to_smcl&gt;&quot;},
+  &quot;log_content&quot;: {&quot;text&quot;: &quot;&lt;error_log_text_or_placeholder&gt;&quot;, &quot;smcl&quot;: &quot;&lt;smcl_path&gt;&quot;}
+}
+</code></pre>
+<p>仅在 <code>read_log_when_error=True</code> 时才会包含 <code>log_content</code> 键。错误情况返回：<code>{"error": "&lt;exception_message&gt;"}</code>。</p>
+<p><strong>操作示例</strong>：</p>
+<pre><code class="language-python"># 标准执行,成功路径不读 log
+stata_do(&quot;/Users/project/stata-mcp-dofile/20250104153045.do&quot;)
+
+# 自定义日志命名
+stata_do(&quot;~/analysis/regression_pipeline.do&quot;, log_file_name=&quot;quarterly_results&quot;)
+
+# 仅在 Stata 报错时返回日志内容
+stata_do(&quot;/tmp/estimation.do&quot;, read_log_when_error=True)
+
+# 保留历史日志并关闭 SMCL 输出
+stata_do(&quot;/tmp/estimation.do&quot;,
+         read_log_when_error=True,
+         is_replace_log=False,
+         enable_smcl=False)
+
+# 执行超过五分钟时终止 Stata
+stata_do(&quot;/tmp/estimation.do&quot;, timeout=300)
+</code></pre>
+<p><strong>实现架构</strong>：
+该工具封装了实现平台特定命令调用策略的 <code>StataDo</code> 执行器类。跨平台抽象通过 <code>StataFinder</code> 类抽象 Stata 可执行文件位置：macOS 探测 <code>/Applications/Stata/</code> 层级，Windows 查询 Program Files 注册表，Linux 在系统 PATH 中查询 <code>stata-mp</code>。执行流水线涉及 do 文件暂存、带 <code>-b</code> 批处理模式标志的 Stata CLI 调用、日志文件重定向和退出代码监控。</p>
+<p>日志文件管理在 <code>stata-mcp-log/</code> 目录结构内运行，当省略 <code>log_file_name</code> 时自动生成时间戳。<code>is_replace_log</code> 标志决定是否覆盖既有日志,<code>enable_smcl</code> 决定是否一并产出 SMCL 制品。执行器根据 <code>read_log_when_error</code> 标志实现条件式日志返回：先以 <code>r(\d+)</code> 模式扫描文本日志,只有检测到 Stata 返回码错误时才返回日志负载,否则返回一个占位提示,引导用户改用 <code>read_log</code> 工具。</p>
+<p>异常处理将失败分为三个层级：缺失 do 文件产物的 <code>FileNotFoundError</code>，Stata 执行失败或日志生成问题的 <code>RuntimeError</code>，以及执行或写入权限不足的 <code>PermissionError</code>。错误情况返回带 <code>"error"</code> 键的字典而非抛出异常，以保持 MCP 协议兼容性。</p>
+<hr />
+<h2 id="write_dofile">write_dofile</h2>
+<blockquote>
+<p><strong>默认禁用</strong>：该工具是否被注册到 MCP server 完全由 <code>ENABLE_WRITE_DOFILE</code> 配置开关决定。未设置为 <code>true</code> 时,<code>register_tools()</code> 会直接跳过这个条目,工具不会暴露给客户端。</p>
+<p>现代 AI 智能体具有原生文件写入能力，使该工具变得多余。
+要启用，请设置 <code>STATA_MCP__ENABLE_WRITE_DOFILE=true</code> 或在配置中添加 <code>[BETA] ENABLE_WRITE_DOFILE = true</code>。</p>
+</blockquote>
+<pre><code class="language-python">def write_dofile(content: str,
+                 encoding: str | None = None) -&gt; str:
+    ...
+</code></pre>
+<p><strong>输入参数</strong>：
+- <code>content</code>：要持久化的 Stata 命令序列（必填）
+- <code>encoding</code>：文件输出的字符编码（可选，默认为 UTF-8）</p>
+<p><strong>返回结构</strong>：
+包含生成的 do 文件绝对 POSIX 兼容路径的字符串</p>
+<p><strong>操作示例</strong>：</p>
+<pre><code class="language-python"># 基本回归分析
+write_dofile(&quot;&quot;&quot;
+use &quot;/data/survey.dta&quot;, clear
+regress income age education experience
+outreg2 using &quot;`output_path'/results.doc&quot;, replace
+&quot;&quot;&quot;)
+
+# 带编码规范的时间序列分析
+write_dofile(&quot;&quot;&quot;
+tsset date
+arima gdp, ar(1) ma(1)
+predict forecast
+&quot;&quot;&quot;, encoding=&quot;latin1&quot;)
+
+# 数据转换流水线
+write_dofile(&quot;&quot;&quot;
+gen log_gdp = ln(gdp)
+gen diff_income = d(income)
+xtset country_id year
+xtreg diff_income log_gdp, fe
+&quot;&quot;&quot;)
+</code></pre>
+<p><strong>实现架构</strong>：
+该工具在 <code>stata-mcp-dofile/</code> 目录层级内实现原子文件创建。文件命名采用 ISO 8601 基本格式时间戳生成（<code>YYYYMMDDHHMMSS.do</code>），确保时间唯一性和按时间排序。写入操作使用 Python 内置的 <code>open()</code> 函数，模式为 <code>"w"</code> 和指定的编码参数，执行隐式文件创建和截断以实现原子写入语义。</p>
+<p>与输出重定向命令（<code>outreg2</code>、<code>esttab</code>）的集成需要在 do 文件生成之前与 <code>results_doc_path</code> 提示协调以建立输出目录路径。这种关注点分离使得跨多个 Stata 执行周期的确定性输出路径管理成为可能。</p>
+<p>该工具不执行 Stata 代码内容的语法验证或语义分析。代码正确性、命令序列和宏展开有效性仍然是调用上下文的责任。错误处理将文件 I/O 操作包装在 try-except 块中，并进行结构化日志记录以跟踪成功/失败。</p>
+<blockquote>
+<p><strong>弃用通知</strong>：此工具默认禁用，将在未来版本中移除。现代 AI 智能体具有原生文件写入能力，请使用那些功能替代。</p>
+</blockquote>
+<hr />
+<h2 id="read_log">read_log</h2>
+<pre><code class="language-python">def read_log(file_path: str,
+             encoding: str = &quot;utf-8&quot;,
+             is_beta: bool = False,
+             lines: int = 0,
+             *,
+             output_format: Literal[&quot;full&quot;, &quot;core&quot;, &quot;dict&quot;] = &quot;dict&quot;) -&gt; str:
+    ...
+</code></pre>
+<p><strong>输入参数</strong>：
+- <code>file_path</code>：目标日志文件的绝对路径（必填，<code>.log</code> 或 <code>.smcl</code>）
+- <code>encoding</code>：文本解码的字符编码（可选，默认为 UTF-8）
+- <code>is_beta</code>：启用结构化日志解析（可选，默认：false）
+  - <strong>仅限 macOS/Linux</strong> - Windows 用户请使用默认行为
+  - 推荐用于 <code>.smcl</code> 文件配合 <code>dict</code> 格式
+- <code>lines</code>：内容裁剪控制（默认：0，不裁剪）
+  - <code>&gt; 0</code>：返回前 N 项（full/core 模式为行数，dict 模式为条目数）
+  - <code>&lt; 0</code>：返回后 |N| 项
+  - <code>0</code>：返回完整内容
+- <code>output_format</code>：<code>is_beta=true</code> 时的输出格式（可选，默认："dict"）
+  - <code>full</code>：未经处理的原始日志内容
+  - <code>core</code>：去除框架行的清洁内容
+  - <code>dict</code>：结构化的命令-结果对（推荐）</p>
+<p><strong>返回结构</strong>：
+- 默认模式（<code>is_beta=false</code>）：文件的原始字符串内容
+- Beta 模式（<code>is_beta=true</code>）：取决于 <code>output_format</code>：
+  - <code>full</code>：纯文本日志内容
+  - <code>core</code>：不含框架（页眉、页脚、日志命令）的日志内容
+  - <code>dict</code>：命令-结果列表的字符串表示</p>
+<p><strong>操作示例</strong>：</p>
+<pre><code class="language-python"># 读取日志文件（默认模式）
+read_log(&quot;/Users/project/stata-mcp-log/20250104153045.log&quot;)
+
+# 使用结构化解析读取 SMCL 日志（macOS/Linux）
+read_log(&quot;/Users/project/stata-mcp-log/20250104153045.smcl&quot;,
+         is_beta=True,
+         output_format=&quot;dict&quot;)
+
+# 获取去除框架的清洁日志内容
+read_log(&quot;~/stata-mcp-log/session.log&quot;,
+         is_beta=True,
+         output_format=&quot;core&quot;)
+
+# 仅读取前 50 行
+read_log(&quot;~/stata-mcp-log/session.log&quot;, lines=50)
+
+# 读取最后 20 个命令结果（dict 格式）
+read_log(&quot;~/stata-mcp-log/session.log&quot;,
+         is_beta=True,
+         output_format=&quot;dict&quot;,
+         lines=-20)
+
+# 使用自定义编码读取
+read_log(&quot;~/analysis/tables/results.txt&quot;, encoding=&quot;utf-8&quot;)
+</code></pre>
+<p><strong>实现架构</strong>：
+该工具实现双模式日志读取：传统文件读取和通过 <code>StataLog</code> 模块的结构化解析。</p>
+<p><strong>传统模式</strong>（<code>is_beta=false</code>）：通过 Python 的 <code>open()</code> 函数进行通用文件读取，模式为 <code>"r"</code>。路径验证通过 <code>Path.exists()</code> 检查文件是否存在。内容读取使用单次 <code>file.read()</code> 操作获取完整文件内容。</p>
+<p><strong>结构化解析模式</strong>（<code>is_beta=true</code>，仅 Unix）：利用 <code>stata_log</code> 模块，提供：
+- <code>StataLogTEXT</code>：<code>.log</code>（纯文本）文件解析器
+- <code>StataLogSMCL</code>：<code>.smcl</code>（Stata 标记与控制语言）文件解析器
+- <code>StataLogInfo</code>：包含 <code>command_result_list</code> 结构化命令-输出对的数据类</p>
+<p><code>StataLog</code> 工厂类（<code>from_path()</code> 方法）自动检测文件扩展名并返回相应的解析器。框架移除消除日志页眉/页脚、<code>log using/close</code> 命令和 do 文件执行标记，仅保留实际的 Stata 命令及其输出。</p>
+<p><strong><code>lines</code> 裁剪</strong>：通过 <code>_trim_lines()</code> 辅助函数实现。正数取前 N 项，负数取后 |N| 项，0 返回完整内容。对于 <code>dict</code> 格式，裁剪作用于列表条目而非文本行。</p>
+<p>错误处理覆盖：缺失文件的 <code>FileNotFoundError</code>、I/O 失败的 <code>IOError</code>、无效 <code>output_format</code> 的 <code>ValueError</code>，以及编码不匹配的 <code>UnicodeDecodeError</code>。</p>
+<hr />
+<h2 id="ado_package_install">ado_package_install</h2>
+<pre><code class="language-python">def ado_package_install(package: str,
+                        source: str = &quot;ssc&quot;,
+                        is_replace: bool = False,
+                        package_source_from: str | None = None) -&gt; str:
+    ...
+</code></pre>
+<p><strong>输入参数</strong>：
+- <code>package</code>：包标识符（必填）
+  - SSC：包名（如 "outreg2"）
+  - GitHub："username/reponame" 格式（如 "sepinetam/texiv"）
+  - net：包名，<code>package_source_from</code> 指定来源
+- <code>source</code>：分发源（可选，默认："ssc"）
+  - 选项："ssc"、"github"、"net"
+- <code>is_replace</code>：强制替换标志（可选，默认：false）
+- <code>package_source_from</code>：<code>net</code> 安装使用的 HTTPS URL</p>
+<p>默认 <code>all</code> profile 不提供此高风险工具。运维人员必须启用安装功能并使用 <code>unsafe</code>
+profile。SSC 和 net 包名只能包含 ASCII 字母与数字。GitHub 必须使用
+<code>owner/repository</code> 格式并命中精确仓库白名单。每次 MCP 调用还会通过客户端向用户发起批准请求；
+无法请求批准或用户拒绝时会失败关闭。本地路径、IP 主机、凭据、查询参数、片段、
+点路径段、重复斜杠和非默认端口都会被拒绝。</p>
+<p>GitHub 仓库内容没有安全防护，安装前必须人工查验。</p>
+<p><strong>返回结构</strong>：
+包含安装操作完整 Stata 执行日志的字符串</p>
+<p><strong>操作示例</strong>：</p>
+<pre><code class="language-python"># SSC 包安装
+ado_package_install(&quot;outreg2&quot;, source=&quot;ssc&quot;)
+
+# GitHub 包安装
+ado_package_install(&quot;sepinetam/texiv&quot;, source=&quot;github&quot;)
+
+# 网络安装
+ado_package_install(&quot;custompkg&quot;, source=&quot;net&quot;, package_source_from=&quot;https://example.com/stata&quot;)
+
+# 强制重新安装
+ado_package_install(&quot;estout&quot;, source=&quot;ssc&quot;, is_replace=True)
+</code></pre>
+<p><strong>实现架构</strong>：
+该工具实现平台差异化的安装策略。Unix 使用内部专用安装器；Windows 生成经过预先
+校验的临时 dofile，并使用内部可信执行路径。通过 <code>stata_do</code> 提交的直接包管理命令
+在所有平台上都会被阻止。</p>
+<p>Unix 下，安装成功以交互式 Stata Controller 正常返回为准。Controller 遇到
+Stata <code>r(n)</code> 返回码错误、超时或会话异常退出时会抛出异常，因此成功判断不依赖
+匹配提示性输出文本。Windows 使用保守的日志兜底判断；其中 GitHub 安装只接受
+明确的终态成功文本，任何错误信号都会使其失败，并且连接成功或仓库存在不能证明
+安装完成。</p>
+<p>系统不会隐式安装 GitHub helper。任意来源安装成功后，共用安装器都会尝试用
+<code>replace=True</code> 刷新最可能的命令名：SSC/net 使用包名，GitHub 使用仓库名部分。
+刷新失败只会记录日志，不会把已经完成的安装改判为失败。如果包提供的是其他命令名，
+需要对那些命令显式调用 <code>help(cmd, replace=True)</code>。</p>
+<hr />
+<h2 id="help">help</h2>
+<blockquote>
+<p>仅限 macOS 和 Linux</p>
+</blockquote>
+<pre><code class="language-python">def help(cmd: str) -&gt; str:
+    ...
+</code></pre>
+<p><strong>输入参数</strong>：
+- <code>cmd</code>：Stata 命令名（必填，如 "regress"、"describe"、"xtset"）</p>
+<p><strong>返回结构</strong>：
+包含 Stata 帮助文本输出的字符串，可选缓存状态前缀（如 "Cached result for regress: ..."）</p>
+<p><strong>操作示例</strong>：</p>
+<pre><code class="language-python"># 回归命令帮助
+help(&quot;regress&quot;)
+
+# 面板数据命令
+help(&quot;xtset&quot;)
+help(&quot;xtreg&quot;)
+
+# 数据管理
+help(&quot;merge&quot;)
+help(&quot;reshape&quot;)
+</code></pre>
+<p><strong>实现架构</strong>：
+该工具通过带缓存层的 CLI 调用实现 Stata 命令文档检索。文档请求以 <code>help &lt;cmd&gt;</code> 命令在批处理模式下执行 Stata，捕获 stdout 作为返回值。<code>StataHelp</code> 类通过 <code>StataFinder</code> 检测的平台特定 Stata CLI 路径管理调用。</p>
+<p>缓存架构在 <code>~/.statamcp/help/</code> 目录维护帮助文本缓存，使用基于命令名的文件存储。缓存行为可通过环境变量控制：<code>STATA_MCP__CACHE_HELP</code>（默认：true）启用/禁用缓存；<code>STATA_MCP__SAVE_HELP</code> 控制缓存持久化。缓存结果包含指示缓存状态的前缀消息："Cached result for {cmd}: ..." 与实时帮助文本。</p>
+<p>目前仅以 MCP 工具形式注册。资源注册（URI 模式 <code>help://stata/{cmd}</code>）已在 v1.16.1 因 FastMCP 的 URI 模板参数不匹配问题被禁用,工具形态保持完整可用。该工具通过 <code>_TOOL_REGISTRY</code> 中的 <code>unix_only</code> 标志进行限制，仅在 macOS 和 Linux 上可用。</p>
+<p>缓存失效需要手动删除缓存文件或环境变量配置；不存在基于 TTL 的过期。帮助文本语言取决于 Stata 安装区域设置；多语言支持需要单独的 Stata 安装或区域设置重新配置。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+        
+          
+          <a href="../../troubleshooting/" class="md-footer__link md-footer__link--prev" aria-label="上一页: Troubleshooting">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              <div class="md-ellipsis">
+                Troubleshooting
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../resources/" class="md-footer__link md-footer__link--next" aria-label="下一页: Resources">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              <div class="md-ellipsis">
+                Resources
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 - present <a href="https://github.com/sepinetam">Sepine Tam</a>. All Right Reserved. 
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/sepinetam/stata-mcp" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="mailto:sepinetam@gmail.com" target="_blank" rel="noopener" title="E-mail" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m20 8-8 5-8-5V6l8 5 8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.code.select", "navigation.path", "navigation.sections", "navigation.expand", "content.code.annotate", "navigation.footer", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2860 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://sepinetam.github.io/mcp-for-stata/zh/configuration/">
+      
+      
+        <link rel="prev" href="../clients/">
+      
+      
+        <link rel="next" href="../security/">
+      
+      
+        
+          <link rel="alternate" href="../../configuration/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="zh">
+        
+      
+      
+      <link rel="icon" href="https://r2.statamcp.com/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Configuration - Stata-MCP Documents</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../" title="Stata-MCP Documents" class="md-header__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Stata-MCP Documents
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../configuration/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SepineTam/mcp-for-stata" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mcp-for-stata
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="Stata-MCP Documents" class="md-nav__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    Stata-MCP Documents
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SepineTam/mcp-for-stata" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mcp-for-stata
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../claude-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clients/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clients
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置文件
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="配置文件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        位置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="配置分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DEBUG 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debugis_debug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.IS_DEBUG
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debuglogginglogging_on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.LOGGING_ON
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debuglogginglogging_console_handler_on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.LOGGING_CONSOLE_HANDLER_ON
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debuglogginglogging_file_handler_on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.LOGGING_FILE_HANDLER_ON
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debuglogginglog_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.LOG_FILE
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugloggingmax_bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.MAX_BYTES
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugloggingbackup_count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.BACKUP_COUNT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HELP 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HELP 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#helpis_cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HELP.IS_CACHE
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#helpis_save" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HELP.IS_SAVE
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SECURITY 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SECURITY 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#securityis_guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SECURITY.IS_GUARD
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第三方 Ado 包安装
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PROJECT 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PROJECT 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#projectworking_dir" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PROJECT.WORKING_DIR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#projectclean_log_days" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PROJECT.CLEAN_LOG_DAYS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#projectfolder_tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PROJECT.FOLDER_TAG
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MONITOR 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MONITOR 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#monitoris_monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MONITOR.IS_MONITOR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitormax_ram_mb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MONITOR.MAX_RAM_MB
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#beta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BETA 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BETA 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#betaenable_write_dofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BETA.ENABLE_WRITE_DOFILE
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STATA 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="STATA 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#statastata_cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STATA.STATA_CLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_info 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="data_info 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data_infometrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_info.metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data_infostring_keep_number" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_info.string_keep_number
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data_infodecimal_places" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_info.decimal_places
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data_infohash_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_info.hash_length
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        使用环境变量
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="使用环境变量">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        快速设置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        优先级示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置验证
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        常见配置模式
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="常见配置模式">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        开发设置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        生产设置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        高性能计算
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        故障排除
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="故障排除">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置未加载
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        工作目录问题
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        日志文件未创建
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agents/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Summary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/claude_code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/openclaw/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenClaw
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoreTech
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CoreTech
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/finder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Finder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/do/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Runner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/help/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Help
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置文件
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="配置文件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        位置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="配置分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DEBUG 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debugis_debug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.IS_DEBUG
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debuglogginglogging_on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.LOGGING_ON
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debuglogginglogging_console_handler_on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.LOGGING_CONSOLE_HANDLER_ON
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debuglogginglogging_file_handler_on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.LOGGING_FILE_HANDLER_ON
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debuglogginglog_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.LOG_FILE
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugloggingmax_bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.MAX_BYTES
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugloggingbackup_count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEBUG.logging.BACKUP_COUNT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HELP 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HELP 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#helpis_cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HELP.IS_CACHE
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#helpis_save" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HELP.IS_SAVE
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SECURITY 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SECURITY 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#securityis_guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SECURITY.IS_GUARD
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第三方 Ado 包安装
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PROJECT 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PROJECT 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#projectworking_dir" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PROJECT.WORKING_DIR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#projectclean_log_days" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PROJECT.CLEAN_LOG_DAYS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#projectfolder_tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PROJECT.FOLDER_TAG
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MONITOR 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MONITOR 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#monitoris_monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MONITOR.IS_MONITOR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitormax_ram_mb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MONITOR.MAX_RAM_MB
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#beta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BETA 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BETA 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#betaenable_write_dofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BETA.ENABLE_WRITE_DOFILE
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STATA 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="STATA 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#statastata_cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STATA.STATA_CLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_info 分区
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="data_info 分区">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data_infometrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_info.metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data_infostring_keep_number" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_info.string_keep_number
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data_infodecimal_places" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_info.decimal_places
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data_infohash_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        data_info.hash_length
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        使用环境变量
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="使用环境变量">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        快速设置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        优先级示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置验证
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        常见配置模式
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="常见配置模式">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        开发设置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        生产设置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        高性能计算
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        故障排除
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="故障排除">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置未加载
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        工作目录问题
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        日志文件未创建
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="_1">配置系统</h1>
+<p>MCP-for-Stata 使用具有三个优先级的分层配置系统：</p>
+<ol>
+<li><strong>环境变量</strong>（最高优先级）</li>
+<li><strong>配置文件</strong>（<code>~/.statamcp/config.toml</code>）</li>
+<li><strong>默认值</strong>（最低优先级）</li>
+</ol>
+<h2 id="_2">配置文件</h2>
+<h3 id="_3">位置</h3>
+<p>配置文件位于：</p>
+<pre><code>~/.statamcp/config.toml
+</code></pre>
+<p>在不同平台上：
+- <strong>macOS/Linux</strong>：<code>/home/username/.statamcp/config.toml</code>
+- <strong>Windows</strong>：<code>C:\Users\Username\.statamcp\config.toml</code></p>
+<h3 id="_4">示例配置</h3>
+<pre><code class="language-toml">[DEBUG]
+IS_DEBUG = false
+
+[DEBUG.logging]
+LOGGING_ON = true
+LOGGING_CONSOLE_HANDLER_ON = false
+LOGGING_FILE_HANDLER_ON = true
+LOG_FILE = &quot;~/.statamcp/stata_mcp_debug.log&quot;
+MAX_BYTES = 10_000_000
+BACKUP_COUNT = 5
+
+[BETA]
+ENABLE_WRITE_DOFILE = false
+
+[HELP]
+IS_CACHE = true
+IS_SAVE = true
+
+[SECURITY]
+IS_GUARD = true
+ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = []
+
+[PROJECT]
+WORKING_DIR = &quot;&quot;
+CLEAN_LOG_DAYS = -1
+FOLDER_TAG = &quot;.statamcp&quot;
+
+[MONITOR]
+IS_MONITOR = false
+MAX_RAM_MB = -1
+
+[STATA]
+# 可选：覆盖自动 Stata 检测
+# STATA_CLI = &quot;/path/to/stata-mp&quot;
+
+[data_info]
+metrics = [&quot;obs&quot;, &quot;mean&quot;, &quot;stderr&quot;, &quot;min&quot;, &quot;max&quot;, &quot;q1&quot;, &quot;q3&quot;, &quot;skewness&quot;, &quot;kurtosis&quot;]
+string_keep_number = 10
+decimal_places = 3
+hash_length = 12
+</code></pre>
+<h2 id="_5">配置分区</h2>
+<h3 id="debug">DEBUG 分区</h3>
+<p>控制调试和日志行为。</p>
+<h4 id="debugis_debug"><code>DEBUG.IS_DEBUG</code></h4>
+<p>启用调试模式以获得详细输出。</p>
+<ul>
+<li><strong>类型</strong>：Boolean</li>
+<li><strong>默认值</strong>：<code>false</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__IS_DEBUG</code></li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__IS_DEBUG=true</code></li>
+</ul>
+<h4 id="debuglogginglogging_on"><code>DEBUG.logging.LOGGING_ON</code></h4>
+<p>启用或禁用所有日志记录。</p>
+<ul>
+<li><strong>类型</strong>：Boolean</li>
+<li><strong>默认值</strong>：<code>true</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__LOGGING_ON</code></li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__LOGGING_ON=false</code></li>
+</ul>
+<h4 id="debuglogginglogging_console_handler_on"><code>DEBUG.logging.LOGGING_CONSOLE_HANDLER_ON</code></h4>
+<p>启用日志控制台输出。</p>
+<ul>
+<li><strong>类型</strong>：Boolean</li>
+<li><strong>默认值</strong>：<code>false</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__LOGGING_CONSOLE_HANDLER_ON</code></li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__LOGGING_CONSOLE_HANDLER_ON=true</code></li>
+</ul>
+<h4 id="debuglogginglogging_file_handler_on"><code>DEBUG.logging.LOGGING_FILE_HANDLER_ON</code></h4>
+<p>启用文件日志记录。</p>
+<ul>
+<li><strong>类型</strong>：Boolean</li>
+<li><strong>默认值</strong>：<code>true</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__LOGGING_FILE_HANDLER_ON</code></li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__LOGGING_FILE_HANDLER_ON=true</code></li>
+</ul>
+<h4 id="debuglogginglog_file"><code>DEBUG.logging.LOG_FILE</code></h4>
+<p>指定日志文件位置。</p>
+<ul>
+<li><strong>类型</strong>：Path（string）</li>
+<li><strong>默认值</strong>：<code>~/.statamcp/stata_mcp_debug.log</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__LOG_FILE</code></li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__LOG_FILE="/var/log/stata-mcp/debug.log"</code></li>
+</ul>
+<h4 id="debugloggingmax_bytes"><code>DEBUG.logging.MAX_BYTES</code></h4>
+<p>轮换前单个日志文件的最大大小。</p>
+<ul>
+<li><strong>类型</strong>：Integer（bytes）</li>
+<li><strong>默认值</strong>：<code>10_000_000</code>（10 MB）</li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__LOGGING__MAX_BYTES</code></li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__LOGGING__MAX_BYTES=50_000_000</code></li>
+</ul>
+<h4 id="debugloggingbackup_count"><code>DEBUG.logging.BACKUP_COUNT</code></h4>
+<p>保留的备份日志文件数量。</p>
+<ul>
+<li><strong>类型</strong>：Integer</li>
+<li><strong>默认值</strong>：<code>5</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__LOGGING__BACKUP_COUNT</code></li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__LOGGING__BACKUP_COUNT=10</code></li>
+</ul>
+<h3 id="help">HELP 分区</h3>
+<p>控制 <code>help</code> 工具的缓存行为。</p>
+<h4 id="helpis_cache"><code>HELP.IS_CACHE</code></h4>
+<p>启用 <code>help</code> 工具结果的内存缓存。</p>
+<ul>
+<li><strong>类型</strong>：Boolean</li>
+<li><strong>默认值</strong>：<code>true</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__CACHE_HELP</code></li>
+<li><strong>描述</strong>：启用后，对同一命令的重复 help 请求将从缓存读取，减少会话内对 Stata 的重复调用。</li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__CACHE_HELP=true</code></li>
+</ul>
+<h4 id="helpis_save"><code>HELP.IS_SAVE</code></h4>
+<p>将 help 缓存持久化到磁盘（<code>~/.statamcp/help/</code>）。</p>
+<ul>
+<li><strong>类型</strong>：Boolean</li>
+<li><strong>默认值</strong>：<code>true</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__SAVE_HELP</code></li>
+<li><strong>描述</strong>：启用后，help 响应会写入文件，可跨会话复用。如果只需要内存缓存，请关闭此项。</li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__SAVE_HELP=false</code></li>
+</ul>
+<h3 id="security">SECURITY 分区</h3>
+<p>控制安全功能。</p>
+<h4 id="securityis_guard"><code>SECURITY.IS_GUARD</code></h4>
+<p>为 Stata dofile 启用安全守卫验证。</p>
+<ul>
+<li><strong>类型</strong>：Boolean</li>
+<li><strong>默认值</strong>：<code>true</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__IS_GUARD</code></li>
+<li><strong>描述</strong>：启用时，在执行前针对危险命令和模式验证所有 dofile 代码</li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__IS_GUARD=true</code></li>
+</ul>
+<p>更多详情请参阅<a href="../security/">安全守卫文档</a>。</p>
+<h4 id="ado">第三方 Ado 包安装</h4>
+<p>默认 profile 不通过 MCP 暴露 <code>ado_package_install</code>，因为安装后的 ado 包会在
+Stata 中执行第三方代码。通过 MCP 暴露时必须同时满足以下条件：</p>
+<ul>
+<li>将每个已批准的 GitHub <code>owner/repository</code> 加入精确仓库白名单</li>
+<li>MCP server 必须通过 <code>stata-mcp server --unsafe</code> 启动</li>
+<li>每次 MCP 调用接受客户端弹出的用户批准请求</li>
+</ul>
+<pre><code class="language-toml">[SECURITY]
+ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = [&quot;SepineTam/TexIV&quot;]
+</code></pre>
+<p>对应环境变量为 <code>STATA_MCP__ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES</code>，使用逗号
+分隔。SSC 和 net 包名只能包含 ASCII 字母与数字。net 来源必须使用经过
+校验的 HTTPS URL；本地路径、IP 地址主机、凭据、查询参数、片段、点路径段、
+重复斜杠和非默认端口都会被拒绝。</p>
+<p>GitHub 白名单只校验仓库名称，不会检查或保护仓库内容。安装前必须人工查验仓库。</p>
+<p>Python API 不要求调用方确认。CLI 未传入 <code>-y</code> 或 <code>--yes</code> 时会进行交互确认。</p>
+<h3 id="project">PROJECT 分区</h3>
+<p>控制项目特定设置。</p>
+<h4 id="projectworking_dir"><code>PROJECT.WORKING_DIR</code></h4>
+<p>设置 MCP-for-Stata 操作的工作目录。</p>
+<ul>
+<li><strong>类型</strong>：Path（string）</li>
+<li><strong>默认值</strong>：当前目录（如果可写）或 <code>~/Documents</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__CWD</code>（双下划线）</li>
+<li><strong>描述</strong>：</li>
+<li>如果设置且可写，所有输出文件将组织在 <code>&lt;WORKING_DIR&gt;/&lt;FOLDER_TAG&gt;/</code> 下（默认 <code>.statamcp/</code>）</li>
+<li>如果未设置或不可写，回退到当前目录或 <code>~/Documents</code></li>
+<li><strong>遗留支持</strong>：<code>STATA_MCP_CWD</code>（单下划线）仍受支持但已弃用</li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__CWD="/projects/my-research"</code></li>
+</ul>
+<h4 id="projectclean_log_days"><code>PROJECT.CLEAN_LOG_DAYS</code></h4>
+<p>工作目录下 Stata 日志的保留天数。</p>
+<ul>
+<li><strong>类型</strong>：Integer</li>
+<li><strong>默认值</strong>：<code>-1</code>（不清理）</li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__CLEAN_LOG_DAYS</code></li>
+<li><strong>描述</strong>：</li>
+<li><code>-1</code> 表示关闭自动清理</li>
+<li>设置为正整数后，<code>stata-mcp doctor</code> 的 cleanup 检查会删除超过指定天数的 Stata 日志文件</li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__CLEAN_LOG_DAYS=30</code></li>
+</ul>
+<h4 id="projectfolder_tag"><code>PROJECT.FOLDER_TAG</code></h4>
+<p><code>WORKING_DIR</code> 下 stata-mcp 子目录的名称。</p>
+<ul>
+<li><strong>类型</strong>：String</li>
+<li><strong>默认值</strong>：<code>.statamcp</code>（隐藏目录）</li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__FOLDER_TAG</code></li>
+<li><strong>描述</strong>：</li>
+<li>决定存放日志、do 文件、结果与临时文件的目录名</li>
+<li>自 v1.16.0 起，默认名称从 <code>stata-mcp-folder</code> 迁移到 <code>.statamcp</code></li>
+<li>如需保留旧的目录布局，可将其设置为 <code>stata-mcp-folder</code></li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__FOLDER_TAG=stata-mcp-folder</code></li>
+</ul>
+<p>工作目录结构：</p>
+<pre><code>&lt;WORKING_DIR&gt;/&lt;FOLDER_TAG&gt;/        # 默认：.statamcp/
+├── stata-mcp-log/      # Stata 执行日志
+├── stata-mcp-dofile/   # 生成的 do 文件
+├── stata-mcp-result/   # 分析结果
+└── stata-mcp-tmp/      # 临时文件
+</code></pre>
+<p><strong>迁移说明（v1.16.0）</strong>：
+- 默认目录名从 <code>stata-mcp-folder</code> 改为 <code>.statamcp</code>。
+- 若检测到工作目录下仍存在旧的 <code>stata-mcp-folder</code>，MCP-for-Stata 会在该目录中写入一个 <code>README</code> 警告并创建 <code>.migrated</code> 标记，避免重复提示。
+- 如需回滚旧布局，设置 <code>export STATA_MCP__FOLDER_TAG=stata-mcp-folder</code> 即可。</p>
+<h3 id="monitor">MONITOR 分区</h3>
+<p>控制性能监控功能。</p>
+<h4 id="monitoris_monitor"><code>MONITOR.IS_MONITOR</code></h4>
+<p>为 Stata 进程启用 RAM 监控。</p>
+<ul>
+<li><strong>类型</strong>：Boolean</li>
+<li><strong>默认值</strong>：<code>false</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__IS_MONITOR</code></li>
+<li><strong>描述</strong>：启用时，在执行期间监控 Stata 子进程 RAM 使用</li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__IS_MONITOR=true</code></li>
+</ul>
+<p>更多详情请参阅<a href="../monitoring/">监控文档</a>。</p>
+<h4 id="monitormax_ram_mb"><code>MONITOR.MAX_RAM_MB</code></h4>
+<p>最大 RAM 限制（兆字节）。</p>
+<ul>
+<li><strong>类型</strong>：Integer</li>
+<li><strong>默认值</strong>：<code>-1</code>（无限制）</li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__RAM_LIMIT</code></li>
+<li><strong>描述</strong>：</li>
+<li><code>-1</code> 表示无限制（默认）</li>
+<li>设置为正值时，超过此限制的 Stata 进程将被终止</li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__RAM_LIMIT=8192  # 8 GB 限制</code></li>
+</ul>
+<h3 id="beta">BETA 分区</h3>
+<p>控制 Beta/实验性功能。</p>
+<h4 id="betaenable_write_dofile"><code>BETA.ENABLE_WRITE_DOFILE</code></h4>
+<p>控制 <code>write_dofile</code> MCP 工具是否注册。</p>
+<ul>
+<li><strong>类型</strong>：Boolean</li>
+<li><strong>默认值</strong>：<code>false</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP__ENABLE_WRITE_DOFILE</code></li>
+<li><strong>描述</strong>：</li>
+<li>当为 <code>false</code>（默认）时，<code>write_dofile</code> MCP 工具不会注册</li>
+<li>现代 AI 智能体具有原生文件写入能力，使该工具变得多余</li>
+<li>仅在需要与旧工作流程向后兼容时设置为 <code>true</code></li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP__ENABLE_WRITE_DOFILE=true</code></li>
+</ul>
+<blockquote>
+<p><strong>注意</strong>：此配置标记为 BETA，可能在未来版本中移除。</p>
+</blockquote>
+<h3 id="stata">STATA 分区</h3>
+<p>控制 Stata 可执行文件检测。</p>
+<h4 id="statastata_cli"><code>STATA.STATA_CLI</code></h4>
+<p>覆盖自动 Stata 检测。</p>
+<ul>
+<li><strong>类型</strong>：Path（string）</li>
+<li><strong>默认值</strong>：基于平台自动检测</li>
+<li><strong>描述</strong>：</li>
+<li><strong>macOS</strong>：<code>/Applications/Stata/StataMP.app/Contents/MacOS/stata-mp</code></li>
+<li><strong>Windows</strong>：<code>C:\Program Files\Stata18\StataMP-64.exe</code></li>
+<li><strong>Linux</strong>：<code>stata-mp</code>（来自 PATH）</li>
+<li><strong>示例</strong>：
+  <code>toml
+  [STATA]
+  STATA_CLI = "/usr/local/stata17/stata-mp"</code></li>
+</ul>
+<h3 id="data_info">data_info 分区</h3>
+<p>控制 <code>get_data_info</code> 工具的行为：返回哪些描述性统计、如何处理字符串变量，以及缓存文件名的构造方式。</p>
+<p><code>string_keep_number</code>、<code>decimal_places</code> 和 <code>hash_length</code> 的解析优先级为：显式参数 &gt; 环境变量 &gt; 配置文件 &gt; 默认值。</p>
+<h4 id="data_infometrics"><code>data_info.metrics</code></h4>
+<p>每个变量返回的默认数值指标列表。</p>
+<ul>
+<li><strong>类型</strong>：字符串列表</li>
+<li><strong>默认值</strong>：<code>["obs", "mean", "stderr", "min", "max"]</code></li>
+<li><strong>描述</strong>：</li>
+<li>支持的取值包括 <code>obs</code>、<code>mean</code>、<code>stderr</code>、<code>min</code>、<code>max</code>、<code>q1</code>、<code>q3</code>、<code>skewness</code>、<code>kurtosis</code></li>
+<li>默认值可在配置中追加 <code>q1</code>、<code>q3</code>、<code>skewness</code>、<code>kurtosis</code> 以获得更详尽的摘要</li>
+<li><code>metrics</code> 仅从配置文件读取，不支持环境变量或显式参数</li>
+<li><strong>示例</strong>：
+  <code>toml
+  [data_info]
+  metrics = ["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]</code></li>
+</ul>
+<h4 id="data_infostring_keep_number"><code>data_info.string_keep_number</code></h4>
+<p>字符串变量保留的唯一值数量上限。</p>
+<ul>
+<li><strong>类型</strong>：Integer</li>
+<li><strong>默认值</strong>：<code>10</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER</code></li>
+<li><strong>描述</strong>：唯一值数量超过该上限的分类字符串只保留若干代表值。</li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER=20</code></li>
+</ul>
+<h4 id="data_infodecimal_places"><code>data_info.decimal_places</code></h4>
+<p>格式化数值统计时使用的小数位数。</p>
+<ul>
+<li><strong>类型</strong>：Integer</li>
+<li><strong>默认值</strong>：<code>3</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP_DATA_INFO_DECIMAL_PLACES</code></li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP_DATA_INFO_DECIMAL_PLACES=4</code></li>
+</ul>
+<h4 id="data_infohash_length"><code>data_info.hash_length</code></h4>
+<p>data-info 缓存文件名所附加的哈希后缀长度。</p>
+<ul>
+<li><strong>类型</strong>：Integer</li>
+<li><strong>默认值</strong>：<code>12</code></li>
+<li><strong>环境变量</strong>：<code>STATA_MCP_DATA_INFO_HASH_LENGTH</code></li>
+<li><strong>描述</strong>：data-info 层用它区分基于相同源文件生成的不同缓存条目。</li>
+<li><strong>示例</strong>：
+  <code>bash
+  export STATA_MCP_DATA_INFO_HASH_LENGTH=8</code></li>
+</ul>
+<h2 id="_6">使用环境变量</h2>
+<h3 id="_7">快速设置</h3>
+<pre><code class="language-bash"># 启用调试模式
+export STATA_MCP__IS_DEBUG=true
+
+# 设置工作目录
+export STATA_MCP__CWD=&quot;/projects/my-analysis&quot;
+
+# 启用监控，设置 8GB RAM 限制
+export STATA_MCP__IS_MONITOR=true
+export STATA_MCP__RAM_LIMIT=8192
+
+# 禁用安全守卫（不推荐）
+export STATA_MCP__IS_GUARD=false
+
+# 启用控制台日志
+export STATA_MCP__LOGGING_CONSOLE_HANDLER_ON=true
+</code></pre>
+<h3 id="_8">优先级示例</h3>
+<p>如果在多个位置设置同一选项：</p>
+<pre><code class="language-bash"># 配置文件：IS_GUARD = true
+# 环境变量：STATA_MCP__IS_GUARD=false
+export STATA_MCP__IS_GUARD=false
+
+# 结果：安全守卫被禁用（环境变量优先）
+</code></pre>
+<h2 id="_9">配置验证</h2>
+<p>配置系统包含内置验证：</p>
+<ul>
+<li><strong>布尔值</strong>：必须是 <code>true</code> 或 <code>false</code>（不区分大小写）</li>
+<li><strong>整数值</strong>：必须是有效整数</li>
+<li><strong>路径值</strong>：自动展开 <code>~</code>（主目录）</li>
+<li><strong>无效值</strong>：自动回退到默认值</li>
+</ul>
+<h2 id="_10">常见配置模式</h2>
+<h3 id="_11">开发设置</h3>
+<pre><code class="language-toml">[DEBUG]
+IS_DEBUG = true
+
+[DEBUG.logging]
+LOGGING_ON = true
+LOGGING_CONSOLE_HANDLER_ON = true
+LOGGING_FILE_HANDLER_ON = false
+</code></pre>
+<h3 id="_12">生产设置</h3>
+<pre><code class="language-toml">[DEBUG]
+IS_DEBUG = false
+
+[DEBUG.logging]
+LOGGING_ON = true
+LOGGING_CONSOLE_HANDLER_ON = false
+LOGGING_FILE_HANDLER_ON = true
+MAX_BYTES = 50_000_000
+BACKUP_COUNT = 10
+
+[SECURITY]
+IS_GUARD = true
+
+[MONITOR]
+IS_MONITOR = true
+MAX_RAM_MB = 16384
+</code></pre>
+<h3 id="_13">高性能计算</h3>
+<pre><code class="language-toml">[DEBUG]
+IS_DEBUG = false
+
+[DEBUG.logging]
+LOGGING_ON = false
+
+[MONITOR]
+IS_MONITOR = true
+MAX_RAM_MB = 65536  # 64 GB
+</code></pre>
+<h2 id="_14">故障排除</h2>
+<h3 id="_15">配置未加载</h3>
+<ol>
+<li>
+<p>检查配置文件是否存在：
+   <code>bash
+   ls ~/.statamcp/config.toml</code></p>
+</li>
+<li>
+<p>验证 TOML 语法：
+   <code>bash
+   python3 -c "import tomllib; tomllib.load(open('~/.statamcp/config.toml', 'rb'))"</code></p>
+</li>
+<li>
+<p>检查环境变量冲突：
+   <code>bash
+   env | grep STATA_MCP</code></p>
+</li>
+</ol>
+<h3 id="_16">工作目录问题</h3>
+<p>如果工作目录不可写，MCP-for-Stata 将回退到 <code>~/Documents</code>。解决方法：</p>
+<ol>
+<li>
+<p>检查目录权限：
+   <code>bash
+   ls -la /your/working/directory</code></p>
+</li>
+<li>
+<p>创建具有正确权限的目录：
+   <code>bash
+   mkdir -p /your/working/directory
+   chmod u+w /your/working/directory</code></p>
+</li>
+</ol>
+<h3 id="_17">日志文件未创建</h3>
+<ol>
+<li>
+<p>检查是否启用日志：
+   <code>bash
+   echo $STATA_MCP__LOGGING_ON</code></p>
+</li>
+<li>
+<p>验证日志文件路径是否可写：
+   <code>bash
+   touch ~/.statamcp/stata_mcp_debug.log</code></p>
+</li>
+<li>
+<p>检查磁盘空间：
+   <code>bash
+   df -h</code></p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+        
+          
+          <a href="../clients/" class="md-footer__link md-footer__link--prev" aria-label="上一页: Clients">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              <div class="md-ellipsis">
+                Clients
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../security/" class="md-footer__link md-footer__link--next" aria-label="下一页: Security">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              <div class="md-ellipsis">
+                Security
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 - present <a href="https://github.com/sepinetam">Sepine Tam</a>. All Right Reserved. 
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/sepinetam/stata-mcp" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="mailto:sepinetam@gmail.com" target="_blank" rel="noopener" title="E-mail" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m20 8-8 5-8-5V6l8 5 8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.code.select", "navigation.path", "navigation.sections", "navigation.expand", "content.code.annotate", "navigation.footer", "navigation.top"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

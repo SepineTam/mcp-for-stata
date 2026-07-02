@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/claude-plugin/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/claude-plugin/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/claude-plugin/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/cli/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/cli/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/cli/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/clients/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/clients/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/clients/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/configuration/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/configuration/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/monitoring/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/monitoring/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/monitoring/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/overview/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/overview/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/overview/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/security/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/security/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/security/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/troubleshooting/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/usage/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/usage/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/usage/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/agents/claude_code/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/agents/claude_code/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/agents/claude_code/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/agents/openclaw/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/agents/openclaw/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/agents/openclaw/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/api/overview/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/api/overview/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/api/overview/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/core/stata/do/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/core/stata/do/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/core/stata/do/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/core/stata/finder/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/core/stata/finder/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/core/stata/finder/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/core/stata/help/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/core/stata/help/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/core/stata/help/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/core/stata/package/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/core/stata/package/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/core/stata/package/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/mcp/resources/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/mcp/resources/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/mcp/resources/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/mcp/tools/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/mcp/tools/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/mcp/tools/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/skills/openclaw/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/skills/openclaw/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/skills/openclaw/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/claude-plugin/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/claude-plugin/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/claude-plugin/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/cli/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/cli/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/cli/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/clients/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/clients/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/clients/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/configuration/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/configuration/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/monitoring/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/monitoring/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/monitoring/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/overview/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/overview/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/overview/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/security/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/security/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/security/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/troubleshooting/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/usage/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/usage/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/usage/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/agents/claude_code/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/agents/claude_code/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/agents/claude_code/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/agents/openclaw/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/agents/openclaw/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/agents/openclaw/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/api/overview/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/api/overview/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/api/overview/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/core/stata/do/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/core/stata/do/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/core/stata/do/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/core/stata/finder/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/core/stata/finder/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/core/stata/finder/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/core/stata/help/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/core/stata/help/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/core/stata/help/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/core/stata/package/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/core/stata/package/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/core/stata/package/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/mcp/resources/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/mcp/resources/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/mcp/resources/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/mcp/tools/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/mcp/tools/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/mcp/tools/"/>
+    </url>
+    <url>
+        <loc>https://sepinetam.github.io/mcp-for-stata/zh/skills/openclaw/</loc>
+        <lastmod>2026-07-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sepinetam.github.io/mcp-for-stata/zh/skills/openclaw/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sepinetam.github.io/mcp-for-stata/skills/openclaw/"/>
+    </url>
+</urlset>

@@ -1,0 +1,2351 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://sepinetam.github.io/mcp-for-stata/zh/claude-plugin/">
+      
+      
+        <link rel="prev" href="../usage/">
+      
+      
+        <link rel="next" href="../clients/">
+      
+      
+        
+          <link rel="alternate" href="../../claude-plugin/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="zh">
+        
+      
+      
+      <link rel="icon" href="https://r2.statamcp.com/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Claude Plugin - Stata-MCP Documents</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#claude" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../" title="Stata-MCP Documents" class="md-header__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Stata-MCP Documents
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Claude Plugin
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../claude-plugin/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SepineTam/mcp-for-stata" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mcp-for-stata
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="Stata-MCP Documents" class="md-nav__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    Stata-MCP Documents
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SepineTam/mcp-for-stata" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mcp-for-stata
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Plugin
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概述
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#claude-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        什么是 Claude Plugin？
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        插件结构
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="插件结构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#marketplacejson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        市场清单（marketplace.json）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pluginjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        插件配置（plugin.json）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="插件配置（plugin.json）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP 服务器配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lsp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LSP 服务器配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安装
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="安装">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前提条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安装方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        工作原理
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例工作流程
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="示例工作流程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        论文复现
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        快速假设检验
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        比较：插件 vs 手动配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="比较：插件 vs 手动配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        手动配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        基于插件的配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        比较
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        架构
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="架构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        插件加载流程
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        组件交互
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        故障排除
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="故障排除">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        插件未检测到
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP 服务器连接失败
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lsp_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LSP 不工作
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        最佳实践
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        相关文档
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        许可证和归属
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clients/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clients
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agents/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Summary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/claude_code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/openclaw/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenClaw
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoreTech
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CoreTech
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/finder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Finder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/do/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Runner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/help/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Help
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概述
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#claude-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        什么是 Claude Plugin？
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        插件结构
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="插件结构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#marketplacejson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        市场清单（marketplace.json）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pluginjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        插件配置（plugin.json）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="插件配置（plugin.json）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP 服务器配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lsp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LSP 服务器配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安装
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="安装">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前提条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安装方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        工作原理
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例工作流程
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="示例工作流程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        论文复现
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        快速假设检验
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        比较：插件 vs 手动配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="比较：插件 vs 手动配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        手动配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        基于插件的配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        比较
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        架构
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="架构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        插件加载流程
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        组件交互
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        故障排除
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="故障排除">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        插件未检测到
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP 服务器连接失败
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lsp_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LSP 不工作
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        最佳实践
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        相关文档
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        许可证和归属
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="claude">Claude 插件集成</h1>
+<h2 id="_1">概述</h2>
+<p>MCP-for-Stata 为 Claude Code 提供官方原生插件支持，目前 <code>stata-toolbox@stata-plugin-lib</code> 中集成了两个强大组件：</p>
+<ol>
+<li><strong>MCP-for-Stata 服务器</strong>：用于 Stata 执行的模型上下文协议服务器</li>
+<li><strong>Stata LSP（Language Server Protocol）</strong>：Stata do 文件的高级语言支持</li>
+</ol>
+<p>此插件包名为 <strong>stata-toolbox</strong>，提供统一的实证研究开发环境，将 Stata 的分析能力与 AI 辅助和高级 IDE 功能相结合。</p>
+<h2 id="claude-plugin">什么是 Claude Plugin？</h2>
+<p>Claude Plugin 是 Claude Code 中引入的插件系统，允许开发者打包和分发：</p>
+<ul>
+<li><strong>MCP 服务器</strong>：向 Claude 暴露工具的模型上下文协议服务器</li>
+<li><strong>LSP 服务器</strong>：用于增强编辑器支持的语言服务器协议服务器</li>
+<li><strong>Skills</strong>：扩展 Claude 智能体能力的技能</li>
+<li><strong>配置</strong>：预配置的最佳集成设置</li>
+</ul>
+<p>插件系统实现复杂开发环境的一键安装，用可复现、版本控制的包替代手动配置。</p>
+<h2 id="_2">插件结构</h2>
+<blockquote>
+<p>更多插件配置模式可在 Claude 的 <a href="https://code.claude.com/docs/en/plugins-reference#plugin-manifest-schema">plugins-reference</a> 中找到。</p>
+</blockquote>
+<pre><code>.claude-plugin/
+├── marketplace.json          # 插件注册表清单
+└── plugins/
+    └── stata-toolbox/       # 插件包
+        └── plugin.json        # 插件配置
+</code></pre>
+<h3 id="marketplacejson">市场清单（<code>marketplace.json</code>）</h3>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;stata-plugin-lib&quot;,
+  &quot;owner&quot;: {
+    &quot;name&quot;: &quot;Song Tan&quot;,
+    &quot;email&quot;: &quot;sepinetam@gmail.com&quot;
+  },
+  &quot;plugins&quot;: [
+    {
+      &quot;name&quot;: &quot;stata-toolbox&quot;,
+      &quot;source&quot;: &quot;./plugins/stata-toolbox&quot;,
+      &quot;description&quot;: &quot;The official working package of MCP-for-Stata plugin, including mcp config and stata lsp.&quot;
+    }
+  ]
+}
+</code></pre>
+<p><strong>字段：</strong>
+- <code>name</code>（string）：市场库标识符（kebab-case，无空格）
+- <code>owner</code>（object）：作者信息
+  - <code>name</code>（string）：作者姓名
+  - <code>email</code>（string）：联系邮箱
+- <code>plugins</code>（array）：插件包列表
+  - <code>name</code>（string）：插件标识符
+  - <code>source</code>（string）：插件目录的相对路径
+  - <code>description</code>（string）：插件功能摘要</p>
+<h3 id="pluginjson">插件配置（<code>plugin.json</code>）</h3>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;stata-toolbox&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;description&quot;: &quot;The official working package of MCP-for-Stata plugin, including mcp config and stata lsp.&quot;,
+  &quot;author&quot;: {
+    &quot;name&quot;: &quot;Song Tan&quot;,
+    &quot;email&quot;: &quot;sepinetam@gmail.com&quot;,
+    &quot;url&quot;: &quot;https://www.sepinetam.com&quot;
+  },
+  &quot;homepage&quot;: &quot;https://statamcp.com&quot;,
+  &quot;repository&quot;: &quot;https://github.com/sepinetam/mcp-for-stata&quot;,
+  &quot;license&quot;: &quot;AGPL-3.0&quot;,
+  &quot;keywords&quot;: [&quot;stata&quot;, &quot;econometrics&quot;, &quot;empirical analysis&quot;],
+  &quot;mcpServers&quot;: {
+    ...
+  },
+  &quot;lspServers&quot;: {
+    ...
+  }
+}
+</code></pre>
+<p><strong>配置分区：</strong></p>
+<h4 id="mcp">MCP 服务器配置</h4>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;stata-mcp&quot;: {
+      &quot;command&quot;: &quot;uvx&quot;,
+      &quot;args&quot;: [
+        &quot;stata-mcp&quot;
+      ]
+    }
+  }
+}
+</code></pre>
+<p><strong>command</strong>：执行 MCP 服务器的命令。使用 <code>uvx</code> 允许直接运行已安装的 Python 包，无需激活虚拟环境。</p>
+<p><strong>args</strong>：传递给命令的命令行参数数组。<code>["stata-mcp"]</code> 指定要运行的包名。</p>
+<h4 id="lsp">LSP 服务器配置</h4>
+<pre><code class="language-json">&quot;lspServers&quot;: {
+  &quot;stata&quot;: {
+    &quot;command&quot;: &quot;stata-language-server&quot;,
+    &quot;args&quot;: [],
+    &quot;extensionToLanguage&quot;: {
+      &quot;.do&quot;: &quot;stata&quot;
+    },
+    &quot;settings&quot;: {
+      &quot;stata&quot;: {
+        &quot;setMaxLineLength&quot;: 120,
+        &quot;setIndentSpace&quot;: 4,
+        &quot;enableCompletion&quot;: true,
+        &quot;enableDocstring&quot;: true,
+        &quot;enableStyleChecking&quot;: true,
+        &quot;enableFormatting&quot;: true
+      }
+    }
+  }
+}
+</code></pre>
+<blockquote>
+<p><strong>注意</strong>：您应该先通过 <code>pipx install "git+https://github.com/euglevi/stata-language-server.git"</code> 安装 <code>stata-language-server</code>。</p>
+</blockquote>
+<p><strong>command</strong>：LSP 服务器二进制可执行文件。必须在系统 PATH 中可用。</p>
+<p><strong>args</strong>：传递给 LSP 服务器的命令行参数数组。空数组表示无额外参数。</p>
+<p><strong>extensionToLanguage</strong>：将文件扩展名映射到语言标识符。<code>.do</code> 文件映射到 <code>stata</code> 语言以获得正确的 LSP 支持。</p>
+<p><strong>settings</strong>：LSP 特定配置对象。<code>stata</code> 键包含 Stata 语言服务器设置，用于代码补全、格式化和样式检查。</p>
+<h2 id="_3">安装</h2>
+<h3 id="_4">前提条件</h3>
+<p>在安装插件之前，请确保满足以下要求：</p>
+<ol>
+<li><strong>Claude Code</strong>：通过官方安装程序安装
+   ```bash
+   # macOS/Linux
+   curl -fsSL https://claude.ai/install.sh | bash</li>
+</ol>
+<p># Windows
+   irm https://claude.ai/install.ps1 | iex
+   ```</p>
+<ol>
+<li>
+<p><strong>Stata</strong>：有效的 Stata 17+ 许可证并安装了 Stata MP</p>
+</li>
+<li>
+<p><strong>Python 包</strong>：<code>stata-mcp</code> 包可用
+   <code>bash
+   # 验证安装
+   uvx stata-mcp doctor</code></p>
+</li>
+<li>
+<p><strong>Stata LSP</strong>：已安装语言服务器
+   <code>bash
+   pipx install "git+https://github.com/euglevi/stata-language-server.git"</code></p>
+</li>
+<li>
+<p><strong>uv</strong>：包运行器（推荐）
+   ```bash
+   # 通过 homebrew 安装
+   brew install uv</p>
+</li>
+</ol>
+<p># 或通过官方安装程序
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```</p>
+<h3 id="_5">安装方法</h3>
+<p>添加市场注册表并安装插件：</p>
+<pre><code class="language-bash"># 添加市场
+claude plugin marketplace add sepinetam/stata-mcp
+
+# 安装插件到用户范围（默认）
+claude plugin install stata-toolbox
+
+# 安装到项目范围（与团队共享）
+claude plugin install stata-toolbox --scope project
+
+# 安装到本地范围（gitignore）
+claude plugin install stata-toolbox --scope local
+</code></pre>
+<p>插件自动使用当前目录作为 Stata 操作的工作目录。</p>
+<h3 id="_6">验证</h3>
+<p>安装后，验证插件是否已加载：</p>
+<pre><code class="language-bash"># 列出已安装的插件
+claude plugin list
+</code></pre>
+<h3 id="_7">工作原理</h3>
+<p>安装后，插件提供无缝集成：</p>
+<p><strong>1. 自动加载</strong>
+Claude Code 自动检测：
+- <code>.claude-plugin/marketplace.json</code> → 插件注册表
+- <code>plugins/stata-toolbox/plugin.json</code> → 插件配置</p>
+<p><strong>2. MCP 工具</strong>
+MCP-for-Stata 服务器暴露 Claude 可调用的工具：
+- <code>stata_do</code>：执行 Stata 代码
+- <code>write_dofile</code>：创建 do 文件
+- <code>get_data_info</code>：分析数据集
+- <code>help</code>：获取 Stata 命令文档
+- 以及更多...</p>
+<p><strong>3. LSP 功能</strong>
+Stata LSP 提供高级编辑器支持：
+- <strong>语法高亮</strong>：增强的 .do 文件着色
+- <strong>补全</strong>：自动建议 Stata 命令
+- <strong>悬停文档</strong>：鼠标悬停在命令上获取帮助
+- <strong>错误检测</strong>：实时语法验证
+- <strong>格式化</strong>：自动格式化 .do 文件</p>
+<h3 id="_8">示例工作流程</h3>
+<blockquote>
+<p>此部分由 AI 生成，使用前请审查。如果您想获得最佳结果，应该根据自己的偏好编辑 <code>~/.claude/CLAUDE.md</code>。</p>
+</blockquote>
+<h4 id="_9">论文复现</h4>
+<pre><code class="language-markdown">&gt; 从 &quot;source/data/CPS_2018.dta&quot; 加载数据集
+&gt; 使用 OLS 回归复现 Mincer (1974) 的表 3
+&gt; 将回归表导出为 LaTeX 格式
+
+Claude：
+1. 使用 get_data_info 了解数据集结构
+2. 使用 write_dofile 创建 do 文件
+3. 使用 stata_do 执行
+4. 将表导出到 stata-mcp-result/
+</code></pre>
+<h4 id="_10">快速假设检验</h4>
+<pre><code class="language-markdown">&gt; 检验 2008 年金融危机后教育回报是否增加
+&gt; 使用大学入学作为处理组的双重差分法
+
+Claude：
+1. 生成 DiD 规范
+2. 使用事件研究设计运行 stata_do
+3. 呈现带经济学解释的结果
+</code></pre>
+<h2 id="vs">比较：插件 vs 手动配置</h2>
+<h3 id="_11">手动配置</h3>
+<p>使用命令的传统方法：</p>
+<pre><code class="language-bash">claude mcp add stata-mcp -- uvx stata-mcp
+</code></pre>
+<p>或需要手动编辑 <code>.mcp.json</code>：</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;stata-mcp&quot;: {
+      &quot;command&quot;: &quot;uvx&quot;,
+      &quot;args&quot;: [&quot;stata-mcp&quot;],
+      &quot;env&quot;: {
+        &quot;STATA_MCP__CWD&quot;: &quot;/absolute/path/to/project&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="_12">基于插件的配置</h3>
+<p><strong>使用插件：</strong></p>
+<pre><code class="language-bash"># 单命令安装
+claude plugin marketplace add sepinetam/stata-mcp
+claude plugin install stata-toolbox
+</code></pre>
+<h3 id="_13">比较</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>手动配置</th>
+<th>插件安装</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>设置</strong></td>
+<td>手动编辑 <code>.mcp.json</code> 或命令</td>
+<td>一键安装</td>
+</tr>
+<tr>
+<td><strong>MCP 服务器</strong></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>LSP 服务器</strong></td>
+<td>❌ 单独安装</td>
+<td>✅ 包含</td>
+</tr>
+<tr>
+<td><strong>团队共享</strong></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>更新</strong></td>
+<td>自动更新最新 MCP</td>
+<td>自动更新 MCP，手动更新其他</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_14">架构</h2>
+<h3 id="_15">插件加载流程</h3>
+<pre><code>1. Claude Code 启动
+   ↓
+2. 扫描 .claude-plugin/marketplace.json
+   ↓
+3. 解析插件注册表
+   ↓
+4. 加载每个插件的 plugin.json
+   ↓
+5. 注册 MCP 服务器
+   ↓
+6. 初始化 LSP 服务器
+   ↓
+7. 应用插件配置
+   ↓
+8. 插件可供使用
+</code></pre>
+<h3 id="_16">组件交互</h3>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│                   Claude Code                       │
+└──────────────────────┬──────────────────────────────┘
+                       │
+         ┌─────────────┴────────────┐
+         │                          │
+    ┌────▼─────┐                ┌────▼─────┐
+    │   MCP    │                │   LSP    │
+    │  Server  │                │  Server  │
+    └────┬─────┘                └────┬─────┘
+         │                           │
+    ┌────▼───────────────────────────▼────┐
+    │         MCP-for-Stata Package           │
+    │  - stata_do tool                    │
+    │  - Data analysis tools              │
+    │  - Help system                      │
+    └─────────────────────────────────────┘
+         │
+    ┌────▼──────────┐
+    │     Stata     │
+    │  Executable   │
+    └───────────────┘
+</code></pre>
+<h2 id="_17">故障排除</h2>
+<h3 id="_18">插件未检测到</h3>
+<p><strong>症状：</strong> 插件已安装但 Claude Code 不显示工具</p>
+<p><strong>解决方案：</strong>
+1. 完全重启 Claude Code
+2. 验证 marketplace.json 和 plugin.json 中的 JSON 语法
+3. 检查文件权限（必须可读）
+4. 确保插件正确安装
+5. 运行 <code>claude plugin list</code> 验证</p>
+<h3 id="mcp_1">MCP 服务器连接失败</h3>
+<p><strong>症状：</strong> 工具显示错误 "Failed to connect to MCP server"</p>
+<p><strong>诊断：</strong></p>
+<pre><code class="language-bash"># 独立测试 MCP 服务器
+uvx stata-mcp doctor
+
+# 检查 Stata 是否可访问
+stata-se --version
+
+# 验证 uvx 安装
+uvx --version
+</code></pre>
+<p><strong>解决方案：</strong>
+1. 安装缺失的依赖：
+   <code>bash
+   pip install stata-mcp</code></p>
+<ol>
+<li>
+<p>验证 Stata 安装路径</p>
+</li>
+<li>
+<p>检查环境变量是否正确设置</p>
+</li>
+</ol>
+<h3 id="lsp_1">LSP 不工作</h3>
+<p><strong>症状：</strong> .do 文件中没有语法高亮或补全</p>
+<p><strong>诊断：</strong></p>
+<pre><code class="language-bash"># 检查 stata-language-server 是否已安装
+which stata-language-server
+
+# 测试 LSP 服务器
+stata-language-server --help
+</code></pre>
+<p><strong>解决方案：</strong>
+1. 安装 stata-language-server：
+   <code>bash
+   npm install -g stata-language-server</code></p>
+<ol>
+<li>
+<p>验证文件扩展名映射：
+   <code>json
+   {
+     "extensionToLanguage": {
+       ".do": "stata"
+     }
+   }</code></p>
+</li>
+<li>
+<p>检查 Claude Code 中的 LSP 日志</p>
+</li>
+</ol>
+<h2 id="_19">最佳实践</h2>
+<ol>
+<li><strong>验证安装</strong>：安装前使用 <code>uvx stata-mcp doctor</code> 检查系统兼容性</li>
+<li><strong>环境变量</strong>：对敏感数据使用 <code>.env</code> 文件或项目设置</li>
+<li><strong>文档</strong>：维护带有研究指令的项目特定 CLAUDE.md</li>
+<li><strong>版本更新</strong>：保持插件更新以获取最新功能和错误修复</li>
+</ol>
+<h2 id="_20">相关文档</h2>
+<ul>
+<li><a href="../configuration/">配置指南</a> - 高级配置选项</li>
+<li><a href="../security/">安全文档</a> - 安全守卫系统</li>
+<li><a href="../monitoring/">监控指南</a> - 资源监控</li>
+<li><a href="../mcp/tools/">MCP 工具参考</a> - 可用工具</li>
+<li><a href="../usage/">使用示例</a> - 常见工作流程</li>
+<li><a href="../clients/">客户端配置</a> - 替代客户端设置</li>
+</ul>
+<h2 id="_21">许可证和归属</h2>
+<p>stata-toolbox 插件是 MCP-for-Stata 项目的一部分。</p>
+<ul>
+<li><strong>许可证</strong>：AGPL-3.0</li>
+<li><strong>版权</strong>：(c) 2026 Song Tan (Sepine Tam), Inc.</li>
+<li><strong>作者</strong>：Song Tan (sepinetam@gmail.com)</li>
+</ul>
+<p><strong>Stata LSP</strong>：由 <a href="https://github.com/euglevi/stata-language-server">euglevi</a> 版权所有，采用 <a href="https://github.com/euglevi/stata-language-server/blob/main/LICENSE">MIT 许可证</a></p>
+<p>该插件集成了独立开发的组件：
+- <strong>MCP-for-Stata Server</strong>：<a href="https://github.com/sepinetam/mcp-for-stata">GitHub 仓库</a>
+- <strong>Stata LSP</strong>：<a href="https://github.com/euglevi/stata-language-server">GitHub 仓库</a></p>
+<hr />
+<p><strong>文档版本</strong>：1.0.0
+<strong>最后更新</strong>：2025-02-12
+<strong>维护者</strong>：Song Tan (sepinetam@gmail.com)</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+        
+          
+          <a href="../usage/" class="md-footer__link md-footer__link--prev" aria-label="上一页: Usage">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              <div class="md-ellipsis">
+                Usage
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../clients/" class="md-footer__link md-footer__link--next" aria-label="下一页: Clients">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              <div class="md-ellipsis">
+                Clients
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 - present <a href="https://github.com/sepinetam">Sepine Tam</a>. All Right Reserved. 
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/sepinetam/stata-mcp" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="mailto:sepinetam@gmail.com" target="_blank" rel="noopener" title="E-mail" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m20 8-8 5-8-5V6l8 5 8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.code.select", "navigation.path", "navigation.sections", "navigation.expand", "content.code.annotate", "navigation.footer", "navigation.top"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
