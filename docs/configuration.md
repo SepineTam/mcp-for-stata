@@ -376,19 +376,22 @@ Override automatic Stata detection.
 
 Controls the behavior of the `get_data_info` tool: which descriptive statistics are reported, how strings are summarized, and how cache filenames are constructed.
 
+For `string_keep_number`, `decimal_places`, and `hash_length`, the resolution priority is: explicit argument > environment variable > config file > default.
+
 #### `data_info.metrics`
 
 Default list of numeric metrics returned for each variable.
 
 - **Type**: List of strings
-- **Default**: `["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]`
+- **Default**: `["obs", "mean", "stderr", "min", "max"]`
 - **Description**:
   - Supported values include `obs`, `mean`, `stderr`, `min`, `max`, `q1`, `q3`, `skewness`, and `kurtosis`
-  - Trim the list to keep responses small, or extend it when richer summaries are needed
+  - The default list can be extended with `q1`, `q3`, `skewness`, and `kurtosis` when richer summaries are needed
+  - `metrics` is read from the config file only; it does not support environment variables or explicit arguments
 - **Example**:
   ```toml
   [data_info]
-  metrics = ["obs", "mean", "stderr", "min", "max"]
+  metrics = ["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]
   ```
 
 #### `data_info.string_keep_number`

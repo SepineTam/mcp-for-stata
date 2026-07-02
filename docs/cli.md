@@ -88,6 +88,26 @@ stata-mcp doctor --check cleanup --dry-run
 
 Common check names include `stata`, `python`, and `cleanup`. The `--dry-run` flag is interpreted by cleanup-style checks and previews destructive operations instead of executing them; other checks ignore it.
 
+### Verify Installation
+
+Check whether `stata-mcp` is already installed in a target MCP client or config file. This subcommand is read-only and never modifies configuration files.
+
+```bash
+# Check a supported client
+stata-mcp verify -c claude
+
+# Check a custom JSON config file
+stata-mcp verify -f ~/.cursor/mcp.json
+
+# Check a nested config path
+stata-mcp verify -f ~/.openclaw/openclaw.json --index mcp.servers
+
+# Use a custom entry key
+stata-mcp verify -f ~/.codex/config.toml --index mcp_servers --key stata-mcp
+```
+
+`-c` takes precedence over `-f` when both are provided.
+
 ### Update
 
 Update stata-mcp to the latest version:
@@ -259,6 +279,15 @@ stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 | `--check` | Run only specified check names (repeatable) |
 | `--dry-run` | Preview cleanup actions without deleting files (cleanup-style checks only) |
 
+### Verify Options
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--client` | `-c` | Target client key (e.g. `claude`, `cursor`, `codex`) |
+| `--file` | `-f` | Path to a custom JSON or TOML config file |
+| `--index` | | Dot-separated nested key path, used with `-f` (e.g. `mcp.servers`) |
+| `--key` | | Entry key inside the target dict (default: `stata-mcp`) |
+
 ### Update Options
 
 | Option | Description |
@@ -332,8 +361,11 @@ These scripts are intended for first-time bootstrap on machines without a Python
 ## Exit Codes
 
 - `0` - Success
-- `1` - Error (invalid client, system incompatibility, etc.)
-- `2` - Command line argument error
+- `1` - Error (system incompatibility, file not found, etc.)
+- `2` - Command line argument error, or missing/invalid config key in `verify`
+- `3` - Failed to parse JSON/TOML file in `verify`
+- `4` - Invalid MCP server entry in `verify` (missing `command` or wrong type)
+- `5` - `verify` subcommand argument error (missing `-c`/`--client`, invalid client, or missing `-f`/`--file`)
 
 ## Environment Variables
 

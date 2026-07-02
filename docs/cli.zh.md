@@ -88,6 +88,26 @@ stata-mcp doctor --check cleanup --dry-run
 
 常见的检查名包括 `stata`、`python` 和 `cleanup`。`--dry-run` 仅对 `cleanup` 类检查生效，用于预览将要清理的内容而不真正删除；其他检查会忽略该参数。
 
+### 验证安装（verify）
+
+检查 `stata-mcp` 是否已安装在目标 MCP 客户端或配置文件中。该子命令只读，不会修改任何配置文件。
+
+```bash
+# 检查支持的客户端
+stata-mcp verify -c claude
+
+# 检查自定义 JSON 配置文件
+stata-mcp verify -f ~/.cursor/mcp.json
+
+# 检查嵌套配置路径
+stata-mcp verify -f ~/.openclaw/openclaw.json --index mcp.servers
+
+# 使用自定义条目键
+stata-mcp verify -f ~/.codex/config.toml --index mcp_servers --key stata-mcp
+```
+
+同时传入 `-c` 和 `-f` 时，`-c` 优先。
+
 ### 更新（update）
 
 将 stata-mcp 更新到最新版本：
@@ -257,6 +277,15 @@ stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 | `--check` | 仅运行指定检查（可重复） |
 | `--dry-run` | 仅预览清理动作但不实际删除文件（仅 cleanup 类检查生效） |
 
+### 验证选项（verify）
+
+| 选项 | 简写 | 描述 |
+|--------|-------|-------------|
+| `--client` | `-c` | 目标客户端 key（如 `claude`、`cursor`、`codex`） |
+| `--file` | `-f` | 自定义 JSON 或 TOML 配置文件路径 |
+| `--index` | | 与 `-f` 配合使用的 dot-notation 嵌套键路径（如 `mcp.servers`） |
+| `--key` | | 目标字典内的条目键（默认：`stata-mcp`） |
+
 ### 更新选项（update）
 
 | 选项 | 描述 |
@@ -330,8 +359,11 @@ uvx stata-mcp install -c cursor
 ## 退出代码
 
 - `0` - 成功
-- `1` - 错误（无效客户端、系统不兼容等）
-- `2` - 命令行参数错误
+- `1` - 错误（系统不兼容、文件不存在等）
+- `2` - 命令行参数错误，或 `verify` 中缺少/无效的配置键
+- `3` - `verify` 解析 JSON/TOML 文件失败
+- `4` - `verify` 中 MCP 服务器条目无效（缺少 `command` 或类型错误）
+- `5` - `verify` 子命令参数错误（缺少 `-c`/`--client`、客户端无效，或缺少 `-f`/`--file`）
 
 ## 环境变量
 

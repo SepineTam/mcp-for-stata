@@ -77,6 +77,13 @@ stata-mcp doctor
 stata-mcp doctor --verbose          # Detailed output
 stata-mcp doctor --json             # JSON output
 stata-mcp doctor --check stata      # Run specific check(s)
+stata-mcp doctor --dry-run          # Preview cleanup actions without deleting files
+
+# Verify MCP client configuration (read-only)
+stata-mcp verify                    # Error: must specify -c or -f
+stata-mcp verify -c claude          # Check a supported client
+stata-mcp verify -f ~/.cursor/mcp.json
+stata-mcp verify -f ~/.codex/config.toml --index mcp_servers
 
 # Check version
 stata-mcp --version
@@ -193,9 +200,22 @@ All handlers extend `DataInfoBase` and return `Series` dataclasses with typed nu
 ### 5. CLI Interface (`src/stata_mcp/cli/`)
 
 Modular architecture:
-- `_parsers.py` defines argument parsers for: `server`, `doctor`, `tool`, `config`, `install`, `update`
+- `_parsers.py` defines argument parsers for: `server`, `doctor`, `tool`, `config`, `install`, `update`, `verify`
 - `_handlers.py` implements the corresponding handler functions
 - `_cli.py` routes subcommands and serves as the package entry point
+
+#### Verify Subcommand
+
+`stata-mcp verify` is a read-only check that confirms whether `stata-mcp` is installed in a target MCP client or config file.
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--client` | `-c` | Target client key (e.g. `claude`, `cursor`, `codex`) |
+| `--file` | `-f` | Path to a custom JSON/TOML config file |
+| `--index` | | Dot-separated nested key path, used with `-f` (e.g. `mcp.servers`) |
+| `--key` | | Entry key inside the target dict (default: `stata-mcp`) |
+
+`-c` takes precedence over `-f` when both are provided.
 
 ### 6. Configuration System (`src/stata_mcp/config.py`)
 
@@ -204,6 +224,35 @@ Priority (highest to lowest): **environment variables > config file > defaults**
 `Config` class uses `@cached_property` for lazy directory creation. `StataMcpFolder` helper manages the working directory structure.
 
 Config file location: `~/.statamcp/config.toml`. See `src/stata_mcp/config.py` for the configuration schema.
+
+### data_info Configuration
+
+The `[data_info]` section controls the behavior of `get_data_info` and the `stata-mcp tool data-info` CLI command.
+
+For `string_keep_number`, `decimal_places`, and `hash_length`, values are read with priority: explicit argument > environment variable > config file > default.
+
+`metrics` is read from the config file only and does not support environment variables or explicit arguments.
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `metrics` | `["obs", "mean", "stderr", "min", "max"]` | Numeric statistics to include in summaries. Allowed additions: `q1`, `q3`, `skewness`, `kurtosis`. |
+| `string_keep_number` | `10` | Maximum number of unique string values to list for string variables. |
+| `decimal_places` | `3` | Number of decimal places for numeric statistics. |
+| `hash_length` | `12` | Length of the hash suffix used in cache file names. |
+
+Example `~/.statamcp/config.toml`:
+```toml
+[data_info]
+metrics = ["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]
+string_keep_number = 10
+decimal_places = 3
+hash_length = 12
+```
+
+Equivalent environment variables:
+- `STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER`
+- `STATA_MCP_DATA_INFO_DECIMAL_PLACES`
+- `STATA_MCP_DATA_INFO_HASH_LENGTH`
 
 ### 7. Security Guard (`src/stata_mcp/guard/`)
 

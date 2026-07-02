@@ -5,7 +5,7 @@
 #
 # @Author : Sepine Tam (谭淞)
 # @Email  : sepinetam@gmail.com
-# @File   : _base.py
+# @File   : data_info/base.py
 
 import copy
 import hashlib
@@ -192,12 +192,44 @@ class DataInfoBase(ABC):
         self.cache_dir = Path(cache_dir) if cache_dir else Path.home() / ".statamcp" / ".cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        self.string_keep_number = string_keep_number or int(os.getenv("STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", 10))
-        self.decimal_places = decimal_places or int(os.getenv("STATA_MCP_DATA_INFO_DECIMAL_PLACES", 3))
-        self.HASH_LENGTH = hash_length or int(os.getenv("STATA_MCP_DATA_INFO_HASH_LENGTH", "12"))
+        self.string_keep_number = self._resolve_data_info_value(
+            string_keep_number, "STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", "string_keep_number", 10
+        )
+        self.decimal_places = self._resolve_data_info_value(
+            decimal_places, "STATA_MCP_DATA_INFO_DECIMAL_PLACES", "decimal_places", 3
+        )
+        self.HASH_LENGTH = self._resolve_data_info_value(
+            hash_length, "STATA_MCP_DATA_INFO_HASH_LENGTH", "hash_length", 12
+        )
         self._head = head
 
         self.kwargs = kwargs  # Store additional keyword arguments for subclasses to use
+
+    def _resolve_data_info_value(
+        self,
+        explicit_value: int | None,
+        env_var: str,
+        config_key: str,
+        default: int,
+    ) -> int:
+        """Resolve a data_info config value with explicit > env > config > default priority."""
+        if explicit_value is not None:
+            return int(explicit_value)
+
+        env_value = os.getenv(env_var, None)
+        if env_value is not None:
+            return int(env_value)
+
+        try:
+            with open(self.CFG_FILE, "rb") as f:
+                config = tomllib.load(f)
+            config_value = config.get("data_info", {}).get(config_key, None)
+            if config_value is not None:
+                return int(config_value)
+        except (FileNotFoundError, OSError, Exception):
+            pass
+
+        return default
 
     # Properties
     @cached_property
