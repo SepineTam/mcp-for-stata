@@ -621,8 +621,8 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
     },
     "get_data_info": {
         "description": (
-            "Get descriptive statistics and a data preview for a data file "
-            "(dta, csv, xlsx). Returns overview, variable details, "
+            "Get descriptive statistics and a data preview for a supported data file "
+            "(.dta, .csv, .tsv, .psv, .xlsx, .xls, .sav, .zsav). Returns overview, variable details, "
             "and optional head rows filtered by requested variables. "
             "Use when you need to understand a dataset or have no prior knowledge of the data."
         ),

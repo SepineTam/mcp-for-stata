@@ -279,7 +279,7 @@ Tools are registered based on profile selection (`--core` / `--all` / `--unsafe`
 | Profile | Tool | Notes |
 |---------|------|-------|
 | core, all, unsafe | `stata_do` | Execute Stata do-files; package-management commands are always blocked |
-| core, all, unsafe | `get_data_info` | Analyze data files (CSV, DTA, XLSX, SPSS) |
+| core, all, unsafe | `get_data_info` | Analyze data files (CSV/TSV/PSV, DTA, XLSX/XLS, SPSS SAV/ZSAV) |
 | core, all, unsafe | `help` | Stata command documentation (Unix only) |
 | all, unsafe | `read_log` | Read log files; supports `lines` param and `full`/`core`/`dict` formats |
 | unsafe | `ado_package_install` | Install approved packages; GitHub repositories require an allowlist |
