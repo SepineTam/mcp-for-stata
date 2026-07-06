@@ -147,7 +147,7 @@ stata-mcp tool do /path/to/analysis.do --is-read-log true
 stata-mcp tool do /path/to/analysis.do --timeout 300
 
 # 通过一次性的 API helper 读取 Stata help
-stata-mcp tool help regress --enable-smcl true
+stata-mcp tool help regress
 
 # 查看支持的数据集元信息
 stata-mcp tool data-info /path/to/data.dta
@@ -159,7 +159,7 @@ stata-mcp tool read-log /path/to/output.log
 工具子命令：
 - `stata-mcp tool ado-install <package_name> [-y|--yes] [--source ssc|net|github]`
 - `stata-mcp tool do <dofile_path> [--is-read-log true|false] [--enable-smcl true|false] [--timeout <seconds>]`
-- `stata-mcp tool help <command> [--read-log-when-error true|false] [--enable-smcl true|false]`
+- `stata-mcp tool help <command> [--replace true|false]`
 - `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
 - `stata-mcp tool read-log <log_path> [--output-format full|core|dict]`
 

@@ -53,9 +53,8 @@ def test_cli_help_handler_forwards_replace(monkeypatch: pytest.MonkeyPatch) -> N
     args = Namespace(
         tool_action="help",
         stata_command="regress",
-        enable_smcl=True,
         replace=True,
     )
 
     assert handle_tool(args) == 0
-    stata_help.assert_called_once_with(cmd="regress", enable_smcl=True, replace=True)
+    stata_help.assert_called_once_with(cmd="regress", replace=True)

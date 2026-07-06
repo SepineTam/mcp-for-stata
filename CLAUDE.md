@@ -127,6 +127,7 @@ src/stata_mcp/
 │   └── builtin_tools/
 │       ├── ado_install/     # SSC_Install, NET_Install, GITHUB_Install
 │       ├── help/            # StataHelp with disk caching
+│       │   └── stata_help.py  # Stata help command wrapper
 │       └── stata_log/       # Log readers: text and SMCL formats
 ├── data_info/               # Data file analysis handlers
 │   ├── base.py              # DataInfoBase ABC, Series dataclasses
@@ -136,11 +137,12 @@ src/stata_mcp/
 │   └── spss.py              # SPSS .sav handler
 ├── guard/                   # Security validation
 │   ├── validator.py         # GuardValidator, RiskItem, SecurityReport
-│   └── blacklist.py         # DANGEROUS_COMMANDS, DANGEROUS_PATTERNS
+│   ├── blacklist.py         # DANGEROUS_COMMANDS, DANGEROUS_PATTERNS
+│   └── input_validation.py  # Input guard and allowlist validation
 ├── monitor/                 # Process monitoring
 │   ├── base.py              # MonitorBase ABC
 │   └── ram_monitor.py       # RAMMonitor (threading + psutil)
-├── evaluate/                # Evaluation and scoring
+├── evaluate/                # Evaluation and scoring (depends on OpenAI Agents SDK; kept for future reference)
 │   ├── _model.py            # OpenAI client config (DEFAULT/CHAT/THINKING models)
 │   ├── score_it.py          # Scoring module
 │   ├── advice.py            # Advice generation
@@ -149,7 +151,11 @@ src/stata_mcp/
 │   ├── doctor.py            # Diagnostics: CheckStatus, DoctorReport
 │   ├── update.py            # Version checking and update orchestration
 │   ├── usable.py            # Legacy usability check (deprecated)
-│   └── Installer/           # MCP client integration installer
+│   ├── clean_log.py         # Log cleanup helpers
+│   └── installer/           # MCP client integration installer
+│       ├── installer.py     # Installer logic
+│       ├── output.py        # Installer output helpers
+│       └── verifier.py      # Installation verification
 └── core/
     └── types/
         └── _error.py        # Custom exceptions: StataCLINotFoundError, RAMLimitExceededError

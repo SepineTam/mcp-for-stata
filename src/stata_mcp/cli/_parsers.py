@@ -197,21 +197,9 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
     tool_help_parser.add_argument("stata_command", help="Stata command name")
     add_bool_argument(
         tool_help_parser,
-        "--is-read-log",
-        default=True,
-        help_text="Read log content after execution",
-    )
-    add_bool_argument(
-        tool_help_parser,
-        "--enable-smcl",
-        default=True,
-        help_text="Generate the SMCL log file",
-    )
-    add_bool_argument(
-        tool_help_parser,
         "--replace",
         default=False,
-        help_text="Bypass cached help and refresh it from Stata",
+        help_text="Skip caches and refresh help from Stata",
     )
 
     tool_data_info_parser = tool_subparsers.add_parser(

@@ -116,8 +116,7 @@ stata-mcp tool help xtset
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `stata_command` | Stata command name (required) | - |
-| `--is-read-log` | Read output content | true |
-| `--enable-smcl` | Generate SMCL format output | true |
+| `--replace` | Skip caches and refresh help from Stata | false |
 
 ---
 

@@ -317,7 +317,6 @@ Get Stata command documentation.
 ```python
 def stata_help(
     cmd: str,
-    enable_smcl: bool = True,
     config_file: str | Path | None = None,
     replace: bool = False,
 ) -> str:
@@ -329,7 +328,6 @@ def stata_help(
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `cmd` | `str` | required | Stata command name |
-| `enable_smcl` | `bool` | `True` | Reserved compatibility option |
 | `config_file` | `str \| Path` | `None` | Custom config file path |
 | `replace` | `bool` | `False` | Skip caches and refresh help from Stata |
 

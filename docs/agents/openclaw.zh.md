@@ -114,8 +114,7 @@ stata-mcp tool help xtset
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
 | `stata_command` | Stata 命令名（必填） | - |
-| `--is-read-log` | 读取输出内容 | true |
-| `--enable-smcl` | 生成 SMCL 格式输出 | true |
+| `--replace` | 跳过缓存并从 Stata 刷新帮助 | false |
 
 ---
 

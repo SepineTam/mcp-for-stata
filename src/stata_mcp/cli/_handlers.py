@@ -109,7 +109,6 @@ def handle_tool(args: Namespace) -> int:
         elif args.tool_action == "help":
             result = stata_help(
                 cmd=args.stata_command,
-                enable_smcl=args.enable_smcl,
                 replace=args.replace,
             )
         elif args.tool_action == "data-info":

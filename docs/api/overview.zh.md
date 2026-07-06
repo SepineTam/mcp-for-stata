@@ -316,7 +316,6 @@ content = read_log(
 ```python
 def stata_help(
     cmd: str,
-    enable_smcl: bool = True,
     config_file: str | Path | None = None,
     replace: bool = False,
 ) -> str:
@@ -328,7 +327,6 @@ def stata_help(
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | `cmd` | `str` | 必填 | Stata 命令名 |
-| `enable_smcl` | `bool` | `True` | 保留的兼容参数 |
 | `config_file` | `str \| Path` | `None` | 自定义配置文件路径 |
 | `replace` | `bool` | `False` | 跳过缓存并从 Stata 刷新帮助 |
 
