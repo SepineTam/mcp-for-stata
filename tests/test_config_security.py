@@ -41,7 +41,23 @@ def test_ado_install_security_config_reads_environment_github_allowlist(
     )
 
 
-def test_async_do_beta_config_reads_on_off_values(monkeypatch, tmp_path) -> None:
+def test_async_do_beta_config_reads_true_false_values(monkeypatch, tmp_path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        """
+[BETA]
+IS_ASYNC_DO = "true"
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert Config(config_file=config_path).IS_ASYNC_DO is True
+
+    monkeypatch.setenv("STATA_MCP__IS_ASYNC_DO", "false")
+    assert Config(config_file=config_path).IS_ASYNC_DO is False
+
+
+def test_async_do_beta_config_rejects_on_off_values(monkeypatch, tmp_path) -> None:
     config_path = tmp_path / "config.toml"
     config_path.write_text(
         """
@@ -51,7 +67,7 @@ IS_ASYNC_DO = "on"
         encoding="utf-8",
     )
 
-    assert Config(config_file=config_path).IS_ASYNC_DO is True
+    assert Config(config_file=config_path).IS_ASYNC_DO is False
 
     monkeypatch.setenv("STATA_MCP__IS_ASYNC_DO", "off")
     assert Config(config_file=config_path).IS_ASYNC_DO is False

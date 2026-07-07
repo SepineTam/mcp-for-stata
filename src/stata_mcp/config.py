@@ -215,11 +215,11 @@ class Config:
             return value
         if isinstance(value, str):
             normalized_value = value.strip().lower()
-            if normalized_value in {"true", "on"}:
+            if normalized_value == "true":
                 return True
-            if normalized_value in {"false", "off"}:
+            if normalized_value == "false":
                 return False
-            raise ValueError("Expected 'true', 'false', 'on', or 'off'.")
+            raise ValueError("Expected 'true' or 'false'.")
         raise TypeError("Expected a boolean or an explicit boolean string.")
 
     @staticmethod

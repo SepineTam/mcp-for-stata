@@ -153,7 +153,7 @@ def test_stata_do_tool_is_async_function_when_async_do_enabled(
     monkeypatch: pytest.MonkeyPatch,
     loaded_modules,
 ):
-    monkeypatch.setenv("STATA_MCP__IS_ASYNC_DO", "on")
+    monkeypatch.setenv("STATA_MCP__IS_ASYNC_DO", "true")
     monkeypatch.delitem(sys.modules, "stata_mcp.mcp_servers", raising=False)
 
     mcp_servers = importlib.import_module("stata_mcp.mcp_servers")
