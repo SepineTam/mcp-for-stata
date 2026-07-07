@@ -8,6 +8,7 @@ def test_ado_install_security_config_defaults_to_disabled(tmp_path) -> None:
 
     assert config.ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES == ()
     assert config.IS_ASYNC_DO is False
+    assert config.MAX_ASYNC_DO == 3
 
 
 def test_ado_install_security_config_reads_github_allowlist(tmp_path) -> None:
@@ -54,3 +55,38 @@ IS_ASYNC_DO = "on"
 
     monkeypatch.setenv("STATA_MCP__IS_ASYNC_DO", "off")
     assert Config(config_file=config_path).IS_ASYNC_DO is False
+
+
+def test_async_do_max_parallel_config_reads_positive_integer(monkeypatch, tmp_path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        """
+[BETA]
+MAX_ASYNC_DO = 5
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert Config(config_file=config_path).MAX_ASYNC_DO == 5
+
+    monkeypatch.setenv("STATA_MCP__MAX_ASYNC_DO", "2")
+    assert Config(config_file=config_path).MAX_ASYNC_DO == 2
+
+    monkeypatch.setenv("STATA_MCP__MAX_ASYNC_DO", "0")
+    assert Config(config_file=config_path).MAX_ASYNC_DO == 3
+
+
+def test_async_do_max_parallel_config_rejects_invalid_values(monkeypatch, tmp_path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        """
+[BETA]
+MAX_ASYNC_DO = -2
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert Config(config_file=config_path).MAX_ASYNC_DO == 3
+
+    monkeypatch.setenv("STATA_MCP__MAX_ASYNC_DO", "not-a-number")
+    assert Config(config_file=config_path).MAX_ASYNC_DO == 3

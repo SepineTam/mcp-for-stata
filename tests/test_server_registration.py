@@ -142,6 +142,13 @@ def test_register_tools_core_only_registers_core(monkeypatch: pytest.MonkeyPatch
     assert server.resources == []  # resource registration temporarily disabled
 
 
+def test_stata_do_tool_is_sync_function_by_default(loaded_modules):
+    mcp_servers, _ = loaded_modules
+
+    assert not inspect.iscoroutinefunction(mcp_servers.stata_do)
+    assert mcp_servers._TOOL_REGISTRY["stata_do"]["func"] is mcp_servers.stata_do
+
+
 def test_stata_do_tool_is_async_function_when_async_do_enabled(
     monkeypatch: pytest.MonkeyPatch,
     loaded_modules,
