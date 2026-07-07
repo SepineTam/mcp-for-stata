@@ -24,6 +24,7 @@
 
 ---
 ## 🆕 动态
+- 🧪 **Claude Science 支持**：MCP-for-Stata 现已支持 Claude Science，需配置沙箱放行路径。详见 [Claude Science 指南](https://sepinetam.github.io/mcp-for-stata/agents/claude_science)。
 - 更多内容请关注微信公众号：[Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ)，以及 [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
 - 🦞 **OpenClaw 支持**：独立的 OpenClaw 集成 CLI 工具（`stata-mcp tool`），详见 [OpenClaw 指南](https://sepinetam.github.io/mcp-for-stata/agents/openclaw.md)
 - ✨ **Claude Code 插件支持**：官方插件包，包含 MCP 服务器和 Stata LSP 集成
@@ -80,6 +81,7 @@ uvx stata-mcp install --all
 | Codex CLI & Codex Desktop | codex    | uvx stata-mcp install -c codex    |
 | OpenCode                  | opencode | uvx stata-mcp install -c opencode |
 | OpenClaw                  | openclaw | uvx stata-mcp install -c openclaw |
+| Claude Science            | —        | [手工配置](#advanced-claude-science) |
 
 </details>
 
@@ -185,6 +187,34 @@ uvx stata-mcp install -c codex
 ```bash
 codex mcp add stata-mcp -- uvx stata-mcp
 ```
+
+<a name="advanced-claude-science"></a>
+
+### 高级用法 - Claude Science
+
+Claude Science 在严格的沙箱中运行 MCP 服务器，默认会阻止访问主目录（`~`）。如果按常规方式启动 MCP-for-Stata，可能会看到如下报错：
+
+```text
+Couldn't load tools: MCP error -32000: Connection closed
+FileNotFoundError: [Errno 2] No such file or directory
+```
+
+解决方法是放行 `uv tool install stata-mcp` 放置可执行文件的路径。创建或编辑 `~/.claude-science/config.toml`：
+
+```toml
+[sandbox]
+user_write_paths = [
+  "~/.local/bin",
+  "~/.local/share/uv/tools/stata-mcp",
+]
+```
+
+然后在 Claude Science 中添加 MCP 服务：
+
+- **Name**：`stata-mcp`
+- **Command**：`~/.local/bin/stata-mcp`
+
+重启 Claude Science 后即可加载工具。完整步骤请参考 [Claude Science 指南](https://sepinetam.github.io/mcp-for-stata/agents/claude_science)。
 
 ### 其他客户端
 > 标准配置要求：请确保 Stata 已安装在默认路径，并且 Stata CLI 存在（适用于 macOS 和 Linux）。

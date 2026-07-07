@@ -24,6 +24,7 @@ Permite que agentes de IA como Claude Code, Codex y OpenClaw invoquen Stata loca
 
 ---
 ## 🆕 Novedades
+- 🧪 **Soporte para Claude Science**: MCP-for-Stata ahora funciona en Claude Science con una lista de permitidos del sandbox. Consulta la [guia de Claude Science](https://sepinetam.github.io/mcp-for-stata/agents/claude_science).
 - Encuentra mas en WeChat: [Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ), y [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
 - 🦞 **Soporte para OpenClaw**: Herramientas CLI independientes para la integracion con OpenClaw (`stata-mcp tool`), consulta la [guia de OpenClaw](https://sepinetam.github.io/mcp-for-stata/agents/openclaw.md)
 - ✨ **Soporte para plugin de Claude Code**: Paquete oficial de plugin con servidor MCP e integracion con Stata LSP
@@ -80,6 +81,7 @@ Hemos descubierto que Claude y DeepSeek son los dos mejores modelos en cualquier
 | Codex CLI & Codex Desktop | codex    | uvx stata-mcp install -c codex    |
 | OpenCode                  | opencode | uvx stata-mcp install -c opencode |
 | OpenClaw                  | openclaw | uvx stata-mcp install -c openclaw |
+| Claude Science            | —        | [Configuracion manual](#advanced-claude-science) |
 
 </details>
 
@@ -185,6 +187,34 @@ O usa
 ```bash
 codex mcp add stata-mcp -- uvx stata-mcp
 ```
+
+<a name="advanced-claude-science"></a>
+
+### Avanzado - Claude Science
+
+Claude Science ejecuta los servidores MCP dentro de un sandbox estricto que bloquea el acceso al directorio principal (`~`) de forma predeterminada. Si intentas iniciar MCP-for-Stata de la manera estandar, puedes ver:
+
+```text
+Couldn't load tools: MCP error -32000: Connection closed
+FileNotFoundError: [Errno 2] No such file or directory
+```
+
+Para solucionarlo, permite los caminos donde `uv tool install stata-mcp` coloca sus archivos. Crea o edita `~/.claude-science/config.toml`:
+
+```toml
+[sandbox]
+user_write_paths = [
+  "~/.local/bin",
+  "~/.local/share/uv/tools/stata-mcp",
+]
+```
+
+Luego agrega el servidor en Claude Science:
+
+- **Name**: `stata-mcp`
+- **Command**: `~/.local/bin/stata-mcp`
+
+Reinicia Claude Science y las herramientas se cargaran. Para la guia completa, consulta la [guia de Claude Science](https://sepinetam.github.io/mcp-for-stata/agents/claude_science).
 
 ### Otros clientes
 > Configuracion estandar requerida: asegurate de que Stata este instalado en la ruta predeterminada, y que la CLI de Stata (para macOS y Linux) exista.
