@@ -7,15 +7,18 @@
 # @Email  : sepinetam@gmail.com
 # @File   : stata_do.py
 
+import asyncio
 import logging
 import re
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Coroutine, Dict
 
 from ..core.types import RAMLimitExceededError
 from ..guard import GuardValidator, PackageManagementGuardValidator
 from ..monitor import RAMMonitor
 from ..stata import StataDo, StataLog
+from ..stata.stata_do.async_do import AsyncStataDo
 from ._runtime import create_runtime_context
 
 
@@ -121,7 +124,9 @@ def _stata_do(
     if runtime.config.IS_MONITOR and runtime.config.MAX_RAM_MB is not None:
         monitors.append(RAMMonitor(max_ram_mb=runtime.config.MAX_RAM_MB))
 
-    stata_executor = StataDo(
+    is_async_do = getattr(runtime.config, "IS_ASYNC_DO", False)
+    executor_cls = AsyncStataDo if is_async_do else StataDo
+    stata_executor = executor_cls(
         stata_cli=runtime.stata_cli,
         log_file_path=runtime.log_base_path,
         is_unix=runtime.is_unix,
@@ -130,13 +135,24 @@ def _stata_do(
     )
 
     try:
-        log_file_path_mapping = stata_executor.execute_dofile(
-            resolved_dofile_path,
-            log_file_name,
-            is_replace_log,
-            enable_smcl,
-            timeout=timeout,
-        )
+        if is_async_do:
+            log_file_path_mapping = _run_coroutine_sync(
+                stata_executor.execute_dofile_async(
+                    resolved_dofile_path,
+                    log_file_name,
+                    is_replace_log,
+                    enable_smcl,
+                    timeout=timeout,
+                )
+            )
+        else:
+            log_file_path_mapping = stata_executor.execute_dofile(
+                resolved_dofile_path,
+                log_file_name,
+                is_replace_log,
+                enable_smcl,
+                timeout=timeout,
+            )
         text_log_path = log_file_path_mapping["text"]
     except RAMLimitExceededError as error:
         return {"error": f"Out of max RAM limit: {error}"}
@@ -166,6 +182,17 @@ def _stata_do(
         result["log_content"] = log_content
 
     return result
+
+
+def _run_coroutine_sync(coroutine: Coroutine[Any, Any, Any]) -> Any:
+    """Run a coroutine from synchronous code, even when a loop already exists."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coroutine)
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        return executor.submit(asyncio.run, coroutine).result()
 
 
 def _security_rejection(report) -> Dict[str, Any]:

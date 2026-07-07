@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import importlib
+import asyncio
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -144,6 +145,280 @@ def test_mcp_stata_do_forwards_optional_timeout(
         True,
         timeout=12.5,
     )
+
+
+def test_mcp_stata_do_uses_async_executor_when_enabled(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_mcp_servers,
+    tmp_path: Path,
+):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofile = work_dir / "ok.do"
+    dofile.write_text("display 1")
+    log_file = tmp_path / "run.log"
+    log_file.write_text("ok")
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    loaded_mcp_servers.config.IS_ASYNC_DO = True
+    async_module = importlib.import_module("stata_mcp.stata.stata_do.async_do")
+    fake_executor = SimpleNamespace(
+        execute_dofile_async=AsyncMock(return_value={"text": log_file}),
+        read_log=Mock(return_value="ok"),
+    )
+    async_executor_cls = Mock(return_value=fake_executor)
+    monkeypatch.setattr(async_module, "AsyncStataDo", async_executor_cls)
+
+    result = asyncio.run(
+        loaded_mcp_servers._async_stata_do(dofile.as_posix(), timeout=12.5)
+    )
+
+    assert "error" not in result
+    assert result["log_file_path"]["text"] == log_file.as_posix()
+    async_executor_cls.assert_called_once_with(
+        stata_cli="stata",
+        log_file_path=tmp_path,
+        is_unix=True,
+        cwd=work_dir,
+        monitors=[],
+    )
+    fake_executor.execute_dofile_async.assert_awaited_once_with(
+        dofile,
+        None,
+        True,
+        True,
+        timeout=12.5,
+    )
+
+
+def test_mcp_async_stata_do_queues_above_max_parallel_limit(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_mcp_servers,
+    tmp_path: Path,
+):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofiles = []
+    for index in range(3):
+        dofile = work_dir / f"job_{index}.do"
+        dofile.write_text("display 1")
+        dofiles.append(dofile)
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    loaded_mcp_servers.config.MAX_ASYNC_DO = 2
+    loaded_mcp_servers._ASYNC_DO_SEMAPHORES.clear()
+    tracker = {"active": 0, "max_active": 0}
+
+    class _FakeAsyncStataDo:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def execute_dofile_async(self, dofile_path, *args, **kwargs):
+            tracker["active"] += 1
+            tracker["max_active"] = max(tracker["max_active"], tracker["active"])
+            await asyncio.sleep(0.01)
+            tracker["active"] -= 1
+            return {"text": tmp_path / f"{dofile_path.stem}.log"}
+
+        @staticmethod
+        def read_log(log_file_path):
+            return "ok"
+
+    async_module = importlib.import_module("stata_mcp.stata.stata_do.async_do")
+    monkeypatch.setattr(async_module, "AsyncStataDo", _FakeAsyncStataDo)
+
+    async def run_jobs():
+        return await asyncio.gather(
+            *(
+                loaded_mcp_servers._async_stata_do(dofile.as_posix(), enable_smcl=False)
+                for dofile in dofiles
+            )
+        )
+
+    results = asyncio.run(run_jobs())
+
+    assert tracker["max_active"] == 2
+    assert [result["log_file_path"]["text"] for result in results] == [
+        (tmp_path / "job_0.log").as_posix(),
+        (tmp_path / "job_1.log").as_posix(),
+        (tmp_path / "job_2.log").as_posix(),
+    ]
+
+
+def test_mcp_async_stata_do_uses_default_parallel_limit_of_three(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_mcp_servers,
+    tmp_path: Path,
+):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofiles = []
+    for index in range(4):
+        dofile = work_dir / f"default_{index}.do"
+        dofile.write_text("display 1")
+        dofiles.append(dofile)
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    loaded_mcp_servers._ASYNC_DO_SEMAPHORES.clear()
+    tracker = {"active": 0, "max_active": 0}
+
+    class _FakeAsyncStataDo:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def execute_dofile_async(self, dofile_path, *args, **kwargs):
+            tracker["active"] += 1
+            tracker["max_active"] = max(tracker["max_active"], tracker["active"])
+            await asyncio.sleep(0.01)
+            tracker["active"] -= 1
+            return {"text": tmp_path / f"{dofile_path.stem}.log"}
+
+        @staticmethod
+        def read_log(log_file_path):
+            return "ok"
+
+    async_module = importlib.import_module("stata_mcp.stata.stata_do.async_do")
+    monkeypatch.setattr(async_module, "AsyncStataDo", _FakeAsyncStataDo)
+
+    async def run_jobs():
+        return await asyncio.gather(
+            *(
+                loaded_mcp_servers._async_stata_do(dofile.as_posix(), enable_smcl=False)
+                for dofile in dofiles
+            )
+        )
+
+    asyncio.run(run_jobs())
+
+    assert tracker["max_active"] == 3
+
+
+def test_mcp_async_stata_do_releases_parallel_slot_after_error(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_mcp_servers,
+    tmp_path: Path,
+):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofiles = []
+    for index in range(2):
+        dofile = work_dir / f"failure_{index}.do"
+        dofile.write_text("display 1")
+        dofiles.append(dofile)
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    loaded_mcp_servers.config.MAX_ASYNC_DO = 1
+    loaded_mcp_servers._ASYNC_DO_SEMAPHORES.clear()
+    calls = []
+
+    class _FakeAsyncStataDo:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def execute_dofile_async(self, dofile_path, *args, **kwargs):
+            calls.append(dofile_path.name)
+            await asyncio.sleep(0.01)
+            if dofile_path.name == "failure_0.do":
+                raise RuntimeError("first failed")
+            return {"text": tmp_path / f"{dofile_path.stem}.log"}
+
+        @staticmethod
+        def read_log(log_file_path):
+            return "ok"
+
+    async_module = importlib.import_module("stata_mcp.stata.stata_do.async_do")
+    monkeypatch.setattr(async_module, "AsyncStataDo", _FakeAsyncStataDo)
+
+    async def run_jobs():
+        return await asyncio.gather(
+            *(
+                loaded_mcp_servers._async_stata_do(dofile.as_posix(), enable_smcl=False)
+                for dofile in dofiles
+            )
+        )
+
+    results = asyncio.run(run_jobs())
+
+    assert calls == ["failure_0.do", "failure_1.do"]
+    assert results[0] == {"error": "first failed"}
+    assert results[1]["log_file_path"]["text"] == (tmp_path / "failure_1.log").as_posix()
+
+
+def test_mcp_async_do_semaphore_is_recreated_when_limit_changes(
+    loaded_mcp_servers,
+) -> None:
+    async def build_semaphores():
+        loaded_mcp_servers._ASYNC_DO_SEMAPHORES.clear()
+        loaded_mcp_servers.config = SimpleNamespace(MAX_ASYNC_DO=1)
+        first = loaded_mcp_servers._get_async_do_semaphore()
+        loaded_mcp_servers.config = SimpleNamespace(MAX_ASYNC_DO=2)
+        second = loaded_mcp_servers._get_async_do_semaphore()
+        return first, second, len(loaded_mcp_servers._ASYNC_DO_SEMAPHORES)
+
+    first, second, cache_size = asyncio.run(build_semaphores())
+
+    assert first is not second
+    assert cache_size == 1
+    assert len(loaded_mcp_servers._ASYNC_DO_SEMAPHORES) == 0
+
+
+def test_mcp_async_do_semaphore_falls_back_to_default_for_invalid_runtime_limit(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_mcp_servers,
+    tmp_path: Path,
+) -> None:
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofiles = []
+    for index in range(4):
+        dofile = work_dir / f"invalid_limit_{index}.do"
+        dofile.write_text("display 1")
+        dofiles.append(dofile)
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    loaded_mcp_servers.config.MAX_ASYNC_DO = 0
+    loaded_mcp_servers._ASYNC_DO_SEMAPHORES.clear()
+    tracker = {"active": 0, "max_active": 0}
+
+    class _FakeAsyncStataDo:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def execute_dofile_async(self, dofile_path, *args, **kwargs):
+            tracker["active"] += 1
+            tracker["max_active"] = max(tracker["max_active"], tracker["active"])
+            await asyncio.sleep(0.01)
+            tracker["active"] -= 1
+            return {"text": tmp_path / f"{dofile_path.stem}.log"}
+
+        @staticmethod
+        def read_log(log_file_path):
+            return "ok"
+
+    async_module = importlib.import_module("stata_mcp.stata.stata_do.async_do")
+    monkeypatch.setattr(async_module, "AsyncStataDo", _FakeAsyncStataDo)
+
+    async def run_jobs():
+        return await asyncio.gather(
+            *(
+                loaded_mcp_servers._async_stata_do(dofile.as_posix(), enable_smcl=False)
+                for dofile in dofiles
+            )
+        )
+
+    asyncio.run(run_jobs())
+
+    assert tracker["max_active"] == 3
 
 
 def test_stata_do_rejects_dofile_outside_whitelist(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):

@@ -220,7 +220,7 @@ class Config:
             if normalized_value == "false":
                 return False
             raise ValueError("Expected 'true' or 'false'.")
-        raise TypeError("Expected a boolean or a 'true'/'false' string.")
+        raise TypeError("Expected a boolean or an explicit boolean string.")
 
     @staticmethod
     def _to_int(value):
@@ -276,6 +276,26 @@ class Config:
             default=False,
             converter=self._to_bool,
             validator=lambda x: isinstance(x, bool)
+        )
+
+    @property
+    def IS_ASYNC_DO(self) -> bool:
+        return self._get_config_value(
+            config_keys=["BETA", "IS_ASYNC_DO"],
+            env_var="STATA_MCP__IS_ASYNC_DO",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool)
+        )
+
+    @property
+    def MAX_ASYNC_DO(self) -> int:
+        return self._get_config_value(
+            config_keys=["BETA", "MAX_ASYNC_DO"],
+            env_var="STATA_MCP__MAX_ASYNC_DO",
+            default=3,
+            converter=self._to_int,
+            validator=lambda x: isinstance(x, int) and x > 0
         )
 
     @property

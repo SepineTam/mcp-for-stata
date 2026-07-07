@@ -7,7 +7,7 @@ import subprocess
 from argparse import Namespace
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -196,6 +196,53 @@ def test_api_stata_do_forwards_optional_timeout(
 
     assert "error" not in result
     executor.execute_dofile.assert_called_once_with(
+        dofile.resolve(),
+        None,
+        True,
+        True,
+        timeout=8,
+    )
+
+
+def test_api_stata_do_uses_async_executor_when_enabled(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    stata_do_api = importlib.import_module("stata_mcp.api.stata_do")
+    dofile = _dofile(tmp_path)
+    executor = SimpleNamespace(
+        execute_dofile_async=AsyncMock(return_value={"text": tmp_path / "run.log"})
+    )
+    runtime = SimpleNamespace(
+        config=SimpleNamespace(
+            STATA_MCP_FOLDER=SimpleNamespace(DO=tmp_path),
+            WORKING_DIR=tmp_path,
+            IS_GUARD=False,
+            IS_MONITOR=False,
+            IS_ASYNC_DO=True,
+        ),
+        stata_cli="stata",
+        log_base_path=tmp_path,
+        is_unix=True,
+        cwd=tmp_path,
+    )
+    async_executor_cls = Mock(return_value=executor)
+    monkeypatch.setattr(
+        stata_do_api, "create_runtime_context", lambda **kwargs: runtime
+    )
+    monkeypatch.setattr(stata_do_api, "AsyncStataDo", async_executor_cls)
+
+    result = stata_do_api.stata_do(dofile.as_posix(), timeout=8)
+
+    assert "error" not in result
+    async_executor_cls.assert_called_once_with(
+        stata_cli="stata",
+        log_file_path=tmp_path,
+        is_unix=True,
+        cwd=tmp_path,
+        monitors=[],
+    )
+    executor.execute_dofile_async.assert_awaited_once_with(
         dofile.resolve(),
         None,
         True,
