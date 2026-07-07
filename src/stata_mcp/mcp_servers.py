@@ -7,13 +7,15 @@
 # @Email  : sepinetam@gmail.com
 # @File   : mcp_servers.py
 
+import asyncio
 import json
 import logging
 import logging.handlers
 import re
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Literal
+from typing import Any, Callable, Coroutine, Dict, List, Literal
 
 from mcp.server.fastmcp import Context, FastMCP, Icon
 from pydantic import BaseModel, Field
@@ -269,8 +271,14 @@ def stata_do(
             monitors.append(RAMMonitor(max_ram_mb=config.MAX_RAM_MB))
 
     # Initialize Stata executor with system configuration
-    from .stata import StataDo
-    stata_executor = StataDo(
+    if getattr(config, "IS_ASYNC_DO", False):
+        from .stata.stata_do.async_do import AsyncStataDo
+        executor_cls = AsyncStataDo
+    else:
+        from .stata import StataDo
+        executor_cls = StataDo
+
+    stata_executor = executor_cls(
         stata_cli=config.STATA_CLI,  # Path to Stata executable
         log_file_path=config.STATA_MCP_FOLDER.LOG,  # Directory for log files
         is_unix=config.IS_UNIX,  # Whether the OS is Unix-like
@@ -284,13 +292,24 @@ def stata_do(
     from .core.types import RAMLimitExceededError
 
     try:
-        log_file_path_mapping: Dict[str, Path] = stata_executor.execute_dofile(
-            dofile_path,
-            log_file_name,
-            is_replace_log,
-            enable_smcl,
-            timeout=timeout,
-        )
+        if getattr(config, "IS_ASYNC_DO", False):
+            log_file_path_mapping: Dict[str, Path] = _run_coroutine_sync(
+                stata_executor.execute_dofile_async(
+                    dofile_path,
+                    log_file_name,
+                    is_replace_log,
+                    enable_smcl,
+                    timeout=timeout,
+                )
+            )
+        else:
+            log_file_path_mapping: Dict[str, Path] = stata_executor.execute_dofile(
+                dofile_path,
+                log_file_name,
+                is_replace_log,
+                enable_smcl,
+                timeout=timeout,
+            )
         text_log = log_file_path_mapping.get("text").as_posix()
         logging.info(f"{dofile_path} is executed successfully. Log file path: {text_log}")
     except RAMLimitExceededError as e:
@@ -325,6 +344,17 @@ def stata_do(
         result["log_content"] = log_content
 
     return result
+
+
+def _run_coroutine_sync(coroutine: Coroutine[Any, Any, Any]) -> Any:
+    """Run a coroutine from synchronous code, even when a loop already exists."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coroutine)
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        return executor.submit(asyncio.run, coroutine).result()
 
 
 class _AdoInstallApproval(BaseModel):

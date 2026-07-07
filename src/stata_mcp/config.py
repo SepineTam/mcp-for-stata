@@ -215,12 +215,12 @@ class Config:
             return value
         if isinstance(value, str):
             normalized_value = value.strip().lower()
-            if normalized_value == "true":
+            if normalized_value in {"true", "on"}:
                 return True
-            if normalized_value == "false":
+            if normalized_value in {"false", "off"}:
                 return False
-            raise ValueError("Expected 'true' or 'false'.")
-        raise TypeError("Expected a boolean or a 'true'/'false' string.")
+            raise ValueError("Expected 'true', 'false', 'on', or 'off'.")
+        raise TypeError("Expected a boolean or an explicit boolean string.")
 
     @staticmethod
     def _to_int(value):
@@ -273,6 +273,16 @@ class Config:
         return self._get_config_value(
             config_keys=["BETA", "ENABLE_WRITE_DOFILE"],
             env_var="STATA_MCP__ENABLE_WRITE_DOFILE",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool)
+        )
+
+    @property
+    def IS_ASYNC_DO(self) -> bool:
+        return self._get_config_value(
+            config_keys=["BETA", "IS_ASYNC_DO"],
+            env_var="STATA_MCP__IS_ASYNC_DO",
             default=False,
             converter=self._to_bool,
             validator=lambda x: isinstance(x, bool)

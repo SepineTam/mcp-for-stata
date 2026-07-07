@@ -6,7 +6,7 @@ import importlib
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -138,6 +138,50 @@ def test_mcp_stata_do_forwards_optional_timeout(
 
     assert "error" not in result
     fake_executor.execute_dofile.assert_called_once_with(
+        dofile,
+        None,
+        True,
+        True,
+        timeout=12.5,
+    )
+
+
+def test_mcp_stata_do_uses_async_executor_when_enabled(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_mcp_servers,
+    tmp_path: Path,
+):
+    do_dir = tmp_path / "do"
+    do_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    dofile = work_dir / "ok.do"
+    dofile.write_text("display 1")
+    log_file = tmp_path / "run.log"
+    log_file.write_text("ok")
+
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    loaded_mcp_servers.config.IS_ASYNC_DO = True
+    async_module = importlib.import_module("stata_mcp.stata.stata_do.async_do")
+    fake_executor = SimpleNamespace(
+        execute_dofile_async=AsyncMock(return_value={"text": log_file}),
+        read_log=Mock(return_value="ok"),
+    )
+    async_executor_cls = Mock(return_value=fake_executor)
+    monkeypatch.setattr(async_module, "AsyncStataDo", async_executor_cls)
+
+    result = loaded_mcp_servers.stata_do(dofile.as_posix(), timeout=12.5)
+
+    assert "error" not in result
+    assert result["log_file_path"]["text"] == log_file.as_posix()
+    async_executor_cls.assert_called_once_with(
+        stata_cli="stata",
+        log_file_path=tmp_path,
+        is_unix=True,
+        cwd=work_dir,
+        monitors=[],
+    )
+    fake_executor.execute_dofile_async.assert_awaited_once_with(
         dofile,
         None,
         True,
