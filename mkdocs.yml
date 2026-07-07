@@ -91,6 +91,8 @@ nav:
   - Agents:
       - Summary: agents/index.md
       - Claude Code: agents/claude_code.md
+      - Claude Science: agents/claude_science.md
+      - Codex: agents/codex.md
       - OpenClaw: agents/openclaw.md
 
   - CoreTech:
