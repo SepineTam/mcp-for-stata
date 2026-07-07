@@ -7,10 +7,12 @@
 # @Email  : sepinetam@gmail.com
 # @File   : mcp_servers.py
 
+import asyncio
 import json
 import logging
 import logging.handlers
 import re
+import weakref
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Literal, NamedTuple
@@ -22,6 +24,7 @@ from .config import Config
 
 # Init project config
 config = Config()
+_ASYNC_DO_SEMAPHORES: weakref.WeakKeyDictionary[Any, tuple[int, asyncio.Semaphore]] = weakref.WeakKeyDictionary()
 
 # Maybe somebody does not like logging.
 # Whatever, left a controller switch `logging STATA_MCP_LOGGING_ON`. Turn off all logging with setting it as false.
@@ -273,6 +276,20 @@ def _format_stata_do_result(
     return result
 
 
+def _get_async_do_semaphore() -> asyncio.Semaphore:
+    """Return the per-event-loop async do-file concurrency limiter."""
+    limit = getattr(config, "MAX_ASYNC_DO", 3)
+    if isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0:
+        limit = 3
+    loop = asyncio.get_running_loop()
+    cached = _ASYNC_DO_SEMAPHORES.get(loop)
+    if cached is None or cached[0] != limit:
+        semaphore = asyncio.Semaphore(limit)
+        _ASYNC_DO_SEMAPHORES[loop] = (limit, semaphore)
+        return semaphore
+    return cached[1]
+
+
 def _sync_stata_do(
         dofile_path: str,
         log_file_name: str = None,
@@ -384,13 +401,14 @@ async def _async_stata_do(
     from .core.types import RAMLimitExceededError
 
     try:
-        log_file_path_mapping: Dict[str, Path] = await stata_executor.execute_dofile_async(
-            request.dofile_path,
-            log_file_name,
-            is_replace_log,
-            enable_smcl,
-            timeout=timeout,
-        )
+        async with _get_async_do_semaphore():
+            log_file_path_mapping: Dict[str, Path] = await stata_executor.execute_dofile_async(
+                request.dofile_path,
+                log_file_name,
+                is_replace_log,
+                enable_smcl,
+                timeout=timeout,
+            )
         text_log = log_file_path_mapping.get("text").as_posix()
         logging.info(f"{request.dofile_path} is executed successfully. Log file path: {text_log}")
     except RAMLimitExceededError as e:

@@ -125,6 +125,67 @@ def test_execute_dofile_async_generates_text_only_when_smcl_disabled(
     assert "run.smcl" not in command_text
 
 
+def test_execute_dofile_async_generates_unique_default_log_names(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    tracker = _tracker()
+
+    async def fake_create_subprocess_exec(*args, **kwargs):
+        return _FakeAsyncProcess(tracker)
+
+    monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
+    monkeypatch.setattr(
+        "stata_mcp.stata.stata_do.async_do.get_nowtime",
+        lambda: "20260101010101",
+    )
+    executor = AsyncStataDo("stata", tmp_path, is_unix=True)
+    dofile = _dofile(tmp_path)
+
+    async def run_jobs():
+        return await asyncio.gather(
+            executor.execute_dofile_async(dofile),
+            executor.execute_dofile_async(dofile),
+        )
+
+    result = asyncio.run(run_jobs())
+    text_log_names = [item["text"].name for item in result]
+
+    assert len(set(text_log_names)) == 2
+    assert all(name.startswith("20260101010101_") for name in text_log_names)
+
+
+def test_execute_dofiles_generates_unique_default_log_names_between_batches(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    tracker = _tracker()
+
+    async def fake_create_subprocess_exec(*args, **kwargs):
+        return _FakeAsyncProcess(tracker)
+
+    monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
+    monkeypatch.setattr(
+        "stata_mcp.stata.stata_do.async_do.get_nowtime",
+        lambda: "20260101010101",
+    )
+    executor = AsyncStataDo("stata", tmp_path, is_unix=True)
+    dofiles = [_dofile(tmp_path, "one.do"), _dofile(tmp_path, "two.do")]
+
+    async def run_batches():
+        first, second = await asyncio.gather(
+            executor.execute_dofiles(dofiles),
+            executor.execute_dofiles(dofiles),
+        )
+        return first + second
+
+    result = asyncio.run(run_batches())
+    text_log_names = [item["text"].name for item in result]
+
+    assert len(set(text_log_names)) == 4
+    assert all(name.startswith("20260101010101_") for name in text_log_names)
+
+
 def test_execute_dofile_async_raises_when_stata_process_fails(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -173,6 +234,42 @@ def test_execute_dofile_async_cleans_up_after_timeout(
                 timeout=0.01,
             )
         )
+
+    assert process.terminated is True
+    assert process.killed is False
+
+
+def test_execute_dofile_async_cleans_up_after_cancellation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    tracker = _tracker()
+    process = _FakeAsyncProcess(tracker, wait_blocks=False)
+
+    async def blocked_communicate(input: bytes | None = None):
+        await asyncio.sleep(10)
+        return b"", b""
+
+    process.communicate = blocked_communicate
+
+    async def fake_create_subprocess_exec(*args, **kwargs):
+        return process
+
+    async def run_and_cancel():
+        monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
+        executor = AsyncStataDo("stata", tmp_path, is_unix=True)
+        task = asyncio.create_task(
+            executor.execute_dofile_async(
+                _dofile(tmp_path),
+                log_file_name="run",
+            )
+        )
+        await asyncio.sleep(0)
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    asyncio.run(run_and_cancel())
 
     assert process.terminated is True
     assert process.killed is False

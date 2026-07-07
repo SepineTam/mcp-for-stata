@@ -9,6 +9,7 @@
 
 import asyncio
 import logging
+import uuid
 from pathlib import Path
 from typing import Dict, Sequence
 
@@ -56,7 +57,7 @@ class AsyncStataDo(StataDo):
             )
 
         timeout = self._validate_timeout(timeout)
-        log_name = log_file_name or get_nowtime()
+        log_name = log_file_name or self._generate_default_log_name()
         self._validate_log_name(log_name)
         validated_dofile_path = self._validate_dofile_path(dofile_path)
 
@@ -209,11 +210,16 @@ class AsyncStataDo(StataDo):
             if len(names) != task_count:
                 raise ValueError("log_file_names must match the number of dofile_paths.")
         else:
-            nowtime = get_nowtime()
-            names = [f"{nowtime}_{index + 1}" for index in range(task_count)]
+            batch_name = self._generate_default_log_name()
+            names = [f"{batch_name}_{index + 1}" for index in range(task_count)]
 
         for name in names:
             self._validate_log_name(name)
         if len(set(names)) != len(names):
             raise ValueError("log_file_names must be unique for parallel execution.")
         return names
+
+    @staticmethod
+    def _generate_default_log_name() -> str:
+        """Generate a collision-resistant default log name for async execution."""
+        return f"{get_nowtime()}_{uuid.uuid4().hex[:12]}"

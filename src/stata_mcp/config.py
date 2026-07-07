@@ -289,6 +289,16 @@ class Config:
         )
 
     @property
+    def MAX_ASYNC_DO(self) -> int:
+        return self._get_config_value(
+            config_keys=["BETA", "MAX_ASYNC_DO"],
+            env_var="STATA_MCP__MAX_ASYNC_DO",
+            default=3,
+            converter=self._to_int,
+            validator=lambda x: isinstance(x, int) and x > 0
+        )
+
+    @property
     def IS_CACHE_HELP(self) -> bool:
         return self._get_config_value(
             config_keys=["HELP", "IS_CACHE"],
