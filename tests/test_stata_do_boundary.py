@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import asyncio
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
@@ -170,7 +171,9 @@ def test_mcp_stata_do_uses_async_executor_when_enabled(
     async_executor_cls = Mock(return_value=fake_executor)
     monkeypatch.setattr(async_module, "AsyncStataDo", async_executor_cls)
 
-    result = loaded_mcp_servers.stata_do(dofile.as_posix(), timeout=12.5)
+    result = asyncio.run(
+        loaded_mcp_servers._async_stata_do(dofile.as_posix(), timeout=12.5)
+    )
 
     assert "error" not in result
     assert result["log_file_path"]["text"] == log_file.as_posix()

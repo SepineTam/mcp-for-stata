@@ -7,15 +7,13 @@
 # @Email  : sepinetam@gmail.com
 # @File   : mcp_servers.py
 
-import asyncio
 import json
 import logging
 import logging.handlers
 import re
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Coroutine, Dict, List, Literal
+from typing import Any, Callable, Dict, List, Literal, NamedTuple
 
 from mcp.server.fastmcp import Context, FastMCP, Icon
 from pydantic import BaseModel, Field
@@ -138,45 +136,13 @@ def help(cmd: str, replace: bool = False) -> str:
     return _load_help_cls().help(cmd, replace=replace)
 
 
-def stata_do(
-        dofile_path: str,
-        log_file_name: str = None,
-        read_log_when_error: bool = False,
-        is_replace_log: bool = True,
-        enable_smcl: bool = True,
-        timeout: float | None = None,
-) -> Dict[str, Any]:
-    """
-    Execute a Stata do-file and return log file paths.
+class _StataDoRequest(NamedTuple):
+    dofile_path: Path
+    monitors: list[Any]
 
-    Args:
-        dofile_path (str): Path to the .do file.
-        log_file_name (str, optional): Custom log name without timestamp. Default uses current time.
-        read_log_when_error (bool): If True, include log text only when a Stata return-code error
-            (e.g. r(198)) is present. If no error is found, returns a short confirmation instead.
-        is_replace_log (bool): Overwrite existing log files. Defaults to True.
-        enable_smcl (bool): Also generate .smcl log (Unix only). Defaults to True.
-        timeout (float, optional): Maximum execution time in seconds. Defaults to no timeout.
 
-    Returns:
-        Dict[str, Any]: "log_file_path" (text/smcl) and optionally "log_content".
-
-    Examples:
-        >>> stata_do("/path/to/analysis.do")
-        >>> stata_do("/path/to/analysis.do", read_log_when_error=True)
-
-    Raises:
-        FileNotFoundError: If the specified do-file does not exist.
-        RuntimeError: If Stata execution fails or log file cannot be generated.
-        PermissionError: If there are insufficient permissions to execute Stata or write log files.
-
-    Notes:
-        - Log files are automatically created in the configured log directory.
-        - Supports multiple operating systems through the StataDo executor.
-        - SMCL format preserves hyperlinks from findsj, getiref commands (Unix only).
-        - Security guard blocks execution when dangerous commands are detected.
-        - To disable security guard, set STATA_MCP__IS_GUARD=false (not recommended).
-    """
+def _prepare_stata_do_request(dofile_path: str) -> Dict[str, Any] | _StataDoRequest:
+    """Validate a do-file request and build shared execution inputs."""
     # Convert dofile_path from str to Path
     try:
         dofile_path = Path(dofile_path)
@@ -270,55 +236,16 @@ def stata_do(
             from .monitor import RAMMonitor
             monitors.append(RAMMonitor(max_ram_mb=config.MAX_RAM_MB))
 
-    # Initialize Stata executor with system configuration
-    if getattr(config, "IS_ASYNC_DO", False):
-        from .stata.stata_do.async_do import AsyncStataDo
-        executor_cls = AsyncStataDo
-    else:
-        from .stata import StataDo
-        executor_cls = StataDo
+    return _StataDoRequest(dofile_path=dofile_path, monitors=monitors)
 
-    stata_executor = executor_cls(
-        stata_cli=config.STATA_CLI,  # Path to Stata executable
-        log_file_path=config.STATA_MCP_FOLDER.LOG,  # Directory for log files
-        is_unix=config.IS_UNIX,  # Whether the OS is Unix-like
-        cwd=config.WORKING_DIR,
-        monitors=monitors
-    )
 
-    # Execute the do-file and get log file path
-    logging.info(f"Try to running file {dofile_path}")
-
-    from .core.types import RAMLimitExceededError
-
-    try:
-        if getattr(config, "IS_ASYNC_DO", False):
-            log_file_path_mapping: Dict[str, Path] = _run_coroutine_sync(
-                stata_executor.execute_dofile_async(
-                    dofile_path,
-                    log_file_name,
-                    is_replace_log,
-                    enable_smcl,
-                    timeout=timeout,
-                )
-            )
-        else:
-            log_file_path_mapping: Dict[str, Path] = stata_executor.execute_dofile(
-                dofile_path,
-                log_file_name,
-                is_replace_log,
-                enable_smcl,
-                timeout=timeout,
-            )
-        text_log = log_file_path_mapping.get("text").as_posix()
-        logging.info(f"{dofile_path} is executed successfully. Log file path: {text_log}")
-    except RAMLimitExceededError as e:
-        logging.error(f"Out of max RAM limit: {e}")
-        return {"error": f"Out of max RAM limit: {e}"}
-    except Exception as e:
-        logging.error(f"Failed to execute {dofile_path}. Error: {str(e)}")
-        return {"error": str(e)}
-
+def _format_stata_do_result(
+    log_file_path_mapping: Dict[str, Path],
+    read_log_when_error: bool,
+    enable_smcl: bool,
+    stata_executor: Any,
+    text_log: str,
+) -> Dict[str, Any]:
     result: Dict[str, Any] = {
         "log_file_path": {
             k: v.as_posix()  # avoiding issues with some AI clients that may not recognize Path objects
@@ -346,15 +273,143 @@ def stata_do(
     return result
 
 
-def _run_coroutine_sync(coroutine: Coroutine[Any, Any, Any]) -> Any:
-    """Run a coroutine from synchronous code, even when a loop already exists."""
-    try:
-        asyncio.get_running_loop()
-    except RuntimeError:
-        return asyncio.run(coroutine)
+def _sync_stata_do(
+        dofile_path: str,
+        log_file_name: str = None,
+        read_log_when_error: bool = False,
+        is_replace_log: bool = True,
+        enable_smcl: bool = True,
+        timeout: float | None = None,
+) -> Dict[str, Any]:
+    """
+    Execute a Stata do-file and return log file paths.
 
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        return executor.submit(asyncio.run, coroutine).result()
+    Args:
+        dofile_path (str): Path to the .do file.
+        log_file_name (str, optional): Custom log name without timestamp. Default uses current time.
+        read_log_when_error (bool): If True, include log text only when a Stata return-code error
+            (e.g. r(198)) is present. If no error is found, returns a short confirmation instead.
+        is_replace_log (bool): Overwrite existing log files. Defaults to True.
+        enable_smcl (bool): Also generate .smcl log (Unix only). Defaults to True.
+        timeout (float, optional): Maximum execution time in seconds. Defaults to no timeout.
+
+    Returns:
+        Dict[str, Any]: "log_file_path" (text/smcl) and optionally "log_content".
+
+    Examples:
+        >>> stata_do("/path/to/analysis.do")
+        >>> stata_do("/path/to/analysis.do", read_log_when_error=True)
+
+    Raises:
+        FileNotFoundError: If the specified do-file does not exist.
+        RuntimeError: If Stata execution fails or log file cannot be generated.
+        PermissionError: If there are insufficient permissions to execute Stata or write log files.
+
+    Notes:
+        - Log files are automatically created in the configured log directory.
+        - Supports multiple operating systems through the StataDo executor.
+        - SMCL format preserves hyperlinks from findsj, getiref commands (Unix only).
+        - Security guard blocks execution when dangerous commands are detected.
+        - To disable security guard, set STATA_MCP__IS_GUARD=false (not recommended).
+    """
+    request = _prepare_stata_do_request(dofile_path)
+    if isinstance(request, dict):
+        return request
+
+    # Initialize Stata executor with system configuration
+    from .stata import StataDo
+    stata_executor = StataDo(
+        stata_cli=config.STATA_CLI,  # Path to Stata executable
+        log_file_path=config.STATA_MCP_FOLDER.LOG,  # Directory for log files
+        is_unix=config.IS_UNIX,  # Whether the OS is Unix-like
+        cwd=config.WORKING_DIR,
+        monitors=request.monitors
+    )
+
+    # Execute the do-file and get log file path
+    logging.info(f"Try to running file {request.dofile_path}")
+
+    from .core.types import RAMLimitExceededError
+
+    try:
+        log_file_path_mapping: Dict[str, Path] = stata_executor.execute_dofile(
+            request.dofile_path,
+            log_file_name,
+            is_replace_log,
+            enable_smcl,
+            timeout=timeout,
+        )
+        text_log = log_file_path_mapping.get("text").as_posix()
+        logging.info(f"{request.dofile_path} is executed successfully. Log file path: {text_log}")
+    except RAMLimitExceededError as e:
+        logging.error(f"Out of max RAM limit: {e}")
+        return {"error": f"Out of max RAM limit: {e}"}
+    except Exception as e:
+        logging.error(f"Failed to execute {request.dofile_path}. Error: {str(e)}")
+        return {"error": str(e)}
+
+    return _format_stata_do_result(
+        log_file_path_mapping,
+        read_log_when_error,
+        enable_smcl,
+        stata_executor,
+        text_log,
+    )
+
+
+async def _async_stata_do(
+        dofile_path: str,
+        log_file_name: str = None,
+        read_log_when_error: bool = False,
+        is_replace_log: bool = True,
+        enable_smcl: bool = True,
+        timeout: float | None = None,
+) -> Dict[str, Any]:
+    """Async Stata do-file tool implementation."""
+    request = _prepare_stata_do_request(dofile_path)
+    if isinstance(request, dict):
+        return request
+
+    from .stata.stata_do.async_do import AsyncStataDo
+    stata_executor = AsyncStataDo(
+        stata_cli=config.STATA_CLI,
+        log_file_path=config.STATA_MCP_FOLDER.LOG,
+        is_unix=config.IS_UNIX,
+        cwd=config.WORKING_DIR,
+        monitors=request.monitors
+    )
+
+    logging.info(f"Try to running file {request.dofile_path}")
+
+    from .core.types import RAMLimitExceededError
+
+    try:
+        log_file_path_mapping: Dict[str, Path] = await stata_executor.execute_dofile_async(
+            request.dofile_path,
+            log_file_name,
+            is_replace_log,
+            enable_smcl,
+            timeout=timeout,
+        )
+        text_log = log_file_path_mapping.get("text").as_posix()
+        logging.info(f"{request.dofile_path} is executed successfully. Log file path: {text_log}")
+    except RAMLimitExceededError as e:
+        logging.error(f"Out of max RAM limit: {e}")
+        return {"error": f"Out of max RAM limit: {e}"}
+    except Exception as e:
+        logging.error(f"Failed to execute {request.dofile_path}. Error: {str(e)}")
+        return {"error": str(e)}
+
+    return _format_stata_do_result(
+        log_file_path_mapping,
+        read_log_when_error,
+        enable_smcl,
+        stata_executor,
+        text_log,
+    )
+
+
+stata_do = _async_stata_do if getattr(config, "IS_ASYNC_DO", False) else _sync_stata_do
 
 
 class _AdoInstallApproval(BaseModel):

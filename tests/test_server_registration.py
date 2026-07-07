@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import inspect
 import logging
 import sys
 import asyncio
@@ -139,6 +140,19 @@ def test_register_tools_core_only_registers_core(monkeypatch: pytest.MonkeyPatch
 
     assert set(server.tools) == {"stata_do", "get_data_info", "help"}
     assert server.resources == []  # resource registration temporarily disabled
+
+
+def test_stata_do_tool_is_async_function_when_async_do_enabled(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    monkeypatch.setenv("STATA_MCP__IS_ASYNC_DO", "on")
+    monkeypatch.delitem(sys.modules, "stata_mcp.mcp_servers", raising=False)
+
+    mcp_servers = importlib.import_module("stata_mcp.mcp_servers")
+
+    assert inspect.iscoroutinefunction(mcp_servers.stata_do)
+    assert mcp_servers._TOOL_REGISTRY["stata_do"]["func"] is mcp_servers.stata_do
 
 
 def test_register_tools_all_applies_platform_and_deprecated_filters(
