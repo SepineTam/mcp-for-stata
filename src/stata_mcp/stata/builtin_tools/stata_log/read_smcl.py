@@ -12,7 +12,6 @@ from pathlib import Path
 
 from .base import StataLogBase, StataLogInfo
 
-
 MAX_SMCL_EXPANSION = 10_000
 
 
