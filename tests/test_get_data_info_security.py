@@ -354,6 +354,33 @@ def test_url_guard_enabled_rejects_http_scheme(monkeypatch, tmp_path) -> None:
     assert fake_data_info.calls == []
 
 
+def test_url_guard_enabled_rejects_http_scheme_logs_security_violation(
+    caplog,
+    monkeypatch,
+    tmp_path,
+) -> None:
+    _patch_fake_data_info(monkeypatch)
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    config_path = _write_config(
+        tmp_path,
+        working_dir,
+        enable_guard=True,
+        allowed_domains=["example.com"],
+    )
+
+    with caplog.at_level(logging.WARNING):
+        result = api_get_data_info(
+            data_path="http://example.com/data.csv",
+            config_file=config_path,
+        )
+
+    messages = _joined_log_messages(caplog)
+    assert result == "Access denied: only HTTPS URLs are allowed."
+    assert "[SECURITY VIOLATION]" in messages
+    assert "non-https-scheme" in messages
+
+
 def test_url_rejects_username_or_password(monkeypatch, tmp_path) -> None:
     fake_data_info = _patch_fake_data_info(monkeypatch)
     working_dir = tmp_path / "work"
