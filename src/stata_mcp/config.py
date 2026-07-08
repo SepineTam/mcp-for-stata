@@ -531,6 +531,16 @@ class Config:
         )
 
     @cached_property
+    def STRICT_READ_LOG_BOUNDARY(self) -> bool:
+        return self._get_config_value(
+            config_keys=["SECURITY", "strict_read_log_boundary"],
+            env_var="",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool),
+        )
+
+    @cached_property
     def ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES(self) -> tuple[str, ...]:
         """Return GitHub repositories explicitly allowed for ado installation."""
         return self._get_config_value(

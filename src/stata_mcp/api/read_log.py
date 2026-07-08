@@ -5,7 +5,7 @@
 #
 # @Author : Sepine Tam
 # @Email  : sepinetam@gmail.com
-# @File   : read_log.py
+# @File   : api/read_log.py
 
 from pathlib import Path
 from typing import Literal
@@ -22,8 +22,20 @@ def read_log(
     config_file: str | Path | None = None,
 ) -> str:
     """Read a Stata log file as a direct one-shot utility."""
-    _ = (is_beta, config_file)
+    _ = is_beta
+
+    from ._runtime import create_runtime_context
+
+    runtime = create_runtime_context(config_file=config_file)
+
     path = Path(file_path).expanduser().resolve()
+
+    if runtime.config.STRICT_READ_LOG_BOUNDARY:
+        allowed_base = runtime.config.STATA_MCP_FOLDER.path.resolve()
+        try:
+            path.relative_to(allowed_base)
+        except ValueError:
+            return "Access denied: log file must be within the stata-mcp folder."
 
     if not path.exists():
         raise FileNotFoundError(f"The file at {file_path} does not exist.")
