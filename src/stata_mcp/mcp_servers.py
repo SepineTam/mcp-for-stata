@@ -8,7 +8,6 @@
 # @File   : mcp_servers.py
 
 import asyncio
-import json
 import logging
 import logging.handlers
 import re
@@ -526,31 +525,15 @@ def get_data_info(
         >>> get_data_info("/Applications/Stata/auto.dta")
         >>> get_data_info("/Applications/Stata/auto.dta", vars_list=["price", "mpg"], head=5)
     """
-    data_path = Path(data_path).expanduser().resolve()
-    data_extension = data_path.suffix.lower().strip(".")
+    from .api.get_data_info import _get_data_info_impl
 
-    # Lazy import: pandas/numpy/requests are heavy, only load when needed
-    from .data_info import get_data_handler
-
-    # Get the appropriate data handler class from the registry
-    data_info_cls = get_data_handler(data_extension)
-
-    if not data_info_cls:
-        logging.error(f"Unsupported file extension: {data_extension} for data file: {data_path}")
-        return f"Unsupported file extension now: {data_extension}"
-
-    data_info = data_info_cls(data_path, vars_list, encoding=encoding, cache_dir=config.STATA_MCP_FOLDER.TMP, head=head)
-    try:
-        info = data_info.info
-        if data_info.is_cache:
-            saved_path = info.get("saved_path", None)
-            logging.info(f"Successfully generated data summary for {data_path}, saved to {saved_path}")
-        else:
-            logging.info(f"Successfully generated data summary for {data_path}")
-        return json.dumps(info, ensure_ascii=False)
-    except Exception as e:
-        logging.error(f"Failed to generate data summary for {data_path}: {str(e)}")
-        return f"Failed to generate data summary for {data_path}: {str(e)}"
+    return _get_data_info_impl(
+        data_path=data_path,
+        vars_list=vars_list,
+        encoding=encoding,
+        config_file=config.config_file if config.is_debug_config else None,
+        head=head,
+    )
 
 
 # =============================================================================

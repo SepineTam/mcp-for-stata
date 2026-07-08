@@ -8,23 +8,101 @@
 # @File   : get_data_info.py
 
 import json
+import ipaddress
 from pathlib import Path
 from typing import List
+from urllib.parse import urlparse
 
 from ..data_info import get_data_handler
 from ._runtime import create_runtime_context
 
 
-def get_data_info(
+LOCAL_ACCESS_DENIED = "Access denied: data file must be within the working directory."
+URL_DOMAIN_ACCESS_DENIED = "Access denied: URL domain is not in the allowlist."
+IP_URL_ACCESS_DENIED = "Access denied: IP-based URLs are not allowed."
+NON_HTTPS_URL_ACCESS_DENIED = "Access denied: only HTTPS URLs are allowed."
+
+
+def _is_url(data_path: str) -> bool:
+    parsed_url = urlparse(data_path)
+    return bool(parsed_url.scheme and parsed_url.netloc)
+
+
+def _is_ip_host(host: str) -> bool:
+    try:
+        ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return True
+
+
+def _is_allowed_domain(host: str, allowed_domains: tuple[str, ...]) -> bool:
+    normalized_host = host.rstrip(".").lower()
+    for allowed_domain in allowed_domains:
+        normalized_allowed = allowed_domain.strip().rstrip(".").lower()
+        if not normalized_allowed:
+            continue
+        if normalized_host == normalized_allowed:
+            return True
+        if normalized_host.endswith(f".{normalized_allowed}"):
+            return True
+        if normalized_allowed == "github.com" and normalized_host == "raw.githubusercontent.com":
+            return True
+    return False
+
+
+def _validate_local_path(data_path: str, working_dir: Path) -> Path | str:
+    resolved_data_path = Path(data_path).expanduser().resolve()
+    try:
+        resolved_data_path.relative_to(working_dir.resolve())
+    except ValueError:
+        return LOCAL_ACCESS_DENIED
+    return resolved_data_path
+
+
+def _validate_url(data_path: str, runtime_config) -> tuple[str, str] | str:
+    parsed_url = urlparse(data_path)
+    if parsed_url.scheme.lower() != "https":
+        return NON_HTTPS_URL_ACCESS_DENIED
+
+    host = parsed_url.hostname
+    if not host:
+        return URL_DOMAIN_ACCESS_DENIED
+    if _is_ip_host(host):
+        return IP_URL_ACCESS_DENIED
+
+    if runtime_config.ENABLE_DATA_INFO_URL_GUARD and not _is_allowed_domain(
+        host,
+        runtime_config.DATA_INFO_ALLOWED_URL_DOMAINS,
+    ):
+        return URL_DOMAIN_ACCESS_DENIED
+
+    data_extension = Path(parsed_url.path).suffix.lower().strip(".")
+    return data_path, data_extension
+
+
+def _get_data_info_impl(
     data_path: str,
     vars_list: List[str] | None = None,
     encoding: str = "utf-8",
     config_file: str | Path | None = None,
+    *,
+    head: int = 0,
 ) -> str:
     """Return descriptive statistics for a supported dataset."""
     runtime = create_runtime_context(config_file=config_file)
-    resolved_data_path = Path(data_path).expanduser().resolve()
-    data_extension = resolved_data_path.suffix.lower().strip(".")
+
+    if _is_url(data_path):
+        validated_data = _validate_url(data_path, runtime.config)
+        if not isinstance(validated_data, tuple):
+            return validated_data
+        resolved_data_path, data_extension = validated_data
+    else:
+        validated_data_path = _validate_local_path(data_path, runtime.config.WORKING_DIR)
+        if isinstance(validated_data_path, str):
+            return validated_data_path
+        resolved_data_path = validated_data_path
+        data_extension = resolved_data_path.suffix.lower().strip(".")
 
     data_info_cls = get_data_handler(data_extension)
     if not data_info_cls:
@@ -35,8 +113,24 @@ def get_data_info(
         vars_list,
         encoding=encoding,
         cache_dir=runtime.tmp_base_path,
+        head=head,
     )
     try:
         return json.dumps(data_info.info, ensure_ascii=False)
     except Exception as error:
         return f"Failed to generate data summary for {resolved_data_path}: {error}"
+
+
+def get_data_info(
+    data_path: str,
+    vars_list: List[str] | None = None,
+    encoding: str = "utf-8",
+    config_file: str | Path | None = None,
+) -> str:
+    """Return descriptive statistics for a supported dataset."""
+    return _get_data_info_impl(
+        data_path=data_path,
+        vars_list=vars_list,
+        encoding=encoding,
+        config_file=config_file,
+    )

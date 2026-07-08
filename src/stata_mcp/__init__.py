@@ -7,18 +7,12 @@
 # @Email  : sepinetam@gmail.com
 # @File   : __init__.py
 
-import warnings
 from importlib.metadata import PackageNotFoundError, version
 
 try:
     __version__ = version("stata-mcp")
 except PackageNotFoundError:
     __version__ = "0.0.0"
-    warnings.warn(
-        "Package metadata for 'stata-mcp' is unavailable. Falling back to version '0.0.0'.",
-        RuntimeWarning,
-        stacklevel=1,
-    )
 __author__ = "Song Tan <sepinetan@gmail.com>"
 
 _default_server_cache = None
