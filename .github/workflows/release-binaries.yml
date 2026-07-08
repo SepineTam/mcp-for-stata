@@ -1,0 +1,82 @@
+name: Build Release Binaries
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.artifact_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: stata-mcp-linux-x86_64
+            executable_path: dist/stata-mcp
+          - os: macos-13
+            artifact_name: stata-mcp-macos-x86_64
+            executable_path: dist/stata-mcp
+          - os: macos-14
+            artifact_name: stata-mcp-macos-arm64
+            executable_path: dist/stata-mcp
+          - os: windows-latest
+            artifact_name: stata-mcp-windows-x86_64.exe
+            executable_path: dist/stata-mcp.exe
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install system compilers (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y build-essential
+
+      - name: Install build dependencies
+        run: uv sync --group build
+
+      - name: Build binary
+        run: uv run python -m nuitka --project --mode=onefile --output-dir=dist
+
+      - name: Stage binary
+        shell: bash
+        run: |
+          mkdir -p release-bin
+          cp "${{ matrix.executable_path }}" "release-bin/${{ matrix.artifact_name }}"
+          chmod +x "release-bin/${{ matrix.artifact_name }}" || true
+          if command -v shasum >/dev/null 2>&1; then
+            shasum -a 256 "release-bin/${{ matrix.artifact_name }}" > "release-bin/${{ matrix.artifact_name }}.sha256"
+          else
+            sha256sum "release-bin/${{ matrix.artifact_name }}" > "release-bin/${{ matrix.artifact_name }}.sha256"
+          fi
+
+      - name: Smoke test binary
+        shell: bash
+        run: |
+          "release-bin/${{ matrix.artifact_name }}" --version
+          "release-bin/${{ matrix.artifact_name }}" doctor --check python --check dependencies --dry-run
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: release-bin/*
+
+      - name: Upload release assets
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-bin/*
