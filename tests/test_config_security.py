@@ -106,3 +106,115 @@ MAX_ASYNC_DO = -2
 
     monkeypatch.setenv("STATA_MCP__MAX_ASYNC_DO", "not-a-number")
     assert Config(config_file=config_path).MAX_ASYNC_DO == 3
+
+
+def test_project_config_overrides_user_config_for_regular_sections(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    home_dir = tmp_path / "home"
+    project_dir = tmp_path / "project"
+    user_config_dir = home_dir / ".statamcp"
+    project_config_dir = project_dir / ".statamcp"
+    user_config_dir.mkdir(parents=True)
+    project_config_dir.mkdir(parents=True)
+    monkeypatch.setattr("pathlib.Path.home", lambda: home_dir)
+    monkeypatch.chdir(project_dir)
+
+    (user_config_dir / "config.toml").write_text(
+        """
+[BETA]
+MAX_ASYNC_DO = 2
+""".strip(),
+        encoding="utf-8",
+    )
+    (project_config_dir / "config.toml").write_text(
+        """
+[BETA]
+MAX_ASYNC_DO = 5
+""".strip(),
+        encoding="utf-8",
+    )
+
+    config = Config()
+
+    assert config.MAX_ASYNC_DO == 5
+
+
+def test_user_config_overrides_project_config_for_security_sections(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    home_dir = tmp_path / "home"
+    project_dir = tmp_path / "project"
+    user_config_dir = home_dir / ".statamcp"
+    project_config_dir = project_dir / ".statamcp"
+    user_config_dir.mkdir(parents=True)
+    project_config_dir.mkdir(parents=True)
+    monkeypatch.setattr("pathlib.Path.home", lambda: home_dir)
+    monkeypatch.chdir(project_dir)
+
+    (user_config_dir / "config.toml").write_text(
+        """
+[SECURITY]
+IS_GUARD = true
+ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = ["trusted/repository"]
+""".strip(),
+        encoding="utf-8",
+    )
+    (project_config_dir / "config.toml").write_text(
+        """
+[SECURITY]
+IS_GUARD = false
+ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = ["project/repository"]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    config = Config()
+
+    assert config.IS_GUARD is True
+    assert config.ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES == ("trusted/repository",)
+
+
+def test_debug_config_file_ignores_user_and_project_config(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    home_dir = tmp_path / "home"
+    project_dir = tmp_path / "project"
+    user_config_dir = home_dir / ".statamcp"
+    project_config_dir = project_dir / ".statamcp"
+    user_config_dir.mkdir(parents=True)
+    project_config_dir.mkdir(parents=True)
+    monkeypatch.setattr("pathlib.Path.home", lambda: home_dir)
+    monkeypatch.chdir(project_dir)
+
+    (user_config_dir / "config.toml").write_text(
+        """
+[BETA]
+MAX_ASYNC_DO = 2
+""".strip(),
+        encoding="utf-8",
+    )
+    (project_config_dir / "config.toml").write_text(
+        """
+[BETA]
+MAX_ASYNC_DO = 5
+""".strip(),
+        encoding="utf-8",
+    )
+    debug_config = tmp_path / "debug.toml"
+    debug_config.write_text(
+        """
+[BETA]
+MAX_ASYNC_DO = 7
+""".strip(),
+        encoding="utf-8",
+    )
+
+    config = Config(config_file=debug_config)
+
+    assert config.is_debug_config is True
+    assert config.config_files == (debug_config,)
+    assert config.MAX_ASYNC_DO == 7

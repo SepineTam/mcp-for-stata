@@ -67,7 +67,7 @@ def handle_doctor(args: Namespace) -> int:
             return 2
 
     try:
-        config = Config()
+        config = Config(config_file=getattr(args, "config_file", None))
     except Exception as error:
         print(f"Failed to initialize configuration for doctor: {error}", file=sys.stderr)
         return 1
@@ -87,6 +87,8 @@ def handle_tool(args: Namespace) -> int:
     from ..api import ado_package_install, get_data_info, read_log, stata_do, stata_help
 
     try:
+        config_file = getattr(args, "config_file", None)
+        config_kwargs = {"config_file": config_file} if config_file is not None else {}
         if args.tool_action == "ado-install":
             if not args.yes and not _confirm_ado_install(args):
                 print("Ado package installation cancelled.", file=sys.stderr)
@@ -96,6 +98,7 @@ def handle_tool(args: Namespace) -> int:
                 source=args.source,
                 is_replace=args.is_replace,
                 package_source_from=args.package_source_from,
+                **config_kwargs,
             )
         elif args.tool_action == "do":
             result = stata_do(
@@ -105,23 +108,27 @@ def handle_tool(args: Namespace) -> int:
                 is_replace_log=args.is_replace_log,
                 enable_smcl=args.enable_smcl,
                 timeout=args.timeout,
+                **config_kwargs,
             )
         elif args.tool_action == "help":
             result = stata_help(
                 cmd=args.stata_command,
                 replace=args.replace,
+                **config_kwargs,
             )
         elif args.tool_action == "data-info":
             result = get_data_info(
                 data_path=args.data_path,
                 vars_list=args.vars_list,
                 encoding=args.encoding,
+                **config_kwargs,
             )
         elif args.tool_action == "read-log":
             result = read_log(
                 file_path=args.file_path,
                 encoding=args.encoding,
                 output_format=args.output_format,
+                **config_kwargs,
             )
         else:
             return 2
@@ -156,14 +163,18 @@ def handle_config(args: Namespace) -> int:
     """Handle the config subcommand."""
     from ..config import Config
 
-    cfg = Config()
+    cfg = Config(config_file=getattr(args, "config_file", None))
 
     if args.config_action is None:
         content = cfg.read_config_text()
         if content:
             print(content, end="" if content.endswith("\n") else "\n")
         else:
-            print(f"No config file found at: {cfg.config_file}")
+            if cfg.is_debug_config:
+                print(f"No config file found at: {cfg.config_file}")
+            else:
+                paths = ", ".join(str(path) for path in cfg.config_files)
+                print(f"No config file found at: {paths}")
         return 0
 
     if args.config_action == "set":

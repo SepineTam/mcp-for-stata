@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 
 from ._handlers import (
@@ -47,6 +48,8 @@ def main() -> None:
     add_verify_parser(subparsers)
 
     args = parser.parse_args()
+    if getattr(args, "config_file", None) is not None:
+        os.environ["STATA_MCP_CONFIG_FILE"] = str(args.config_file)
 
     if args.usable:
         sys.exit(handle_usable())

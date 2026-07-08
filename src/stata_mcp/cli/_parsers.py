@@ -11,6 +11,10 @@ from pathlib import Path
 from typing import Callable, NoReturn
 
 BoolConverter = Callable[[str], bool]
+CONFIG_HELP = (
+    "Debug-only config.toml path. Note: not recommended for normal use; "
+    "intended for developer debugging and ignores the user/project config stack."
+)
 
 
 def _parse_bool(value: str) -> bool:
@@ -48,6 +52,25 @@ def add_bool_argument(
     )
 
 
+def add_config_argument(
+    parser: argparse.ArgumentParser,
+    *,
+    include_short: bool = False,
+    default=None,
+) -> None:
+    """Add the developer-only config override argument."""
+    flags = ["--config"]
+    if include_short:
+        flags.insert(0, "-c")
+    parser.add_argument(
+        *flags,
+        dest="config_file",
+        type=Path,
+        default=default,
+        help=CONFIG_HELP,
+    )
+
+
 def create_root_parser() -> argparse.ArgumentParser:
     """Create the root parser with global options."""
     try:
@@ -65,6 +88,7 @@ def create_root_parser() -> argparse.ArgumentParser:
         description="Stata-MCP command line interface",
         add_help=True,
     )
+    add_config_argument(parser, include_short=True, default=None)
     parser.add_argument(
         "-v",
         "--version",
@@ -94,6 +118,7 @@ def add_server_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
         "server",
         help="Start MCP server (default behavior when no subcommand is given)",
     )
+    add_config_argument(server_parser, default=argparse.SUPPRESS)
     profile_group = server_parser.add_mutually_exclusive_group()
     profile_group.add_argument(
         "--core",
@@ -126,12 +151,14 @@ def add_server_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
 def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     """Add the tool subcommand parser."""
     tool_parser = subparsers.add_parser("tool", help="Run local Stata tools through the API module")
+    add_config_argument(tool_parser, default=argparse.SUPPRESS)
     tool_subparsers = tool_parser.add_subparsers(dest="tool_action")
 
     tool_ado_install_parser = tool_subparsers.add_parser(
         "ado-install",
         help="Install an ado package through the API module",
     )
+    add_config_argument(tool_ado_install_parser, default=argparse.SUPPRESS)
     tool_ado_install_parser.add_argument("package_name", help="Ado package name")
     tool_ado_install_parser.add_argument(
         "--source",
@@ -158,6 +185,7 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
     )
 
     tool_do_parser = tool_subparsers.add_parser("do", help="Run a do-file through the API module")
+    add_config_argument(tool_do_parser, default=argparse.SUPPRESS)
     tool_do_parser.add_argument("dofile_path", help="Path to the do-file")
     tool_do_parser.add_argument(
         "--log-file-name",
@@ -194,6 +222,7 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
         "help",
         help="Read Stata help output through the API module",
     )
+    add_config_argument(tool_help_parser, default=argparse.SUPPRESS)
     tool_help_parser.add_argument("stata_command", help="Stata command name")
     add_bool_argument(
         tool_help_parser,
@@ -206,6 +235,7 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
         "data-info",
         help="Read dataset metadata through the API module",
     )
+    add_config_argument(tool_data_info_parser, default=argparse.SUPPRESS)
     tool_data_info_parser.add_argument("data_path", help="Path to the data file")
     tool_data_info_parser.add_argument(
         "--encoding",
@@ -223,6 +253,7 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
         "read-log",
         help="Read a Stata log through the API module",
     )
+    add_config_argument(tool_read_log_parser, default=argparse.SUPPRESS)
     tool_read_log_parser.add_argument("file_path", help="Path to the log file")
     tool_read_log_parser.add_argument(
         "--encoding",
@@ -244,6 +275,7 @@ def add_doctor_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
         "doctor",
         help="Run diagnostics to check stata-mcp health status",
     )
+    add_config_argument(doctor_parser, default=argparse.SUPPRESS)
     doctor_parser.add_argument(
         "--json",
         action="store_true",
@@ -273,9 +305,11 @@ def add_doctor_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
 def add_config_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     """Add the config subcommand parser."""
     config_parser = subparsers.add_parser("config", help="Show and manage Stata-MCP configuration")
+    add_config_argument(config_parser, default=argparse.SUPPRESS)
     config_subparsers = config_parser.add_subparsers(dest="config_action")
 
     config_set_parser = config_subparsers.add_parser("set", help="Set a config value")
+    add_config_argument(config_set_parser, default=argparse.SUPPRESS)
     config_set_parser.add_argument(
         "key",
         choices=["cli"],
@@ -289,6 +323,7 @@ def add_config_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
     )
 
     config_show_parser = config_subparsers.add_parser("show", help="Show a config value")
+    add_config_argument(config_show_parser, default=argparse.SUPPRESS)
     config_show_parser.add_argument(
         "dot_key",
         help="Config key to show. Use 'cli' as shorthand for STATA.STATA_CLI, or Section.Key notation.",
@@ -298,6 +333,7 @@ def add_config_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
         "edit",
         help="Edit a config value by section.key",
     )
+    add_config_argument(config_edit_parser, default=argparse.SUPPRESS)
     config_edit_parser.add_argument(
         "dot_key",
         help="Dot-notation key, e.g. STATA.STATA_CLI",
@@ -312,6 +348,7 @@ def add_config_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
 def add_install_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     """Add the install subcommand parser."""
     install_parser = subparsers.add_parser("install", help="Install Stata-MCP to MCP clients")
+    add_config_argument(install_parser, default=argparse.SUPPRESS)
     install_parser.add_argument(
         "-c",
         "--client",
@@ -343,6 +380,7 @@ def add_install_parser(subparsers: argparse._SubParsersAction) -> argparse.Argum
 def add_update_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     """Add the update subcommand parser."""
     update_parser = subparsers.add_parser("update", help="Update stata-mcp to latest version")
+    add_config_argument(update_parser, default=argparse.SUPPRESS)
     update_parser.add_argument(
         "--method",
         choices=["auto", "pip", "uv-tool", "homebrew"],
@@ -371,6 +409,7 @@ def add_verify_parser(subparsers: argparse._SubParsersAction) -> argparse.Argume
             "or config file (read-only)."
         ),
     )
+    add_config_argument(verify_parser, default=argparse.SUPPRESS)
 
     def _error(message: str) -> NoReturn:
         verify_parser.print_usage(sys.stderr)

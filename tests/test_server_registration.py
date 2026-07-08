@@ -8,6 +8,7 @@ import logging
 import sys
 import asyncio
 from argparse import Namespace
+from pathlib import Path
 from types import ModuleType, SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
@@ -15,8 +16,16 @@ import pytest
 
 
 @pytest.fixture
-def loaded_modules(monkeypatch: pytest.MonkeyPatch):
+def loaded_modules(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     """Load target modules with isolated dependency stubs."""
+    home_dir = tmp_path / "home"
+    project_dir = tmp_path / "project"
+    home_dir.mkdir()
+    project_dir.mkdir()
+    monkeypatch.setattr("pathlib.Path.home", lambda: home_dir)
+    monkeypatch.chdir(project_dir)
+    monkeypatch.delenv("STATA_MCP_CONFIG_FILE", raising=False)
+    monkeypatch.delenv("STATA_MCP__IS_ASYNC_DO", raising=False)
     monkeypatch.setitem(sys.modules, "tomli_w", SimpleNamespace(dump=lambda *args, **kwargs: None))
     monkeypatch.setitem(sys.modules, "pexpect", ModuleType("pexpect"))
 

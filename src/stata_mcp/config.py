@@ -61,23 +61,95 @@ class StataMcpFolder:
 
 
 class Config:
+    ENV_CONFIG_FILE = "STATA_MCP_CONFIG_FILE"
+    USER_CONFIG_NAME = "config.toml"
+    PROJECT_CONFIG_PATH = Path(".statamcp") / "config.toml"
+    SECURITY_SECTION = "SECURITY"
+
     def __init__(self, config_file: Optional[Union[str, Path]] = None):
-        self.config_file = config_file if config_file else self.STATA_MCP_DIRECTORY / "config.toml"
-        self.config_file = Path(self.config_file)
+        env_config_file = self._clean_string_value(os.getenv(self.ENV_CONFIG_FILE))
+        debug_config_file = config_file if config_file is not None else env_config_file
+        self.is_debug_config = debug_config_file is not None
+
+        if debug_config_file is not None:
+            self.config_file = Path(debug_config_file).expanduser()
+            self.user_config_file = self.config_file
+            self.project_config_file = None
+            self.config_files = (self.config_file,)
+        else:
+            self.user_config_file = self.STATA_MCP_DIRECTORY / self.USER_CONFIG_NAME
+            self.project_config_file = (Path.cwd() / self.PROJECT_CONFIG_PATH).resolve()
+            self.config_file = self.user_config_file
+            self.config_files = (self.user_config_file, self.project_config_file)
 
     @cached_property
     def config(self) -> dict[str, Any]:
+        if self.is_debug_config:
+            return self._read_toml_file(self.config_file)
+
+        user_config = self._read_toml_file(self.user_config_file)
+        project_config = self._read_toml_file(self.project_config_file)
+        return self._merge_config(user_config, project_config)
+
+    @staticmethod
+    def _read_toml_file(config_file: Path | None) -> dict[str, Any]:
+        if config_file is None:
+            return {}
         try:
-            with open(self.config_file, "rb") as f:
+            with open(config_file, "rb") as f:
                 return tomllib.load(f)
         except Exception:
             return {}
 
+    @classmethod
+    def _merge_config(
+        cls,
+        user_config: dict[str, Any],
+        project_config: dict[str, Any],
+    ) -> dict[str, Any]:
+        merged = cls._deep_merge(user_config, project_config)
+
+        user_security = user_config.get(cls.SECURITY_SECTION)
+        if isinstance(user_security, dict):
+            project_security = project_config.get(cls.SECURITY_SECTION, {})
+            if not isinstance(project_security, dict):
+                project_security = {}
+            merged[cls.SECURITY_SECTION] = cls._deep_merge(project_security, user_security)
+
+        return merged
+
+    @classmethod
+    def _deep_merge(
+        cls,
+        base: dict[str, Any],
+        override: dict[str, Any],
+    ) -> dict[str, Any]:
+        merged = dict(base)
+        for key, value in override.items():
+            base_value = merged.get(key)
+            if isinstance(base_value, dict) and isinstance(value, dict):
+                merged[key] = cls._deep_merge(base_value, value)
+            else:
+                merged[key] = value
+        return merged
+
     def read_config_text(self) -> str:
         """Return raw configuration file content."""
-        if not self.config_file.exists():
+        if self.is_debug_config:
+            return self._read_config_file_text(self.config_file)
+
+        parts = []
+        for config_file in self.config_files:
+            content = self._read_config_file_text(config_file)
+            if content:
+                parts.append(f"# {config_file}\n{content}")
+        return "\n\n".join(parts)
+
+    @staticmethod
+    def _read_config_file_text(config_file: Path | None) -> str:
+        if config_file is None or not config_file.exists():
             return ""
-        return self.config_file.read_text(encoding="utf-8")
+        return config_file.read_text(encoding="utf-8")
 
     def _write_toml(self, data: dict) -> None:
         """Write TOML content using tomli_w library."""
@@ -96,7 +168,7 @@ class Config:
         if cleaned_value is None:
             raise StataCLINotFoundError()
 
-        updated = self.config
+        updated = self._read_toml_file(self.config_file)
         stata_section = updated.get("STATA", {})
         if not isinstance(stata_section, dict):
             stata_section = {}
@@ -132,7 +204,7 @@ class Config:
         section, key = dot_key.split(".", 1)
         cleaned_value = self._clean_string_value(value)
 
-        updated = self.config
+        updated = self._read_toml_file(self.config_file)
         if section not in updated:
             raise KeyError(f"Section '{section}' not found")
         if not isinstance(updated[section], dict):

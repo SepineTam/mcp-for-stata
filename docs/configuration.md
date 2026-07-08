@@ -1,16 +1,28 @@
 # Configuration System
 
-MCP-for-Stata uses a hierarchical configuration system with three levels of priority:
+MCP-for-Stata uses a hierarchical configuration system:
 
 1. **Environment Variables** (highest priority)
-2. **Configuration File** (`~/.statamcp/config.toml`)
-3. **Default Values** (lowest priority)
+2. **Developer config override** (`-c/--config`, debug only)
+3. **Project configuration file** (`./.statamcp/config.toml`)
+4. **User configuration file** (`~/.statamcp/config.toml`)
+5. **Default Values** (lowest priority)
+
+When `-c/--config` is provided, MCP-for-Stata reads only that TOML file and ignores
+the user and project configuration files. This option is intended for developer
+debugging. It is not recommended for normal user workflows because it bypasses the
+standard configuration stack.
+
+For normal user/project configuration, project settings override user settings
+for most sections. The `SECURITY` section is the exception: user-level security
+settings override project-level security settings so a project cannot relax a
+stricter user safety policy.
 
 ## Configuration File
 
 ### Location
 
-The configuration file is located at:
+The user configuration file is located at:
 ```
 ~/.statamcp/config.toml
 ```
@@ -18,6 +30,15 @@ The configuration file is located at:
 On different platforms:
 - **macOS/Linux**: `/home/username/.statamcp/config.toml`
 - **Windows**: `C:\Users\Username\.statamcp\config.toml`
+
+The optional project configuration file is located at:
+```
+./.statamcp/config.toml
+```
+
+Use it for project-specific defaults such as `PROJECT.WORKING_DIR`, monitoring
+limits, beta options, and logging preferences. Put stricter safety defaults in
+the user configuration file when they must apply across projects.
 
 ### Recommended `config.toml`
 

@@ -1,16 +1,22 @@
 # 配置系统
 
-MCP-for-Stata 使用具有三个优先级的分层配置系统：
+MCP-for-Stata 使用分层配置系统：
 
 1. **环境变量**（最高优先级）
-2. **配置文件**（`~/.statamcp/config.toml`）
-3. **默认值**（最低优先级）
+2. **开发调试配置覆盖**（`-c/--config`，仅建议调试使用）
+3. **项目配置文件**（`./.statamcp/config.toml`）
+4. **用户配置文件**（`~/.statamcp/config.toml`）
+5. **默认值**（最低优先级）
+
+当提供 `-c/--config` 时，MCP-for-Stata 只读取这个 TOML 文件，并忽略用户级与项目级配置。这个参数用于开发者调试，不建议普通用户工作流使用，因为它会绕过标准配置栈。
+
+在正常的用户级/项目级配置中，大多数配置由项目级覆盖用户级。`SECURITY` 分区是例外：用户级安全配置会覆盖项目级安全配置，避免项目配置放宽用户已经设置的更严格安全策略。
 
 ## 配置文件
 
 ### 位置
 
-配置文件位于：
+用户配置文件位于：
 ```
 ~/.statamcp/config.toml
 ```
@@ -18,6 +24,13 @@ MCP-for-Stata 使用具有三个优先级的分层配置系统：
 在不同平台上：
 - **macOS/Linux**：`/home/username/.statamcp/config.toml`
 - **Windows**：`C:\Users\Username\.statamcp\config.toml`
+
+可选的项目配置文件位于：
+```
+./.statamcp/config.toml
+```
+
+它适合存放项目自己的默认值，例如 `PROJECT.WORKING_DIR`、监控限制、Beta 选项和日志偏好。如果某些安全默认值必须跨项目生效，应放在用户配置文件中。
 
 ### 推荐 `config.toml`
 

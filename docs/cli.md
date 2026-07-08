@@ -20,6 +20,22 @@ stata-mcp doctor
 
 ## Commands
 
+### Global Config Override
+
+Most users should use `~/.statamcp/config.toml` and optional
+`./.statamcp/config.toml` project files. For developer debugging, the CLI also
+accepts a config override:
+
+```bash
+stata-mcp -c /path/to/debug-config.toml server
+stata-mcp server --config /path/to/debug-config.toml
+```
+
+> **Note:** `-c/--config` is not recommended for normal use. When provided,
+> Stata-MCP reads only that file and ignores the user/project config stack.
+> The `install` and `verify` subcommands keep their existing `-c/--client`
+> meaning; use `--config` there if a debug config path is needed.
+
 ### Start MCP Server
 
 Start the MCP server with different transport methods:

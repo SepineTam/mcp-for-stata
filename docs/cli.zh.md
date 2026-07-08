@@ -20,6 +20,21 @@ stata-mcp doctor
 
 ## 命令
 
+### 全局配置覆盖
+
+大多数用户应使用 `~/.statamcp/config.toml`，并按需添加
+`./.statamcp/config.toml` 项目配置。CLI 也提供一个面向开发调试的配置覆盖参数：
+
+```bash
+stata-mcp -c /path/to/debug-config.toml server
+stata-mcp server --config /path/to/debug-config.toml
+```
+
+> **注意：** 不建议在日常使用中使用 `-c/--config`。提供该参数后，
+> Stata-MCP 只读取这个文件，并忽略用户级/项目级配置栈。
+> `install` 和 `verify` 子命令保留原有的 `-c/--client` 含义；
+> 如果这些子命令需要调试配置路径，请使用 `--config`。
+
 ### 启动 MCP 服务器
 
 使用不同的传输方式启动 MCP 服务器：
