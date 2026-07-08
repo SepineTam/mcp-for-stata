@@ -7,8 +7,8 @@
 # @Email  : sepinetam@gmail.com
 # @File   : get_data_info.py
 
-import json
 import ipaddress
+import json
 import logging
 from pathlib import Path
 from typing import List
@@ -16,7 +16,6 @@ from urllib.parse import urlparse
 
 from ..data_info import get_data_handler
 from ._runtime import create_runtime_context
-
 
 LOCAL_ACCESS_DENIED = "Access denied: data file must be within the working directory."
 URL_DOMAIN_ACCESS_DENIED = "Access denied: URL domain is not in the allowlist."

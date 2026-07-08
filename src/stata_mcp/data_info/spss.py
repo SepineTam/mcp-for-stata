@@ -48,7 +48,7 @@ class SpssDataInfo(DataInfoBase):
 
         try:
             if self.is_url:
-                resp = requests.get(str(self.data_path))
+                resp = requests.get(str(self.data_path), timeout=self.DEFAULT_TIMEOUT)
                 resp.raise_for_status()
                 suffix = Path(url_path).suffix
                 with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
