@@ -12,7 +12,6 @@ import logging
 import logging.handlers
 import re
 import weakref
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Literal, NamedTuple
 
@@ -656,41 +655,6 @@ def _has_stata_error(content: str) -> bool:
     return re.search(r"r\(\d+\)", content) is not None
 
 
-def write_dofile(content: str, encoding: str = None) -> str:
-    """
-    Write stata code to a dofile and return the do-file path.
-
-    Args:
-        content (str): The stata code content which will be writen to the designated do-file.
-        encoding (str): The encoding method for the dofile, default -> 'utf-8'
-
-    Returns:
-        the do-file path
-
-    Notes:
-        Please be careful about the first command in dofile should be use data.
-        For avoiding make mistake, you can generate stata-code with the function from `StataCommandGenerator` class.
-        Please avoid writing any code that draws graphics or requires human intervention for uncertainty bug.
-        If you find something went wrong about the code, you can use the function from `StataCommandGenerator` class.
-
-    Warnings:
-        This tool will be removed in an upcoming version because modern coding agents
-        (Claude Code, Codex, Cursor, etc.) have native file writing capabilities.
-        If you are using such agents, consider creating a 'code' directory to manage
-        your Stata do-files directly.
-
-    """
-    file_path = config.STATA_MCP_FOLDER.DO / f"{datetime.now().strftime('%Y%m%d%H%M%S%f')}.do"
-    encoding = encoding or "utf-8"
-    try:
-        with open(file_path, "w", encoding=encoding) as f:
-            f.write(content)
-        logging.info(f"Successful write dofile to {file_path}")
-    except Exception as e:
-        logging.error(f"Failed to write dofile to {file_path}: {str(e)}")
-    return file_path.as_posix()
-
-
 ToolFunc = Callable[..., Any]
 
 _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
@@ -743,12 +707,6 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
         "func": ado_package_install,
         "profiles": {"unsafe"},
     },
-    "write_dofile": {
-        "description": "write the stata-code to dofile",
-        "func": write_dofile,
-        "profiles": {"all"},
-        "deprecated": True,
-    },
 }
 
 _registered_profile: str | None = None
@@ -771,8 +729,6 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
 
     for name, meta in _TOOL_REGISTRY.items():
         if meta.get("unix_only") and not config.IS_UNIX:
-            continue
-        if meta.get("deprecated") and not config.ENABLE_WRITE_DOFILE:
             continue
         eligible_profiles = {"all", "unsafe"} if profile == "unsafe" else {profile}
         if not eligible_profiles.intersection(meta["profiles"]):
@@ -803,7 +759,6 @@ __all__ = [
     "get_data_info",
     "stata_do",
     "register_tools",
-    "write_dofile",
 
     # Utilities
     "read_log",
