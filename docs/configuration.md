@@ -19,7 +19,9 @@ On different platforms:
 - **macOS/Linux**: `/home/username/.statamcp/config.toml`
 - **Windows**: `C:\Users\Username\.statamcp\config.toml`
 
-### Example Configuration
+### Recommended `config.toml`
+
+This configuration keeps experimental features disabled, leaves Stata auto-detection enabled, and uses safe defaults for logs, security, monitoring, and data summaries.
 
 ```toml
 [DEBUG]
@@ -35,6 +37,8 @@ BACKUP_COUNT = 5
 
 [BETA]
 ENABLE_WRITE_DOFILE = false
+IS_ASYNC_DO = false
+MAX_ASYNC_DO = 3
 
 [HELP]
 IS_CACHE = true
@@ -54,8 +58,7 @@ IS_MONITOR = false
 MAX_RAM_MB = -1
 
 [STATA]
-# Optional: Override automatic Stata detection
-# STATA_CLI = "/path/to/stata-mp"
+STATA_CLI = ""
 
 [data_info]
 metrics = ["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]
@@ -63,6 +66,8 @@ string_keep_number = 10
 decimal_places = 3
 hash_length = 12
 ```
+
+Beta options are documented separately in [Beta Configuration](beta.md).
 
 ## Configuration Sections
 
@@ -332,25 +337,7 @@ Maximum RAM limit in megabytes.
 
 ### BETA Section
 
-Controls beta/experimental features.
-
-#### `BETA.ENABLE_WRITE_DOFILE`
-
-Control whether the `write_dofile` MCP tool is registered.
-
-- **Type**: Boolean
-- **Default**: `false`
-- **Environment Variable**: `STATA_MCP__ENABLE_WRITE_DOFILE`
-- **Description**:
-  - When `false` (default), the `write_dofile` MCP tool is not registered
-  - Modern AI agents have native file writing capabilities, making this tool redundant
-  - Set to `true` only if you need backward compatibility with older workflows
-- **Example**:
-  ```bash
-  export STATA_MCP__ENABLE_WRITE_DOFILE=true
-  ```
-
-> **Note**: This configuration is marked as BETA and may be removed in future versions.
+Beta and experimental options live in the `[BETA]` section. See [Beta Configuration](beta.md) for the complete list, recommended defaults, and behavior notes.
 
 ### STATA Section
 

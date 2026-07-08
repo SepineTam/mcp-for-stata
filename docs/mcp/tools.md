@@ -114,13 +114,15 @@ Log file management operates within the `stata-mcp-log/` directory structure wit
 
 Exception handling categorizes failures into three tiers: `FileNotFoundError` for missing do-file artifacts, `RuntimeError` for Stata execution failures or log generation issues, and `PermissionError` for insufficient execution or write permissions. Error conditions return dictionary with `"error"` key rather than raising exceptions to maintain MCP protocol compatibility.
 
+`stata_do` can opt into beta async execution through `[BETA] IS_ASYNC_DO`. See [Beta Configuration](../beta.md) for the full beta parameter list and concurrency limits.
+
 ---
 
 ## write_dofile
 > **Disabled by Default**: Whether this tool is registered with the MCP server is controlled by the `ENABLE_WRITE_DOFILE` switch. Without setting it to `true`, `register_tools()` skips this entry entirely and the tool will not be exposed to the client.
 >
 > Modern AI agents have native file writing capabilities, making this tool redundant.
-> To enable, set `STATA_MCP__ENABLE_WRITE_DOFILE=true` or add `[BETA] ENABLE_WRITE_DOFILE = true` to your config.
+> To enable, see [Beta Configuration](../beta.md).
 
 ```python
 def write_dofile(content: str,

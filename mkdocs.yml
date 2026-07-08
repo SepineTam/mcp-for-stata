@@ -80,6 +80,7 @@ nav:
   - Claude Plugin: claude-plugin.md
   - Clients: clients.md
   - Configuration: configuration.md
+  - Beta Configuration: beta.md
   - Security: security.md
   - Monitoring: monitoring.md
   - Troubleshooting: troubleshooting.md

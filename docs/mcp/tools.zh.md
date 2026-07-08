@@ -114,13 +114,15 @@ stata_do("/tmp/estimation.do", timeout=300)
 
 异常处理将失败分为三个层级：缺失 do 文件产物的 `FileNotFoundError`，Stata 执行失败或日志生成问题的 `RuntimeError`，以及执行或写入权限不足的 `PermissionError`。错误情况返回带 `"error"` 键的字典而非抛出异常，以保持 MCP 协议兼容性。
 
+`stata_do` 可以通过 `[BETA] IS_ASYNC_DO` 启用 beta 异步执行。完整 Beta 参数列表和并发限制见 [Beta 配置](../beta.md)。
+
 ---
 
 ## write_dofile
 > **默认禁用**：该工具是否被注册到 MCP server 完全由 `ENABLE_WRITE_DOFILE` 配置开关决定。未设置为 `true` 时,`register_tools()` 会直接跳过这个条目,工具不会暴露给客户端。
 >
 > 现代 AI 智能体具有原生文件写入能力，使该工具变得多余。
-> 要启用，请设置 `STATA_MCP__ENABLE_WRITE_DOFILE=true` 或在配置中添加 `[BETA] ENABLE_WRITE_DOFILE = true`。
+> 如需启用，请查看 [Beta 配置](../beta.md)。
 
 ```python
 def write_dofile(content: str,

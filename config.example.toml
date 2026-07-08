@@ -11,6 +11,8 @@ BACKUP_COUNT = 5
 
 [BETA]
 ENABLE_WRITE_DOFILE = false
+IS_ASYNC_DO = false
+MAX_ASYNC_DO = 3
 
 [HELP]
 IS_CACHE = true
