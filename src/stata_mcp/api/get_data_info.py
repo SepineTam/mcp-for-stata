@@ -46,8 +46,6 @@ def _is_allowed_domain(host: str, allowed_domains: tuple[str, ...]) -> bool:
             return True
         if normalized_host.endswith(f".{normalized_allowed}"):
             return True
-        if normalized_allowed == "github.com" and normalized_host == "raw.githubusercontent.com":
-            return True
     return False
 
 

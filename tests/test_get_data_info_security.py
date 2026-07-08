@@ -148,7 +148,7 @@ def test_url_guard_enabled_allows_allowlisted_domain(
         tmp_path,
         working_dir,
         enable_guard=True,
-        allowed_domains=["github.com"],
+        allowed_domains=["raw.githubusercontent.com"],
     )
 
     result = api_get_data_info(
@@ -160,6 +160,29 @@ def test_url_guard_enabled_allows_allowlisted_domain(
     assert payload["overview"]["source"] == (
         "https://raw.githubusercontent.com/owner/repo/data.csv"
     )
+
+
+def test_url_guard_enabled_does_not_special_case_github_raw_domain(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    fake_data_info = _patch_fake_data_info(monkeypatch)
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    config_path = _write_config(
+        tmp_path,
+        working_dir,
+        enable_guard=True,
+        allowed_domains=["github.com"],
+    )
+
+    result = api_get_data_info(
+        data_path="https://raw.githubusercontent.com/owner/repo/data.csv",
+        config_file=config_path,
+    )
+
+    assert result == "Access denied: URL domain is not in the allowlist."
+    assert fake_data_info.calls == []
 
 
 def test_url_guard_enabled_rejects_non_allowlisted_domain(
