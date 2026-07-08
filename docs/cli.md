@@ -33,6 +33,8 @@ stata-mcp server --config /path/to/debug-config.toml
 
 > **Note:** `-c/--config` is not recommended for normal use. When provided,
 > Stata-MCP reads only that file and ignores the user/project config stack.
+> On Linux, `/etc/statamcp/config.toml` still has the highest priority and can
+> override this debug config.
 > The `install` and `verify` subcommands keep their existing `-c/--client`
 > meaning; use `--config` there if a debug config path is needed.
 

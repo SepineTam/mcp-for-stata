@@ -32,6 +32,7 @@ stata-mcp server --config /path/to/debug-config.toml
 
 > **注意：** 不建议在日常使用中使用 `-c/--config`。提供该参数后，
 > Stata-MCP 只读取这个文件，并忽略用户级/项目级配置栈。
+> 在 Linux 上，`/etc/statamcp/config.toml` 仍然拥有最高优先级，可以覆盖这个调试配置。
 > `install` 和 `verify` 子命令保留原有的 `-c/--client` 含义；
 > 如果这些子命令需要调试配置路径，请使用 `--config`。
 

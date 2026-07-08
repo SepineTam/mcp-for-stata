@@ -2,16 +2,23 @@
 
 MCP-for-Stata uses a hierarchical configuration system:
 
-1. **Environment Variables** (highest priority)
-2. **Developer config override** (`-c/--config`, debug only)
-3. **Project configuration file** (`./.statamcp/config.toml`)
-4. **User configuration file** (`~/.statamcp/config.toml`)
-5. **Default Values** (lowest priority)
+1. **Linux system configuration file** (`/etc/statamcp/config.toml`, highest priority)
+2. **Environment Variables**
+3. **Developer config override** (`-c/--config`, debug only)
+4. **Project configuration file** (`./.statamcp/config.toml`)
+5. **User configuration file** (`~/.statamcp/config.toml`)
+6. **Default Values** (lowest priority)
 
 When `-c/--config` is provided, MCP-for-Stata reads only that TOML file and ignores
-the user and project configuration files. This option is intended for developer
-debugging. It is not recommended for normal user workflows because it bypasses the
-standard configuration stack.
+the user and project configuration files. On Linux, `/etc/statamcp/config.toml`
+still has the highest priority and can override the debug config. This option is
+intended for developer debugging. It is not recommended for normal user workflows
+because it bypasses the standard user/project configuration stack.
+
+On Linux servers or shared machines, administrators can place managed defaults in
+`/etc/statamcp/config.toml`. Any value set there overrides environment variables,
+developer config overrides, user config, and project config. This file is ignored
+on non-Linux systems.
 
 For normal user/project configuration, project settings override user settings
 for most sections. The `SECURITY` section is the exception: user-level security
@@ -39,6 +46,14 @@ The optional project configuration file is located at:
 Use it for project-specific defaults such as `PROJECT.WORKING_DIR`, monitoring
 limits, beta options, and logging preferences. Put stricter safety defaults in
 the user configuration file when they must apply across projects.
+
+The optional Linux system configuration file is located at:
+```
+/etc/statamcp/config.toml
+```
+
+Use it only for administrator-managed settings that must apply to every user on
+the machine.
 
 ### Recommended `config.toml`
 

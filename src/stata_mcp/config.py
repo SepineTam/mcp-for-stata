@@ -64,32 +64,42 @@ class Config:
     ENV_CONFIG_FILE = "STATA_MCP_CONFIG_FILE"
     USER_CONFIG_NAME = "config.toml"
     PROJECT_CONFIG_PATH = Path(".statamcp") / "config.toml"
+    SYSTEM_CONFIG_FILE = Path("/etc/statamcp/config.toml")
     SECURITY_SECTION = "SECURITY"
 
     def __init__(self, config_file: Optional[Union[str, Path]] = None):
         env_config_file = self._clean_string_value(os.getenv(self.ENV_CONFIG_FILE))
         debug_config_file = config_file if config_file is not None else env_config_file
         self.is_debug_config = debug_config_file is not None
+        self.system_config_file = self.SYSTEM_CONFIG_FILE if platform.system() == "Linux" else None
 
         if debug_config_file is not None:
             self.config_file = Path(debug_config_file).expanduser()
             self.user_config_file = self.config_file
             self.project_config_file = None
-            self.config_files = (self.config_file,)
+            self.config_files = tuple(
+                path for path in (self.config_file, self.system_config_file) if path is not None
+            )
         else:
             self.user_config_file = self.STATA_MCP_DIRECTORY / self.USER_CONFIG_NAME
             self.project_config_file = (Path.cwd() / self.PROJECT_CONFIG_PATH).resolve()
             self.config_file = self.user_config_file
-            self.config_files = (self.user_config_file, self.project_config_file)
+            self.config_files = tuple(
+                path
+                for path in (self.user_config_file, self.project_config_file, self.system_config_file)
+                if path is not None
+            )
 
     @cached_property
     def config(self) -> dict[str, Any]:
+        system_config = self._read_toml_file(self.system_config_file)
         if self.is_debug_config:
-            return self._read_toml_file(self.config_file)
+            debug_config = self._read_toml_file(self.config_file)
+            return self._deep_merge(debug_config, system_config)
 
         user_config = self._read_toml_file(self.user_config_file)
         project_config = self._read_toml_file(self.project_config_file)
-        return self._merge_config(user_config, project_config)
+        return self._merge_config(user_config, project_config, system_config)
 
     @staticmethod
     def _read_toml_file(config_file: Path | None) -> dict[str, Any]:
@@ -106,17 +116,16 @@ class Config:
         cls,
         user_config: dict[str, Any],
         project_config: dict[str, Any],
+        system_config: dict[str, Any],
     ) -> dict[str, Any]:
         merged = cls._deep_merge(user_config, project_config)
-
         user_security = user_config.get(cls.SECURITY_SECTION)
         if isinstance(user_security, dict):
             project_security = project_config.get(cls.SECURITY_SECTION, {})
             if not isinstance(project_security, dict):
                 project_security = {}
             merged[cls.SECURITY_SECTION] = cls._deep_merge(project_security, user_security)
-
-        return merged
+        return cls._deep_merge(merged, system_config)
 
     @classmethod
     def _deep_merge(
@@ -150,6 +159,18 @@ class Config:
         if config_file is None or not config_file.exists():
             return ""
         return config_file.read_text(encoding="utf-8")
+
+    def _get_raw_config_value(self, config_data: dict[str, Any], config_keys: list) -> Any | None:
+        config_dict = config_data
+        for key in config_keys[:-1]:
+            config_dict = config_dict.get(key, {})
+            if not isinstance(config_dict, dict):
+                return None
+
+        if isinstance(config_dict, dict):
+            value = config_dict.get(config_keys[-1], None)
+            return self._clean_string_value(value)
+        return None
 
     def _write_toml(self, data: dict) -> None:
         """Write TOML content using tomli_w library."""
@@ -246,35 +267,33 @@ class Config:
         Returns:
             Configuration value (processed by converter and validator)
         """
-        # 1. Read from environment variable first
-        value = os.getenv(env_var, None)  # str | None
+        # 1. Read from system config first. Linux administrators can enforce values.
+        value = self._get_raw_config_value(
+            self._read_toml_file(self.system_config_file),
+            config_keys,
+        )
+
+        # 2. Read from environment variable if system config does not enforce a value.
+        if value is None and env_var:
+            value = os.getenv(env_var, None)  # str | None
         value = self._clean_string_value(value)
 
-        # 2. If no environment variable, read from config file
+        # 3. If no environment variable, read from config file
         if value is None:
-            config_dict = self.config
-            for key in config_keys[:-1]:
-                config_dict = config_dict.get(key, {})
-                if not isinstance(config_dict, dict):
-                    config_dict = {}
-                    break
+            value = self._get_raw_config_value(self.config, config_keys)
 
-            if isinstance(config_dict, dict):
-                value = config_dict.get(config_keys[-1], None)  # str | bool | dict | list | int | float | None
-                value = self._clean_string_value(value)
-
-        # 3. If still no value, return default
+        # 4. If still no value, return default
         if value is None:
             return default
 
-        # 4. Convert value
+        # 5. Convert value
         if converter is not None:
             try:
                 value = converter(value)
             except (ValueError, TypeError):
                 return default
 
-        # 5. Validate value
+        # 6. Validate value
         if validator is not None and not validator(value):
             return default
 
@@ -317,6 +336,26 @@ class Config:
         else:
             raise TypeError("Expected a comma-separated string or string collection.")
         return tuple(str(item).strip() for item in values if str(item).strip())
+
+    @cached_property
+    def ENABLE_DATA_INFO_URL_GUARD(self) -> bool:
+        return self._get_config_value(
+            config_keys=["BETA", "enable_data_info_url_guard"],
+            env_var="",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool),
+        )
+
+    @cached_property
+    def DATA_INFO_ALLOWED_URL_DOMAINS(self) -> tuple[str, ...]:
+        return self._get_config_value(
+            config_keys=["BETA", "data_info_allowed_url_domains"],
+            env_var="",
+            default=(),
+            converter=self._to_str_tuple,
+            validator=lambda x: isinstance(x, tuple),
+        )
 
     @property
     def STATA_MCP_DIRECTORY(self) -> Path:
