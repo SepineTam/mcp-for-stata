@@ -859,15 +859,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pathvalidate"
-version = "3.3.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/fa/2a/52a8da6fe965dea6192eb716b357558e103aea0a1e9a8352ad575a8406ca/pathvalidate-3.3.1.tar.gz", hash = "sha256:b18c07212bfead624345bb8e1d6141cdcf15a39736994ea0b94035ad2b1ba177", size = 63262, upload-time = "2025-06-15T09:07:20.736Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/70/875f4a23bfc4731703a5835487d0d2fb999031bd415e7d17c0ae615c18b7/pathvalidate-3.3.1-py3-none-any.whl", hash = "sha256:5263baab691f8e1af96092fa5137ee17df5bdfbd6cff1fcac4d6ef4bc2e1735f", size = 24305, upload-time = "2025-06-15T09:07:19.117Z" },
-]
-
-[[package]]
 name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1521,11 +1512,9 @@ dependencies = [
     { name = "mcp", extra = ["cli"] },
     { name = "openpyxl" },
     { name = "pandas" },
-    { name = "pathvalidate" },
     { name = "pexpect" },
     { name = "psutil" },
     { name = "pyreadstat" },
-    { name = "python-dotenv" },
     { name = "requests" },
     { name = "tomli-w" },
 ]
@@ -1554,11 +1543,9 @@ requires-dist = [
     { name = "mcp", extras = ["cli"], specifier = ">=1.27.1" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=3.0.0,<4.0.0" },
-    { name = "pathvalidate", specifier = ">=3.3.1" },
     { name = "pexpect", specifier = ">=4.9.0" },
     { name = "psutil", specifier = ">=7.2.2" },
     { name = "pyreadstat", specifier = ">=1.3.4" },
-    { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "requests", specifier = ">=2.34.0" },
     { name = "tomli-w", specifier = ">=1.2.0" },
 ]
