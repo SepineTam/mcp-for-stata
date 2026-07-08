@@ -60,7 +60,7 @@ dependencies = [
 stata-mcp = "stata_mcp.cli:main"
 
 [build-system]
-requires = ["uv-build>=0.11.28"]
+requires = ["uv-build>=0.11.28,<0.12"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
