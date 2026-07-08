@@ -9,6 +9,7 @@
 
 import json
 import ipaddress
+import logging
 from pathlib import Path
 from typing import List
 from urllib.parse import urlparse
@@ -21,6 +22,7 @@ LOCAL_ACCESS_DENIED = "Access denied: data file must be within the working direc
 URL_DOMAIN_ACCESS_DENIED = "Access denied: URL domain is not in the allowlist."
 IP_URL_ACCESS_DENIED = "Access denied: IP-based URLs are not allowed."
 NON_HTTPS_URL_ACCESS_DENIED = "Access denied: only HTTPS URLs are allowed."
+URL_USERINFO_ACCESS_DENIED = "Access denied: URL userinfo is not allowed."
 
 
 def _is_url(data_path: str) -> bool:
@@ -46,35 +48,65 @@ def _is_allowed_domain(host: str, allowed_domains: tuple[str, ...]) -> bool:
             return True
         if normalized_host.endswith(f".{normalized_allowed}"):
             return True
-        if normalized_allowed == "github.com" and normalized_host == "raw.githubusercontent.com":
-            return True
     return False
 
 
+def _safe_url_for_log(data_path: str) -> str:
+    parsed_url = urlparse(data_path)
+    safe_url = parsed_url._replace(query="", fragment="")
+    return safe_url.geturl()
+
+
+def _log_url_security_violation(data_path: str, host: str | None, reason: str) -> None:
+    logging.warning(
+        "[SECURITY VIOLATION] Attempted to access data URL outside allowlist: "
+        f"requested_url='{_safe_url_for_log(data_path)}', "
+        f"host='{host}', "
+        f"reason='{reason}'"
+    )
+
+
 def _validate_local_path(data_path: str, working_dir: Path) -> Path | str:
-    resolved_data_path = Path(data_path).expanduser().resolve()
+    candidate_path = Path(data_path).expanduser()
+    if not candidate_path.is_absolute():
+        candidate_path = working_dir / candidate_path
+    resolved_data_path = candidate_path.resolve()
+    resolved_working_dir = working_dir.resolve()
     try:
-        resolved_data_path.relative_to(working_dir.resolve())
+        resolved_data_path.relative_to(resolved_working_dir)
     except ValueError:
+        logging.warning(
+            "[SECURITY VIOLATION] Attempted to access data file outside working directory: "
+            f"requested_path='{data_path}', "
+            f"resolved_path='{resolved_data_path}', "
+            f"working_dir='{resolved_working_dir.as_posix()}'"
+        )
         return LOCAL_ACCESS_DENIED
     return resolved_data_path
 
 
 def _validate_url(data_path: str, runtime_config) -> tuple[str, str] | str:
     parsed_url = urlparse(data_path)
-    if parsed_url.scheme.lower() != "https":
-        return NON_HTTPS_URL_ACCESS_DENIED
-
     host = parsed_url.hostname
+    if parsed_url.scheme.lower() != "https":
+        _log_url_security_violation(data_path, host, "non-https-scheme")
+        return NON_HTTPS_URL_ACCESS_DENIED
+    if parsed_url.username or parsed_url.password:
+        _log_url_security_violation(data_path, host, "url-userinfo-not-allowed")
+        return URL_USERINFO_ACCESS_DENIED
+
     if not host:
+        _log_url_security_violation(data_path, host, "domain-not-in-allowlist")
         return URL_DOMAIN_ACCESS_DENIED
     if _is_ip_host(host):
+        _log_url_security_violation(data_path, host, "ip-host-not-allowed")
         return IP_URL_ACCESS_DENIED
 
     if runtime_config.ENABLE_DATA_INFO_URL_GUARD and not _is_allowed_domain(
         host,
         runtime_config.DATA_INFO_ALLOWED_URL_DOMAINS,
     ):
+        _log_url_security_violation(data_path, host, "domain-not-in-allowlist")
         return URL_DOMAIN_ACCESS_DENIED
 
     data_extension = Path(parsed_url.path).suffix.lower().strip(".")

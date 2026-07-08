@@ -266,6 +266,53 @@ MAX_ASYNC_DO = 4
     assert config.MAX_ASYNC_DO == 4
 
 
+def test_data_info_url_guard_beta_config_merges_user_project_and_system(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    home_dir = tmp_path / "home"
+    project_dir = tmp_path / "project"
+    system_config = tmp_path / "etc" / "statamcp" / "config.toml"
+    user_config_dir = home_dir / ".statamcp"
+    project_config_dir = project_dir / ".statamcp"
+    user_config_dir.mkdir(parents=True)
+    project_config_dir.mkdir(parents=True)
+    system_config.parent.mkdir(parents=True)
+    monkeypatch.setattr("pathlib.Path.home", lambda: home_dir)
+    monkeypatch.setattr("platform.system", lambda: "Linux")
+    monkeypatch.setattr(Config, "SYSTEM_CONFIG_FILE", system_config)
+    monkeypatch.chdir(project_dir)
+
+    (user_config_dir / "config.toml").write_text(
+        """
+[BETA]
+enable_data_info_url_guard = false
+data_info_allowed_url_domains = ["user.example.com"]
+""".strip(),
+        encoding="utf-8",
+    )
+    (project_config_dir / "config.toml").write_text(
+        """
+[BETA]
+enable_data_info_url_guard = true
+data_info_allowed_url_domains = ["project.example.com"]
+""".strip(),
+        encoding="utf-8",
+    )
+    system_config.write_text(
+        """
+[BETA]
+data_info_allowed_url_domains = ["system.example.com"]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    config = Config()
+
+    assert config.ENABLE_DATA_INFO_URL_GUARD is True
+    assert config.DATA_INFO_ALLOWED_URL_DOMAINS == ("system.example.com",)
+
+
 def test_linux_system_config_overrides_debug_config(
     monkeypatch,
     tmp_path,

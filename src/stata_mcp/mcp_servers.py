@@ -531,7 +531,7 @@ def get_data_info(
         data_path=data_path,
         vars_list=vars_list,
         encoding=encoding,
-        config_file=config.config_file if config.is_debug_config else None,
+        config_file=None,
         head=head,
     )
 
