@@ -118,6 +118,28 @@ def test_local_file_outside_working_dir_is_rejected(tmp_path) -> None:
     assert result == "Access denied: data file must be within the working directory."
 
 
+def test_relative_local_file_is_resolved_from_working_dir(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    working_dir = tmp_path / "work"
+    process_dir = tmp_path / "process"
+    working_dir.mkdir()
+    process_dir.mkdir()
+    data_path = working_dir / "data.csv"
+    data_path.write_text("x,y\n1,2\n", encoding="utf-8")
+    config_path = _write_config(tmp_path, working_dir)
+    monkeypatch.chdir(process_dir)
+
+    result = api_get_data_info(
+        data_path="data.csv",
+        config_file=config_path,
+    )
+
+    payload = json.loads(result)
+    assert payload["overview"]["source"] == data_path.resolve().as_posix()
+
+
 def test_url_guard_disabled_does_not_block_non_allowlisted_domain(
     monkeypatch,
     tmp_path,
@@ -245,6 +267,26 @@ def test_url_guard_enabled_rejects_http_scheme(monkeypatch, tmp_path) -> None:
     )
 
     assert result == "Access denied: only HTTPS URLs are allowed."
+    assert fake_data_info.calls == []
+
+
+def test_url_rejects_username_or_password(monkeypatch, tmp_path) -> None:
+    fake_data_info = _patch_fake_data_info(monkeypatch)
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    config_path = _write_config(
+        tmp_path,
+        working_dir,
+        enable_guard=True,
+        allowed_domains=["github.com"],
+    )
+
+    result = api_get_data_info(
+        data_path="https://evil.com@github.com/data.csv",
+        config_file=config_path,
+    )
+
+    assert result == "Access denied: URL userinfo is not allowed."
     assert fake_data_info.calls == []
 
 

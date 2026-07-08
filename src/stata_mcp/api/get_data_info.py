@@ -21,6 +21,7 @@ LOCAL_ACCESS_DENIED = "Access denied: data file must be within the working direc
 URL_DOMAIN_ACCESS_DENIED = "Access denied: URL domain is not in the allowlist."
 IP_URL_ACCESS_DENIED = "Access denied: IP-based URLs are not allowed."
 NON_HTTPS_URL_ACCESS_DENIED = "Access denied: only HTTPS URLs are allowed."
+URL_USERINFO_ACCESS_DENIED = "Access denied: URL userinfo is not allowed."
 
 
 def _is_url(data_path: str) -> bool:
@@ -50,7 +51,10 @@ def _is_allowed_domain(host: str, allowed_domains: tuple[str, ...]) -> bool:
 
 
 def _validate_local_path(data_path: str, working_dir: Path) -> Path | str:
-    resolved_data_path = Path(data_path).expanduser().resolve()
+    candidate_path = Path(data_path).expanduser()
+    if not candidate_path.is_absolute():
+        candidate_path = working_dir / candidate_path
+    resolved_data_path = candidate_path.resolve()
     try:
         resolved_data_path.relative_to(working_dir.resolve())
     except ValueError:
@@ -62,6 +66,8 @@ def _validate_url(data_path: str, runtime_config) -> tuple[str, str] | str:
     parsed_url = urlparse(data_path)
     if parsed_url.scheme.lower() != "https":
         return NON_HTTPS_URL_ACCESS_DENIED
+    if parsed_url.username or parsed_url.password:
+        return URL_USERINFO_ACCESS_DENIED
 
     host = parsed_url.hostname
     if not host:
