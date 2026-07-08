@@ -1,5 +1,6 @@
 import importlib
 import json
+import logging
 from pathlib import Path
 
 from stata_mcp.api import get_data_info as api_get_data_info
@@ -85,6 +86,10 @@ def _patch_fake_data_info(monkeypatch):
     return _FakeDataInfo
 
 
+def _joined_log_messages(caplog) -> str:
+    return "\n".join(caplog.messages)
+
+
 def test_local_file_within_working_dir_is_allowed(tmp_path) -> None:
     working_dir = tmp_path / "work"
     working_dir.mkdir()
@@ -116,6 +121,30 @@ def test_local_file_outside_working_dir_is_rejected(tmp_path) -> None:
     )
 
     assert result == "Access denied: data file must be within the working directory."
+
+
+def test_local_file_outside_working_dir_logs_security_violation(
+    caplog,
+    tmp_path,
+) -> None:
+    working_dir = tmp_path / "work"
+    outside_dir = tmp_path / "outside"
+    working_dir.mkdir()
+    outside_dir.mkdir()
+    data_path = outside_dir / "data.csv"
+    data_path.write_text("x,y\n1,2\n", encoding="utf-8")
+    config_path = _write_config(tmp_path, working_dir)
+
+    with caplog.at_level(logging.WARNING):
+        result = api_get_data_info(
+            data_path=data_path.as_posix(),
+            config_file=config_path,
+        )
+
+    messages = _joined_log_messages(caplog)
+    assert result == "Access denied: data file must be within the working directory."
+    assert "[SECURITY VIOLATION]" in messages
+    assert "resolved_path" in messages
 
 
 def test_relative_local_file_is_resolved_from_working_dir(
@@ -230,6 +259,34 @@ def test_url_guard_enabled_rejects_non_allowlisted_domain(
     assert fake_data_info.calls == []
 
 
+def test_url_guard_enabled_rejects_non_allowlisted_domain_logs_security_violation(
+    caplog,
+    monkeypatch,
+    tmp_path,
+) -> None:
+    _patch_fake_data_info(monkeypatch)
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    config_path = _write_config(
+        tmp_path,
+        working_dir,
+        enable_guard=True,
+        allowed_domains=["github.com"],
+    )
+
+    with caplog.at_level(logging.WARNING):
+        result = api_get_data_info(
+            data_path="https://evil.com/data.csv?token=secret",
+            config_file=config_path,
+        )
+
+    messages = _joined_log_messages(caplog)
+    assert result == "Access denied: URL domain is not in the allowlist."
+    assert "requested_url='https://evil.com/data.csv'" in messages
+    assert "domain-not-in-allowlist" in messages
+    assert "token=secret" not in messages
+
+
 def test_url_guard_enabled_rejects_ip_url(monkeypatch, tmp_path) -> None:
     fake_data_info = _patch_fake_data_info(monkeypatch)
     working_dir = tmp_path / "work"
@@ -248,6 +305,33 @@ def test_url_guard_enabled_rejects_ip_url(monkeypatch, tmp_path) -> None:
 
     assert result == "Access denied: IP-based URLs are not allowed."
     assert fake_data_info.calls == []
+
+
+def test_url_guard_enabled_rejects_ip_url_logs_security_violation(
+    caplog,
+    monkeypatch,
+    tmp_path,
+) -> None:
+    _patch_fake_data_info(monkeypatch)
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    config_path = _write_config(
+        tmp_path,
+        working_dir,
+        enable_guard=True,
+        allowed_domains=["example.com"],
+    )
+
+    with caplog.at_level(logging.WARNING):
+        result = api_get_data_info(
+            data_path="https://192.168.1.1/data.csv",
+            config_file=config_path,
+        )
+
+    messages = _joined_log_messages(caplog)
+    assert result == "Access denied: IP-based URLs are not allowed."
+    assert "[SECURITY VIOLATION]" in messages
+    assert "ip-host-not-allowed" in messages
 
 
 def test_url_guard_enabled_rejects_http_scheme(monkeypatch, tmp_path) -> None:
@@ -288,6 +372,33 @@ def test_url_rejects_username_or_password(monkeypatch, tmp_path) -> None:
 
     assert result == "Access denied: URL userinfo is not allowed."
     assert fake_data_info.calls == []
+
+
+def test_url_rejects_username_or_password_logs_security_violation(
+    caplog,
+    monkeypatch,
+    tmp_path,
+) -> None:
+    _patch_fake_data_info(monkeypatch)
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    config_path = _write_config(
+        tmp_path,
+        working_dir,
+        enable_guard=True,
+        allowed_domains=["github.com"],
+    )
+
+    with caplog.at_level(logging.WARNING):
+        result = api_get_data_info(
+            data_path="https://evil.com@github.com/data.csv",
+            config_file=config_path,
+        )
+
+    messages = _joined_log_messages(caplog)
+    assert result == "Access denied: URL userinfo is not allowed."
+    assert "[SECURITY VIOLATION]" in messages
+    assert "url-userinfo-not-allowed" in messages
 
 
 def test_data_info_url_guard_config_ignores_environment(
