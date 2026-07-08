@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Skill(rfc-impl-generator)",
+      "Read(~/.statamcp/*)",
       "Read(.claude/rules/*)",
       "Bash(stata-mcp --version)",
       "Bash(stata-mcp --help)",
