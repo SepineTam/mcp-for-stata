@@ -107,7 +107,6 @@ def _set_registry(
     mcp_servers,
     *,
     unix: bool,
-    enable_write: bool,
 ) -> None:
     registry = {
         "stata_do": {"description": "d", "func": lambda: None, "profiles": {"core", "all"}},
@@ -119,12 +118,6 @@ def _set_registry(
             "func": lambda: None,
             "profiles": {"unsafe"},
         },
-        "write_dofile": {
-            "description": "d",
-            "func": lambda: None,
-            "profiles": {"all"},
-            "deprecated": True,
-        },
         "broken_tool": {"description": "d", "profiles": {"all"}},
     }
     monkeypatch.setattr(mcp_servers, "_TOOL_REGISTRY", registry)
@@ -134,7 +127,6 @@ def _set_registry(
         "config",
         SimpleNamespace(
             IS_UNIX=unix,
-            ENABLE_WRITE_DOFILE=enable_write,
         ),
         raising=False,
     )
@@ -142,7 +134,7 @@ def _set_registry(
 
 def test_register_tools_core_only_registers_core(monkeypatch: pytest.MonkeyPatch, loaded_modules):
     mcp_servers, _ = loaded_modules
-    _set_registry(monkeypatch, mcp_servers, unix=True, enable_write=False)
+    _set_registry(monkeypatch, mcp_servers, unix=True)
     server = _DummyServer()
 
     mcp_servers.register_tools(server, profile="core")
@@ -176,7 +168,7 @@ def test_register_tools_all_applies_platform_and_deprecated_filters(
     loaded_modules,
 ):
     mcp_servers, _ = loaded_modules
-    _set_registry(monkeypatch, mcp_servers, unix=False, enable_write=False)
+    _set_registry(monkeypatch, mcp_servers, unix=False)
     server = _DummyServer()
 
     mcp_servers.register_tools(server, profile="all")
@@ -195,7 +187,6 @@ def test_register_tools_unsafe_includes_standard_and_high_risk_tools(
         monkeypatch,
         mcp_servers,
         unix=True,
-        enable_write=False,
     )
     mcp_servers.register_tools(server, profile="unsafe")
 
@@ -210,7 +201,7 @@ def test_register_tools_unsafe_includes_standard_and_high_risk_tools(
 
 def test_register_tools_prevents_profile_switch(monkeypatch: pytest.MonkeyPatch, loaded_modules):
     mcp_servers, _ = loaded_modules
-    _set_registry(monkeypatch, mcp_servers, unix=True, enable_write=True)
+    _set_registry(monkeypatch, mcp_servers, unix=True)
     server = _DummyServer()
 
     mcp_servers.register_tools(server, profile="core")
@@ -224,7 +215,7 @@ def test_register_tools_logs_warning_for_missing_func(
     loaded_modules,
 ):
     mcp_servers, _ = loaded_modules
-    _set_registry(monkeypatch, mcp_servers, unix=True, enable_write=True)
+    _set_registry(monkeypatch, mcp_servers, unix=True)
     server = _DummyServer()
 
     with caplog.at_level(logging.WARNING):

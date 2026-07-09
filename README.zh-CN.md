@@ -309,7 +309,9 @@ Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 ### 主要功能
 - **[安全守卫](https://sepinetam.github.io/mcp-for-stata/security)**：拦截危险命令（`!`、`shell`、`erase` 等）
 - **[内存监控](https://sepinetam.github.io/mcp-for-stata/monitoring)**：通过可配置限制防止内存耗尽
-- **[统一配置](https://sepinetam.github.io/mcp-for-stata/configuration)**：TOML 配置 + 环境变量
+- **[分层配置](https://sepinetam.github.io/mcp-for-stata/configuration)**：支持用户级、项目级、环境变量和 Linux 系统级配置
+- **Beta 异步 `stata_do` 执行**：支持多客户端工作流中的 MCP 并发调用
+- **可配置的数据访问边界**：data info URL guard 与可选的直接 `read_log` 边界
 - 跨平台支持（macOS、Windows、Linux）
 - 自动日志捕获和错误报告
 

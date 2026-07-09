@@ -13,8 +13,8 @@ def get_data_info(data_path: str | Path,
 ```
 
 **输入参数**：
-- `data_path`：数据文件的绝对文件系统路径或 URL（必填）
-  - 本地路径解析后必须位于 `WORKING_DIR` 下；相对路径会基于 `WORKING_DIR` 解析
+- `data_path`：数据文件的本地路径或 URL（必填）
+  - 本地路径可以是绝对路径或相对路径，但解析后必须位于 `WORKING_DIR` 下；相对路径会基于 `WORKING_DIR` 解析
   - URL 数据源默认不做限制
   - 当 `[BETA] enable_data_info_url_guard=true` 时，URL 必须使用 HTTPS，不能使用 IP 地址主机，不能包含 URL userinfo，并且主机名必须命中 `data_info_allowed_url_domains`
 - `vars_list`：可选变量子集规范，用于选择性分析（默认：null，所有变量）
@@ -34,15 +34,15 @@ def get_data_info(data_path: str | Path,
 
 **操作示例**：
 ```python
-# 本地文件分析
-get_data_info("/data/econometrics/survey.dta")
-get_data_info("~/Documents/exports/quarterly.csv", vars_list=["gdp", "inflation", "unemployment"])
+# 基于 WORKING_DIR 的本地文件分析
+get_data_info("./data/econometrics/survey.dta")
+get_data_info("./exports/quarterly.csv", vars_list=["gdp", "inflation", "unemployment"])
 
 # 远程数据获取；只有 enable_data_info_url_guard=true 时才限制 URL
 get_data_info("https://repository.org/datasets/panel_data.xlsx")
 
 # 编码源处理
-get_data_info("/data/legacy/latin1_data.csv", encoding="latin1")
+get_data_info("./data/legacy/latin1_data.csv", encoding="latin1")
 ```
 
 **支持格式**：
@@ -92,22 +92,22 @@ def stata_do(dofile_path: str,
 **操作示例**：
 ```python
 # 标准执行,成功路径不读 log
-stata_do("/Users/project/stata-mcp-dofile/20250104153045.do")
+stata_do("./.statamcp/stata-mcp-dofile/20250104153045.do")
 
 # 自定义日志命名
-stata_do("~/analysis/regression_pipeline.do", log_file_name="quarterly_results")
+stata_do("./analysis/regression_pipeline.do", log_file_name="quarterly_results")
 
 # 仅在 Stata 报错时返回日志内容
-stata_do("/tmp/estimation.do", read_log_when_error=True)
+stata_do("./analysis/estimation.do", read_log_when_error=True)
 
 # 保留历史日志并关闭 SMCL 输出
-stata_do("/tmp/estimation.do",
+stata_do("./analysis/estimation.do",
          read_log_when_error=True,
          is_replace_log=False,
          enable_smcl=False)
 
 # 执行超过五分钟时终止 Stata
-stata_do("/tmp/estimation.do", timeout=300)
+stata_do("./analysis/estimation.do", timeout=300)
 ```
 
 **实现架构**：
@@ -118,6 +118,13 @@ stata_do("/tmp/estimation.do", timeout=300)
 异常处理将失败分为三个层级：缺失 do 文件产物的 `FileNotFoundError`，Stata 执行失败或日志生成问题的 `RuntimeError`，以及执行或写入权限不足的 `PermissionError`。错误情况返回带 `"error"` 键的字典而非抛出异常，以保持 MCP 协议兼容性。
 
 `stata_do` 可以通过 `[BETA] IS_ASYNC_DO` 启用 beta 异步执行。完整 Beta 参数列表和并发限制见 [Beta 配置](../beta.md)。
+
+**Beta 异步执行**：
+- 通过 `[BETA] IS_ASYNC_DO=true` 启用异步执行
+- MCP、API 和 CLI 的 `stata_do` 路径在加载到该配置后都可以使用异步执行器
+- `MAX_ASYNC_DO` 控制并发的 MCP 异步 `stata_do` 调用数量；超过上限的 MCP 调用会等待执行槽释放
+- 异步执行不会改变 `timeout`、`enable_smcl`、`is_replace_log`、`log_file_name` 或 `read_log_when_error`
+- 当 RAM 监控以 `IS_MONITOR=true` 启用时，单次异步运行会使用带监控的同步回退路径；需要监控的 MCP 运行建议使用保守并发
 
 ---
 
@@ -189,6 +196,8 @@ def read_log(file_path: str,
 
 **输入参数**：
 - `file_path`：目标日志文件的绝对路径（必填，`.log` 或 `.smcl`）
+  - MCP 调用只能读取 `<WORKING_DIR>/<FOLDER_TAG>/` 下的文件
+  - API 和 CLI 调用默认保留历史的不限制路径行为；设置 `[SECURITY] strict_read_log_boundary=true` 后会强制使用同样边界
 - `encoding`：文本解码的字符编码（可选，默认为 UTF-8）
 - `is_beta`：启用结构化日志解析（可选，默认：false）
   - **仅限 macOS/Linux** - Windows 用户请使用默认行为
@@ -212,29 +221,29 @@ def read_log(file_path: str,
 **操作示例**：
 ```python
 # 读取日志文件（默认模式）
-read_log("/Users/project/stata-mcp-log/20250104153045.log")
+read_log("/Users/project/.statamcp/stata-mcp-log/20250104153045.log")
 
 # 使用结构化解析读取 SMCL 日志（macOS/Linux）
-read_log("/Users/project/stata-mcp-log/20250104153045.smcl",
+read_log("/Users/project/.statamcp/stata-mcp-log/20250104153045.smcl",
          is_beta=True,
          output_format="dict")
 
 # 获取去除框架的清洁日志内容
-read_log("~/stata-mcp-log/session.log",
+read_log("/Users/project/.statamcp/stata-mcp-log/session.log",
          is_beta=True,
          output_format="core")
 
 # 仅读取前 50 行
-read_log("~/stata-mcp-log/session.log", lines=50)
+read_log("/Users/project/.statamcp/stata-mcp-log/session.log", lines=50)
 
 # 读取最后 20 个命令结果（dict 格式）
-read_log("~/stata-mcp-log/session.log",
+read_log("/Users/project/.statamcp/stata-mcp-log/session.log",
          is_beta=True,
          output_format="dict",
          lines=-20)
 
-# 使用自定义编码读取
-read_log("~/analysis/tables/results.txt", encoding="utf-8")
+# 读取 stata-mcp 工作目录下生成的文本制品
+read_log("/Users/project/.statamcp/stata-mcp-log/results.txt", encoding="utf-8")
 ```
 
 **实现架构**：

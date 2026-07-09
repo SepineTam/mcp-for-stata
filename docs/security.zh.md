@@ -75,6 +75,30 @@ dofile 的绝对解析路径必须位于以下目录之一，才会被接受：
 
 将 dofile 放在配置的工作目录下，或让 MCP-for-Stata 自动生成到 `stata-mcp-dofile/`。若需要执行位于其他位置的 dofile，应通过把 `STATA_MCP__CWD` 指向其上级目录来纳入白名单，而不是放宽校验。
 
+## Data Info 访问边界
+
+`get_data_info` 接受本地路径和 URL 数据源，但两种输入在进入具体数据处理器前都会经过校验。
+
+### 本地数据文件
+
+本地数据文件的解析路径必须位于配置的 `WORKING_DIR` 之下。相对路径会基于 `WORKING_DIR` 解析，因此当工作目录是项目根目录时，`./data/survey.dta` 这类示例是可移植的。位于 `WORKING_DIR` 之外的绝对路径会被拒绝，并向日志写入 `[SECURITY VIOLATION]` 警告。
+
+### URL 数据源
+
+URL 数据源始终会经过基础 URL 检查：
+
+- 协议必须是 `https`
+- 拒绝 IP 地址主机
+- 拒绝 `https://user:pass@example.com/file.csv` 这类 URL userinfo
+
+当 `[BETA] enable_data_info_url_guard=true` 时，URL 主机名还必须命中 `data_info_allowed_url_domains`。白名单条目会匹配精确主机名及其子域名；如果需要读取 GitHub raw 内容，请显式加入 `raw.githubusercontent.com`。被拒绝的 URL 请求会返回 access-denied 消息，并写入包含脱敏 URL 和拒绝原因的 `[SECURITY VIOLATION]` 审计日志。
+
+## Read Log 边界开关
+
+MCP 层 `read_log` 工具始终限制只能读取 `<WORKING_DIR>/<FOLDER_TAG>/` 下的文件，防止 MCP 客户端把日志读取工具当作通用文件读取器使用。
+
+直接 API 和 CLI 调用默认保留历史行为，可以读取 stata-mcp 工作目录之外的路径。设置 `[SECURITY] strict_read_log_boundary=true` 后，API 和 CLI 路径的 `read_log` 也会使用同样的 `<WORKING_DIR>/<FOLDER_TAG>/` 边界。
+
 ## Local Macro 展开检测
 
 仅检查每行首个 token 的朴素黑名单可以被绕过：把危险命令藏进 local macro，稍后通过展开调用。自 v1.16.2 起 `GuardValidator` 通过两轮扫描堵上了这个缺口。

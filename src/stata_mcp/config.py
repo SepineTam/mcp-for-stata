@@ -380,16 +380,6 @@ class Config:
         )
 
     @property
-    def ENABLE_WRITE_DOFILE(self) -> bool:
-        return self._get_config_value(
-            config_keys=["BETA", "ENABLE_WRITE_DOFILE"],
-            env_var="STATA_MCP__ENABLE_WRITE_DOFILE",
-            default=False,
-            converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool)
-        )
-
-    @property
     def IS_ASYNC_DO(self) -> bool:
         return self._get_config_value(
             config_keys=["BETA", "IS_ASYNC_DO"],
@@ -528,6 +518,16 @@ class Config:
             default=True,
             converter=self._to_bool,
             validator=lambda x: isinstance(x, bool)
+        )
+
+    @cached_property
+    def STRICT_READ_LOG_BOUNDARY(self) -> bool:
+        return self._get_config_value(
+            config_keys=["SECURITY", "strict_read_log_boundary"],
+            env_var="",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool),
         )
 
     @cached_property

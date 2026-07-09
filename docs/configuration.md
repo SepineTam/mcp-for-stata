@@ -77,6 +77,8 @@ enable_data_info_url_guard = false
 data_info_allowed_url_domains = []
 IS_ASYNC_DO = false
 MAX_ASYNC_DO = 3
+enable_data_info_url_guard = false
+data_info_allowed_url_domains = []
 
 [HELP]
 IS_CACHE = true
@@ -84,6 +86,7 @@ IS_SAVE = true
 
 [SECURITY]
 IS_GUARD = true
+strict_read_log_boundary = false
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = []
 
 [PROJECT]
@@ -246,6 +249,22 @@ Enable security guard validation for Stata dofiles.
 
 For more details, see [Security Guard Documentation](security.md).
 
+#### `SECURITY.strict_read_log_boundary`
+
+Restrict direct `read_log` calls to logs under the configured stata-mcp working folder.
+
+- **Type**: Boolean
+- **Default**: `false`
+- **Environment Variable**: None
+- **Description**:
+  - When enabled, API and CLI `read_log` calls may read only files under `<WORKING_DIR>/<FOLDER_TAG>/`
+  - The MCP-layer `read_log` tool always enforces this folder boundary; this switch controls only API and CLI calls
+- **Example**:
+  ```toml
+  [SECURITY]
+  strict_read_log_boundary = true
+  ```
+
 #### Third-Party Ado Installation
 
 MCP exposure of `ado_package_install` is disabled by the default profile because
@@ -375,7 +394,7 @@ Maximum RAM limit in megabytes.
 
 ### BETA Section
 
-Beta and experimental options live in the `[BETA]` section. See [Beta Configuration](beta.md) for the complete list, recommended defaults, and behavior notes.
+Beta and experimental options live in the `[BETA]` section. This includes async `stata_do`, deprecated `write_dofile` registration, and the optional `get_data_info` URL domain guard. See [Beta Configuration](beta.md) for the complete list, recommended defaults, and behavior notes.
 
 ### STATA Section
 

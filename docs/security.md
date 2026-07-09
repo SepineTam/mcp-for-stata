@@ -97,6 +97,12 @@ When `[BETA] enable_data_info_url_guard=true`, URL data sources are checked befo
 
 Allowlist entries match the exact hostname and subdomains; add `raw.githubusercontent.com` explicitly when raw GitHub content is required. Rejected URL requests return an access-denied message and write a `[SECURITY VIOLATION]` audit log entry with the sanitized URL and rejection reason.
 
+## Read Log Boundary Switch
+
+The MCP-layer `read_log` tool always restricts reads to `<WORKING_DIR>/<FOLDER_TAG>/`. This prevents MCP clients from using the log reader as a general file reader.
+
+Direct API and CLI calls default to the historical behavior and may read paths outside the stata-mcp working folder. Set `[SECURITY] strict_read_log_boundary=true` to apply the same `<WORKING_DIR>/<FOLDER_TAG>/` boundary to API and CLI `read_log` calls.
+
 ## Local Macro Expansion Detection
 
 A naive blacklist that only inspects each line's first token can be bypassed by hiding a dangerous command inside a local macro and expanding it later. Since v1.16.2 `GuardValidator` performs a two-pass check that closes this gap.
