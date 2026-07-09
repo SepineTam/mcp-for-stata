@@ -31,7 +31,7 @@ class NET_Install(AdoInstallBase):
             options.append("replace")
         options.append(f"from({directory_or_url})")
         install_command = f"net install {package}, {' '.join(options)}"
-        runner_result = self.controller.run(install_command)
+        runner_result = self._run_install_command(install_command, source="net", package=package)
         return self._install_msg_template(runner_result)
 
     @staticmethod

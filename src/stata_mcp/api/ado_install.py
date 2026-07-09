@@ -50,6 +50,8 @@ def ado_package_install(
     )
     runtime = create_runtime_context(config_file=config_file, require_stata=True)
 
+    logging.info("Installing ado package %s from %s", package, source)
+
     if runtime.is_unix:
         installer_cls = SOURCE_MAPPING[source]
         install_args = [package, package_source_from] if source == "net" else [package]
@@ -123,6 +125,7 @@ def _finalize_install(
 ) -> str:
     """Refresh help after success or append consistent installation failure details."""
     if is_installed:
+        logging.info("Installed ado package %s from %s", package, source)
         _refresh_installed_package_help(
             package,
             source=source,
@@ -130,6 +133,7 @@ def _finalize_install(
         )
         return install_message
 
+    logging.error("Failed to install ado package %s from %s", package, source)
     error_summary = installer_cls.extract_error_summary(install_message)
     install_message += (
         f"\nError: Failed to install package '{package}' from source '{source}'. "

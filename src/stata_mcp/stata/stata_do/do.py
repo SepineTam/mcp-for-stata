@@ -145,6 +145,7 @@ class StataDo:
             try:
                 proc.wait(timeout=5)
             except subprocess.TimeoutExpired:
+                logging.warning("Stata process did not terminate; killed")
                 proc.kill()
                 proc.wait()
 
@@ -237,6 +238,7 @@ class StataDo:
         # Get environment with terminal size settings
         env = self.set_fake_terminal_size_env()
 
+        logging.info("Launching Stata %s in cwd %s", self.STATA_CLI, self.cwd)
         proc = subprocess.Popen(
             [self.STATA_CLI],  # Launch the Stata CLI
             stdin=subprocess.PIPE,  # Prepare to send commands
@@ -369,6 +371,7 @@ class StataDo:
         # Get environment with terminal size settings
         env = self.set_fake_terminal_size_env()
 
+        logging.info("Launching Stata %s in cwd %s", self.STATA_CLI, self.cwd)
         proc = subprocess.Popen(
             [self.STATA_CLI],  # Launch the Stata CLI
             stdin=subprocess.PIPE,  # Prepare to send commands
@@ -519,4 +522,5 @@ class StataDo:
                 log_content = file.read()
             return log_content
         except Exception as e:
+            logging.error("Failed to read log file %s: %s", log_file_path, e)
             return f"Failed to read logfile-{log_file_path}: {e}"

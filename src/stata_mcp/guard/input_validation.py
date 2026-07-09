@@ -1,9 +1,12 @@
 """Validation helpers for values interpolated into Stata commands."""
 
+import logging
 import re
 from collections.abc import Collection
 from ipaddress import ip_address
 from urllib.parse import urlsplit
+
+logger = logging.getLogger(__name__)
 
 STATA_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 ADO_PACKAGE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9]+$")
@@ -73,6 +76,10 @@ def validate_ado_package_name(package: str, *, source: str) -> str:
 def require_ado_install_confirmation(confirmed: bool) -> None:
     """Require an explicit acknowledgement before installing third-party code."""
     if confirmed is not True:
+        logger.warning(
+            "[SECURITY VIOLATION] Rejected ado install request: %s",
+            "explicit confirmation was not provided",
+        )
         raise PermissionError(
             "Ado package installation executes third-party code. "
             "Set confirm=True only after the user explicitly approves the "
@@ -93,6 +100,10 @@ def validate_github_repository_allowed(
         if str(item).strip()
     }
     if normalized_repository.lower() not in normalized_allowlist:
+        logger.warning(
+            "[SECURITY VIOLATION] Rejected ado install request: %s",
+            f"GitHub repository '{normalized_repository}' is not allowlisted",
+        )
         raise PermissionError(
             f"GitHub repository '{normalized_repository}' is not allowlisted. "
             "Configure SECURITY.ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES "
@@ -141,6 +152,10 @@ def validate_net_source_location(location: str | None) -> str:
             for segment in parsed_location.path.split("/")
         )
     ):
+        logger.warning(
+            "[SECURITY VIOLATION] Rejected ado install request: %s",
+            "net package source location failed HTTPS/path validation",
+        )
         raise ValueError(
             "Invalid net package source location. Only HTTPS URLs without "
             "credentials, query strings, fragments, non-default ports, or "
@@ -153,6 +168,10 @@ def validate_net_source_location(location: str | None) -> str:
     except ValueError:
         pass
     else:
+        logger.warning(
+            "[SECURITY VIOLATION] Rejected ado install request: %s",
+            "net package source location uses an IP-address host",
+        )
         raise ValueError(
             "Invalid net package source location. IP-address hosts are not allowed."
         )

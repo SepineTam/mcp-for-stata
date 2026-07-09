@@ -9,6 +9,7 @@
 
 # Notes: This feat is worked by Claude Code with GLM-5
 
+import logging
 import tempfile
 from pathlib import Path
 from typing import Any, Dict
@@ -18,6 +19,8 @@ import pyreadstat
 import requests
 
 from .base import DataInfoBase
+
+logger = logging.getLogger(__name__)
 
 
 class SpssDataInfo(DataInfoBase):
@@ -50,6 +53,8 @@ class SpssDataInfo(DataInfoBase):
             if self.is_url:
                 resp = requests.get(str(self.data_path), timeout=self.DEFAULT_TIMEOUT)
                 resp.raise_for_status()
+                safe_url = parsed_url._replace(query="", fragment="").geturl()
+                logger.info("Fetched SPSS data from URL: %s, status=%s", safe_url, resp.status_code)
                 suffix = Path(url_path).suffix
                 with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
                     tmp.write(resp.content)

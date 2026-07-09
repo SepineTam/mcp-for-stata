@@ -106,17 +106,22 @@ def _stata_do(
     try:
         dofile_content = resolved_dofile_path.read_text(encoding="utf-8")
     except Exception as error:
+        logging.error(
+            "Failed to read dofile %s for security check: %s",
+            resolved_dofile_path,
+            error,
+        )
         return {"error": f"Failed to read dofile for security check: {error}"}
 
     if not allow_package_management:
         package_report = PackageManagementGuardValidator().validate(dofile_content)
         if not package_report.is_safe:
-            return _security_rejection(package_report)
+            return _security_rejection(package_report, resolved_dofile_path)
 
     if runtime.config.IS_GUARD:
         report = GuardValidator().validate(dofile_content)
         if not report.is_safe:
-            return _security_rejection(report)
+            return _security_rejection(report, resolved_dofile_path)
     else:
         logging.warning("[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.")
 
@@ -157,6 +162,7 @@ def _stata_do(
     except RAMLimitExceededError as error:
         return {"error": f"Out of max RAM limit: {error}"}
     except Exception as error:
+        logging.error("Failed to execute %s: %s", resolved_dofile_path, error)
         return {"error": str(error)}
 
     result: Dict[str, Any] = {
@@ -195,8 +201,16 @@ def _run_coroutine_sync(coroutine: Coroutine[Any, Any, Any]) -> Any:
         return executor.submit(asyncio.run, coroutine).result()
 
 
-def _security_rejection(report) -> Dict[str, Any]:
+def _security_rejection(report, resolved_dofile_path: Path) -> Dict[str, Any]:
     """Return the standard response for a rejected dofile."""
+    dangerous_summary = ", ".join(
+        f"line {item.line}:{item.type}" for item in report.dangerous_items
+    )
+    logging.warning(
+        "[SECURITY VIOLATION] Security rejection for %s: %s",
+        resolved_dofile_path,
+        dangerous_summary,
+    )
     warning_message = "⚠️  Security warning: Dangerous commands detected:\n"
     for item in report.dangerous_items:
         warning_message += f"  - Line {item.line}: {item.type} '{item.content}'\n"

@@ -487,7 +487,10 @@ async def ado_package_install(
         or approval.data is None
         or approval.data.approved is not True
     ):
+        logging.info("User denied ado install of %s from %s", package, source)
         raise PermissionError("Ado package installation was not approved by the user.")
+
+    logging.info("User approved ado install of %s from %s", package, source)
 
     return api_ado_package_install(
         package=package,
@@ -739,6 +742,8 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
             logging.warning("Skipping tool '%s' because its registry entry has no callable func.", name)
             continue
         server.tool(name=name, description=meta["description"])(tool_func)
+
+    logging.info("Registered tools for profile: %s", profile)
 
     # # Keep help as both tool and resource on Unix platforms.
     # # NOTE: Temporarily disabled due to MCP resource URI parameter mismatch

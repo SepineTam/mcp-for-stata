@@ -7,10 +7,13 @@
 # @Email  : sepinetam@gmail.com
 # @File   : api/read_log.py
 
+import logging
 from pathlib import Path
 from typing import Literal
 
 from ..stata import StataLog
+
+logger = logging.getLogger(__name__)
 
 
 def read_log(
@@ -35,6 +38,10 @@ def read_log(
         try:
             path.relative_to(allowed_base)
         except ValueError:
+            logger.warning(
+                "[SECURITY VIOLATION] read_log outside allowed directory: %s",
+                path,
+            )
             return "Access denied: log file must be within the stata-mcp folder."
 
     if not path.exists():

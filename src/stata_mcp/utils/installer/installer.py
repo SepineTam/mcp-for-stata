@@ -8,6 +8,7 @@
 # @File   : utils/installer/installer.py
 
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -18,6 +19,8 @@ from pathlib import Path
 from typing import Callable, Dict, Optional
 
 from ...stata import StataFinder
+
+logger = logging.getLogger(__name__)
 
 
 class Installer:
@@ -133,6 +136,7 @@ class Installer:
         servers.update(custom_config or self.STATA_MCP_COMMON_CONFIG)
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(config, f, ensure_ascii=False, indent=2)
+        logger.info("Wrote MCP config to %s", config_path)
 
     def install_to_toml_config(self, config_path: Path, key: str = "mcpServers"):
         config_path = Path(config_path)
@@ -162,6 +166,7 @@ class Installer:
             if self.is_env:
                 f.write(f"env = {self._format_inline_table(self.env)}\n")
 
+        logger.info("Wrote MCP config to %s", config_path)
         print(f"✅ Successfully installed stata-mcp to: {config_path}")
 
     def install_to_yaml_config(self, config_path: Path, key: str = "mcpServers"):
@@ -218,6 +223,7 @@ class Installer:
                 encoding="utf-8",
             )
 
+        logger.info("Wrote MCP config to %s", config_path)
         print(f"✅ Successfully installed stata-mcp to: {config_path}")
 
     def _backup_before_write(self, config_path: Path) -> Optional[Path]:
@@ -234,6 +240,7 @@ class Installer:
 
         shutil.copy2(config_path, backup_path)
 
+        logger.info("Backed up %s to %s", config_path, backup_path)
         print(f"[BACKUP]\tOriginal config backed up to: {backup_path.resolve()}")
         return backup_path
 
@@ -380,6 +387,7 @@ class Installer:
             print(f"[WARN]\t{cli_bin} is not found, falling back to config file.")
             return False
         full_cmd = [cli_bin, *command]
+        logger.info("Running installer: %s", ' '.join(full_cmd))
         print(f"$ {' '.join(full_cmd)}")
         try:
             result = subprocess.run(

@@ -7,10 +7,13 @@
 # @Email  : sepinetam@gmail.com
 # @File   : controller.py
 
+import logging
 import re
 import time
 
 import pexpect
+
+logger = logging.getLogger(__name__)
 
 
 class StataController:
@@ -172,12 +175,14 @@ class StataController:
         self.child = pexpect.spawn(
             self.STATA_CLI, encoding="utf-8", timeout=self.timeout
         )
+        logger.info("Started Stata session with %s", self.STATA_CLI)
         self._expect_prompt()
 
     def restart(self):
         """
         Restart the Stata session.
         """
+        logger.info("Restarting Stata session")
         self.close()
         self.start()
 
@@ -186,12 +191,12 @@ class StataController:
         Close the Stata session.
         """
         if self.child and not self.child.closed:
+            logger.info("Closing Stata session")
             try:
                 self.child.sendline("exit, clear")
                 self.child.expect(pexpect.EOF, timeout=5)
             except Exception as e:
-                print(
-                    f"Warning: Could not close Stata session with error: {e}")
+                logger.warning("Could not close Stata session cleanly: %s", e)
             finally:
                 self.child.close()
 

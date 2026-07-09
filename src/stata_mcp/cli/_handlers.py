@@ -133,6 +133,7 @@ def handle_tool(args: Namespace) -> int:
         else:
             return 2
     except Exception as error:
+        logging.error("Tool subcommand failed: %s", error)
         print(error, file=sys.stderr)
         return 1
 
@@ -180,6 +181,7 @@ def handle_config(args: Namespace) -> int:
     if args.config_action == "set":
         if args.key == "cli":
             value = cfg.set_stata_cli(args.value)
+            logging.info("CLI set config %s = %s", "STATA.STATA_CLI", value)
             print(f"Set STATA.STATA_CLI = {value}")
         return 0
 
@@ -204,6 +206,7 @@ def handle_config(args: Namespace) -> int:
         except KeyError as error:
             print(error, file=sys.stderr)
             return 1
+        logging.info("CLI set config %s = %s", args.dot_key, args.value)
         print(f"Updated {args.dot_key} = {args.value}")
         return 0
 
@@ -226,6 +229,7 @@ def handle_install(args: Namespace) -> int:
 
     # 2. --all wins, ignore everything else
     if args.all:
+        logging.info("CLI installing MCP config for all clients")
         with colored_stdout():
             installer.install_all()
         return 0
@@ -237,6 +241,7 @@ def handle_install(args: Namespace) -> int:
 
     # 4. opencode / codex / hermes have client-specific schemas; ignore custom path
     if client in {"opencode", "codex", "hermes", "hermes-agent"}:
+        logging.info("CLI installing MCP config for client %s", client)
         with colored_stdout():
             if json_file or json_index:
                 print(
@@ -249,6 +254,7 @@ def handle_install(args: Namespace) -> int:
 
     # 5. -c CLIENT (generic-JSON clients)
     if client:
+        logging.info("CLI installing MCP config for client %s", client)
         if json_file:
             key = _parse_json_index(json_index) if json_index else Installer.CLIENT_DEFAULT_KEY[client]
             with colored_stdout():
@@ -261,6 +267,7 @@ def handle_install(args: Namespace) -> int:
         return 0
 
     # 6. only --json-file (no -c)
+    logging.info("CLI installing MCP config to %s", json_file)
     key = _parse_json_index(json_index) if json_index else "mcpServers"
     with colored_stdout():
         installer.install_to_json_config(json_file, key=key)

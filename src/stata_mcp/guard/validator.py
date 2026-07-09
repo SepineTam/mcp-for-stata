@@ -13,6 +13,7 @@ This module provides the core validation logic for detecting dangerous
 commands and patterns in Stata dofile code.
 """
 
+import logging
 import re
 from dataclasses import dataclass, field
 from typing import List
@@ -23,6 +24,8 @@ from .blacklist import (
     PACKAGE_MANAGEMENT_COMMANDS,
     STATA_PREFIXES,
 )
+
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # Data Structures
@@ -209,6 +212,16 @@ class GuardValidator:
 
         # Generate report
         is_safe = len(dangerous_items) == 0
+        if not is_safe:
+            item_summary = ", ".join(
+                f"line {item.line}:{item.type}" for item in dangerous_items
+            )
+            logger.warning(
+                "[SECURITY VIOLATION] Guard blocked dangerous dofile; items=[%s]",
+                item_summary,
+            )
+        else:
+            logger.debug("Guard validation passed with no dangerous items")
         return SecurityReport(is_safe=is_safe, dangerous_items=dangerous_items)
 
     def _collect_dangerous_local_names(self, lines: List[tuple[int, str]]) -> set[str]:
