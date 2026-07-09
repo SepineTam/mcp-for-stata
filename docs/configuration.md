@@ -73,6 +73,8 @@ BACKUP_COUNT = 5
 
 [BETA]
 ENABLE_WRITE_DOFILE = false
+enable_data_info_url_guard = false
+data_info_allowed_url_domains = []
 IS_ASYNC_DO = false
 MAX_ASYNC_DO = 3
 enable_data_info_url_guard = false

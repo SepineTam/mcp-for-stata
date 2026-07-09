@@ -20,7 +20,7 @@ data_info_allowed_url_domains = []
 | `ENABLE_WRITE_DOFILE` | Boolean | `false` | `STATA_MCP__ENABLE_WRITE_DOFILE` | 注册已弃用的 `write_dofile` MCP 工具。除非旧工作流仍依赖该工具，否则建议保持关闭。 |
 | `IS_ASYNC_DO` | Boolean | `false` | `STATA_MCP__IS_ASYNC_DO` | 为 MCP 和 API/CLI 执行路径启用异步版 `stata_do`。 |
 | `MAX_ASYNC_DO` | Integer | `3` | `STATA_MCP__MAX_ASYNC_DO` | 限制 MCP 异步 `stata_do` 的并发执行数量。超过上限的 MCP 调用会等待执行槽释放。仅在 `IS_ASYNC_DO=true` 时生效。 |
-| `enable_data_info_url_guard` | Boolean | `false` | 无 | 对传给 `get_data_info` 的 URL 数据源启用域名白名单检查。 |
+| `enable_data_info_url_guard` | Boolean | `false` | 无 | 对传给 `get_data_info` 的 URL 数据源启用 URL 校验和域名白名单检查。 |
 | `data_info_allowed_url_domains` | List[str] | `[]` | 无 | URL guard 启用后允许访问的主机名列表。 |
 
 ## `ENABLE_WRITE_DOFILE`
@@ -81,7 +81,7 @@ MAX_ASYNC_DO = 3
 
 ## `enable_data_info_url_guard`
 
-`enable_data_info_url_guard` 控制传给 `get_data_info` 的 URL 数据源是否必须命中白名单。
+`enable_data_info_url_guard` 控制传给 `get_data_info` 的 URL 数据源是否受 beta URL guard 限制。
 
 ```toml
 [BETA]
@@ -89,10 +89,10 @@ enable_data_info_url_guard = true
 data_info_allowed_url_domains = ["example.com", "raw.githubusercontent.com"]
 ```
 
-当该开关为 `false` 时，URL 数据源仍会经过基础 URL 检查：仅允许 HTTPS、禁止 IP 主机、禁止 URL userinfo。当该开关为 `true` 时，URL 主机名还必须命中 `data_info_allowed_url_domains`。
+当该开关为 `false` 时，URL 数据源保持历史行为，直接交给 data handler，不校验 scheme、host、userinfo 或域名白名单。当该开关为 `true` 时，URL 必须使用 HTTPS，不能使用 IP 主机，不能包含 URL userinfo，并且主机名必须命中 `data_info_allowed_url_domains`。
 
 ## `data_info_allowed_url_domains`
 
-`data_info_allowed_url_domains` 是 `get_data_info` URL guard 使用的主机名白名单。
+`data_info_allowed_url_domains` 是启用 `get_data_info` URL guard 后使用的主机名白名单。
 
 条目会匹配精确主机名及其子域名。例如，`example.com` 会允许 `example.com` 和 `data.example.com`。GitHub raw 内容是独立主机名，因此需要读取 GitHub raw 数据集时，请显式加入 `raw.githubusercontent.com`。

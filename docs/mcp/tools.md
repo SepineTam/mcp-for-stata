@@ -15,8 +15,8 @@ def get_data_info(data_path: str | Path,
 **Input Parameters**:
 - `data_path`: Local data path or URL to data file (required)
   - Local paths may be absolute or relative, but must resolve under `WORKING_DIR`; relative paths are resolved against `WORKING_DIR`
-  - URL sources must use HTTPS, may not use IP-address hosts, and may not include URL userinfo
-  - When `[BETA] enable_data_info_url_guard=true`, URL hostnames must also match `data_info_allowed_url_domains`
+  - URL data sources are unrestricted by default
+  - When `[BETA] enable_data_info_url_guard=true`, URL sources must use HTTPS, cannot use IP hosts or URL userinfo, and must match `data_info_allowed_url_domains`
 - `vars_list`: Optional variable subset specification for selective analysis (default: null, all variables)
 - `encoding`: Character encoding for text-based formats (default: UTF-8, ignored for .dta)
 - `head`: Number of preview rows to display from the dataset (default: 0, disabled to avoid context overflow on large datasets)
@@ -38,7 +38,7 @@ Serialized JSON string containing multi-layered metadata:
 get_data_info("./data/econometrics/survey.dta")
 get_data_info("./exports/quarterly.csv", vars_list=["gdp", "inflation", "unemployment"])
 
-# Remote data ingestion; domain allowlisting is off unless enable_data_info_url_guard=true
+# Remote data ingestion; URL restrictions apply only when enable_data_info_url_guard=true
 get_data_info("https://repository.org/datasets/panel_data.xlsx")
 
 # Encoded source handling

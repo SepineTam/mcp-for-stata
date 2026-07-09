@@ -78,7 +78,7 @@ Place dofiles either under the configured working directory or let MCP-for-Stata
 
 ## Data Info Access Boundary
 
-`get_data_info` accepts local paths and URL data sources, but both forms are validated before any data handler is invoked.
+`get_data_info` accepts local paths and URL data sources. Local paths are always validated before any data handler is invoked. URL sources keep the historical unrestricted behavior unless the beta URL guard is explicitly enabled.
 
 ### Local Data Files
 
@@ -86,13 +86,16 @@ Local data files must resolve under the configured `WORKING_DIR`. Relative paths
 
 ### URL Data Sources
 
-URL data sources always use baseline URL checks:
+By default, URL data sources are passed through to the data handler without scheme, host, userinfo, or domain checks.
+
+When `[BETA] enable_data_info_url_guard=true`, URL data sources are checked before any request is made:
 
 - The scheme must be `https`
 - IP-address hosts are rejected
 - URL userinfo such as `https://user:pass@example.com/file.csv` is rejected
+- The URL hostname must match `data_info_allowed_url_domains`
 
-When `[BETA] enable_data_info_url_guard=true`, the URL hostname must also match `data_info_allowed_url_domains`. Allowlist entries match the exact hostname and subdomains; add `raw.githubusercontent.com` explicitly when raw GitHub content is required. Rejected URL requests return an access-denied message and write a `[SECURITY VIOLATION]` audit log entry with the sanitized URL and rejection reason.
+Allowlist entries match the exact hostname and subdomains; add `raw.githubusercontent.com` explicitly when raw GitHub content is required. Rejected URL requests return an access-denied message and write a `[SECURITY VIOLATION]` audit log entry with the sanitized URL and rejection reason.
 
 ## Read Log Boundary Switch
 

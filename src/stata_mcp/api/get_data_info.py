@@ -87,6 +87,10 @@ def _validate_local_path(data_path: str, working_dir: Path) -> Path | str:
 def _validate_url(data_path: str, runtime_config) -> tuple[str, str] | str:
     parsed_url = urlparse(data_path)
     host = parsed_url.hostname
+    data_extension = Path(parsed_url.path).suffix.lower().strip(".")
+    if not runtime_config.ENABLE_DATA_INFO_URL_GUARD:
+        return data_path, data_extension
+
     if parsed_url.scheme.lower() != "https":
         _log_url_security_violation(data_path, host, "non-https-scheme")
         return NON_HTTPS_URL_ACCESS_DENIED
@@ -108,7 +112,6 @@ def _validate_url(data_path: str, runtime_config) -> tuple[str, str] | str:
         _log_url_security_violation(data_path, host, "domain-not-in-allowlist")
         return URL_DOMAIN_ACCESS_DENIED
 
-    data_extension = Path(parsed_url.path).suffix.lower().strip(".")
     return data_path, data_extension
 
 
