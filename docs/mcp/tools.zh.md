@@ -14,7 +14,8 @@ def get_data_info(data_path: str | Path,
 
 **输入参数**：
 - `data_path`：数据文件的本地路径或 URL（必填）
-  - 本地路径可以是绝对路径或相对路径，但解析后必须位于 `WORKING_DIR` 下；相对路径会基于 `WORKING_DIR` 解析
+  - 本地路径默认不做限制
+  - 当 `[SECURITY] strict_data_info_local_boundary=true` 时，本地路径解析后必须位于 `WORKING_DIR` 下；相对路径会基于 `WORKING_DIR` 解析
   - URL 数据源默认不做限制
   - 当 `[BETA] enable_data_info_url_guard=true` 时，URL 必须使用 HTTPS，不能使用 IP 地址主机，不能包含 URL userinfo，并且主机名必须命中 `data_info_allowed_url_domains`
 - `vars_list`：可选变量子集规范，用于选择性分析（默认：null，所有变量）

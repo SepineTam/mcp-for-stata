@@ -531,6 +531,16 @@ class Config:
         )
 
     @cached_property
+    def STRICT_DATA_INFO_LOCAL_BOUNDARY(self) -> bool:
+        return self._get_config_value(
+            config_keys=["SECURITY", "strict_data_info_local_boundary"],
+            env_var="",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool),
+        )
+
+    @cached_property
     def ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES(self) -> tuple[str, ...]:
         """Return GitHub repositories explicitly allowed for ado installation."""
         return self._get_config_value(

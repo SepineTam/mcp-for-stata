@@ -313,6 +313,35 @@ data_info_allowed_url_domains = ["system.example.com"]
     assert config.DATA_INFO_ALLOWED_URL_DOMAINS == ("system.example.com",)
 
 
+def test_data_info_local_boundary_config_defaults_to_disabled(tmp_path) -> None:
+    config = Config(config_file=tmp_path / "missing.toml")
+
+    assert config.STRICT_DATA_INFO_LOCAL_BOUNDARY is False
+
+
+def test_data_info_local_boundary_config_ignores_environment(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    monkeypatch.setenv("STATA_MCP__STRICT_DATA_INFO_LOCAL_BOUNDARY", "true")
+    config = Config(config_file=tmp_path / "missing.toml")
+
+    assert config.STRICT_DATA_INFO_LOCAL_BOUNDARY is False
+
+
+def test_data_info_local_boundary_config_reads_toml(tmp_path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        """
+[SECURITY]
+strict_data_info_local_boundary = true
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert Config(config_file=config_path).STRICT_DATA_INFO_LOCAL_BOUNDARY is True
+
+
 def test_linux_system_config_overrides_debug_config(
     monkeypatch,
     tmp_path,

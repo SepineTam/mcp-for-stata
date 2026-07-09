@@ -13,6 +13,7 @@ def _write_config(
     *,
     enable_guard: bool | None = None,
     allowed_domains: list[str] | None = None,
+    strict_local_boundary: bool | None = None,
 ) -> Path:
     config_path = tmp_path / "config.toml"
     lines = [
@@ -27,6 +28,12 @@ def _write_config(
         if allowed_domains is not None:
             domains = ", ".join(f'"{domain}"' for domain in allowed_domains)
             lines.append(f"data_info_allowed_url_domains = [{domains}]")
+    if strict_local_boundary is not None:
+        lines.append("")
+        lines.append("[SECURITY]")
+        lines.append(
+            f"strict_data_info_local_boundary = {str(strict_local_boundary).lower()}"
+        )
 
     config_path.write_text("\n".join(lines), encoding="utf-8")
     return config_path
@@ -106,7 +113,7 @@ def test_local_file_within_working_dir_is_allowed(tmp_path) -> None:
     assert payload["overview"]["source"] == data_path.resolve().as_posix()
 
 
-def test_local_file_outside_working_dir_is_rejected(tmp_path) -> None:
+def test_local_file_outside_working_dir_is_allowed_by_default(tmp_path) -> None:
     working_dir = tmp_path / "work"
     outside_dir = tmp_path / "outside"
     working_dir.mkdir()
@@ -114,6 +121,26 @@ def test_local_file_outside_working_dir_is_rejected(tmp_path) -> None:
     data_path = outside_dir / "data.csv"
     data_path.write_text("x,y\n1,2\n", encoding="utf-8")
     config_path = _write_config(tmp_path, working_dir)
+
+    result = api_get_data_info(
+        data_path=data_path.as_posix(),
+        config_file=config_path,
+    )
+
+    payload = json.loads(result)
+    assert payload["overview"]["source"] == data_path.resolve().as_posix()
+
+
+def test_local_file_outside_working_dir_is_rejected_when_boundary_is_enabled(
+    tmp_path,
+) -> None:
+    working_dir = tmp_path / "work"
+    outside_dir = tmp_path / "outside"
+    working_dir.mkdir()
+    outside_dir.mkdir()
+    data_path = outside_dir / "data.csv"
+    data_path.write_text("x,y\n1,2\n", encoding="utf-8")
+    config_path = _write_config(tmp_path, working_dir, strict_local_boundary=True)
 
     result = api_get_data_info(
         data_path=data_path.as_posix(),
@@ -133,7 +160,7 @@ def test_local_file_outside_working_dir_logs_security_violation(
     outside_dir.mkdir()
     data_path = outside_dir / "data.csv"
     data_path.write_text("x,y\n1,2\n", encoding="utf-8")
-    config_path = _write_config(tmp_path, working_dir)
+    config_path = _write_config(tmp_path, working_dir, strict_local_boundary=True)
 
     with caplog.at_level(logging.WARNING):
         result = api_get_data_info(
@@ -157,7 +184,7 @@ def test_relative_local_file_is_resolved_from_working_dir(
     process_dir.mkdir()
     data_path = working_dir / "data.csv"
     data_path.write_text("x,y\n1,2\n", encoding="utf-8")
-    config_path = _write_config(tmp_path, working_dir)
+    config_path = _write_config(tmp_path, working_dir, strict_local_boundary=True)
     monkeypatch.chdir(process_dir)
 
     result = api_get_data_info(

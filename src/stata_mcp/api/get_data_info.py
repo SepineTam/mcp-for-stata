@@ -65,8 +65,16 @@ def _log_url_security_violation(data_path: str, host: str | None, reason: str) -
     )
 
 
-def _validate_local_path(data_path: str, working_dir: Path) -> Path | str:
+def _validate_local_path(
+    data_path: str,
+    working_dir: Path,
+    *,
+    enforce_boundary: bool,
+) -> Path | str:
     candidate_path = Path(data_path).expanduser()
+    if not enforce_boundary:
+        return candidate_path.resolve()
+
     if not candidate_path.is_absolute():
         candidate_path = working_dir / candidate_path
     resolved_data_path = candidate_path.resolve()
@@ -132,7 +140,11 @@ def _get_data_info_impl(
             return validated_data
         resolved_data_path, data_extension = validated_data
     else:
-        validated_data_path = _validate_local_path(data_path, runtime.config.WORKING_DIR)
+        validated_data_path = _validate_local_path(
+            data_path,
+            runtime.config.WORKING_DIR,
+            enforce_boundary=runtime.config.STRICT_DATA_INFO_LOCAL_BOUNDARY,
+        )
         if isinstance(validated_data_path, str):
             return validated_data_path
         resolved_data_path = validated_data_path

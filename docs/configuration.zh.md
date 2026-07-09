@@ -72,6 +72,7 @@ IS_SAVE = true
 [SECURITY]
 IS_GUARD = true
 strict_read_log_boundary = false
+strict_data_info_local_boundary = false
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = []
 
 [PROJECT]

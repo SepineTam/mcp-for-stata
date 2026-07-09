@@ -14,7 +14,8 @@ def get_data_info(data_path: str | Path,
 
 **Input Parameters**:
 - `data_path`: Local data path or URL to data file (required)
-  - Local paths may be absolute or relative, but must resolve under `WORKING_DIR`; relative paths are resolved against `WORKING_DIR`
+  - Local paths are unrestricted by default
+  - When `[SECURITY] strict_data_info_local_boundary=true`, local paths must resolve under `WORKING_DIR`; relative paths are resolved against `WORKING_DIR`
   - URL data sources are unrestricted by default
   - When `[BETA] enable_data_info_url_guard=true`, URL sources must use HTTPS, cannot use IP hosts or URL userinfo, and must match `data_info_allowed_url_domains`
 - `vars_list`: Optional variable subset specification for selective analysis (default: null, all variables)
