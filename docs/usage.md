@@ -29,15 +29,10 @@ MCP-for-Stata now includes automatic security validation to prevent dangerous co
 # Blocks: !, shell, erase, rm, run, do, include, etc.
 
 # Safe code executes normally
-result = stata_mcp.stata_do("""
-    sysuse auto
-    regress price mpg weight
-""")
+result = stata_mcp.stata_do("./analysis.do")
 
 # Dangerous code is blocked
-result = stata_mcp.stata_do("""
-    ! rm -rf /  # ❌ Blocked by security guard
-""")
+result = stata_mcp.stata_do("./dangerous_analysis.do")
 # Error: Security validation failed
 ```
 
@@ -65,7 +60,7 @@ export STATA_MCP__IS_MONITOR=true
 export STATA_MCP__RAM_LIMIT=8192
 
 # Process is automatically terminated if RAM exceeds limit
-result = stata_mcp.stata_do(large_analysis_code)
+result = stata_mcp.stata_do("./large_analysis.do")
 ```
 
 **Configuration**:

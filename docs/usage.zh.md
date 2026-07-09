@@ -29,15 +29,10 @@ MCP-for-Stata 现在包含自动安全验证以防止危险命令：
 # 阻止：!, shell, erase, rm, run, do, include 等
 
 # 安全代码正常执行
-result = stata_mcp.stata_do("""
-    sysuse auto
-    regress price mpg weight
-""")
+result = stata_mcp.stata_do("./analysis.do")
 
 # 危险代码被阻止
-result = stata_mcp.stata_do("""
-    ! rm -rf /  # ❌ 被安全守卫阻止
-""")
+result = stata_mcp.stata_do("./dangerous_analysis.do")
 # Error: Security validation failed
 ```
 
@@ -65,7 +60,7 @@ export STATA_MCP__IS_MONITOR=true
 export STATA_MCP__RAM_LIMIT=8192
 
 # 如果 RAM 超过限制，进程将被自动终止
-result = stata_mcp.stata_do(large_analysis_code)
+result = stata_mcp.stata_do("./large_analysis.do")
 ```
 
 **配置**：

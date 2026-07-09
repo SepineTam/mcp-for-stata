@@ -92,11 +92,10 @@ MCP-for-Stata enforces a standardized directory layout for reproducible research
 ~/.statamcp/
 ├── stata-mcp-log/      # Stata execution logs (timestamped)
 ├── stata-mcp-dofile/   # Generated do-files (ISO 8601 timestamps)
-├── stata-mcp-result/   # Command outputs (outreg2, esttab exports)
 └── stata-mcp-tmp/      # Temporary artifacts (data info cache)
 ```
 
-For AI-assisted research projects, the recommended template (`stata-mcp --init`) creates:
+For AI-assisted research projects, a recommended layout is:
 
 ```text
 <project_name>/

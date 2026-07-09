@@ -77,21 +77,27 @@ dofile 的绝对解析路径必须位于以下目录之一，才会被接受：
 
 ## Data Info 访问边界
 
-`get_data_info` 接受本地路径和 URL 数据源，但两种输入在进入具体数据处理器前都会经过校验。
+`get_data_info` 接受本地路径和 URL 数据源。默认情况下，两者都保持历史的不限制行为；当部署环境需要更严格控制时，可以通过安全开关启用本地路径和 URL 边界。
 
 ### 本地数据文件
 
-本地数据文件的解析路径必须位于配置的 `WORKING_DIR` 之下。相对路径会基于 `WORKING_DIR` 解析，因此当工作目录是项目根目录时，`./data/survey.dta` 这类示例是可移植的。位于 `WORKING_DIR` 之外的绝对路径会被拒绝，并向日志写入 `[SECURITY VIOLATION]` 警告。
+默认情况下，本地数据文件会直接交给 data handler，不受 `WORKING_DIR` 边界限制。
+
+设置 `[SECURITY] strict_data_info_local_boundary=true` 后，本地数据文件的解析路径必须位于配置的 `WORKING_DIR` 之下。启用该开关时，相对路径会基于 `WORKING_DIR` 解析，因此当工作目录是项目根目录时，`./data/survey.dta` 这类示例是可移植的。位于 `WORKING_DIR` 之外的绝对路径会被拒绝，并向日志写入 `[SECURITY VIOLATION]` 警告。
 
 ### URL 数据源
 
-URL 数据源始终会经过基础 URL 检查：
+默认情况下，URL 数据源会直接交给 data handler，不校验 scheme、host、userinfo 或域名白名单。
+
+当 `[BETA] enable_data_info_url_guard=true` 时，URL 数据源会在发起请求前经过检查：
 
 - 协议必须是 `https`
 - 拒绝 IP 地址主机
 - 拒绝 `https://user:pass@example.com/file.csv` 这类 URL userinfo
 
-当 `[BETA] enable_data_info_url_guard=true` 时，URL 主机名还必须命中 `data_info_allowed_url_domains`。白名单条目会匹配精确主机名及其子域名；如果需要读取 GitHub raw 内容，请显式加入 `raw.githubusercontent.com`。被拒绝的 URL 请求会返回 access-denied 消息，并写入包含脱敏 URL 和拒绝原因的 `[SECURITY VIOLATION]` 审计日志。
+- URL 主机名必须命中 `data_info_allowed_url_domains`
+
+白名单条目会匹配精确主机名及其子域名；如果需要读取 GitHub raw 内容，请显式加入 `raw.githubusercontent.com`。被拒绝的 URL 请求会返回 access-denied 消息，并写入包含脱敏 URL 和拒绝原因的 `[SECURITY VIOLATION]` 审计日志。
 
 ## Read Log 边界开关
 
@@ -188,23 +194,17 @@ export STATA_MCP__IS_GUARD=false
 
 ```python
 # 当 IS_GUARD 启用时（默认）
-result = stata_mcp.stata_do(code="""
-    sysuse auto
-    regress price mpg weight
-""")
+result = stata_mcp.stata_do("./analysis.do")
 
 # 安全代码正常执行
 ```
 
 ### 安全验证示例
 
-当检测到危险代码时：
+当检测到危险代码时，`stata_do` 会返回错误，不会执行该 do 文件：
 
 ```python
-result = stata_mcp.stata_do(code="""
-    sysuse auto
-    ! rm -rf /  # 危险命令
-""")
+result = stata_mcp.stata_do("./dangerous_analysis.do")
 
 # Error: Security validation failed
 # ❌ Security validation failed. Found dangerous items:

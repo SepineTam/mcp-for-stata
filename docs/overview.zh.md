@@ -92,11 +92,10 @@ MCP-for-Stata 为可复现研究强制执行标准化的目录布局：
 ~/.statamcp/
 ├── stata-mcp-log/      # Stata 执行日志（带时间戳）
 ├── stata-mcp-dofile/   # 生成的 do 文件（ISO 8601 时间戳）
-├── stata-mcp-result/   # 命令输出（outreg2、esttab 导出）
 └── stata-mcp-tmp/      # 临时文件（数据信息缓存）
 ```
 
-对于 AI 辅助研究项目，推荐模板（`stata-mcp --init`）创建：
+对于 AI 辅助研究项目，推荐布局如下：
 
 ```text
 <project_name>/

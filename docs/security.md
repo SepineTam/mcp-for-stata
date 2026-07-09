@@ -78,11 +78,13 @@ Place dofiles either under the configured working directory or let MCP-for-Stata
 
 ## Data Info Access Boundary
 
-`get_data_info` accepts local paths and URL data sources. Local paths are always validated before any data handler is invoked. URL sources keep the historical unrestricted behavior unless the beta URL guard is explicitly enabled.
+`get_data_info` accepts local paths and URL data sources. Both keep the historical unrestricted behavior by default. Optional security switches can enable local path and URL boundaries when a deployment needs stricter controls.
 
 ### Local Data Files
 
-Local data files must resolve under the configured `WORKING_DIR`. Relative paths are resolved against `WORKING_DIR`, so examples such as `./data/survey.dta` are portable when the working directory is the project root. Absolute paths outside `WORKING_DIR` are rejected and a `[SECURITY VIOLATION]` warning is written to the log.
+By default, local data files are passed through to the data handler without a `WORKING_DIR` boundary.
+
+Set `[SECURITY] strict_data_info_local_boundary=true` to require local data files to resolve under the configured `WORKING_DIR`. When this switch is enabled, relative paths are resolved against `WORKING_DIR`, so examples such as `./data/survey.dta` are portable when the working directory is the project root. Absolute paths outside `WORKING_DIR` are rejected and a `[SECURITY VIOLATION]` warning is written to the log.
 
 ### URL Data Sources
 
@@ -198,23 +200,17 @@ The Security Guard is automatically applied when using the `stata_do` tool:
 
 ```python
 # When IS_GUARD is enabled (default)
-result = stata_mcp.stata_do(code="""
-    sysuse auto
-    regress price mpg weight
-""")
+result = stata_mcp.stata_do("./analysis.do")
 
 # Safe code executes normally
 ```
 
 ### Security Validation Example
 
-When dangerous code is detected:
+When dangerous code is detected, `stata_do` returns an error instead of executing the do-file:
 
 ```python
-result = stata_mcp.stata_do(code="""
-    sysuse auto
-    ! rm -rf /  # Dangerous command
-""")
+result = stata_mcp.stata_do("./dangerous_analysis.do")
 
 # Error: Security validation failed
 # ❌ Security validation failed. Found dangerous items:
