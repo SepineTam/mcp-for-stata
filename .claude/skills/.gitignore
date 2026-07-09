@@ -1,0 +1,11 @@
+# Ignore all local hooks file
+*
+
+# Allow the folling files in `.claude/skills`
+!.gitignore
+
+# Skills
+!rfc-impl-generator/
+!rfc-impl-generator/**
+!mcp-smoke-test/
+!mcp-smoke-test/**

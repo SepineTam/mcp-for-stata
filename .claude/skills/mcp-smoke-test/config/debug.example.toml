@@ -1,0 +1,59 @@
+# Example debug configuration for the Stata-MCP smoke test.
+# Copy this file to ~/.statamcp/debug.toml and adjust paths for your machine.
+
+[DEBUG]
+IS_DEBUG = true
+
+[DEBUG.logging]
+LOGGING_ON = true
+LOGGING_CONSOLE_HANDLER_ON = false
+LOGGING_FILE_HANDLER_ON = true
+LOG_FILE = "~/.statamcp/stata_mcp_debug.log"
+MAX_BYTES = 10000000
+BACKUP_COUNT = 5
+
+[BETA]
+ENABLE_WRITE_DOFILE = false
+IS_ASYNC_DO = false
+MAX_ASYNC_DO = 3
+enable_data_info_url_guard = true
+data_info_allowed_url_domains = ["raw.githubusercontent.com"]
+
+[HELP]
+IS_CACHE = true
+IS_SAVE = true
+
+[SECURITY]
+IS_GUARD = true
+enable_data_command_path_guard = true
+strict_data_info_local_boundary = true
+strict_read_log_boundary = true
+ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = []
+
+[PROJECT]
+WORKING_DIR = "/path/to/your/stata-mcp"
+CLEAN_LOG_DAYS = -1
+FOLDER_TAG = ".statamcp"
+
+[MONITOR]
+IS_MONITOR = false
+MAX_RAM_MB = -1
+
+[data_info]
+metrics = [
+    "obs",
+    "mean",
+    "stderr",
+    "min",
+    "max",
+    "q1",
+    "q3",
+    "skewness",
+    "kurtosis",
+]
+string_keep_number = 10
+decimal_places = 3
+hash_length = 12
+
+[STATA]
+STATA_CLI = "/usr/local/bin/stata-mp"

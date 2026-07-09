@@ -2,8 +2,11 @@
   "permissions": {
     "allow": [
       "Skill(rfc-impl-generator)",
+      "Skill(mcp-smoke-test)",
       "Read(~/.statamcp/*)",
       "Read(.claude/rules/*)",
+      "Bash(bash .claude/skills/mcp-smoke-test/scripts/cleanup.sh)",
+      "Bash(bash .claude/skills/mcp-smoke-test/scripts/prepare_smoke_test.sh)",
       "Bash(stata-mcp --version)",
       "Bash(stata-mcp --help)",
       "Bash(stata-mcp doctor:*)",
