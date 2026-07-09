@@ -188,6 +188,35 @@ def test_url_guard_disabled_does_not_block_non_allowlisted_domain(
     assert fake_data_info.calls[0]["data_path"] == "https://evil.com/data.csv"
 
 
+def test_url_guard_disabled_does_not_apply_baseline_url_restrictions(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    fake_data_info = _patch_fake_data_info(monkeypatch)
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    config_path = _write_config(tmp_path, working_dir, enable_guard=False)
+
+    for url in (
+        "http://example.com/data.csv",
+        "https://192.168.1.1/data.csv",
+        "https://evil.com@example.com/data.csv",
+    ):
+        result = api_get_data_info(
+            data_path=url,
+            config_file=config_path,
+        )
+
+        payload = json.loads(result)
+        assert payload["overview"]["source"] == url
+
+    assert [call["data_path"] for call in fake_data_info.calls] == [
+        "http://example.com/data.csv",
+        "https://192.168.1.1/data.csv",
+        "https://evil.com@example.com/data.csv",
+    ]
+
+
 def test_url_guard_enabled_allows_allowlisted_domain(
     monkeypatch,
     tmp_path,

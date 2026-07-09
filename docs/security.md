@@ -76,6 +76,27 @@ When the resolved path is outside the allowed roots, `stata_do` returns an error
 
 Place dofiles either under the configured working directory or let MCP-for-Stata generate them into `stata-mcp-dofile/`. To execute dofiles that live elsewhere, point `STATA_MCP__CWD` at a parent directory that already contains them rather than relaxing the check.
 
+## Data Info Access Boundary
+
+`get_data_info` accepts local paths and URL data sources. Local paths are always validated before any data handler is invoked. URL sources keep the historical unrestricted behavior unless the beta URL guard is explicitly enabled.
+
+### Local Data Files
+
+Local data files must resolve under the configured `WORKING_DIR`. Relative paths are resolved against `WORKING_DIR`, so examples such as `./data/survey.dta` are portable when the working directory is the project root. Absolute paths outside `WORKING_DIR` are rejected and a `[SECURITY VIOLATION]` warning is written to the log.
+
+### URL Data Sources
+
+By default, URL data sources are passed through to the data handler without scheme, host, userinfo, or domain checks.
+
+When `[BETA] enable_data_info_url_guard=true`, URL data sources are checked before any request is made:
+
+- The scheme must be `https`
+- IP-address hosts are rejected
+- URL userinfo such as `https://user:pass@example.com/file.csv` is rejected
+- The URL hostname must match `data_info_allowed_url_domains`
+
+Allowlist entries match the exact hostname and subdomains; add `raw.githubusercontent.com` explicitly when raw GitHub content is required. Rejected URL requests return an access-denied message and write a `[SECURITY VIOLATION]` audit log entry with the sanitized URL and rejection reason.
+
 ## Local Macro Expansion Detection
 
 A naive blacklist that only inspects each line's first token can be bypassed by hiding a dangerous command inside a local macro and expanding it later. Since v1.16.2 `GuardValidator` performs a two-pass check that closes this gap.
