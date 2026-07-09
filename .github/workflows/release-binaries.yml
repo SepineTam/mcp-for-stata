@@ -48,20 +48,31 @@ jobs:
       - name: Install build dependencies
         run: uv sync --group build
 
+      - name: Build Python distributions
+        if: matrix.os == 'ubuntu-latest'
+        run: uv build
+
       - name: Build binary
         run: uv run python -m nuitka --project --mode=onefile --output-dir=dist
 
-      - name: Stage binary
+      - name: Stage release assets
         shell: bash
         run: |
           mkdir -p release-bin
           cp "${{ matrix.executable_path }}" "release-bin/${{ matrix.artifact_name }}"
           chmod +x "release-bin/${{ matrix.artifact_name }}" || true
-          if command -v shasum >/dev/null 2>&1; then
-            shasum -a 256 "release-bin/${{ matrix.artifact_name }}" > "release-bin/${{ matrix.artifact_name }}.sha256"
-          else
-            sha256sum "release-bin/${{ matrix.artifact_name }}" > "release-bin/${{ matrix.artifact_name }}.sha256"
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            cp dist/*.tar.gz dist/*.whl release-bin/ || true
           fi
+          for file in release-bin/*; do
+            if [ -f "$file" ]; then
+              if command -v shasum >/dev/null 2>&1; then
+                shasum -a 256 "$file" > "$file.sha256"
+              else
+                sha256sum "$file" > "$file.sha256"
+              fi
+            fi
+          done
 
       - name: Smoke test binary
         shell: bash
