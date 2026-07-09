@@ -19,9 +19,6 @@ jobs:
           - os: ubuntu-latest
             artifact_name: stata-mcp-linux-x86_64
             executable_path: dist/stata-mcp
-          - os: macos-13
-            artifact_name: stata-mcp-macos-x86_64
-            executable_path: dist/stata-mcp
           - os: macos-14
             artifact_name: stata-mcp-macos-arm64
             executable_path: dist/stata-mcp
@@ -53,7 +50,7 @@ jobs:
         run: uv build
 
       - name: Build binary
-        run: uv run python -m nuitka --project --mode=onefile --output-dir=dist
+        run: uv run python -m nuitka --project --mode=onefile --output-dir=dist --assume-yes-for-downloads
 
       - name: Stage release assets
         shell: bash
