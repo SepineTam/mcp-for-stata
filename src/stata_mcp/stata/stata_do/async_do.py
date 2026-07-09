@@ -129,6 +129,7 @@ class AsyncStataDo(StataDo):
     ) -> Dict[str, Path]:
         """Execute Stata on macOS/Linux systems using asyncio subprocesses."""
         env = self.set_fake_terminal_size_env()
+        logging.info("Launching Stata asynchronously: %s", self.STATA_CLI)
         proc = await asyncio.create_subprocess_exec(
             self.STATA_CLI,
             stdin=asyncio.subprocess.PIPE,

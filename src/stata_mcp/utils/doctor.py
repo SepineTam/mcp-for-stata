@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import platform
 import shutil
@@ -29,6 +30,8 @@ from urllib.error import URLError
 from urllib.request import Request, urlopen
 
 from .clean_log import clean_log_files, scan_old_files
+
+logger = logging.getLogger(__name__)
 
 
 class CheckStatus(Enum):
@@ -385,6 +388,12 @@ def check_stata_execution(config: Any, stata_cli_path: str | None) -> CheckResul
 
     elapsed = round(time.monotonic() - start_time, 1)
     is_ok = return_code == 0
+
+    logger.info(
+        "Doctor stata_execution check: %s (%ss)",
+        "OK" if is_ok else "FAILED",
+        elapsed,
+    )
 
     return CheckResult(
         name="stata_execution",

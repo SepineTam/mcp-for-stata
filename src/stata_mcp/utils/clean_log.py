@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -9,6 +10,8 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from ..config import Config
+
+logger = logging.getLogger(__name__)
 
 _TIMESTAMP_PATTERN = re.compile(r"^(\d{14})(\d{6})?")
 
@@ -114,9 +117,11 @@ def clean_log_files(
             file_path.unlink()
             deleted_count += 1
             freed_bytes += size
+            logger.info("Deleted old file: %s", file_path)
         except OSError as error:
             failed_count += 1
             errors.append({"path": str(file_path), "error": str(error)})
+            logger.warning("Failed to delete old file %s: %s", file_path, error)
 
     return {
         "deleted_count": deleted_count,

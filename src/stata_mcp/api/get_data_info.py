@@ -152,6 +152,7 @@ def _get_data_info_impl(
 
     data_info_cls = get_data_handler(data_extension)
     if not data_info_cls:
+        logging.warning("Unsupported file extension for data_info: %s", data_extension)
         return f"Unsupported file extension now: {data_extension}"
 
     data_info = data_info_cls(
@@ -164,6 +165,11 @@ def _get_data_info_impl(
     try:
         return json.dumps(data_info.info, ensure_ascii=False)
     except Exception as error:
+        logging.error(
+            "Failed to serialize data summary for %s: %s",
+            _safe_url_for_log(str(resolved_data_path)),
+            error,
+        )
         return f"Failed to generate data summary for {resolved_data_path}: {error}"
 
 

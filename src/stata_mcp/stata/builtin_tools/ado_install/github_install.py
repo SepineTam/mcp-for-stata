@@ -42,7 +42,7 @@ class GITHUB_Install(AdoInstallBase):
                 "manually before using GitHub as an ado package source."
             )
         install_command = f"github install {package}{self.REPLACE_MESSAGE}"
-        runner_result = self.controller.run(install_command)
+        runner_result = self._run_install_command(install_command, source="github", package=package)
         return self._install_msg_template(runner_result)
 
     @property

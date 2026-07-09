@@ -341,6 +341,8 @@ class DataInfoBase(ABC):
             timeout=request_timeout
         )
         response.raise_for_status()
+        safe_url = urlparse(str(self.data_path))._replace(query="", fragment="").geturl()
+        logging.info("Fetched data from URL: %s, status=%s", safe_url, response.status_code)
         return BytesIO(response.content)
 
     def _load_data(self) -> BytesIO:

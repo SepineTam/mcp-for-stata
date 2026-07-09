@@ -7,6 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : config.py
 
+import logging
 import os
 import platform
 import sys
@@ -20,6 +21,8 @@ import tomli_w
 from .core.types import StataCLINotFoundError
 from .stata import StataFinder
 
+logger = logging.getLogger(__name__)
+
 
 class StataMcpFolder:
     """Lazy-create stata-mcp-folder sub-directories on first property access."""
@@ -32,6 +35,7 @@ class StataMcpFolder:
         gitignore = self._base / ".gitignore"
         if not gitignore.exists():
             gitignore.write_text("*", encoding="utf-8")
+            logger.info("Ensured stata-mcp folder at %s; wrote .gitignore", self._base)
 
     @cached_property
     def LOG(self) -> Path:
@@ -108,7 +112,10 @@ class Config:
         try:
             with open(config_file, "rb") as f:
                 return tomllib.load(f)
-        except Exception:
+        except FileNotFoundError:
+            return {}
+        except Exception as exc:
+            logger.warning("Could not read config file %s: %s", config_file, exc)
             return {}
 
     @classmethod
@@ -177,6 +184,7 @@ class Config:
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
         content = tomli_w.dumps(data)
         self.config_file.write_text(content, encoding="utf-8")
+        logger.info("Wrote config file %s", self.config_file)
         # Invalidate cached config so next access re-reads the file
         self.__dict__.pop("config", None)
 
@@ -196,6 +204,7 @@ class Config:
         stata_section["STATA_CLI"] = cleaned_value
         updated["STATA"] = stata_section
         self._write_toml(updated)
+        logger.info("Set STATA.STATA_CLI = %s in %s", cleaned_value, self.config_file)
         return cleaned_value
 
     def get_stata_cli(self) -> str | None:
@@ -235,6 +244,7 @@ class Config:
 
         updated[section][key] = cleaned_value
         self._write_toml(updated)
+        logger.info("Updated config %s = %s in %s", dot_key, cleaned_value, self.config_file)
 
     @staticmethod
     def _clean_string_value(value):
@@ -487,6 +497,7 @@ class Config:
         system_os = platform.system()
         if system_os not in ["Darwin", "Linux", "Windows"]:
             # Here, if unknown system -> exit.
+            logger.critical("Unknown/unsupported operating system: %s", system_os)
             sys.exit(f"Unknown System: {system_os}")
         return system_os
 
@@ -577,7 +588,11 @@ class Config:
             test_file.touch()
             test_file.unlink()
         except (OSError, PermissionError):
-            cwd = Path.home() / "Documents"
+            fallback = Path.home() / "Documents"
+            logger.warning(
+                "WORKING_DIR %s is not writable; falling back to %s", cwd, fallback
+            )
+            cwd = fallback
 
         return cwd
 
@@ -605,6 +620,10 @@ class Config:
                 warning_file.write_text(migrate_message + "\n" + old_folder_readme)
 
         migrated_marker.touch()
+        logger.info(
+            "Migrated old stata-mcp-folder to new layout; wrote README at %s",
+            warning_file,
+        )
 
     @cached_property
     def STATA_MCP_FOLDER_TAG(self) -> str:

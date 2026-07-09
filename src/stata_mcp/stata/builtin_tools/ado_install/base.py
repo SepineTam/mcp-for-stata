@@ -7,9 +7,12 @@
 # @Email  : sepinetam@gmail.com
 # @File   : base.py
 
+import logging
 from abc import ABC, abstractmethod
 
 from ...stata_controller import StataController
+
+logger = logging.getLogger(__name__)
 
 
 class AdoInstallBase(ABC):
@@ -64,6 +67,20 @@ class AdoInstallBase(ABC):
         state_with_prompt = msg.split("\n")[0]
         state_str = state_with_prompt.split(":")[-1].strip().lower()
         return state_str in ("true", "1", "yes")
+
+    def _run_install_command(self, install_command: str, *, source: str, package: str) -> str:
+        """Run an install command in Stata with lifecycle audit logging.
+
+        The raw command (which may embed a source URL) is intentionally not
+        logged; only the package name and source are recorded.
+        """
+        logger.info("Running Stata install command for package %s (source=%s)", package, source)
+        try:
+            runner_result = self.controller.run(install_command)
+        except Exception as error:
+            logger.error("Stata install command failed for package %s (source=%s): %s", package, source, error)
+            raise
+        return runner_result
 
     def _install_msg_template(self, runner_result: str) -> str:
         """Mark a completed interactive install successful.

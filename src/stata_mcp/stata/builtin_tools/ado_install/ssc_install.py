@@ -21,7 +21,7 @@ class SSC_Install(AdoInstallBase):
         require_ado_install_confirmation(confirm)
         package = validate_ado_package_name(package, source="ssc")
         install_command = f"ssc install {package}{self.REPLACE_MESSAGE}"
-        runner_result = self.controller.run(install_command)
+        runner_result = self._run_install_command(install_command, source="ssc", package=package)
         return self._install_msg_template(runner_result)
 
     @staticmethod

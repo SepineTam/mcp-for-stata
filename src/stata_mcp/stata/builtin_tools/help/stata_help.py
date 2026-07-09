@@ -7,6 +7,7 @@
 # @Email  : sepinetam@gmail.com
 # @File   : stata_help.py
 
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -15,6 +16,8 @@ from ...stata_controller import StataController
 
 if TYPE_CHECKING:
     from ...config import Config
+
+logger = logging.getLogger(__name__)
 
 
 class StataHelp:
@@ -120,16 +123,16 @@ class StataHelp:
                     self.help_cache_dir / f"help__{cmd}.txt", "w", encoding="utf-8"
                 ) as f:
                     f.write(content)
-            except Exception:
-                pass
+            except Exception as error:
+                logger.warning("Failed to write help cache for %s: %s", cmd, error)
         if (force or self.IS_SAVE) and self.project_tmp_dir is not None:
             try:
                 with open(
                     self.project_tmp_dir / f"help__{cmd}.txt", "w", encoding="utf-8"
                 ) as f:
                     f.write(content)
-            except Exception:
-                pass
+            except Exception as error:
+                logger.warning("Failed to write help cache for %s: %s", cmd, error)
         return None
 
     @staticmethod
