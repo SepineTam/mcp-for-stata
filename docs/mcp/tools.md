@@ -13,7 +13,10 @@ def get_data_info(data_path: str | Path,
 ```
 
 **Input Parameters**:
-- `data_path`: Absolute filesystem path or URL to data file (required)
+- `data_path`: Local data path or URL to data file (required)
+  - Local paths may be absolute or relative, but must resolve under `WORKING_DIR`; relative paths are resolved against `WORKING_DIR`
+  - URL sources must use HTTPS, may not use IP-address hosts, and may not include URL userinfo
+  - When `[BETA] enable_data_info_url_guard=true`, URL hostnames must also match `data_info_allowed_url_domains`
 - `vars_list`: Optional variable subset specification for selective analysis (default: null, all variables)
 - `encoding`: Character encoding for text-based formats (default: UTF-8, ignored for .dta)
 - `head`: Number of preview rows to display from the dataset (default: 0, disabled to avoid context overflow on large datasets)
@@ -31,15 +34,15 @@ Serialized JSON string containing multi-layered metadata:
 
 **Operational Examples**:
 ```python
-# Local file analysis
-get_data_info("/data/econometrics/survey.dta")
-get_data_info("~/Documents/exports/quarterly.csv", vars_list=["gdp", "inflation", "unemployment"])
+# Local file analysis from WORKING_DIR
+get_data_info("./data/econometrics/survey.dta")
+get_data_info("./exports/quarterly.csv", vars_list=["gdp", "inflation", "unemployment"])
 
-# Remote data ingestion
+# Remote data ingestion; domain allowlisting is off unless enable_data_info_url_guard=true
 get_data_info("https://repository.org/datasets/panel_data.xlsx")
 
 # Encoded source handling
-get_data_info("/data/legacy/latin1_data.csv", encoding="latin1")
+get_data_info("./data/legacy/latin1_data.csv", encoding="latin1")
 ```
 
 **Supported Formats**:
@@ -89,22 +92,22 @@ The `log_content` key is only present when `read_log_when_error=True`. Error con
 **Operational Examples**:
 ```python
 # Standard execution; log payload skipped on success
-stata_do("/Users/project/stata-mcp-dofile/20250104153045.do")
+stata_do("./.statamcp/stata-mcp-dofile/20250104153045.do")
 
 # Custom log naming
-stata_do("~/analysis/regression_pipeline.do", log_file_name="quarterly_results")
+stata_do("./analysis/regression_pipeline.do", log_file_name="quarterly_results")
 
 # Surface log content only when Stata reports an error
-stata_do("/tmp/estimation.do", read_log_when_error=True)
+stata_do("./analysis/estimation.do", read_log_when_error=True)
 
 # Keep prior logs and disable SMCL output
-stata_do("/tmp/estimation.do",
+stata_do("./analysis/estimation.do",
          read_log_when_error=True,
          is_replace_log=False,
          enable_smcl=False)
 
 # Stop Stata if execution exceeds five minutes
-stata_do("/tmp/estimation.do", timeout=300)
+stata_do("./analysis/estimation.do", timeout=300)
 ```
 
 **Implementation Architecture**:
@@ -115,6 +118,13 @@ Log file management operates within the `stata-mcp-log/` directory structure wit
 Exception handling categorizes failures into three tiers: `FileNotFoundError` for missing do-file artifacts, `RuntimeError` for Stata execution failures or log generation issues, and `PermissionError` for insufficient execution or write permissions. Error conditions return dictionary with `"error"` key rather than raising exceptions to maintain MCP protocol compatibility.
 
 `stata_do` can opt into beta async execution through `[BETA] IS_ASYNC_DO`. See [Beta Configuration](../beta.md) for the full beta parameter list and concurrency limits.
+
+**Beta Async Execution**:
+- Enable async execution with `[BETA] IS_ASYNC_DO=true`
+- MCP, API, and CLI `stata_do` paths can use the async executor when they load this configuration
+- `MAX_ASYNC_DO` controls the number of concurrent async MCP `stata_do` calls; extra MCP calls wait for an execution slot
+- Async execution does not change `timeout`, `enable_smcl`, `is_replace_log`, `log_file_name`, or `read_log_when_error`
+- When RAM monitoring is enabled with `IS_MONITOR=true`, individual async runs use the monitored synchronous fallback path; use conservative MCP concurrency for monitored runs
 
 ---
 
@@ -186,6 +196,8 @@ def read_log(file_path: str,
 
 **Input Parameters**:
 - `file_path`: Absolute path to target log file (required, `.log` or `.smcl`)
+  - MCP calls must read files under `<WORKING_DIR>/<FOLDER_TAG>/`
+  - API and CLI calls default to the historical unrestricted path behavior; set `[SECURITY] strict_read_log_boundary=true` to enforce the same boundary there
 - `encoding`: Character encoding for text decoding (optional, defaults to UTF-8)
 - `is_beta`: Enable structured log parsing with StataLog module (optional, default: false)
   - **macOS/Linux only** - Windows users should use default behavior
@@ -209,20 +221,20 @@ def read_log(file_path: str,
 **Operational Examples**:
 ```python
 # Read log file (default mode)
-read_log("/Users/project/stata-mcp-log/20250104153045.log")
+read_log("/Users/project/.statamcp/stata-mcp-log/20250104153045.log")
 
 # Read SMCL log with structured parsing (macOS/Linux)
-read_log("/Users/project/stata-mcp-log/20250104153045.smcl",
+read_log("/Users/project/.statamcp/stata-mcp-log/20250104153045.smcl",
          is_beta=True,
          output_format="dict")
 
 # Get cleaned log content without framework
-read_log("~/stata-mcp-log/session.log",
+read_log("/Users/project/.statamcp/stata-mcp-log/session.log",
          is_beta=True,
          output_format="core")
 
-# Read with custom encoding
-read_log("~/analysis/tables/results.txt", encoding="utf-8")
+# Read a generated text artifact under the stata-mcp working folder
+read_log("/Users/project/.statamcp/stata-mcp-log/results.txt", encoding="utf-8")
 ```
 
 **Implementation Architecture**:

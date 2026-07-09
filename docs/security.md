@@ -76,6 +76,30 @@ When the resolved path is outside the allowed roots, `stata_do` returns an error
 
 Place dofiles either under the configured working directory or let MCP-for-Stata generate them into `stata-mcp-dofile/`. To execute dofiles that live elsewhere, point `STATA_MCP__CWD` at a parent directory that already contains them rather than relaxing the check.
 
+## Data Info Access Boundary
+
+`get_data_info` accepts local paths and URL data sources, but both forms are validated before any data handler is invoked.
+
+### Local Data Files
+
+Local data files must resolve under the configured `WORKING_DIR`. Relative paths are resolved against `WORKING_DIR`, so examples such as `./data/survey.dta` are portable when the working directory is the project root. Absolute paths outside `WORKING_DIR` are rejected and a `[SECURITY VIOLATION]` warning is written to the log.
+
+### URL Data Sources
+
+URL data sources always use baseline URL checks:
+
+- The scheme must be `https`
+- IP-address hosts are rejected
+- URL userinfo such as `https://user:pass@example.com/file.csv` is rejected
+
+When `[BETA] enable_data_info_url_guard=true`, the URL hostname must also match `data_info_allowed_url_domains`. Allowlist entries match the exact hostname and subdomains; add `raw.githubusercontent.com` explicitly when raw GitHub content is required. Rejected URL requests return an access-denied message and write a `[SECURITY VIOLATION]` audit log entry with the sanitized URL and rejection reason.
+
+## Read Log Boundary Switch
+
+The MCP-layer `read_log` tool always restricts reads to `<WORKING_DIR>/<FOLDER_TAG>/`. This prevents MCP clients from using the log reader as a general file reader.
+
+Direct API and CLI calls default to the historical behavior and may read paths outside the stata-mcp working folder. Set `[SECURITY] strict_read_log_boundary=true` to apply the same `<WORKING_DIR>/<FOLDER_TAG>/` boundary to API and CLI `read_log` calls.
+
 ## Local Macro Expansion Detection
 
 A naive blacklist that only inspects each line's first token can be bypassed by hiding a dangerous command inside a local macro and expanding it later. Since v1.16.2 `GuardValidator` performs a two-pass check that closes this gap.

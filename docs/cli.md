@@ -161,6 +161,9 @@ stata-mcp tool ado-install reghdfe --yes
 # Run a do-file and only read the log when execution fails
 stata-mcp tool do /path/to/analysis.do --is-read-log true
 
+# Run with a custom log name and keep an existing log file
+stata-mcp tool do /path/to/analysis.do --log-file-name quarterly_results --is-replace-log false
+
 # Stop a do-file if execution exceeds five minutes
 stata-mcp tool do /path/to/analysis.do --timeout 300
 
@@ -176,7 +179,7 @@ stata-mcp tool read-log /path/to/output.log
 
 Tool subcommands:
 - `stata-mcp tool ado-install <package_name> [-y|--yes] [--source ssc|net|github]`
-- `stata-mcp tool do <dofile_path> [--is-read-log true|false] [--enable-smcl true|false] [--timeout <seconds>]`
+- `stata-mcp tool do <dofile_path> [--log-file-name <name>] [--is-read-log true|false] [--is-replace-log true|false] [--enable-smcl true|false] [--timeout <seconds>]`
 - `stata-mcp tool help <command> [--replace true|false]`
 - `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
 - `stata-mcp tool read-log <log_path> [--output-format full|core|dict]`
@@ -269,6 +272,7 @@ stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 | `--help` | `-h` | Show help message |
 | `--usable` | `-u` | *(Deprecated)* Check system compatibility, use `stata-mcp doctor` instead |
 | `--transport` | `-t` | MCP transport method (stdio/sse/http) |
+| `--config` | `-c` | Debug-only `config.toml` path for developer use |
 
 ### Config Options
 

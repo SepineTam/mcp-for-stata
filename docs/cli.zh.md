@@ -159,6 +159,9 @@ stata-mcp tool ado-install reghdfe --yes
 # 运行 do-file，仅在执行失败时读取 log
 stata-mcp tool do /path/to/analysis.do --is-read-log true
 
+# 使用自定义日志名，并保留已有同名日志
+stata-mcp tool do /path/to/analysis.do --log-file-name quarterly_results --is-replace-log false
+
 # 执行超过五分钟时终止 do-file
 stata-mcp tool do /path/to/analysis.do --timeout 300
 
@@ -174,7 +177,7 @@ stata-mcp tool read-log /path/to/output.log
 
 工具子命令：
 - `stata-mcp tool ado-install <package_name> [-y|--yes] [--source ssc|net|github]`
-- `stata-mcp tool do <dofile_path> [--is-read-log true|false] [--enable-smcl true|false] [--timeout <seconds>]`
+- `stata-mcp tool do <dofile_path> [--log-file-name <name>] [--is-read-log true|false] [--is-replace-log true|false] [--enable-smcl true|false] [--timeout <seconds>]`
 - `stata-mcp tool help <command> [--replace true|false]`
 - `stata-mcp tool data-info <data_path> [--vars-list var1 var2 ...]`
 - `stata-mcp tool read-log <log_path> [--output-format full|core|dict]`
@@ -265,6 +268,7 @@ stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 | `--help` | `-h` | 显示帮助信息 |
 | `--usable` | `-u` | *（已弃用）* 检查系统兼容性，请改用 `stata-mcp doctor` |
 | `--transport` | `-t` | MCP 传输方式（stdio/sse/http） |
+| `--config` | `-c` | 仅调试用的 `config.toml` 路径，面向开发者 |
 
 ### 配置选项
 
