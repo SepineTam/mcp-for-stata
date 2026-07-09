@@ -255,6 +255,24 @@ When making changes, ensure you:
 4. **Add examples** for new functionality
 5. **Update CHANGELOG.md** for releases
 
+### Logging Conventions
+
+Security-sensitive and state-changing operations must leave an audit trail. Use the following log levels:
+
+| Event type | Minimum level | Examples |
+|---|---|---|
+| Fatal errors | `CRITICAL` | unsupported OS, unrecoverable startup failure |
+| Failures and exceptions | `ERROR` | dofile execution failed, JSON serialization failed, log read failed |
+| Security rejections and boundary violations | `WARNING` | guard rejection, `read_log` boundary violation, invalid install request, `WORKING_DIR` fallback |
+| State changes and lifecycle events | `INFO` | Stata process start/kill, config write, package install, tool registration, client config write |
+| Routine success paths | none | do not log; MCP framework already records tool calls |
+| Verbose diagnostics | `DEBUG` | path resolution, cache hits, temporary file lifecycle |
+
+Additional rules:
+- Never log raw do-file contents, full Stata command text, URL query/fragment, or unredacted user paths at `INFO` or above.
+- Use `logging.getLogger(__name__)` for new modules; keep existing root-logger usage in `mcp_servers.py` for consistency.
+- Security events should use the `[SECURITY VIOLATION]` prefix for easy alerting.
+
 ### Getting Help
 
 - **Documentation**: See [sepinetam.github.io/mcp-for-stata](https://sepinetam.github.io/mcp-for-stata/) for complete guides

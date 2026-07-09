@@ -387,8 +387,26 @@ git merge origin/master
 - Security-sensitive code paths must go through `GuardValidator` before execution
 - The project requires a valid Stata license to run Stata commands
 
+## Logging Conventions
+
+Security-sensitive and state-changing operations must leave an audit trail. Follow these rules when adding or modifying logs:
+
+| Event type | Minimum level | Examples |
+|---|---|---|
+| Fatal errors | `CRITICAL` | unsupported OS, unrecoverable startup failure |
+| Failures and exceptions | `ERROR` | dofile execution failed, JSON serialization failed, log read failed |
+| Security rejections and boundary violations | `WARNING` | guard rejection, `read_log` boundary violation, invalid install request, `WORKING_DIR` fallback |
+| State changes and lifecycle events | `INFO` | Stata process start/kill, config write, package install, tool registration, client config write |
+| Routine success paths | none | do not log; MCP framework already records tool calls |
+| Verbose diagnostics | `DEBUG` | path resolution, cache hits, temporary file lifecycle |
+
+Additional rules:
+- Never log raw do-file contents, full Stata command text, URL query/fragment, or unredacted user paths at `INFO` or above.
+- Use `logging.getLogger(__name__)` for new modules; keep existing root-logger usage in `mcp_servers.py` for consistency.
+- Security events should use the `[SECURITY VIOLATION]` prefix for easy alerting.
+
 ## Important Notes
 
 - The `help` tool is Unix-only; it is filtered out on Windows during `register_tools()`
-- `write_dofile` is deprecated — do not extend or rely on it for new features
+- `write_dofile` has been removed from MCP tool registration and is no longer exposed to clients
 - `--usable` CLI flag is deprecated since v1.14.3; use `stata-mcp doctor` instead
