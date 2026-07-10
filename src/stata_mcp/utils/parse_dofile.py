@@ -113,6 +113,11 @@ _COMMAND_MIN_ABBREV: dict[str, int] = {
     "tabulate": 2,
     "program": 2,
     "forvalues": 4,
+    # data-read commands: infile owns the "inf" abbreviation, so infix
+    # must be spelled out (min length = full name)
+    "infile": 3,
+    "infix": 5,
+    "insheet": 4,
     # security-relevant abbreviations mirrored from guard/blacklist.py
     "shell": 2,
     "xshell": 3,
@@ -1456,6 +1461,11 @@ _DIRECT_PATH_COMMANDS: dict[str, int] = {
     "webuse": 1,
     "import": 1,
     "export": 1,
+    "infile": 1,
+    "infix": 1,
+    "insheet": 1,
+    "outsheet": 1,
+    "outfile": 1,
     "do": 1,
     "run": 1,
     "include": 1,

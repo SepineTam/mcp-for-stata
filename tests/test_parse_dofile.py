@@ -687,3 +687,56 @@ def test_diagnostics_on_command():
     use = [c for c in result.commands if c.name == "use"][0]
     assert any(d.code == "unresolved-macro" for d in result.diagnostics_on(summarize))
     assert result.diagnostics_on(use) == ()
+
+
+# ============================================================================
+# infile / infix / insheet path extraction (review follow-up)
+# ============================================================================
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("inf using data.dct", "infile using data.dct"),
+        ("infi using data.dct", "infile using data.dct"),
+        ("insh using data.csv", "insheet using data.csv"),
+        ("inshe using data.csv", "insheet using data.csv"),
+    ],
+)
+def test_data_read_abbreviations_expanded(source, expected):
+    assert _lines(expand_code(source + "\n")) == [expected]
+
+
+def test_infile_direct_path():
+    command = _first_command('infile "/tmp/secret.raw"\n', "infile")
+    assert command.data_paths == ("/tmp/secret.raw",)
+
+
+def test_infile_abbreviated_direct_path():
+    command = _first_command('inf "/tmp/secret.raw"\n', "infile")
+    assert command.data_paths == ("/tmp/secret.raw",)
+
+
+def test_infix_direct_path():
+    command = _first_command('infix "/tmp/secret.raw"\n', "infix")
+    assert command.data_paths == ("/tmp/secret.raw",)
+
+
+def test_infile_varlist_using_form():
+    command = _first_command('infile str8 name age using "f.raw"\n', "infile")
+    # varlist form: paths come from the using clause only
+    assert command.data_paths == ("f.raw",)
+
+
+def test_insheet_using_path():
+    command = _first_command('insh using "/tmp/secret.csv", clear\n', "insheet")
+    assert command.name == "insheet"
+    assert command.data_paths == ("/tmp/secret.csv",)
+
+
+def test_outfile_and_outsheet_paths():
+    result = expand_code_for_security(
+        'outfile using "/tmp/out.raw"\noutsheet using "/tmp/out.csv"\n'
+    )
+    assert result.commands[0].data_paths == ("/tmp/out.raw",)
+    assert result.commands[1].data_paths == ("/tmp/out.csv",)
