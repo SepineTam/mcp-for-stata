@@ -557,3 +557,133 @@ def test_commands_name_strips_prefixes():
     assert result.commands[0].name == "use"
     assert result.commands[0].options == "clear"
     assert result.commands[1].name == "generate"
+
+
+# ============================================================================
+# data_paths: unified path extraction for data commands
+# ============================================================================
+
+
+def _first_command(code, name):
+    result = expand_code_for_security(code)
+    return [c for c in result.commands if c.name == name][0]
+
+
+def test_data_paths_direct_use():
+    assert _first_command('use "x.dta", clear\n', "use").data_paths == ("x.dta",)
+
+
+def test_data_paths_bare_use():
+    assert _first_command("use secret.dta\n", "use").data_paths == ("secret.dta",)
+
+
+def test_data_paths_macro_expanded_use():
+    code = 'local p "/tmp/secret.dta"\nuse "`p\'"\n'
+    assert _first_command(code, "use").data_paths == ("/tmp/secret.dta",)
+
+
+def test_data_paths_import_delimited_direct():
+    command = _first_command('import delimited "x.csv"\n', "import")
+    assert command.data_paths == ("x.csv",)
+
+
+def test_data_paths_import_delimited_using_paren():
+    command = _first_command('import delimited using("/tmp/secret.csv")\n', "import")
+    assert command.data_paths == ("/tmp/secret.csv",)
+
+
+def test_data_paths_use_varlist_using():
+    command = _first_command('use price mpg using "x.dta"\n', "use")
+    # varlist form: price/mpg are variables, not paths
+    assert command.data_paths == ("x.dta",)
+
+
+def test_data_paths_use_using_after_continuation():
+    code = 'use keepvar ///\nusing "/tmp/secret.dta"\n'
+    assert _first_command(code, "use").data_paths == ("/tmp/secret.dta",)
+
+
+def test_data_paths_compound_quoted_use():
+    command = _first_command('use `"/tmp/secret.dta"\'\n', "use")
+    assert command.data_paths == ("/tmp/secret.dta",)
+
+
+def test_data_paths_append_multiple():
+    command = _first_command('append using "a.dta" "b.dta"\n', "append")
+    assert command.data_paths == ("a.dta", "b.dta")
+
+
+def test_data_paths_webuse_set_url():
+    code = "webuse set http://127.0.0.1/private\nwebuse secret, clear\n"
+    result = expand_code_for_security(code)
+    assert result.commands[0].data_paths == ("http://127.0.0.1/private",)
+    assert result.commands[1].data_paths == ("secret",)
+
+
+def test_data_paths_cd_and_copy():
+    result = expand_code_for_security('cd /tmp\ncopy "a.txt" "b.txt"\n')
+    assert result.commands[0].data_paths == ("/tmp",)
+    assert result.commands[1].data_paths == ("a.txt", "b.txt")
+
+
+def test_data_paths_save_without_filename():
+    assert _first_command("save, replace\n", "save").data_paths == ()
+
+
+def test_data_paths_prefixed_command():
+    command = _first_command('cap qui use "x.dta", clear\n', "use")
+    assert command.data_paths == ("x.dta",)
+
+
+def test_data_paths_non_file_command_empty():
+    assert _first_command("summarize price\n", "summarize").data_paths == ()
+
+
+def test_data_paths_unresolved_macro_token_surfaces():
+    code = 'local p : env SECRET\nuse "`p\'"\n'
+    command = _first_command(code, "use")
+    assert command.has_unresolved_macro is True
+    assert command.data_paths == ("`p'",)
+
+
+# ============================================================================
+# Diagnostic scope: global vs line-scoped fail-closed
+# ============================================================================
+
+
+def test_unbalanced_quotes_is_global_scope():
+    result = expand_code_for_security('use "unterminated.dta\n')
+    assert result.requires_global_fail_closed is True
+
+
+def test_internal_error_is_global_scope(monkeypatch):
+    import stata_mcp.utils.parse_dofile as module
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(module, "_process_lines", boom)
+    result = expand_code_for_security("display 1\n")
+    assert result.requires_global_fail_closed is True
+
+
+def test_preserved_loop_is_line_scope():
+    code = "foreach v of varlist a b {\n    summarize `v'\n}\n"
+    result = expand_code_for_security(code)
+    assert result.has_unsupported_security_construct is True
+    assert result.requires_global_fail_closed is False
+
+
+def test_program_macro_is_line_scope():
+    code = 'program define myprog\n    display "`msg\'"\nend\n'
+    result = expand_code_for_security(code)
+    assert result.requires_global_fail_closed is False
+
+
+def test_diagnostics_on_command():
+    code = "foreach v of varlist a b {\n    summarize `v'\n}\nuse clean.dta\n"
+    result = expand_code_for_security(code)
+    summarize = [c for c in result.commands if c.name == "summarize"][0]
+    use = [c for c in result.commands if c.name == "use"][0]
+    assert any(d.code == "unresolved-macro" for d in result.diagnostics_on(summarize))
+    assert result.diagnostics_on(use) == ()

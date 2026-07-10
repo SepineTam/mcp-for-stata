@@ -51,10 +51,20 @@ Usage::
     from stata_mcp.utils.parse_dofile import expand_code_for_security
 
     result = expand_code_for_security(code)
+
+    # conservative policy: fail closed on anything unresolved
     if result.has_unsupported_security_construct:
-        ...  # fail closed
+        ...  # reject
+
+    # graded policy: always reject structural damage, then decide
+    # per command for line-scoped diagnostics
+    if result.requires_global_fail_closed:
+        ...  # reject
     for command in result.commands:
-        ...  # audit command.name / command.using_paths
+        ...  # audit command.name / command.data_paths;
+        #      reject sensitive commands when
+        #      command.has_unresolved_macro or
+        #      result.diagnostics_on(command) is non-empty
 """
 
 from __future__ import annotations
@@ -186,12 +196,22 @@ class ParseDiagnostic:
             (0 when no specific line applies).
         security_relevant: True when a security consumer should treat the
             construct as unsupported and fail closed.
+        scope: Blast radius of the problem. ``"global"`` means the
+            normalized view as a whole may be unreliable (structural
+            damage: unbalanced quotes/blocks, exhausted budget,
+            internal errors) and a security consumer should reject the
+            dofile outright. ``"line"`` means the problem is confined
+            to the reported line(s) (unresolved macros, preserved
+            loops); the rest of the expansion is still faithful, so a
+            consumer may choose to fail closed only when the affected
+            lines intersect security-sensitive commands.
     """
 
     code: str
     message: str
     line: int
     security_relevant: bool = True
+    scope: str = "line"
 
     def __str__(self) -> str:
         """Return a compact human-readable representation."""
@@ -218,6 +238,14 @@ class ParsedCommand:
             literals on the line, in order.
         using_paths: Targets of ``using ...`` / ``using(...)`` clauses
             (quoted or bare, multiple targets supported).
+        data_paths: Unified file/URL arguments of this command: all
+            ``using`` targets plus, for known file commands (``use``,
+            ``save``, ``import``/``export``, ``append``, ``merge``,
+            ``do``/``run``/``include``, ``erase``, ``copy``, ``cd``,
+            ``webuse``/``sysuse``, ...), the direct path argument
+            (``use "x.dta"``, ``import delimited "x.csv"``,
+            ``webuse set <url>``). Guards should audit this field
+            instead of inferring paths per command type.
         has_unresolved_macro: True when the line still contains macro
             references or expressions the expander could not resolve.
     """
@@ -229,6 +257,7 @@ class ParsedCommand:
     options: str
     string_literals: tuple[str, ...]
     using_paths: tuple[str, ...]
+    data_paths: tuple[str, ...]
     has_unresolved_macro: bool
 
 
@@ -252,8 +281,39 @@ class ExpansionResult:
 
     @property
     def has_unsupported_security_construct(self) -> bool:
-        """True when any diagnostic requires a fail-closed decision."""
+        """True when any security-relevant diagnostic exists.
+
+        This is the conservative aggregate: rejecting on it fails
+        closed on every unresolved construct anywhere in the file. For
+        a graded policy, reject on
+        :attr:`requires_global_fail_closed` unconditionally and handle
+        line-scoped diagnostics per command via :meth:`diagnostics_on`
+        or :attr:`ParsedCommand.has_unresolved_macro`.
+        """
         return any(d.security_relevant for d in self.diagnostics)
+
+    @property
+    def requires_global_fail_closed(self) -> bool:
+        """True when the expanded view itself may be unreliable.
+
+        Set by ``scope="global"`` diagnostics (unbalanced quotes or
+        blocks, exhausted expansion budget, depth overflow, internal
+        errors). A security consumer must reject the whole dofile in
+        this case regardless of per-command policy.
+        """
+        return any(
+            d.security_relevant and d.scope == "global" for d in self.diagnostics
+        )
+
+    def diagnostics_on(self, command: ParsedCommand) -> tuple[ParseDiagnostic, ...]:
+        """Diagnostics whose original lines intersect ``command``.
+
+        Useful for line-scoped fail-closed policies: reject when a
+        security-sensitive command carries any security-relevant
+        diagnostic.
+        """
+        origins = set(command.origins)
+        return tuple(d for d in self.diagnostics if d.line in origins)
 
 
 # ============================================================================
@@ -287,6 +347,7 @@ class _DiagnosticCollector:
         message: str,
         line: int,
         security_relevant: bool = True,
+        scope: str = "line",
     ) -> None:
         """Record a diagnostic unless an identical one already exists."""
         key = (code, message, line)
@@ -299,6 +360,7 @@ class _DiagnosticCollector:
                 message=message,
                 line=line,
                 security_relevant=security_relevant,
+                scope=scope,
             )
         )
 
@@ -440,6 +502,7 @@ def expand_code_for_security(
             "internal-error",
             "expansion failed unexpectedly; original code returned unmodified",
             0,
+            scope="global",
         )
         return ExpansionResult(
             expanded_code=code,
@@ -659,6 +722,7 @@ def _strip_comments(code: str, collector: _DiagnosticCollector) -> list[_Line]:
                     "unbalanced-quotes",
                     "string literal is not terminated on its line",
                     orig_line,
+                    scope="global",
                 )
             index = end
             line_blank = False
@@ -702,6 +766,7 @@ def _strip_comments(code: str, collector: _DiagnosticCollector) -> list[_Line]:
                     "unbalanced-comment",
                     "block comment is never closed",
                     start_line,
+                    scope="global",
                 )
             continue
 
@@ -1196,6 +1261,7 @@ def _process_lines(
                 reason[0],
                 f"{reason[1]}; remaining source preserved verbatim",
                 lines[index].first_origin,
+                scope="global",
             )
             output.extend(lines[index:])
             break
@@ -1235,6 +1301,7 @@ def _process_lines(
                     "unbalanced-block",
                     "loop block has no matching closing brace",
                     entry.first_origin,
+                    scope="global",
                 )
                 output.append(line)
                 budget.spend()
@@ -1325,14 +1392,7 @@ def _report_unresolved_macros(
 
 def _command_name(text: str) -> str:
     """Extract the normalized command token of an expanded line."""
-    body = text
-    while True:
-        stripped = _PREFIX_STRIP_RE.sub("", body)
-        stripped = _BY_PREFIX_STRIP_RE.sub("", stripped)
-        if stripped == body:
-            break
-        body = stripped
-    tokens = body.split()
+    tokens = _strip_command_prefixes(text).split()
     if not tokens:
         return ""
     return tokens[0].lower().rstrip(",:")
@@ -1386,6 +1446,77 @@ def _extract_using_paths(text: str) -> tuple[str, ...]:
     return tuple(unique)
 
 
+#: Commands whose direct (non-``using``) argument is a file, URL, or
+#: directory path, mapped to the maximum number of path tokens taken.
+_DIRECT_PATH_COMMANDS: dict[str, int] = {
+    "use": 1,
+    "save": 1,
+    "saveold": 1,
+    "sysuse": 1,
+    "webuse": 1,
+    "import": 1,
+    "export": 1,
+    "do": 1,
+    "run": 1,
+    "include": 1,
+    "type": 1,
+    "erase": 1,
+    "rmdir": 1,
+    "mkdir": 1,
+    "cd": 1,
+    "chdir": 1,
+    "copy": 2,
+}
+
+#: Commands whose first argument is a subcommand, not a path
+#: (``import delimited "x.csv"``).
+_SUBCOMMAND_SKIP: dict[str, int] = {"import": 1, "export": 1}
+
+
+def _strip_command_prefixes(text: str) -> str:
+    """Strip stacked ``capture``/``quietly``/``by ...:`` prefixes."""
+    body = text
+    while True:
+        stripped = _PREFIX_STRIP_RE.sub("", body)
+        stripped = _BY_PREFIX_STRIP_RE.sub("", stripped)
+        if stripped == body:
+            return body
+        body = stripped
+
+
+def _extract_direct_paths(name: str, text: str) -> list[str]:
+    """Direct path argument(s) of a known file command.
+
+    Returns an empty list when the command takes a ``using`` clause on
+    this line (the arguments before ``using`` are then a varlist, and
+    the paths are covered by :func:`_extract_using_paths`).
+    """
+    limit = _DIRECT_PATH_COMMANDS.get(name)
+    if limit is None:
+        return []
+    body = _strip_command_prefixes(text)
+    comma = _find_top_level_comma(body)
+    head = body if comma == -1 else body[:comma]
+    tokens = _split_items(head)
+    if not tokens:
+        return []
+    arguments = tokens[1:]
+    arguments = arguments[_SUBCOMMAND_SKIP.get(name, 0) :]
+    if name == "webuse" and arguments and arguments[0].lower() == "set":
+        arguments = arguments[1:]
+    for token in arguments:
+        if token.lower() == "using" or token.lower().startswith("using("):
+            return []
+    paths: list[str] = []
+    for token in arguments:
+        if token.lower() in ("if", "in"):
+            break
+        paths.append(token)
+        if len(paths) >= limit:
+            break
+    return paths
+
+
 def _extract_commands(out_lines: list[_Line]) -> tuple[ParsedCommand, ...]:
     """Tokenize each non-blank expanded line into a :class:`ParsedCommand`."""
     commands: list[ParsedCommand] = []
@@ -1394,15 +1525,21 @@ def _extract_commands(out_lines: list[_Line]) -> tuple[ParsedCommand, ...]:
         if not stripped or stripped in ("{", "}"):
             continue
         comma = _find_top_level_comma(stripped)
+        name = _command_name(stripped)
+        using_paths = _extract_using_paths(stripped)
+        data_paths = tuple(
+            dict.fromkeys([*_extract_direct_paths(name, stripped), *using_paths])
+        )
         commands.append(
             ParsedCommand(
-                name=_command_name(stripped),
+                name=name,
                 text=stripped,
                 line=number,
                 origins=entry.origins,
                 options=stripped[comma + 1 :].strip() if comma != -1 else "",
                 string_literals=_extract_string_literals(stripped),
-                using_paths=_extract_using_paths(stripped),
+                using_paths=using_paths,
+                data_paths=data_paths,
                 has_unresolved_macro=_has_unresolved_macro(stripped),
             )
         )
