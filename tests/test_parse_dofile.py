@@ -4,7 +4,12 @@
 
 import pytest
 
-from stata_mcp.utils.parse_dofile import expand_code, expand_dofile
+from stata_mcp.utils.parse_dofile import (
+    expand_code,
+    expand_code_for_security,
+    expand_dofile,
+    expand_dofile_for_security,
+)
 
 
 def _lines(result: str) -> list[str]:
@@ -378,3 +383,177 @@ def test_guard_catches_loop_assembled_command():
     )
     expanded = expand_code(code)
     assert GuardValidator().validate(expanded).is_safe is False
+
+
+# ============================================================================
+# ExpansionResult contract: diagnostics, line map, fail-closed signal
+# ============================================================================
+
+
+def _diag_codes(result):
+    return {d.code for d in result.diagnostics}
+
+
+def test_clean_code_has_no_diagnostics():
+    result = expand_code_for_security('use "auto.dta", clear\nsummarize price\n')
+    assert result.diagnostics == ()
+    assert result.has_unsupported_security_construct is False
+    assert result.line_map[1] == [1]
+    assert result.line_map[2] == [2]
+
+
+def test_delimit_diagnostic_is_not_security_relevant():
+    result = expand_code_for_security('#delimit ;\ndisplay "a";\n#delimit cr\n')
+    assert "delimit-normalized" in _diag_codes(result)
+    assert result.has_unsupported_security_construct is False
+
+
+def test_unresolved_dynamic_macro_fails_closed():
+    code = 'local p : env HOME\nuse "`p\'"\n'
+    result = expand_code_for_security(code)
+    assert "unresolved-macro" in _diag_codes(result)
+    assert result.has_unsupported_security_construct is True
+    use_cmd = [c for c in result.commands if c.name == "use"][0]
+    assert use_cmd.has_unresolved_macro is True
+
+
+def test_preserved_while_loop_reports_diagnostic():
+    code = "local i 1\nwhile `i' < 3 {\n    display `i'\n}\n"
+    result = expand_code_for_security(code)
+    assert "preserved-loop" in _diag_codes(result)
+    assert result.has_unsupported_security_construct is True
+
+
+def test_preserved_varlist_loop_reports_diagnostic():
+    code = "foreach v of varlist price mpg {\n    summarize `v'\n}\n"
+    result = expand_code_for_security(code)
+    assert "preserved-loop" in _diag_codes(result)
+    assert "unresolved-macro" in _diag_codes(result)
+
+
+def test_oversized_loop_reports_diagnostic():
+    code = "forvalues i = 1/999999 {\n    display `i'\n}\n"
+    result = expand_code_for_security(code)
+    assert "preserved-loop" in _diag_codes(result)
+    assert result.has_unsupported_security_construct is True
+
+
+def test_unbalanced_quotes_reports_diagnostic():
+    result = expand_code_for_security('use "unterminated.dta\n')
+    assert "unbalanced-quotes" in _diag_codes(result)
+    assert result.has_unsupported_security_construct is True
+
+
+def test_unbalanced_block_reports_diagnostic():
+    result = expand_code_for_security("foreach v in a b {\n    display `v'\n")
+    assert "unbalanced-block" in _diag_codes(result)
+    assert result.has_unsupported_security_construct is True
+
+
+def test_program_block_macro_fails_closed():
+    code = 'program define myprog\n    display "`msg\'"\nend\n'
+    result = expand_code_for_security(code)
+    assert "unresolved-macro" in _diag_codes(result)
+    assert result.has_unsupported_security_construct is True
+
+
+def test_internal_error_is_reported_not_swallowed(monkeypatch):
+    import stata_mcp.utils.parse_dofile as module
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(module, "_process_lines", boom)
+    original = "display 1\n"
+    result = expand_code_for_security(original)
+    assert result.expanded_code == original
+    assert "internal-error" in _diag_codes(result)
+    assert result.has_unsupported_security_construct is True
+    # the best-effort wrapper still returns the original content
+    assert expand_code(original) == original
+
+
+def test_line_map_tracks_continuation():
+    code = 'use keepvar ///\nusing "/tmp/secret.dta"\n'
+    result = expand_code_for_security(code)
+    assert result.line_map[1] == [1, 2]
+    assert 'using "/tmp/secret.dta"' in result.expanded_code
+
+
+def test_line_map_tracks_unrolled_loop():
+    code = "forvalues i = 1/2 {\n    display `i'\n}\n"
+    result = expand_code_for_security(code)
+    assert result.line_map[1] == [2]
+    assert result.line_map[2] == [2]
+
+
+def test_expand_dofile_for_security_reads_path(tmp_path):
+    dofile = tmp_path / "job.do"
+    dofile.write_text("u auto.dta\n", encoding="utf-8")
+    result = expand_dofile_for_security(dofile)
+    assert "use auto.dta" in result.expanded_code
+    assert result.commands[0].name == "use"
+
+
+# ============================================================================
+# Command tokenization: data-path bypass surfaces
+# ============================================================================
+
+
+def test_commands_cd_then_use():
+    result = expand_code_for_security("cd /tmp\nuse secret.dta\n")
+    names = [c.name for c in result.commands]
+    assert names == ["cd", "use"]
+    assert result.commands[1].text == "use secret.dta"
+
+
+def test_commands_macro_path_expanded():
+    code = 'local p "/tmp/secret.dta"\nuse "`p\'"\n'
+    result = expand_code_for_security(code)
+    assert result.has_unsupported_security_construct is False
+    use_cmd = [c for c in result.commands if c.name == "use"][0]
+    assert "/tmp/secret.dta" in use_cmd.string_literals
+
+
+def test_commands_using_after_continuation():
+    code = 'use keepvar ///\nusing "/tmp/secret.dta"\n'
+    result = expand_code_for_security(code)
+    use_cmd = result.commands[0]
+    assert use_cmd.name == "use"
+    assert use_cmd.using_paths == ("/tmp/secret.dta",)
+
+
+def test_commands_compound_quoted_path():
+    code = 'use `"/tmp/secret.dta"\'\n'
+    result = expand_code_for_security(code)
+    assert result.commands[0].string_literals == ("/tmp/secret.dta",)
+
+
+def test_commands_using_paren_form():
+    code = 'import delimited using("/tmp/secret.csv")\n'
+    result = expand_code_for_security(code)
+    command = result.commands[0]
+    assert command.name == "import"
+    assert command.using_paths == ("/tmp/secret.csv",)
+
+
+def test_commands_webuse_set():
+    code = "webuse set http://127.0.0.1/private\nwebuse secret, clear\n"
+    result = expand_code_for_security(code)
+    names = [c.name for c in result.commands]
+    assert names == ["webuse", "webuse"]
+    assert result.commands[1].options == "clear"
+
+
+def test_commands_multiple_using_paths():
+    code = 'append using "a.dta" "b.dta"\n'
+    result = expand_code_for_security(code)
+    assert result.commands[0].using_paths == ("a.dta", "b.dta")
+
+
+def test_commands_name_strips_prefixes():
+    code = 'cap qui use "x.dta", clear\nby rep78: generate y = 1\n'
+    result = expand_code_for_security(code)
+    assert result.commands[0].name == "use"
+    assert result.commands[0].options == "clear"
+    assert result.commands[1].name == "generate"

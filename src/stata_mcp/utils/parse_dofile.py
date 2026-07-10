@@ -7,11 +7,12 @@
 # @Email  : sepinetam@gmail.com
 # @File   : parse_dofile.py
 
-"""Static expansion of Stata dofiles for security checking.
+"""Security-oriented static expansion of Stata dofiles.
 
-This module rewrites a dofile into the flat form Stata would actually
-execute so that downstream validators scan real commands instead of
-obfuscated source text:
+This module is a **normalizer for security checking, not a Stata
+interpreter**. It rewrites a dofile into the flat form Stata would
+actually execute so that downstream validators scan real commands
+instead of obfuscated source text:
 
 - comments (``*``, ``//``, ``///``, nested ``/* */``) are removed with
   string awareness; inline block comments join the surrounding text,
@@ -27,17 +28,33 @@ obfuscated source text:
 - ``foreach`` / ``forvalues`` loops are unrolled when their item list
   is statically resolvable, within an output budget
 
-The expansion is best-effort and fail-safe: any construct that cannot
-be resolved statically (``while`` loops, ``foreach ... of varlist``,
-``=`` expressions, extended macro functions, oversized loops) is
-preserved verbatim, so the expanded text never contains less than the
-original source did.
+Anything that cannot be resolved statically (``while`` loops,
+``foreach ... of varlist``, ``=`` expressions, extended macro
+functions, oversized loops, unbalanced quotes or braces) is preserved
+verbatim — the expanded text never contains less than the original
+source did — **and** reported as a :class:`ParseDiagnostic` so that a
+security consumer can fail closed instead of trusting a best-effort
+result.
+
+Two API levels are provided:
+
+- :func:`expand_code_for_security` / :func:`expand_dofile_for_security`
+  return an :class:`ExpansionResult` with the expanded code, structured
+  diagnostics, a line map back to the original source, and a light
+  per-command tokenization (:class:`ParsedCommand`).
+- :func:`expand_code` / :func:`expand_dofile` are best-effort
+  conveniences that return only the expanded string (suitable for
+  display; security callers should use the ``*_for_security`` forms).
 
 Usage::
 
-    from stata_mcp.utils.parse_dofile import expand_dofile
+    from stata_mcp.utils.parse_dofile import expand_code_for_security
 
-    cleaned_dofile_context: str = expand_dofile(Path("analysis.do"))
+    result = expand_code_for_security(code)
+    if result.has_unsupported_security_construct:
+        ...  # fail closed
+    for command in result.commands:
+        ...  # audit command.name / command.using_paths
 """
 
 from __future__ import annotations
@@ -120,6 +137,7 @@ _FOREACH_OF_KINDS: tuple[str, ...] = (
 # ============================================================================
 
 _LOCAL_REF_RE = re.compile(r"`([A-Za-z_][A-Za-z0-9_]*)'")
+_MACRO_EXPRESSION_RE = re.compile(r"`[=:]")
 _GLOBAL_BRACE_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 _GLOBAL_RE = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*)")
 _MACRO_DEF_RE = re.compile(
@@ -129,6 +147,7 @@ _NUMBER_RE = re.compile(r"[-+]?\d+(?:\.\d+)?")
 _PREFIX_STRIP_RE = re.compile(
     r"^\s*(?:(?:capture|quietly|noisily):?\s+)+", re.IGNORECASE
 )
+_BY_PREFIX_STRIP_RE = re.compile(r"^\s*bys?\w*\s+[^:\"']*:\s*", re.IGNORECASE)
 _PROGRAM_START_RE = re.compile(
     r"^\s*program\s+(?:define\s+)?([A-Za-z_]\w*)", re.IGNORECASE
 )
@@ -144,14 +163,144 @@ _FORVALUES_RE = re.compile(
 )
 _WHILE_RE = re.compile(r"^\s*while\b.*\{\s*$", re.IGNORECASE)
 _DELIMIT_RE = re.compile(r"^\s*#d[a-z]*\s*(.*)$", re.IGNORECASE)
+_USING_PAREN_RE = re.compile(r"\busing\b\s*\(", re.IGNORECASE)
 
 #: Subcommands of ``program`` that do not open a program block.
 _PROGRAM_NON_BLOCK_SUBCOMMANDS: frozenset[str] = frozenset({"drop", "dir", "list"})
 
 
 # ============================================================================
-# State containers
+# Public data structures
 # ============================================================================
+
+
+@dataclass(frozen=True)
+class ParseDiagnostic:
+    """A structured note about a construct the expander could not resolve.
+
+    Attributes:
+        code: Machine-readable diagnostic kind, e.g. ``unresolved-macro``,
+            ``preserved-loop``, ``unbalanced-quotes``, ``internal-error``.
+        message: Human-readable explanation.
+        line: 1-indexed line number in the **original** source
+            (0 when no specific line applies).
+        security_relevant: True when a security consumer should treat the
+            construct as unsupported and fail closed.
+    """
+
+    code: str
+    message: str
+    line: int
+    security_relevant: bool = True
+
+    def __str__(self) -> str:
+        """Return a compact human-readable representation."""
+        return f"Line {self.line}: [{self.code}] {self.message}"
+
+
+@dataclass(frozen=True)
+class ParsedCommand:
+    """Light tokenization of one expanded command line.
+
+    This is deliberately not an AST: it extracts just enough structure
+    for a security guard to audit commands and data paths without
+    re-guessing strings.
+
+    Attributes:
+        name: Normalized command token (prefixes such as
+            ``capture``/``quietly``/``by ...:`` stripped, abbreviations
+            already spelled out by the expander), lowercased.
+        text: The full expanded command line, stripped.
+        line: 1-indexed line number in the expanded code.
+        origins: 1-indexed line numbers in the original source.
+        options: Text after the first top-level comma ("" when absent).
+        string_literals: Contents of all ``"..."`` and ``` `"..."' ```
+            literals on the line, in order.
+        using_paths: Targets of ``using ...`` / ``using(...)`` clauses
+            (quoted or bare, multiple targets supported).
+        has_unresolved_macro: True when the line still contains macro
+            references or expressions the expander could not resolve.
+    """
+
+    name: str
+    text: str
+    line: int
+    origins: tuple[int, ...]
+    options: str
+    string_literals: tuple[str, ...]
+    using_paths: tuple[str, ...]
+    has_unresolved_macro: bool
+
+
+@dataclass
+class ExpansionResult:
+    """Full result of a security-oriented expansion.
+
+    Attributes:
+        expanded_code: The expanded dofile content.
+        diagnostics: Structured notes about unsupported constructs.
+        line_map: Mapping from 1-indexed line numbers in
+            ``expanded_code`` to the 1-indexed original source lines
+            that produced them.
+        commands: Per-line light tokenization of the expanded code.
+    """
+
+    expanded_code: str
+    diagnostics: tuple[ParseDiagnostic, ...]
+    line_map: dict[int, list[int]]
+    commands: tuple[ParsedCommand, ...]
+
+    @property
+    def has_unsupported_security_construct(self) -> bool:
+        """True when any diagnostic requires a fail-closed decision."""
+        return any(d.security_relevant for d in self.diagnostics)
+
+
+# ============================================================================
+# Internal state containers
+# ============================================================================
+
+
+@dataclass
+class _Line:
+    """A logical line of code with its originating source lines."""
+
+    text: str
+    origins: tuple[int, ...]
+
+    @property
+    def first_origin(self) -> int:
+        """First original line number (0 when unknown)."""
+        return self.origins[0] if self.origins else 0
+
+
+class _DiagnosticCollector:
+    """Accumulates deduplicated diagnostics during expansion."""
+
+    def __init__(self) -> None:
+        self.items: list[ParseDiagnostic] = []
+        self._seen: set[tuple[str, str, int]] = set()
+
+    def add(
+        self,
+        code: str,
+        message: str,
+        line: int,
+        security_relevant: bool = True,
+    ) -> None:
+        """Record a diagnostic unless an identical one already exists."""
+        key = (code, message, line)
+        if key in self._seen:
+            return
+        self._seen.add(key)
+        self.items.append(
+            ParseDiagnostic(
+                code=code,
+                message=message,
+                line=line,
+                security_relevant=security_relevant,
+            )
+        )
 
 
 @dataclass
@@ -210,12 +359,26 @@ class _LoopHeader:
 # ============================================================================
 
 
-def expand_dofile(dofile: str | Path) -> str:
-    """Read a dofile and return its statically expanded content.
+def expand_dofile_for_security(dofile: str | Path) -> ExpansionResult:
+    """Read a dofile and expand it, returning the structured result.
 
-    The result is almost equivalent to reading the file with
-    ``open(...).read()``, except that comments are removed, macros and
-    loops are expanded, and command abbreviations are spelled out.
+    Args:
+        dofile: Path to the dofile to expand.
+
+    Returns:
+        The :class:`ExpansionResult` for the file content.
+
+    Raises:
+        FileNotFoundError: If ``dofile`` does not exist or is not a file.
+    """
+    path = Path(dofile)
+    if not path.is_file():
+        raise FileNotFoundError(f"dofile not found: {path}")
+    return expand_code_for_security(_read_dofile(path))
+
+
+def expand_dofile(dofile: str | Path) -> str:
+    """Read a dofile and return its expanded content (best-effort).
 
     Args:
         dofile: Path to the dofile to expand.
@@ -226,14 +389,19 @@ def expand_dofile(dofile: str | Path) -> str:
     Raises:
         FileNotFoundError: If ``dofile`` does not exist or is not a file.
     """
-    path = Path(dofile)
-    if not path.is_file():
-        raise FileNotFoundError(f"dofile not found: {path}")
-    return expand_code(_read_dofile(path))
+    return expand_dofile_for_security(dofile).expanded_code
 
 
-def expand_code(code: str, *, max_output_lines: int = DEFAULT_MAX_OUTPUT_LINES) -> str:
-    """Statically expand Stata code held in a string.
+def expand_code_for_security(
+    code: str, *, max_output_lines: int = DEFAULT_MAX_OUTPUT_LINES
+) -> ExpansionResult:
+    """Statically expand Stata code and report everything unresolved.
+
+    This is the entry point security consumers should use. Any
+    construct that could not be resolved statically is preserved
+    verbatim in ``expanded_code`` and surfaced as a diagnostic; check
+    :attr:`ExpansionResult.has_unsupported_security_construct` to
+    decide whether to fail closed.
 
     Args:
         code: Raw dofile content.
@@ -241,22 +409,63 @@ def expand_code(code: str, *, max_output_lines: int = DEFAULT_MAX_OUTPUT_LINES) 
             would exceed the remaining budget are preserved verbatim.
 
     Returns:
-        The expanded code. On any unexpected internal error the
-        original ``code`` is returned unchanged (fail-safe).
+        The :class:`ExpansionResult`. This function never raises on
+        malformed Stata code; even an unexpected internal error yields
+        a result carrying the original code and an ``internal-error``
+        diagnostic.
     """
+    collector = _DiagnosticCollector()
     try:
-        stripped = _strip_comments(code)
-        lines = _normalize_delimiter(stripped)
+        lines = _strip_comments(code, collector)
+        lines = _normalize_delimiter(lines, collector)
         state = _MacroState()
         budget = _Budget(remaining=max_output_lines)
-        expanded = _process_lines(lines, state, budget, depth=0)
-        return "\n".join(expanded)
+        out_lines = _process_lines(lines, state, budget, 0, collector)
+        _report_unresolved_macros(out_lines, collector)
+        return ExpansionResult(
+            expanded_code="\n".join(entry.text for entry in out_lines),
+            diagnostics=tuple(collector.items),
+            line_map={
+                number: list(entry.origins)
+                for number, entry in enumerate(out_lines, start=1)
+            },
+            commands=_extract_commands(out_lines),
+        )
     except Exception:
         logger.error(
             "Dofile expansion failed; returning original content",
             exc_info=True,
         )
-        return code
+        collector.add(
+            "internal-error",
+            "expansion failed unexpectedly; original code returned unmodified",
+            0,
+        )
+        return ExpansionResult(
+            expanded_code=code,
+            diagnostics=tuple(collector.items),
+            line_map={number: [number] for number in range(1, code.count("\n") + 2)},
+            commands=(),
+        )
+
+
+def expand_code(code: str, *, max_output_lines: int = DEFAULT_MAX_OUTPUT_LINES) -> str:
+    """Statically expand Stata code, returning only the expanded string.
+
+    Best-effort convenience wrapper around
+    :func:`expand_code_for_security` for display purposes; security
+    callers should use the structured form and honor its diagnostics.
+
+    Args:
+        code: Raw dofile content.
+        max_output_lines: Cap on emitted lines.
+
+    Returns:
+        The expanded code; on internal errors, the original ``code``.
+    """
+    return expand_code_for_security(
+        code, max_output_lines=max_output_lines
+    ).expanded_code
 
 
 # ============================================================================
@@ -280,32 +489,43 @@ def _read_dofile(path: Path) -> str:
 # ============================================================================
 
 
-def _skip_simple_string(text: str, start: int) -> int:
-    """Return the index just past a ``"..."`` string starting at ``start``."""
-    index = start + 1
+def _scan_string(text: str, start: int) -> tuple[int, bool]:
+    """Scan a ``"..."`` or ``` `"..."' ``` literal starting at ``start``.
+
+    Scanning stops at end of line. Returns ``(end_index, closed)``.
+    """
     length = len(text)
-    while index < length and text[index] != '"' and text[index] != "\n":
+    if text.startswith('`"', start):
+        depth = 1
+        index = start + 2
+        while index < length and depth and text[index] != "\n":
+            if text.startswith('`"', index):
+                depth += 1
+                index += 2
+            elif text.startswith("\"'", index):
+                depth -= 1
+                index += 2
+            else:
+                index += 1
+        return index, depth == 0
+    index = start + 1
+    while index < length and text[index] not in '"\n':
         index += 1
     if index < length and text[index] == '"':
-        return index + 1
-    return index
+        return index + 1, True
+    return index, False
+
+
+def _skip_simple_string(text: str, start: int) -> int:
+    """Return the index just past a ``"..."`` string starting at ``start``."""
+    end, _closed = _scan_string(text, start)
+    return end
 
 
 def _skip_compound_string(text: str, start: int) -> int:
-    """Return the index just past a ``` `"..."' ``` string (nesting-aware)."""
-    depth = 1
-    index = start + 2
-    length = len(text)
-    while index < length and depth:
-        if text.startswith('`"', index):
-            depth += 1
-            index += 2
-        elif text.startswith("\"'", index):
-            depth -= 1
-            index += 2
-        else:
-            index += 1
-    return index
+    """Return the index just past a ``` `"..."' ``` string at ``start``."""
+    end, _closed = _scan_string(text, start)
+    return end
 
 
 def _find_unquoted(text: str, target: str) -> int:
@@ -322,6 +542,50 @@ def _find_unquoted(text: str, target: str) -> int:
         else:
             index += 1
     return -1
+
+
+def _find_top_level_comma(text: str) -> int:
+    """Find the first comma outside strings and parentheses."""
+    index = 0
+    length = len(text)
+    paren_depth = 0
+    while index < length:
+        if text.startswith('`"', index):
+            index = _skip_compound_string(text, index)
+        elif text[index] == '"':
+            index = _skip_simple_string(text, index)
+        elif text[index] == "(":
+            paren_depth += 1
+            index += 1
+        elif text[index] == ")":
+            paren_depth = max(paren_depth - 1, 0)
+            index += 1
+        elif text[index] == "," and paren_depth == 0:
+            return index
+        else:
+            index += 1
+    return -1
+
+
+def _paren_contents(text: str, open_index: int) -> str:
+    """Contents of the parenthesized group opening at ``open_index``."""
+    index = open_index + 1
+    depth = 1
+    length = len(text)
+    while index < length and depth:
+        if text.startswith('`"', index):
+            index = _skip_compound_string(text, index)
+            continue
+        if text[index] == '"':
+            index = _skip_simple_string(text, index)
+            continue
+        if text[index] == "(":
+            depth += 1
+        elif text[index] == ")":
+            depth -= 1
+        index += 1
+    end = index - 1 if depth == 0 else index
+    return text[open_index + 1 : end]
 
 
 def _brace_delta(line: str) -> int:
@@ -353,36 +617,49 @@ def _brace_delta(line: str) -> int:
 # ============================================================================
 
 
-def _strip_comments(code: str) -> str:
+def _strip_comments(code: str, collector: _DiagnosticCollector) -> list[_Line]:
     """Remove Stata comments and join continuation lines.
 
     Handles, with awareness of ``"..."`` and ``` `"..."' ``` strings:
 
-    - ``*`` full-line comments (dropped, newline kept)
-    - ``//`` end-of-line comments (dropped, newline kept)
-    - ``///`` continuations (rest of line and the newline dropped)
+    - ``*`` full-line comments (dropped, line break kept)
+    - ``//`` end-of-line comments (dropped, line break kept)
+    - ``///`` continuations (rest of line and the line break dropped)
     - nested ``/* ... */`` block comments (replaced by nothing, so the
       surrounding text joins — mirroring how Stata's do-file processor
       splices lines, and exposing ``she/**/ll`` obfuscation)
+
+    Returns logical lines annotated with their original line numbers.
+    Unterminated strings and block comments produce diagnostics.
     """
-    parts: list[str] = []
+    lines: list[_Line] = []
+    buffer: list[str] = []
+    origins: set[int] = set()
+    orig_line = 1
     index = 0
     length = len(code)
     line_blank = True  # only whitespace seen so far on the current line
 
+    def flush() -> None:
+        nonlocal buffer, origins
+        line_origins = tuple(sorted(origins)) if origins else (orig_line,)
+        lines.append(_Line("".join(buffer), line_origins))
+        buffer = []
+        origins = set()
+
     while index < length:
         char = code[index]
 
-        if char == '"':
-            end = _skip_simple_string(code, index)
-            parts.append(code[index:end])
-            index = end
-            line_blank = False
-            continue
-
-        if code.startswith('`"', index):
-            end = _skip_compound_string(code, index)
-            parts.append(code[index:end])
+        if char == '"' or code.startswith('`"', index):
+            end, closed = _scan_string(code, index)
+            buffer.append(code[index:end])
+            origins.add(orig_line)
+            if not closed:
+                collector.add(
+                    "unbalanced-quotes",
+                    "string literal is not terminated on its line",
+                    orig_line,
+                )
             index = end
             line_blank = False
             continue
@@ -390,9 +667,14 @@ def _strip_comments(code: str) -> str:
         at_boundary = line_blank or (index > 0 and code[index - 1] in " \t")
 
         if code.startswith("///", index) and at_boundary:
+            origins.add(orig_line)
+            buffer.append(" ")
             newline = code.find("\n", index)
-            index = length if newline == -1 else newline + 1
-            parts.append(" ")
+            if newline == -1:
+                index = length
+            else:
+                index = newline + 1
+                orig_line += 1
             continue
 
         if code.startswith("//", index) and at_boundary:
@@ -402,6 +684,7 @@ def _strip_comments(code: str) -> str:
 
         if code.startswith("/*", index):
             depth = 1
+            start_line = orig_line
             index += 2
             while index < length and depth:
                 if code.startswith("/*", index):
@@ -411,7 +694,15 @@ def _strip_comments(code: str) -> str:
                     depth -= 1
                     index += 2
                 else:
+                    if code[index] == "\n":
+                        orig_line += 1
                     index += 1
+            if depth:
+                collector.add(
+                    "unbalanced-comment",
+                    "block comment is never closed",
+                    start_line,
+                )
             continue
 
         if char == "*" and line_blank:
@@ -419,14 +710,21 @@ def _strip_comments(code: str) -> str:
             index = length if newline == -1 else newline
             continue
 
-        parts.append(char)
         if char == "\n":
+            flush()
+            orig_line += 1
+            index += 1
             line_blank = True
-        elif char not in " \t":
+            continue
+
+        buffer.append(char)
+        origins.add(orig_line)
+        if char not in " \t":
             line_blank = False
         index += 1
 
-    return "".join(parts)
+    flush()
+    return lines
 
 
 # ============================================================================
@@ -443,44 +741,60 @@ def _is_delimit_cr(line: str) -> bool:
     return argument == "cr"
 
 
-def _normalize_delimiter(text: str) -> list[str]:
+def _normalize_delimiter(
+    lines: list[_Line], collector: _DiagnosticCollector
+) -> list[_Line]:
     """Convert ``#delimit ;`` regions back to one command per line."""
-    output: list[str] = []
+    output: list[_Line] = []
     semicolon_mode = False
-    buffer = ""
+    buffer_text = ""
+    buffer_origins: set[int] = set()
 
-    for line in text.split("\n"):
+    def flush_buffer() -> None:
+        nonlocal buffer_text, buffer_origins
+        collapsed = " ".join(buffer_text.split())
+        if collapsed:
+            output.append(_Line(collapsed, tuple(sorted(buffer_origins))))
+        buffer_text = ""
+        buffer_origins = set()
+
+    for entry in lines:
         if not semicolon_mode:
-            matched = _DELIMIT_RE.match(line)
+            matched = _DELIMIT_RE.match(entry.text)
             if matched:
-                argument = matched.group(1).strip()
-                if argument.startswith(";"):
+                if matched.group(1).strip().startswith(";"):
                     semicolon_mode = True
-                    buffer = ""
-                # the directive itself is dropped from the output
+                    collector.add(
+                        "delimit-normalized",
+                        "'#delimit ;' region normalized to line delimiters",
+                        entry.first_origin,
+                        security_relevant=False,
+                    )
+                # directives are dropped from the normalized output
                 continue
-            output.append(line)
+            output.append(entry)
             continue
 
-        if _is_delimit_cr(line):
-            if buffer.strip():
-                output.append(" ".join(buffer.split()))
-            buffer = ""
+        if _is_delimit_cr(entry.text):
+            flush_buffer()
             semicolon_mode = False
             continue
 
-        buffer = f"{buffer} {line}" if buffer else line
+        buffer_text = f"{buffer_text} {entry.text}" if buffer_text else entry.text
+        buffer_origins.update(entry.origins)
         while True:
-            split_at = _find_unquoted(buffer, ";")
+            split_at = _find_unquoted(buffer_text, ";")
             if split_at == -1:
                 break
-            command, buffer = buffer[:split_at], buffer[split_at + 1 :]
-            command = " ".join(command.split())
+            command = " ".join(buffer_text[:split_at].split())
+            buffer_text = buffer_text[split_at + 1 :]
             if command:
-                output.append(command)
+                output.append(_Line(command, tuple(sorted(buffer_origins))))
+            if not buffer_text.strip():
+                buffer_origins = set()
 
-    if semicolon_mode and buffer.strip():
-        output.append(" ".join(buffer.split()))
+    if semicolon_mode and buffer_text.strip():
+        flush_buffer()
     return output
 
 
@@ -681,15 +995,15 @@ def _match_loop_header(line: str) -> _LoopHeader | None:
     return None
 
 
-def _find_block_close(lines: list[str], start: int) -> int | None:
+def _find_block_close(lines: list[_Line], start: int) -> int | None:
     """Index of the line closing the block opened at ``lines[start]``."""
     depth = 0
     for index in range(start, len(lines)):
-        depth += _brace_delta(lines[index])
+        depth += _brace_delta(lines[index].text)
         if depth <= 0:
             if index == start:
                 return None
-            if lines[index].strip() == "}":
+            if lines[index].text.strip() == "}":
                 return index
             return None
     return None
@@ -790,16 +1104,28 @@ def _resolve_loop_items(header: _LoopHeader, state: _MacroState) -> list[str] | 
     return None
 
 
+def _preserved_loop_reason(header: _LoopHeader, items: list[str] | None) -> str:
+    """Explain why a loop was kept verbatim."""
+    if header.kind == "while":
+        return "while loops are runtime-dependent"
+    if header.kind == "of" and header.of_kind[:3] in ("var", "new"):
+        return "loop list depends on runtime data"
+    if items is None:
+        return "loop list or range is not statically resolvable"
+    return "expansion would exceed the output budget"
+
+
 def _unroll_loop(
     var: str,
     items: list[str],
-    body: list[str],
+    body: list[_Line],
     state: _MacroState,
     budget: _Budget,
     depth: int,
-) -> list[str]:
+    collector: _DiagnosticCollector,
+) -> list[_Line]:
     """Emit the loop body once per item with the loop variable bound."""
-    output: list[str] = []
+    output: list[_Line] = []
     had_value = var in state.locals_
     previous_value = state.locals_.get(var)
     was_dynamic = var in state.dynamic_locals
@@ -810,7 +1136,7 @@ def _unroll_loop(
             logger.debug("Expansion budget exhausted; truncating unrolled loop")
             break
         state.locals_[var] = item
-        output.extend(_process_lines(body, state, budget, depth + 1))
+        output.extend(_process_lines(body, state, budget, depth + 1, collector))
 
     if had_value and previous_value is not None:
         state.locals_[var] = previous_value
@@ -823,18 +1149,19 @@ def _unroll_loop(
 
 def _process_preserved_block(
     var: str | None,
-    body: list[str],
+    body: list[_Line],
     state: _MacroState,
     budget: _Budget,
     depth: int,
-) -> list[str]:
+    collector: _DiagnosticCollector,
+) -> list[_Line]:
     """Process the body of a loop kept verbatim, protecting its variable."""
     added = False
     if var is not None and var not in state.protected:
         state.protected.add(var)
         added = True
     try:
-        return _process_lines(body, state, budget, depth + 1)
+        return _process_lines(body, state, budget, depth + 1, collector)
     finally:
         if added and var is not None:
             state.protected.discard(var)
@@ -846,26 +1173,39 @@ def _process_preserved_block(
 
 
 def _process_lines(
-    lines: list[str],
+    lines: list[_Line],
     state: _MacroState,
     budget: _Budget,
     depth: int,
-) -> list[str]:
+    collector: _DiagnosticCollector,
+) -> list[_Line]:
     """Expand a list of logical lines sequentially."""
-    output: list[str] = []
+    output: list[_Line] = []
     index = 0
     total = len(lines)
 
     while index < total:
         if budget.exhausted or depth > _MAX_EXPANSION_DEPTH:
             # fail-safe: keep the remaining source verbatim
+            reason = (
+                ("expansion-budget-exhausted", "output budget exhausted")
+                if budget.exhausted
+                else ("max-depth-exceeded", "block nesting exceeds expansion depth")
+            )
+            collector.add(
+                reason[0],
+                f"{reason[1]}; remaining source preserved verbatim",
+                lines[index].first_origin,
+            )
             output.extend(lines[index:])
             break
 
-        line = _expand_macros(lines[index], state)
-        line = _expand_abbreviations(line)
+        entry = lines[index]
+        text = _expand_macros(entry.text, state)
+        text = _expand_abbreviations(text)
+        line = _Line(text, entry.origins)
 
-        program_match = _PROGRAM_START_RE.match(line)
+        program_match = _PROGRAM_START_RE.match(text)
         if (
             program_match
             and program_match.group(1).lower() not in _PROGRAM_NON_BLOCK_SUBCOMMANDS
@@ -876,14 +1216,14 @@ def _process_lines(
             index += 1
             continue
 
-        if state.program_depth > 0 and _PROGRAM_END_RE.match(line):
+        if state.program_depth > 0 and _PROGRAM_END_RE.match(text):
             state.program_depth -= 1
             output.append(line)
             budget.spend()
             index += 1
             continue
 
-        header = _match_loop_header(line)
+        header = _match_loop_header(text)
         if header is not None:
             close = _find_block_close(lines, index)
             if close is None:
@@ -891,6 +1231,11 @@ def _process_lines(
                 # protect the loop variable so later references survive
                 if header.var is not None:
                     state.protected.add(header.var)
+                collector.add(
+                    "unbalanced-block",
+                    "loop block has no matching closing brace",
+                    entry.first_origin,
+                )
                 output.append(line)
                 budget.spend()
                 index += 1
@@ -904,26 +1249,30 @@ def _process_lines(
                 and len(items) * max(len(body), 1) <= budget.remaining
             ):
                 output.extend(
-                    _unroll_loop(header.var, items, body, state, budget, depth)
+                    _unroll_loop(
+                        header.var, items, body, state, budget, depth, collector
+                    )
                 )
             else:
-                if items is not None:
-                    logger.debug(
-                        "Loop of %d iterations exceeds expansion budget; "
-                        "preserving verbatim",
-                        len(items),
-                    )
+                collector.add(
+                    "preserved-loop",
+                    f"loop preserved verbatim: "
+                    f"{_preserved_loop_reason(header, items)}",
+                    entry.first_origin,
+                )
                 output.append(line)
                 budget.spend()
                 output.extend(
-                    _process_preserved_block(header.var, body, state, budget, depth)
+                    _process_preserved_block(
+                        header.var, body, state, budget, depth, collector
+                    )
                 )
                 output.append(lines[close])
                 budget.spend()
             index = close + 1
             continue
 
-        _record_macro_definition(line, state)
+        _record_macro_definition(text, state)
         output.append(line)
         budget.spend()
         index += 1
@@ -932,11 +1281,145 @@ def _process_lines(
 
 
 # ============================================================================
+# Post-processing: unresolved macro reporting and command tokenization
+# ============================================================================
+
+
+def _has_unresolved_macro(text: str) -> bool:
+    """True when ``text`` still contains macro references/expressions."""
+    return bool(
+        _LOCAL_REF_RE.search(text)
+        or _MACRO_EXPRESSION_RE.search(text)
+        or _GLOBAL_BRACE_RE.search(text)
+        or _GLOBAL_RE.search(text)
+    )
+
+
+def _report_unresolved_macros(
+    out_lines: list[_Line], collector: _DiagnosticCollector
+) -> None:
+    """Emit a diagnostic for every macro token left in the output.
+
+    Anything still looking like a macro after expansion is, by
+    construction, unresolved (dynamic definitions, protected loop
+    variables, program-scope locals, undefined globals, ``=``/``:``
+    expressions). Security consumers must treat the containing lines
+    as having unknown runtime content.
+    """
+    patterns: tuple[tuple[re.Pattern[str], str], ...] = (
+        (_LOCAL_REF_RE, "local macro"),
+        (_MACRO_EXPRESSION_RE, "macro expression"),
+        (_GLOBAL_BRACE_RE, "global macro"),
+        (_GLOBAL_RE, "global macro"),
+    )
+    for entry in out_lines:
+        for pattern, kind in patterns:
+            for matched in pattern.finditer(entry.text):
+                collector.add(
+                    "unresolved-macro",
+                    f"unresolved {kind} '{matched.group(0)}' remains "
+                    "after expansion",
+                    entry.first_origin,
+                )
+
+
+def _command_name(text: str) -> str:
+    """Extract the normalized command token of an expanded line."""
+    body = text
+    while True:
+        stripped = _PREFIX_STRIP_RE.sub("", body)
+        stripped = _BY_PREFIX_STRIP_RE.sub("", stripped)
+        if stripped == body:
+            break
+        body = stripped
+    tokens = body.split()
+    if not tokens:
+        return ""
+    return tokens[0].lower().rstrip(",:")
+
+
+def _extract_string_literals(text: str) -> tuple[str, ...]:
+    """Contents of all string literals on ``text``, in order."""
+    literals: list[str] = []
+    index = 0
+    length = len(text)
+    while index < length:
+        if text.startswith('`"', index):
+            end = _skip_compound_string(text, index)
+            inner_end = end - 2 if text.startswith("\"'", end - 2) else end
+            literals.append(text[index + 2 : max(inner_end, index + 2)])
+            index = end
+        elif text[index] == '"':
+            end = _skip_simple_string(text, index)
+            inner_end = end - 1 if end > index + 1 and text[end - 1] == '"' else end
+            literals.append(text[index + 1 : inner_end])
+            index = end
+        else:
+            index += 1
+    return tuple(literals)
+
+
+def _extract_using_paths(text: str) -> tuple[str, ...]:
+    """Targets of ``using ...`` / ``using(...)`` clauses on a line."""
+    paths: list[str] = []
+
+    for matched in _USING_PAREN_RE.finditer(text):
+        paths.extend(_split_items(_paren_contents(text, matched.end() - 1)))
+
+    comma = _find_top_level_comma(text)
+    head = text if comma == -1 else text[:comma]
+    tokens = _split_items(head)
+    for position, token in enumerate(tokens):
+        if token.lower() == "using":
+            for candidate in tokens[position + 1 :]:
+                if candidate.startswith("("):
+                    break
+                paths.append(candidate)
+            break
+
+    seen: set[str] = set()
+    unique: list[str] = []
+    for path in paths:
+        if path and path not in seen:
+            seen.add(path)
+            unique.append(path)
+    return tuple(unique)
+
+
+def _extract_commands(out_lines: list[_Line]) -> tuple[ParsedCommand, ...]:
+    """Tokenize each non-blank expanded line into a :class:`ParsedCommand`."""
+    commands: list[ParsedCommand] = []
+    for number, entry in enumerate(out_lines, start=1):
+        stripped = entry.text.strip()
+        if not stripped or stripped in ("{", "}"):
+            continue
+        comma = _find_top_level_comma(stripped)
+        commands.append(
+            ParsedCommand(
+                name=_command_name(stripped),
+                text=stripped,
+                line=number,
+                origins=entry.origins,
+                options=stripped[comma + 1 :].strip() if comma != -1 else "",
+                string_literals=_extract_string_literals(stripped),
+                using_paths=_extract_using_paths(stripped),
+                has_unresolved_macro=_has_unresolved_macro(stripped),
+            )
+        )
+    return tuple(commands)
+
+
+# ============================================================================
 # Exports
 # ============================================================================
 
 __all__ = [
     "DEFAULT_MAX_OUTPUT_LINES",
+    "ExpansionResult",
+    "ParseDiagnostic",
+    "ParsedCommand",
     "expand_code",
+    "expand_code_for_security",
     "expand_dofile",
+    "expand_dofile_for_security",
 ]
