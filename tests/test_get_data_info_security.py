@@ -171,7 +171,9 @@ def test_local_file_outside_working_dir_logs_security_violation(
     messages = _joined_log_messages(caplog)
     assert result == "Access denied: data file must be within the working directory."
     assert "[SECURITY VIOLATION]" in messages
-    assert "resolved_path" in messages
+    assert "resolved_path" not in messages
+    assert "requested_path" not in messages
+    assert "working_dir" not in messages
 
 
 def test_relative_local_file_is_resolved_from_working_dir(

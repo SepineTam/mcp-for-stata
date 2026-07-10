@@ -20,6 +20,7 @@ Usage:
     ...     print(f"Dangerous items found: {report.dangerous_items}")
 """
 
+from .data_path_auditor import DataPathAuditor
 from .input_validation import (
     require_ado_install_confirmation,
     validate_ado_install_request,
@@ -37,6 +38,7 @@ from .validator import (
 )
 
 __all__ = [
+    "DataPathAuditor",
     "GuardValidator",
     "PackageManagementGuardValidator",
     "RiskItem",

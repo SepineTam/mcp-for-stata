@@ -74,7 +74,9 @@ def _stata_do(
         if not resolved_dofile_path.exists():
             return {"error": f"Dofile {resolved_dofile_path} does not exist"}
     except Exception as error:
-        return {"error": f"Could not recognize dofile_path as pathlib.Path object: {error}"}
+        return {
+            "error": f"Could not recognize dofile_path as pathlib.Path object: {error}"
+        }
 
     resolved_dofile_path = resolved_dofile_path.resolve()
     candidate_allowed_dirs = [
@@ -87,30 +89,24 @@ def _stata_do(
             allowed_dirs.append(candidate_dir.resolve())
         else:
             logging.warning(
-                "Skip missing allowed directory for dofile execution boundary check: "
-                f"{candidate_dir}"
+                "Skip missing allowed directory for dofile execution boundary check."
             )
 
     if not _is_within_allowed_directories(resolved_dofile_path, allowed_dirs):
         logging.warning(
-            f"[SECURITY VIOLATION] Attempted to execute dofile outside allowed directories: "
-            f"requested_path='{dofile_path}', "
-            f"resolved_path='{resolved_dofile_path}', "
-            f"allowed_directories='{[allowed_dir.as_posix() for allowed_dir in allowed_dirs]}'"
+            "[SECURITY VIOLATION] Attempted to execute dofile outside allowed directories."
         )
         return {
-            "error": f"Access denied: Dofile '{resolved_dofile_path}' is outside allowed directories.",
-            "allowed_directories": [allowed_dir.as_posix() for allowed_dir in allowed_dirs],
+            "error": "Access denied: Dofile is outside allowed directories.",
+            "allowed_directories": [
+                allowed_dir.as_posix() for allowed_dir in allowed_dirs
+            ],
         }
 
     try:
         dofile_content = resolved_dofile_path.read_text(encoding="utf-8")
     except Exception as error:
-        logging.error(
-            "Failed to read dofile %s for security check: %s",
-            resolved_dofile_path,
-            error,
-        )
+        logging.error("Failed to read dofile for security check.")
         return {"error": f"Failed to read dofile for security check: {error}"}
 
     if not allow_package_management:
@@ -119,11 +115,13 @@ def _stata_do(
             return _security_rejection(package_report, resolved_dofile_path)
 
     if runtime.config.IS_GUARD:
-        report = GuardValidator().validate(dofile_content)
+        report = GuardValidator().validate(dofile_content, config=runtime.config)
         if not report.is_safe:
             return _security_rejection(report, resolved_dofile_path)
     else:
-        logging.warning("[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.")
+        logging.warning(
+            "[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked."
+        )
 
     monitors = []
     if runtime.config.IS_MONITOR and runtime.config.MAX_RAM_MB is not None:
@@ -162,13 +160,13 @@ def _stata_do(
     except RAMLimitExceededError as error:
         return {"error": f"Out of max RAM limit: {error}"}
     except Exception as error:
-        logging.error("Failed to execute %s: %s", resolved_dofile_path, error)
+        logging.error("Failed to execute dofile.")
+        logging.debug("Execution exception details: %s", error)
         return {"error": str(error)}
 
     result: Dict[str, Any] = {
         "log_file_path": {
-            key: value.as_posix()
-            for key, value in log_file_path_mapping.items()
+            key: value.as_posix() for key, value in log_file_path_mapping.items()
         }
     }
 
@@ -207,8 +205,7 @@ def _security_rejection(report, resolved_dofile_path: Path) -> Dict[str, Any]:
         f"line {item.line}:{item.type}" for item in report.dangerous_items
     )
     logging.warning(
-        "[SECURITY VIOLATION] Security rejection for %s: %s",
-        resolved_dofile_path,
+        "[SECURITY VIOLATION] Security rejection for dofile: %s",
         dangerous_summary,
     )
     warning_message = "⚠️  Security warning: Dangerous commands detected:\n"

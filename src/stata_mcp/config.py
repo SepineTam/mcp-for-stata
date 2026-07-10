@@ -75,14 +75,18 @@ class Config:
         env_config_file = self._clean_string_value(os.getenv(self.ENV_CONFIG_FILE))
         debug_config_file = config_file if config_file is not None else env_config_file
         self.is_debug_config = debug_config_file is not None
-        self.system_config_file = self.SYSTEM_CONFIG_FILE if platform.system() == "Linux" else None
+        self.system_config_file = (
+            self.SYSTEM_CONFIG_FILE if platform.system() == "Linux" else None
+        )
 
         if debug_config_file is not None:
             self.config_file = Path(debug_config_file).expanduser()
             self.user_config_file = self.config_file
             self.project_config_file = None
             self.config_files = tuple(
-                path for path in (self.config_file, self.system_config_file) if path is not None
+                path
+                for path in (self.config_file, self.system_config_file)
+                if path is not None
             )
         else:
             self.user_config_file = self.STATA_MCP_DIRECTORY / self.USER_CONFIG_NAME
@@ -90,7 +94,11 @@ class Config:
             self.config_file = self.user_config_file
             self.config_files = tuple(
                 path
-                for path in (self.user_config_file, self.project_config_file, self.system_config_file)
+                for path in (
+                    self.user_config_file,
+                    self.project_config_file,
+                    self.system_config_file,
+                )
                 if path is not None
             )
 
@@ -131,7 +139,9 @@ class Config:
             project_security = project_config.get(cls.SECURITY_SECTION, {})
             if not isinstance(project_security, dict):
                 project_security = {}
-            merged[cls.SECURITY_SECTION] = cls._deep_merge(project_security, user_security)
+            merged[cls.SECURITY_SECTION] = cls._deep_merge(
+                project_security, user_security
+            )
         return cls._deep_merge(merged, system_config)
 
     @classmethod
@@ -167,7 +177,9 @@ class Config:
             return ""
         return config_file.read_text(encoding="utf-8")
 
-    def _get_raw_config_value(self, config_data: dict[str, Any], config_keys: list) -> Any | None:
+    def _get_raw_config_value(
+        self, config_data: dict[str, Any], config_keys: list
+    ) -> Any | None:
         config_dict = config_data
         for key in config_keys[:-1]:
             config_dict = config_dict.get(key, {})
@@ -244,7 +256,9 @@ class Config:
 
         updated[section][key] = cleaned_value
         self._write_toml(updated)
-        logger.info("Updated config %s = %s in %s", dot_key, cleaned_value, self.config_file)
+        logger.info(
+            "Updated config %s = %s in %s", dot_key, cleaned_value, self.config_file
+        )
 
     @staticmethod
     def _clean_string_value(value):
@@ -263,7 +277,9 @@ class Config:
             value = None
         return value
 
-    def _get_config_value(self, config_keys: list, env_var: str, default, converter=None, validator=None):
+    def _get_config_value(
+        self, config_keys: list, env_var: str, default, converter=None, validator=None
+    ):
         """
         Generic configuration reading method with priority: environment variable > toml config file > default value
 
@@ -386,7 +402,7 @@ class Config:
             env_var="STATA_MCP__IS_DEBUG",
             default=False,
             converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool)
+            validator=lambda x: isinstance(x, bool),
         )
 
     @property
@@ -396,7 +412,7 @@ class Config:
             env_var="STATA_MCP__IS_ASYNC_DO",
             default=False,
             converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool)
+            validator=lambda x: isinstance(x, bool),
         )
 
     @property
@@ -406,7 +422,7 @@ class Config:
             env_var="STATA_MCP__MAX_ASYNC_DO",
             default=3,
             converter=self._to_int,
-            validator=lambda x: isinstance(x, int) and x > 0
+            validator=lambda x: isinstance(x, int) and x > 0,
         )
 
     @property
@@ -416,7 +432,7 @@ class Config:
             env_var="STATA_MCP__CACHE_HELP",
             default=True,
             converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool)
+            validator=lambda x: isinstance(x, bool),
         )
 
     @property
@@ -426,7 +442,7 @@ class Config:
             env_var="STATA_MCP__SAVE_HELP",
             default=True,
             converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool)
+            validator=lambda x: isinstance(x, bool),
         )
 
     @property
@@ -436,7 +452,7 @@ class Config:
             env_var="STATA_MCP__LOGGING_ON",
             default=True,
             converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool)
+            validator=lambda x: isinstance(x, bool),
         )
 
     @property
@@ -446,7 +462,7 @@ class Config:
             env_var="STATA_MCP__LOGGING_CONSOLE_HANDLER_ON",
             default=False,
             converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool)
+            validator=lambda x: isinstance(x, bool),
         )
 
     @property
@@ -456,7 +472,7 @@ class Config:
             env_var="STATA_MCP__LOGGING_FILE_HANDLER_ON",
             default=True,
             converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool)
+            validator=lambda x: isinstance(x, bool),
         )
 
     @property
@@ -466,7 +482,7 @@ class Config:
             env_var="STATA_MCP__LOG_FILE",
             default=self.STATA_MCP_DIRECTORY / "stata_mcp_debug.log",
             converter=self._to_path,
-            validator=lambda x: isinstance(x, Path)
+            validator=lambda x: isinstance(x, Path),
         )
 
         log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -479,7 +495,7 @@ class Config:
             env_var="STATA_MCP__LOGGING__MAX_BYTES",
             default=10_000_000,
             converter=self._to_int,
-            validator=lambda x: isinstance(x, int) and x > 0
+            validator=lambda x: isinstance(x, int) and x > 0,
         )
 
     @property
@@ -489,7 +505,7 @@ class Config:
             env_var="STATA_MCP__LOGGING__BACKUP_COUNT",
             default=5,
             converter=self._to_int,
-            validator=lambda x: isinstance(x, int) and x >= 0
+            validator=lambda x: isinstance(x, int) and x >= 0,
         )
 
     @property
@@ -528,7 +544,7 @@ class Config:
             env_var="STATA_MCP__IS_GUARD",
             default=True,
             converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool)
+            validator=lambda x: isinstance(x, bool),
         )
 
     @cached_property
@@ -562,6 +578,16 @@ class Config:
             validator=lambda x: isinstance(x, tuple),
         )
 
+    @cached_property
+    def ENABLE_DATA_COMMAND_PATH_GUARD(self) -> bool:
+        return self._get_config_value(
+            config_keys=["SECURITY", "enable_data_command_path_guard"],
+            env_var="STATA_MCP__ENABLE_DATA_COMMAND_PATH_GUARD",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool),
+        )
+
     @property
     def IS_MONITOR(self) -> bool:
         return self._get_config_value(
@@ -569,7 +595,7 @@ class Config:
             env_var="STATA_MCP__IS_MONITOR",
             default=False,
             converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool)
+            validator=lambda x: isinstance(x, bool),
         )
 
     @property
@@ -606,8 +632,8 @@ class Config:
             return
 
         migrate_message = (
-            "Warning! Stata MCP has migrated from \"$PWD / stata-mcp-folder\" "
-            "to \"$PWD / .statamcp\" since v1.16.0. "
+            'Warning! Stata MCP has migrated from "$PWD / stata-mcp-folder" '
+            'to "$PWD / .statamcp" since v1.16.0. '
             "To keep using the old folder, set environment variable "
             "STATA_MCP__FOLDER_TAG=stata-mcp-folder."
         )
@@ -632,7 +658,7 @@ class Config:
             env_var="STATA_MCP__FOLDER_TAG",
             default=".statamcp",
             converter=self._to_str,
-            validator=lambda x: isinstance(x, str)
+            validator=lambda x: isinstance(x, str),
         )
 
     @cached_property
@@ -674,7 +700,7 @@ class Config:
             env_var="STATA_MCP__RAM_LIMIT",
             default=-1,
             converter=self._to_int,
-            validator=lambda x: isinstance(x, int)
+            validator=lambda x: isinstance(x, int),
         )
 
         # Convert -1 to None (no limit)
