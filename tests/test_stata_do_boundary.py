@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import asyncio
+import logging
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
@@ -18,7 +19,9 @@ from stata_mcp.stata.stata_do.do import StataDo
 def loaded_mcp_servers(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     """Load mcp_servers with minimal external dependency stubs."""
     monkeypatch.setenv("HOME", (tmp_path / "home").as_posix())
-    monkeypatch.setitem(sys.modules, "tomli_w", SimpleNamespace(dump=lambda *args, **kwargs: None))
+    monkeypatch.setitem(
+        sys.modules, "tomli_w", SimpleNamespace(dump=lambda *args, **kwargs: None)
+    )
     monkeypatch.setitem(sys.modules, "pexpect", ModuleType("pexpect"))
 
     fastmcp_module = ModuleType("mcp.server.fastmcp")
@@ -63,7 +66,13 @@ def loaded_mcp_servers(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     return importlib.import_module("stata_mcp.mcp_servers")
 
 
-def _configure_base(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, do_dir: Path, work_dir: Path, root: Path) -> None:
+def _configure_base(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_mcp_servers,
+    do_dir: Path,
+    work_dir: Path,
+    root: Path,
+) -> None:
     monkeypatch.setattr(
         loaded_mcp_servers,
         "config",
@@ -88,17 +97,31 @@ def _patch_stata_module(monkeypatch: pytest.MonkeyPatch, log_file: Path) -> Mock
     return fake_executor
 
 
-def test_is_within_allowed_directories_uses_input_path_directly(loaded_mcp_servers, tmp_path: Path):
+def test_is_within_allowed_directories_uses_input_path_directly(
+    loaded_mcp_servers, tmp_path: Path
+):
     allowed = tmp_path / "allowed"
     dofile = allowed / "nested" / "sample.do"
     dofile.parent.mkdir(parents=True)
     dofile.write_text("display 1")
 
-    assert loaded_mcp_servers._is_within_allowed_directories(dofile.resolve(), [allowed.resolve()]) is True
-    assert loaded_mcp_servers._is_within_allowed_directories((tmp_path / "outside.do").resolve(), [allowed.resolve()]) is False
+    assert (
+        loaded_mcp_servers._is_within_allowed_directories(
+            dofile.resolve(), [allowed.resolve()]
+        )
+        is True
+    )
+    assert (
+        loaded_mcp_servers._is_within_allowed_directories(
+            (tmp_path / "outside.do").resolve(), [allowed.resolve()]
+        )
+        is False
+    )
 
 
-def test_stata_do_allows_dofile_in_working_dir(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+def test_stata_do_allows_dofile_in_working_dir(
+    monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path
+):
     do_dir = tmp_path / "do"
     do_dir.mkdir()
     work_dir = tmp_path / "work"
@@ -349,7 +372,9 @@ def test_mcp_async_stata_do_releases_parallel_slot_after_error(
 
     assert calls == ["failure_0.do", "failure_1.do"]
     assert results[0] == {"error": "first failed"}
-    assert results[1]["log_file_path"]["text"] == (tmp_path / "failure_1.log").as_posix()
+    assert (
+        results[1]["log_file_path"]["text"] == (tmp_path / "failure_1.log").as_posix()
+    )
 
 
 def test_mcp_async_do_semaphore_is_recreated_when_limit_changes(
@@ -421,7 +446,9 @@ def test_mcp_async_do_semaphore_falls_back_to_default_for_invalid_runtime_limit(
     assert tracker["max_active"] == 3
 
 
-def test_stata_do_rejects_dofile_outside_whitelist(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+def test_stata_do_rejects_dofile_outside_whitelist(
+    monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path
+):
     do_dir = tmp_path / "do"
     do_dir.mkdir()
     work_dir = tmp_path / "work"
@@ -440,7 +467,9 @@ def test_stata_do_rejects_dofile_outside_whitelist(monkeypatch: pytest.MonkeyPat
     assert work_dir.resolve().as_posix() in result["allowed_directories"]
 
 
-def test_stata_do_rejects_symlink_pointing_outside(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+def test_stata_do_rejects_symlink_pointing_outside(
+    monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path
+):
     do_dir = tmp_path / "do"
     do_dir.mkdir()
     work_dir = tmp_path / "work"
@@ -460,7 +489,9 @@ def test_stata_do_rejects_symlink_pointing_outside(monkeypatch: pytest.MonkeyPat
     assert result["error"].startswith("Access denied")
 
 
-def test_stata_do_rejects_path_traversal(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+def test_stata_do_rejects_path_traversal(
+    monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path
+):
     do_dir = tmp_path / "do"
     do_dir.mkdir()
     work_dir = tmp_path / "work"
@@ -480,7 +511,9 @@ def test_stata_do_rejects_path_traversal(monkeypatch: pytest.MonkeyPatch, loaded
     assert result["error"].startswith("Access denied")
 
 
-def test_stata_do_skips_missing_allowed_directories(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+def test_stata_do_skips_missing_allowed_directories(
+    monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path
+):
     do_dir = tmp_path / "missing-do"
     work_dir = tmp_path / "work"
     work_dir.mkdir()
@@ -499,7 +532,9 @@ def test_stata_do_skips_missing_allowed_directories(monkeypatch: pytest.MonkeyPa
     assert result["log_file_path"]["text"] == log_file.as_posix()
 
 
-def test_stata_do_allows_dofile_in_do_directory(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+def test_stata_do_allows_dofile_in_do_directory(
+    monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path
+):
     do_dir = tmp_path / "do"
     do_dir.mkdir()
     work_dir = tmp_path / "work"
@@ -519,7 +554,9 @@ def test_stata_do_allows_dofile_in_do_directory(monkeypatch: pytest.MonkeyPatch,
     assert result["log_file_path"]["text"] == log_file.as_posix()
 
 
-def test_stata_do_rejects_when_allowed_directories_are_empty(monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path):
+def test_stata_do_rejects_when_allowed_directories_are_empty(
+    monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path
+):
     do_dir = tmp_path / "missing-do"
     work_dir = tmp_path / "missing-work"
     outside_dir = tmp_path / "outside"
@@ -614,6 +651,122 @@ def test_api_stata_do_rejects_package_management_when_guard_is_disabled(
 
     assert result["action"] == "Security check, dofile not executed"
     stata_executor.assert_not_called()
+
+
+class TestApiStataDoSecurityLog:
+    """Tests that api/stata_do security logs do not leak full paths."""
+
+    def _build_runtime(self, tmp_path: Path, do_dir: Path, work_dir: Path):
+        return SimpleNamespace(
+            config=SimpleNamespace(
+                STATA_MCP_FOLDER=SimpleNamespace(DO=do_dir),
+                WORKING_DIR=work_dir,
+                IS_GUARD=True,
+                IS_MONITOR=False,
+                ENABLE_DATA_COMMAND_PATH_GUARD=True,
+                STRICT_DATA_INFO_LOCAL_BOUNDARY=True,
+                ENABLE_DATA_INFO_URL_GUARD=True,
+                DATA_INFO_ALLOWED_URL_DOMAINS=(),
+            ),
+            stata_cli="stata",
+            log_base_path=tmp_path,
+            is_unix=True,
+            cwd=work_dir,
+        )
+
+    def test_api_stata_do_boundary_warning_log_redacts_path(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        tmp_path: Path,
+    ) -> None:
+        do_dir = tmp_path / "do"
+        do_dir.mkdir()
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        outside = tmp_path / "outside"
+        outside.mkdir()
+        dofile = outside / "blocked.do"
+        dofile.write_text("display 1")
+
+        stata_do_api = importlib.import_module("stata_mcp.api.stata_do")
+        runtime = self._build_runtime(tmp_path, do_dir, work_dir)
+        monkeypatch.setattr(
+            stata_do_api,
+            "create_runtime_context",
+            lambda **kwargs: runtime,
+        )
+        monkeypatch.setattr(stata_do_api, "StataDo", Mock())
+
+        with caplog.at_level(logging.WARNING):
+            result = stata_do_api.stata_do(dofile.as_posix())
+
+        assert result["error"].startswith("Access denied")
+        messages = "\n".join(caplog.messages)
+        assert "[SECURITY VIOLATION]" in messages
+        assert dofile.as_posix() not in messages
+        assert work_dir.as_posix() not in messages
+
+    def test_api_stata_do_security_rejection_log_redacts_path(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        tmp_path: Path,
+    ) -> None:
+        do_dir = tmp_path / "do"
+        do_dir.mkdir()
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        dofile = work_dir / "bad.do"
+        dofile.write_text("shell rm -rf /")
+
+        stata_do_api = importlib.import_module("stata_mcp.api.stata_do")
+        runtime = self._build_runtime(tmp_path, do_dir, work_dir)
+        monkeypatch.setattr(
+            stata_do_api,
+            "create_runtime_context",
+            lambda **kwargs: runtime,
+        )
+        monkeypatch.setattr(stata_do_api, "StataDo", Mock())
+
+        with caplog.at_level(logging.WARNING):
+            result = stata_do_api.stata_do(dofile.as_posix())
+
+        assert result["action"] == "Security check, dofile not executed"
+        messages = "\n".join(caplog.messages)
+        assert "[SECURITY VIOLATION]" in messages
+        assert dofile.as_posix() not in messages
+        assert work_dir.as_posix() not in messages
+
+    def test_api_stata_do_read_failure_log_redacts_path(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        tmp_path: Path,
+    ) -> None:
+        do_dir = tmp_path / "do"
+        do_dir.mkdir()
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        # A directory at the dofile path causes read_text to fail.
+        dofile = work_dir / "bad"
+        dofile.mkdir()
+
+        stata_do_api = importlib.import_module("stata_mcp.api.stata_do")
+        runtime = self._build_runtime(tmp_path, do_dir, work_dir)
+        monkeypatch.setattr(
+            stata_do_api,
+            "create_runtime_context",
+            lambda **kwargs: runtime,
+        )
+        monkeypatch.setattr(stata_do_api, "StataDo", Mock())
+
+        with caplog.at_level(logging.ERROR):
+            result = stata_do_api.stata_do(dofile.as_posix())
+
+        assert result["error"].startswith("Failed to read dofile for security check")
+        messages = "\n".join(caplog.messages)
+        assert dofile.as_posix() not in messages
 
 
 class TestValidateLogName:

@@ -365,9 +365,8 @@ def test_guard_catches_macro_obfuscated_shell():
 
     code = "`oops'shell rm -rf /tmp/x\n"
     validator = GuardValidator()
-    # raw source slips past the command check (line starts with a macro)
-    assert validator.validate(code).is_safe is True
-    # expanded source is caught
+    # GuardValidator expands source internally before checking commands.
+    assert validator.validate(code).is_safe is False
     assert validator.validate(expand_code(code)).is_safe is False
 
 

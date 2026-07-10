@@ -22,7 +22,9 @@ from .config import Config
 
 # Init project config
 config = Config()
-_ASYNC_DO_SEMAPHORES: weakref.WeakKeyDictionary[Any, tuple[int, asyncio.Semaphore]] = weakref.WeakKeyDictionary()
+_ASYNC_DO_SEMAPHORES: weakref.WeakKeyDictionary[Any, tuple[int, asyncio.Semaphore]] = (
+    weakref.WeakKeyDictionary()
+)
 
 # Maybe somebody does not like logging.
 # Whatever, left a controller switch `logging STATA_MCP_LOGGING_ON`. Turn off all logging with setting it as false.
@@ -48,24 +50,22 @@ if config.LOGGING_ON:
             stata_mcp_dot_log_file_path,
             maxBytes=config.MAX_BYTES,  # 10MB
             backupCount=config.BACKUP_COUNT,
-            encoding='utf-8'
+            encoding="utf-8",
         )
-        file_handler.setLevel(
-            logging.DEBUG if config.IS_DEBUG else logging.INFO
-        )
+        file_handler.setLevel(logging.DEBUG if config.IS_DEBUG else logging.INFO)
 
         logging_handlers.append(file_handler)
 
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=logging_handlers
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        handlers=logging_handlers,
     )
 else:
     # Disable all logging by setting level above CRITICAL
     logging.disable(logging.CRITICAL + 1)
 
-logging.info(f"Using {config.WORKING_DIR.as_posix()} as working directory")
+logging.info("Working directory configured.")
 
 # Initialize MCP Server, avoiding FastMCP server timeout caused by Icon src fetch
 instructions = (
@@ -78,11 +78,13 @@ try:
         name="stata-mcp",
         instructions=instructions,
         website_url="https://www.statamcp.com",
-        icons=[Icon(
-            src="https://r2.statamcp.com/android-chrome-512x512.png",
-            mimeType="image/png",
-            sizes=["512x512"]
-        )]
+        icons=[
+            Icon(
+                src="https://r2.statamcp.com/android-chrome-512x512.png",
+                mimeType="image/png",
+                sizes=["512x512"],
+            )
+        ],
     )
 except Exception:
     stata_mcp = FastMCP(
@@ -163,16 +165,12 @@ def _prepare_stata_do_request(dofile_path: str) -> Dict[str, Any] | _StataDoRequ
             allowed_dirs.append(candidate_dir.resolve())
         else:
             logging.warning(
-                "Skip missing allowed directory for dofile execution boundary check: "
-                f"{candidate_dir}"
+                "Skip missing allowed directory for dofile execution boundary check."
             )
     is_allowed = _is_within_allowed_directories(dofile_path_resolved, allowed_dirs)
     if not is_allowed:
         logging.warning(
-            f"[SECURITY VIOLATION] Attempted to execute dofile outside allowed directories: "
-            f"requested_path='{dofile_path}', "
-            f"resolved_path='{dofile_path_resolved}', "
-            f"allowed_directories='{[d.as_posix() for d in allowed_dirs]}'"
+            "[SECURITY VIOLATION] Attempted to execute dofile outside allowed directories."
         )
         return {
             "error": f"Access denied: Dofile '{dofile_path}' is outside allowed directories.",
@@ -180,10 +178,10 @@ def _prepare_stata_do_request(dofile_path: str) -> Dict[str, Any] | _StataDoRequ
         }
 
     try:
-        with open(dofile_path, 'r', encoding='utf-8') as f:
+        with open(dofile_path, "r", encoding="utf-8") as f:
             dofile_content = f.read()
     except Exception as e:
-        logging.error(f"Failed to read dofile {dofile_path}: {str(e)}")
+        logging.error("Failed to read dofile for security check.")
         return {"error": f"Failed to read dofile for security check: {str(e)}"}
 
     from .guard import PackageManagementGuardValidator
@@ -207,34 +205,45 @@ def _prepare_stata_do_request(dofile_path: str) -> Dict[str, Any] | _StataDoRequ
         from .guard import GuardValidator
 
         # Config guard validator (platform-independent)
-        guard_validator = GuardValidator()  # TODO: It may be make an error for windows user
+        guard_validator = (
+            GuardValidator()
+        )  # TODO: It may be make an error for windows user
 
         # Perform security validation
-        report = guard_validator.validate(dofile_content)
+        report = guard_validator.validate(dofile_content, config=config)
 
         if not report.is_safe:
+            dangerous_summary = ", ".join(
+                f"line {item.line}:{item.type}" for item in report.dangerous_items
+            )
+            logging.warning(
+                "[SECURITY VIOLATION] Security rejection for dofile: %s",
+                dangerous_summary,
+            )
             warning_msg = "⚠️  Security warning: Dangerous commands detected:\n"
             for item in report.dangerous_items:
                 warning_msg += f"  - Line {item.line}: {item.type} '{item.content}'\n"
-            logging.warning(warning_msg)
             return {
                 "action": "Security check, dofile not executed",
                 "warning": warning_msg,
                 "suggesting": (
                     "Modify the dofile to ensure safety\n"
                     "or set environment variable `STATA_MCP__IS_GUARD` to `false` (not recommended)"
-                )
+                ),
             }
         else:
-            logging.info(f"✅ {dofile_path} - Security check passed")
+            logging.info("Security check passed for dofile.")
     else:
-        logging.warning("[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.")
+        logging.warning(
+            "[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked."
+        )
 
     # Initialize monitors
     monitors = []
     if config.IS_MONITOR:
         if config.MAX_RAM_MB is not None:
             from .monitor import RAMMonitor
+
             monitors.append(RAMMonitor(max_ram_mb=config.MAX_RAM_MB))
 
     return _StataDoRequest(dofile_path=dofile_path, monitors=monitors)
@@ -289,12 +298,12 @@ def _get_async_do_semaphore() -> asyncio.Semaphore:
 
 
 def _sync_stata_do(
-        dofile_path: str,
-        log_file_name: str = None,
-        read_log_when_error: bool = False,
-        is_replace_log: bool = True,
-        enable_smcl: bool = True,
-        timeout: float | None = None,
+    dofile_path: str,
+    log_file_name: str = None,
+    read_log_when_error: bool = False,
+    is_replace_log: bool = True,
+    enable_smcl: bool = True,
+    timeout: float | None = None,
 ) -> Dict[str, Any]:
     """
     Execute a Stata do-file and return log file paths.
@@ -333,16 +342,17 @@ def _sync_stata_do(
 
     # Initialize Stata executor with system configuration
     from .stata import StataDo
+
     stata_executor = StataDo(
         stata_cli=config.STATA_CLI,  # Path to Stata executable
         log_file_path=config.STATA_MCP_FOLDER.LOG,  # Directory for log files
         is_unix=config.IS_UNIX,  # Whether the OS is Unix-like
         cwd=config.WORKING_DIR,
-        monitors=request.monitors
+        monitors=request.monitors,
     )
 
     # Execute the do-file and get log file path
-    logging.info(f"Try to running file {request.dofile_path}")
+    logging.info("Try to running dofile.")
 
     from .core.types import RAMLimitExceededError
 
@@ -355,12 +365,13 @@ def _sync_stata_do(
             timeout=timeout,
         )
         text_log = log_file_path_mapping.get("text").as_posix()
-        logging.info(f"{request.dofile_path} is executed successfully. Log file path: {text_log}")
+        logging.info("Dofile executed successfully.")
     except RAMLimitExceededError as e:
-        logging.error(f"Out of max RAM limit: {e}")
+        logging.error("Out of max RAM limit: %s", e)
         return {"error": f"Out of max RAM limit: {e}"}
     except Exception as e:
-        logging.error(f"Failed to execute {request.dofile_path}. Error: {str(e)}")
+        logging.error("Failed to execute dofile.")
+        logging.debug("Execution exception details: %s", e)
         return {"error": str(e)}
 
     return _format_stata_do_result(
@@ -373,12 +384,12 @@ def _sync_stata_do(
 
 
 async def _async_stata_do(
-        dofile_path: str,
-        log_file_name: str = None,
-        read_log_when_error: bool = False,
-        is_replace_log: bool = True,
-        enable_smcl: bool = True,
-        timeout: float | None = None,
+    dofile_path: str,
+    log_file_name: str = None,
+    read_log_when_error: bool = False,
+    is_replace_log: bool = True,
+    enable_smcl: bool = True,
+    timeout: float | None = None,
 ) -> Dict[str, Any]:
     """Async Stata do-file tool implementation."""
     request = _prepare_stata_do_request(dofile_path)
@@ -386,34 +397,38 @@ async def _async_stata_do(
         return request
 
     from .stata.stata_do.async_do import AsyncStataDo
+
     stata_executor = AsyncStataDo(
         stata_cli=config.STATA_CLI,
         log_file_path=config.STATA_MCP_FOLDER.LOG,
         is_unix=config.IS_UNIX,
         cwd=config.WORKING_DIR,
-        monitors=request.monitors
+        monitors=request.monitors,
     )
 
-    logging.info(f"Try to running file {request.dofile_path}")
+    logging.info("Try to running dofile.")
 
     from .core.types import RAMLimitExceededError
 
     try:
         async with _get_async_do_semaphore():
-            log_file_path_mapping: Dict[str, Path] = await stata_executor.execute_dofile_async(
-                request.dofile_path,
-                log_file_name,
-                is_replace_log,
-                enable_smcl,
-                timeout=timeout,
+            log_file_path_mapping: Dict[str, Path] = (
+                await stata_executor.execute_dofile_async(
+                    request.dofile_path,
+                    log_file_name,
+                    is_replace_log,
+                    enable_smcl,
+                    timeout=timeout,
+                )
             )
         text_log = log_file_path_mapping.get("text").as_posix()
-        logging.info(f"{request.dofile_path} is executed successfully. Log file path: {text_log}")
+        logging.info("Dofile executed successfully.")
     except RAMLimitExceededError as e:
-        logging.error(f"Out of max RAM limit: {e}")
+        logging.error("Out of max RAM limit: %s", e)
         return {"error": f"Out of max RAM limit: {e}"}
     except Exception as e:
-        logging.error(f"Failed to execute {request.dofile_path}. Error: {str(e)}")
+        logging.error("Failed to execute dofile.")
+        logging.debug("Execution exception details: %s", e)
         return {"error": str(e)}
 
     return _format_stata_do_result(
@@ -437,11 +452,11 @@ class _AdoInstallApproval(BaseModel):
 
 
 async def ado_package_install(
-        package: str,
-        source: str = "ssc",
-        is_replace: bool = False,
-        package_source_from: str = None,
-        ctx: Context = None,
+    package: str,
+    source: str = "ssc",
+    is_replace: bool = False,
+    package_source_from: str = None,
+    ctx: Context = None,
 ) -> str:
     """
     Install a Stata package from SSC, GitHub, or net.
@@ -505,11 +520,12 @@ async def ado_package_install(
 # STATA_MCP.TOOLS: Data Operation Tools
 # =============================================================================
 
+
 def get_data_info(
-        data_path: str,
-        vars_list: List[str] | None = None,
-        encoding: str = "utf-8",
-        head: int = 0,
+    data_path: str,
+    vars_list: List[str] | None = None,
+    encoding: str = "utf-8",
+    head: int = 0,
 ) -> str:
     """
     Return descriptive statistics for a supported data file.
@@ -542,13 +558,14 @@ def get_data_info(
 # STATA_MCP.TOOLS: File Management Tools
 # =============================================================================
 
+
 def read_log(
-        file_path: str,
-        encoding: str = "utf-8",
-        is_beta: bool = False,
-        *,
-        output_format: Literal["full", "core", "dict"] = "dict",
-        lines: int = 0,
+    file_path: str,
+    encoding: str = "utf-8",
+    is_beta: bool = False,
+    *,
+    output_format: Literal["full", "core", "dict"] = "dict",
+    lines: int = 0,
 ) -> str:
     """
     Read a Stata log file (.log or .smcl) and return its content.
@@ -587,18 +604,14 @@ def read_log(
     try:
         path.relative_to(config.STATA_MCP_FOLDER.path.resolve())
     except ValueError:
-        allowed_path = config.STATA_MCP_FOLDER.path.resolve()
         # Log security violation for audit purposes.
         # If this security warning appears, it may indicate that the current model has been compromised/poisoned.
         logging.warning(
-            f"[SECURITY VIOLATION] Attempted to access file outside allowed directory: "
-            f"requested_path='{file_path}', "
-            f"resolved_path='{path}', "
-            f"allowed_directory='{allowed_path}'"
+            "[SECURITY VIOLATION] Attempted to access file outside allowed directory."
         )
         raise PermissionError(
-            f"Access denied: File '{file_path}' is outside the allowed directory '{allowed_path}'. "
-            f"read_file can only read files within the stata-mcp-folder."
+            "Access denied: File is outside the allowed directory. "
+            "read_file can only read files within the stata-mcp-folder."
         )
 
     if not path.exists():
@@ -606,6 +619,7 @@ def read_log(
 
     if is_beta and config.IS_UNIX:
         from .stata import StataLog
+
         loger = StataLog.from_path(file_path, encoding=encoding)
         if output_format not in ["full", "core", "dict"]:
             raise ValueError(f"Invalid output_format: {output_format}")
@@ -619,15 +633,16 @@ def read_log(
                 return str(dict_data)
             if lines > 0:
                 return str(dict_data[:lines])
-            return str(dict_data[-abs(lines):])
+            return str(dict_data[-abs(lines) :])
     # if not beta version and Windows user using read file text directly.
     try:
         with open(path, "r", encoding=encoding) as file:
             log_content = file.read()
-        logging.info(f"Successfully read file: {file_path}")
+        logging.info("Successfully read file.")
         return _trim_lines(log_content, lines)
     except IOError as e:
-        logging.error(f"Failed to read file {file_path}: {str(e)}")
+        logging.error("Failed to read file.")
+        logging.debug("Read file exception details: %s", e)
         raise IOError(f"An error occurred while reading the file: {e}")
 
 
@@ -639,7 +654,7 @@ def _trim_lines(content: str, lines: int) -> str:
     all_lines = content.splitlines()
     if lines > 0:
         return "\n".join(all_lines[:lines])
-    return "\n".join(all_lines[-abs(lines):])
+    return "\n".join(all_lines[-abs(lines) :])
 
 
 def _is_within_allowed_directories(target_path: Path, allowed_dirs: List[Path]) -> bool:
@@ -739,7 +754,10 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
 
         tool_func: ToolFunc | None = meta.get("func")
         if tool_func is None:
-            logging.warning("Skipping tool '%s' because its registry entry has no callable func.", name)
+            logging.warning(
+                "Skipping tool '%s' because its registry entry has no callable func.",
+                name,
+            )
             continue
         server.tool(name=name, description=meta["description"])(tool_func)
 
@@ -759,18 +777,14 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
 
 __all__ = [
     "stata_mcp",
-
     # Functions (Core)
     "get_data_info",
     "stata_do",
     "register_tools",
-
     # Utilities
     "read_log",
     "ado_package_install",
 ]
 
 if config.IS_UNIX:
-    __all__.extend([
-        "help"
-    ])
+    __all__.extend(["help"])

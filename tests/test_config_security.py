@@ -73,7 +73,9 @@ IS_ASYNC_DO = "on"
     assert Config(config_file=config_path).IS_ASYNC_DO is False
 
 
-def test_async_do_max_parallel_config_reads_positive_integer(monkeypatch, tmp_path) -> None:
+def test_async_do_max_parallel_config_reads_positive_integer(
+    monkeypatch, tmp_path
+) -> None:
     config_path = tmp_path / "config.toml"
     config_path.write_text(
         """
@@ -92,7 +94,9 @@ MAX_ASYNC_DO = 5
     assert Config(config_file=config_path).MAX_ASYNC_DO == 3
 
 
-def test_async_do_max_parallel_config_rejects_invalid_values(monkeypatch, tmp_path) -> None:
+def test_async_do_max_parallel_config_rejects_invalid_values(
+    monkeypatch, tmp_path
+) -> None:
     config_path = tmp_path / "config.toml"
     config_path.write_text(
         """
@@ -340,6 +344,42 @@ strict_data_info_local_boundary = true
     )
 
     assert Config(config_file=config_path).STRICT_DATA_INFO_LOCAL_BOUNDARY is True
+
+
+def test_data_command_path_guard_defaults_to_disabled(tmp_path) -> None:
+    config = Config(config_file=tmp_path / "missing.toml")
+
+    assert config.ENABLE_DATA_COMMAND_PATH_GUARD is False
+
+
+def test_data_command_path_guard_reads_toml(tmp_path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        """
+[SECURITY]
+enable_data_command_path_guard = true
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert Config(config_file=config_path).ENABLE_DATA_COMMAND_PATH_GUARD is True
+
+
+def test_data_command_path_guard_env_var_overrides_toml(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        """
+[SECURITY]
+enable_data_command_path_guard = false
+""".strip(),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("STATA_MCP__ENABLE_DATA_COMMAND_PATH_GUARD", "true")
+
+    assert Config(config_file=config_path).ENABLE_DATA_COMMAND_PATH_GUARD is True
 
 
 def test_linux_system_config_overrides_debug_config(

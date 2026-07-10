@@ -21,6 +21,9 @@ IS_SAVE = true
 [SECURITY]
 IS_GUARD = true
 ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = []
+# When true, GuardValidator scans dofiles for data-loading commands and
+# rejects paths/URLs that violate the same rules as get_data_info.
+enable_data_command_path_guard = false
 
 [PROJECT]
 WORKING_DIR = ""
