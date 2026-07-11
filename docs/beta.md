@@ -6,7 +6,6 @@ Beta options are experimental switches under the `[BETA]` section of `~/.statamc
 
 ```toml
 [BETA]
-ENABLE_WRITE_DOFILE = false
 IS_ASYNC_DO = false
 MAX_ASYNC_DO = 3
 enable_data_info_url_guard = false
@@ -18,31 +17,12 @@ enable_structured_log = false
 
 | Parameter | Type | Default | Environment Variable | Description |
 | --- | --- | --- | --- | --- |
-| `ENABLE_WRITE_DOFILE` | Boolean | `false` | `STATA_MCP__ENABLE_WRITE_DOFILE` | Registers the deprecated `write_dofile` MCP tool. Keep this disabled unless an older workflow still depends on that tool. |
 | `IS_ASYNC_DO` | Boolean | `false` | `STATA_MCP__IS_ASYNC_DO` | Enables the async implementation of `stata_do` for MCP and API/CLI execution paths. |
 | `MAX_ASYNC_DO` | Integer | `3` | `STATA_MCP__MAX_ASYNC_DO` | Limits concurrent async MCP `stata_do` executions. Extra MCP calls wait for an active slot. Applies only when `IS_ASYNC_DO=true`. |
 | `enable_data_info_url_guard` | Boolean | `false` | None | Enables URL validation and domain allowlist checks for URL data sources passed to `get_data_info`. |
 | `data_info_allowed_url_domains` | List[str] | `[]` | None | Allowed hostnames when the `get_data_info` URL guard is enabled. |
 | `enable_structured_log` | Boolean | `false` | None | Enables structured log parsing for the `read_log` tool and API. |
 
-## `ENABLE_WRITE_DOFILE`
-
-`ENABLE_WRITE_DOFILE` controls whether the deprecated `write_dofile` tool is registered with the MCP server.
-
-Modern AI agents can already write files directly, so `write_dofile` is usually redundant. Leave this option as `false` unless you need backward compatibility with an older client or workflow.
-
-Enable it with either:
-
-```toml
-[BETA]
-ENABLE_WRITE_DOFILE = true
-```
-
-or:
-
-```bash
-export STATA_MCP__ENABLE_WRITE_DOFILE=true
-```
 
 ## `IS_ASYNC_DO`
 
@@ -108,6 +88,6 @@ Entries match the exact hostname and its subdomains. For example, `example.com` 
 enable_structured_log = true
 ```
 
-When this switch is `false`, `read_log` returns raw file content. When it is `true`, supported logs are parsed into structured formats (`full`, `core`, or `dict`) via `StataLog`. The MCP-layer tool applies structured parsing only on macOS and Linux; the API path uses structured parsing whenever the switch is enabled.
+When this switch is `false`, `read_log` returns raw file content. When it is `true`, supported logs are parsed into structured formats (`full`, `core`, or `dict`) via `StataLog`. MCP, CLI, and API calls all use this same switch and behavior.
 
 Boolean string values must be `true` or `false`. Values such as `on` and `off` are not accepted and fall back to the default.

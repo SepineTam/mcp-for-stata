@@ -72,7 +72,6 @@ MAX_BYTES = 10_000_000
 BACKUP_COUNT = 5
 
 [BETA]
-ENABLE_WRITE_DOFILE = false
 IS_ASYNC_DO = false
 MAX_ASYNC_DO = 3
 enable_data_info_url_guard = false
@@ -408,7 +407,7 @@ Maximum RAM limit in megabytes.
 
 ### BETA Section
 
-Beta and experimental options live in the `[BETA]` section. This includes async `stata_do`, deprecated `write_dofile` registration, the optional `get_data_info` URL domain guard, and structured log parsing for `read_log`. See [Beta Configuration](beta.md) for the complete list, recommended defaults, and behavior notes.
+Beta and experimental options live in the `[BETA]` section. This includes async `stata_do`, the optional `get_data_info` URL domain guard, and structured log parsing for `read_log`. See [Beta Configuration](beta.md) for the complete list, recommended defaults, and behavior notes.
 
 ### STATA Section
 

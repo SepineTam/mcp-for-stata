@@ -13,11 +13,11 @@ MAX_BYTES = 10000000
 BACKUP_COUNT = 5
 
 [BETA]
-ENABLE_WRITE_DOFILE = false
 IS_ASYNC_DO = false
 MAX_ASYNC_DO = 3
 enable_data_info_url_guard = true
 data_info_allowed_url_domains = ["raw.githubusercontent.com"]
+enable_structured_log = false
 
 [HELP]
 IS_CACHE = true

@@ -1,6 +1,6 @@
 # MCP.Tools
 
-工具在 `_TOOL_REGISTRY` 中按三种 profile 划分。`stata-mcp server --core` 只注册 `stata_do`、`get_data_info`、`help`；`stata-mcp server --all`（默认）注册标准工具，但不包含高风险第三方安装；`stata-mcp server --unsafe` 会额外注册 `ado_package_install`。`help` 在 Windows 上会被过滤。已弃用的 `write_dofile` 仅在 `ENABLE_WRITE_DOFILE=true` 时注册。
+工具在 `_TOOL_REGISTRY` 中按三种 profile 划分。`stata-mcp server --core` 只注册 `stata_do`、`get_data_info`、`help`；`stata-mcp server --all`（默认）注册标准工具，但不包含高风险第三方安装；`stata-mcp server --unsafe` 会额外注册 `ado_package_install`。`help` 在 Windows 上会被过滤。`write_dofile` 已不再注册为 MCP 工具。
 
 ---
 ## get_data_info
@@ -129,69 +129,13 @@ stata_do("./analysis/estimation.do", timeout=300)
 
 ---
 
-## write_dofile
-> **默认禁用**：该工具是否被注册到 MCP server 完全由 `ENABLE_WRITE_DOFILE` 配置开关决定。未设置为 `true` 时,`register_tools()` 会直接跳过这个条目,工具不会暴露给客户端。
->
-> 现代 AI 智能体具有原生文件写入能力，使该工具变得多余。
-> 如需启用，请查看 [Beta 配置](../beta.md)。
-
-```python
-def write_dofile(content: str,
-                 encoding: str | None = None) -> str:
-    ...
-```
-
-**输入参数**：
-- `content`：要持久化的 Stata 命令序列（必填）
-- `encoding`：文件输出的字符编码（可选，默认为 UTF-8）
-
-**返回结构**：
-包含生成的 do 文件绝对 POSIX 兼容路径的字符串
-
-**操作示例**：
-```python
-# 基本回归分析
-write_dofile("""
-use "/data/survey.dta", clear
-regress income age education experience
-outreg2 using "`output_path'/results.doc", replace
-""")
-
-# 带编码规范的时间序列分析
-write_dofile("""
-tsset date
-arima gdp, ar(1) ma(1)
-predict forecast
-""", encoding="latin1")
-
-# 数据转换流水线
-write_dofile("""
-gen log_gdp = ln(gdp)
-gen diff_income = d(income)
-xtset country_id year
-xtreg diff_income log_gdp, fe
-""")
-```
-
-**实现架构**：
-该工具在 `stata-mcp-dofile/` 目录层级内实现原子文件创建。文件命名采用 ISO 8601 基本格式时间戳生成（`YYYYMMDDHHMMSS.do`），确保时间唯一性和按时间排序。写入操作使用 Python 内置的 `open()` 函数，模式为 `"w"` 和指定的编码参数，执行隐式文件创建和截断以实现原子写入语义。
-
-与输出重定向命令（`outreg2`、`esttab`）的集成需要在 do 文件生成之前与 `results_doc_path` 提示协调以建立输出目录路径。这种关注点分离使得跨多个 Stata 执行周期的确定性输出路径管理成为可能。
-
-该工具不执行 Stata 代码内容的语法验证或语义分析。代码正确性、命令序列和宏展开有效性仍然是调用上下文的责任。错误处理将文件 I/O 操作包装在 try-except 块中，并进行结构化日志记录以跟踪成功/失败。
-
-> **弃用通知**：此工具默认禁用，将在未来版本中移除。现代 AI 智能体具有原生文件写入能力，请使用那些功能替代。
-
----
-
 ## read_log
 ```python
 def read_log(file_path: str,
              encoding: str = "utf-8",
-             is_beta: bool = False,
-             lines: int = 0,
              *,
-             output_format: Literal["full", "core", "dict"] = "dict") -> str:
+             output_format: Literal["full", "core", "dict"] = "core",
+             lines: int = 0) -> str:
     ...
 ```
 
@@ -200,21 +144,20 @@ def read_log(file_path: str,
   - MCP 调用只能读取 `<WORKING_DIR>/<FOLDER_TAG>/` 下的文件
   - API 和 CLI 调用默认保留历史的不限制路径行为；设置 `[SECURITY] strict_read_log_boundary=true` 后会强制使用同样边界
 - `encoding`：文本解码的字符编码（可选，默认为 UTF-8）
-- `is_beta`：启用结构化日志解析（可选，默认：false）
-  - **仅限 macOS/Linux** - Windows 用户请使用默认行为
-  - 推荐用于 `.smcl` 文件配合 `dict` 格式
 - `lines`：内容裁剪控制（默认：0，不裁剪）
   - `> 0`：返回前 N 项（full/core 模式为行数，dict 模式为条目数）
   - `< 0`：返回后 |N| 项
   - `0`：返回完整内容
-- `output_format`：`is_beta=true` 时的输出格式（可选，默认："dict"）
+- `output_format`：启用结构化解析时的输出格式（可选，默认："core"）
   - `full`：未经处理的原始日志内容
   - `core`：去除框架行的清洁内容
   - `dict`：结构化的命令-结果对（推荐）
 
+结构化解析由 `[BETA] enable_structured_log` 配置开关控制，默认关闭。
+
 **返回结构**：
-- 默认模式（`is_beta=false`）：文件的原始字符串内容
-- Beta 模式（`is_beta=true`）：取决于 `output_format`：
+- 默认模式（`enable_structured_log=false`）：文件的原始字符串内容
+- 结构化模式（`enable_structured_log=true`）：取决于 `output_format`：
   - `full`：纯文本日志内容
   - `core`：不含框架（页眉、页脚、日志命令）的日志内容
   - `dict`：命令-结果列表的字符串表示
@@ -224,22 +167,19 @@ def read_log(file_path: str,
 # 读取日志文件（默认模式）
 read_log("/Users/project/.statamcp/stata-mcp-log/20250104153045.log")
 
-# 使用结构化解析读取 SMCL 日志（macOS/Linux）
+# 使用结构化解析读取 SMCL 日志（需要 enable_structured_log=true）
 read_log("/Users/project/.statamcp/stata-mcp-log/20250104153045.smcl",
-         is_beta=True,
          output_format="dict")
 
 # 获取去除框架的清洁日志内容
 read_log("/Users/project/.statamcp/stata-mcp-log/session.log",
-         is_beta=True,
          output_format="core")
 
 # 仅读取前 50 行
 read_log("/Users/project/.statamcp/stata-mcp-log/session.log", lines=50)
 
-# 读取最后 20 个命令结果（dict 格式）
+# 读取最后 20 个命令结果（dict 格式，需要 enable_structured_log=true）
 read_log("/Users/project/.statamcp/stata-mcp-log/session.log",
-         is_beta=True,
          output_format="dict",
          lines=-20)
 
@@ -250,9 +190,9 @@ read_log("/Users/project/.statamcp/stata-mcp-log/results.txt", encoding="utf-8")
 **实现架构**：
 该工具实现双模式日志读取：传统文件读取和通过 `StataLog` 模块的结构化解析。
 
-**传统模式**（`is_beta=false`）：通过 Python 的 `open()` 函数进行通用文件读取，模式为 `"r"`。路径验证通过 `Path.exists()` 检查文件是否存在。内容读取使用单次 `file.read()` 操作获取完整文件内容。
+**传统模式**（`enable_structured_log=false`）：通过 Python 的 `open()` 函数进行通用文件读取，模式为 `"r"`。路径验证通过 `Path.exists()` 检查文件是否存在。内容读取使用单次 `file.read()` 操作获取完整文件内容。
 
-**结构化解析模式**（`is_beta=true`，仅 Unix）：利用 `stata_log` 模块，提供：
+**结构化解析模式**（`enable_structured_log=true`）：利用 `stata_log` 模块，提供：
 - `StataLogTEXT`：`.log`（纯文本）文件解析器
 - `StataLogSMCL`：`.smcl`（Stata 标记与控制语言）文件解析器
 - `StataLogInfo`：包含 `command_result_list` 结构化命令-输出对的数据类

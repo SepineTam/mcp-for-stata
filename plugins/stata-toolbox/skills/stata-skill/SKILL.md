@@ -3,7 +3,7 @@ name: stata-skill
 description: |
   A packaged Stata Runner skill via official MCP-for-Stata server including stata_do, ado_package_install, help, read_log and get_data_info tools. Use it when (1) need to execute Stata do-file; (2) missing ado-packages; (3) find code error caused by syntax in Stata; (4) want to read smcl and text format log file with rich text output; (5) first encounter a data file and want to understand its structure and content.
 metadata:
-  version: "1.0.8"
+  version: "1.0.9"
 ---
 
 # MCP-for-Stata
@@ -125,21 +125,12 @@ When the user asks to view a Stata execution log, analyze output results, or wan
 
 **Key parameters:**
 - `file_path`: absolute path to the log file
-- `output_format`: "dict" (recommended, structured command-result pairs), "full" (all original content), "core" (removes framework lines)
-- `is_beta`: defaults to false. When true, uses structured parsing (Unix only, recommended for .smcl + dict format)
+- `output_format`: "core" (default, removes framework lines), "dict" (structured command-result pairs), or "full" (all original content)
 - `lines`: content truncation. 0 returns all; positive returns first N items; negative returns last |N| items
 
 **Notes:**
-- File must be within the `stata-mcp-folder` directory (security boundary)
-- Beta mode uses the StataLog parser and may contain parsing errors
-
----
-
-### 6. Write Do-File (Deprecated)
-
-`write_dofile` is marked as deprecated. Modern AI agents have native file-writing capabilities. Use the Write tool to create do-files instead of calling this MCP tool.
-
-This tool is disabled by default and only available when `STATA_MCP__ENABLE_WRITE_DOFILE=true`. It will be removed in a future version.
+- File must be within `<WORKING_DIR>/<FOLDER_TAG>/` (security boundary)
+- Structured parsing is controlled by `[BETA] enable_structured_log` and is disabled by default
 
 ---
 
@@ -170,7 +161,6 @@ This tool is disabled by default and only available when `STATA_MCP__ENABLE_WRIT
 ## Edge Cases
 
 - **help Unix limitation**: not available on Windows; guide users to alternative documentation methods
-- **write_dofile deprecated**: do not use this tool to write do-files; use the Write tool instead
 - **security guard enabled by default**: dangerous commands (shell, erase, rm, !) in do-files are blocked. To disable, set `STATA_MCP__IS_GUARD=false` (not recommended)
 - **RAM monitoring disabled by default**: to monitor Stata process memory, set `STATA_MCP__IS_MONITOR=true` and `STATA_MCP__RAM_LIMIT`
 - **path boundary check**: do-files and log files must be within whitelisted directories; otherwise execution is rejected

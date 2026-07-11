@@ -1,6 +1,6 @@
 # MCP.Tools
 
-Tools are partitioned into three profiles inside `_TOOL_REGISTRY`. `stata-mcp server --core` registers only `stata_do`, `get_data_info`, and `help`. `stata-mcp server --all` (the default) registers standard tools but excludes high-risk third-party installation. `stata-mcp server --unsafe` adds `ado_package_install`. The `help` tool is filtered out on Windows. The deprecated `write_dofile` tool is skipped unless `ENABLE_WRITE_DOFILE=true`.
+Tools are partitioned into three profiles inside `_TOOL_REGISTRY`. `stata-mcp server --core` registers only `stata_do`, `get_data_info`, and `help`. `stata-mcp server --all` (the default) registers standard tools but excludes high-risk third-party installation. `stata-mcp server --unsafe` adds `ado_package_install`. The `help` tool is filtered out on Windows. `write_dofile` is no longer registered as an MCP tool.
 
 ---
 ## get_data_info
@@ -129,68 +129,13 @@ Exception handling categorizes failures into three tiers: `FileNotFoundError` fo
 
 ---
 
-## write_dofile
-> **Disabled by Default**: Whether this tool is registered with the MCP server is controlled by the `ENABLE_WRITE_DOFILE` switch. Without setting it to `true`, `register_tools()` skips this entry entirely and the tool will not be exposed to the client.
->
-> Modern AI agents have native file writing capabilities, making this tool redundant.
-> To enable, see [Beta Configuration](../beta.md).
-
-```python
-def write_dofile(content: str,
-                 encoding: str | None = None) -> str:
-    ...
-```
-
-**Input Parameters**:
-- `content`: Stata command sequence to persist (required)
-- `encoding`: Character encoding for file output (optional, defaults to UTF-8)
-
-**Return Structure**:
-String containing absolute POSIX-compliant path to generated do-file
-
-**Operational Examples**:
-```python
-# Basic regression analysis
-write_dofile("""
-use "/data/survey.dta", clear
-regress income age education experience
-outreg2 using "`output_path'/results.doc", replace
-""")
-
-# Time series analysis with encoding specification
-write_dofile("""
-tsset date
-arima gdp, ar(1) ma(1)
-predict forecast
-""", encoding="latin1")
-
-# Data transformation pipeline
-write_dofile("""
-gen log_gdp = ln(gdp)
-gen diff_income = d(income)
-xtset country_id year
-xtreg diff_income log_gdp, fe
-""")
-```
-
-**Implementation Architecture**:
-The tool implements atomic file creation within the `stata-mcp-dofile/` directory hierarchy. File naming employs ISO 8601 basic format timestamp generation (`YYYYMMDDHHMMSS.do`) ensuring temporal uniqueness and chronological sorting. The write operation utilizes Python's built-in `open()` function with mode `"w"` and specified encoding parameter, performing implicit file creation and truncation for atomic write semantics.
-
-Integration with output redirection commands (`outreg2`, `esttab`) requires coordination with the `results_doc_path` prompt to establish output directory paths prior to do-file generation. This separation of concerns enables deterministic output path management across multiple Stata execution cycles.
-
-The tool does not perform syntactic validation or semantic analysis of the Stata code content. Code correctness, command sequencing, and macro expansion validity remain the responsibility of the calling context. Error handling wraps file I/O operations in try-except blocks with structured logging for success/failure tracking.
-
-> **Deprecation Notice**: This tool is disabled by default and will be removed in a future version. Modern AI agents have native file writing capabilities, so use those instead.
-
----
-
 ## read_log
 ```python
 def read_log(file_path: str,
              encoding: str = "utf-8",
-             lines: int = 0,
              *,
-             output_format: Literal["full", "core", "dict"] = "dict") -> str:
+             output_format: Literal["full", "core", "dict"] = "core",
+             lines: int = 0) -> str:
     ...
 ```
 
@@ -203,7 +148,7 @@ def read_log(file_path: str,
   - `> 0`: return first N items (lines for full/core, entries for dict)
   - `< 0`: return last |N| items (lines for full/core, entries for dict)
   - `0`: return full content
-- `output_format`: Output format when structured parsing is enabled (optional, default: "dict")
+- `output_format`: Output format when structured parsing is enabled (optional, default: "core")
   - `full`: Raw log content without processing
   - `core`: Cleaned content with framework lines removed
   - `dict`: Structured command-result pairs (recommended)

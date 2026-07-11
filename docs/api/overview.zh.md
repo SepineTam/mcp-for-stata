@@ -266,9 +266,8 @@ result = ado_package_install("estout", is_replace=False)
 def read_log(
     file_path: str,
     encoding: str = "utf-8",
-    is_beta: bool = False,
     *,
-    output_format: Literal["full", "core", "dict"] = "dict",
+    output_format: Literal["full", "core", "dict"] = "core",
     config_file: str | Path | None = None,
 ) -> str:
     ...
@@ -280,8 +279,7 @@ def read_log(
 |------|------|--------|------|
 | `file_path` | `str` | 必填 | 日志文件路径（.log 或 .smcl） |
 | `encoding` | `str` | `"utf-8"` | 文件编码 |
-| `is_beta` | `bool` | `False` | 启用结构化解析 |
-| `output_format` | `str` | `"dict"` | 输出格式：`full` / `core` / `dict` |
+| `output_format` | `str` | `"core"` | 输出格式：`full` / `core` / `dict` |
 | `config_file` | `str \| Path` | `None` | 自定义配置文件路径 |
 
 **返回值**：`str`
@@ -291,16 +289,17 @@ def read_log(
 - `core`：去除框架行的干净内容
 - `dict`：结构化的命令-结果对（字符串表示）
 
+结构化解析由 `[BETA] enable_structured_log` 配置开关控制，默认关闭。
+
 **示例**：
 
 ```python
 # 读取日志内容
 content = read_log("/project/logs/analysis.log")
 
-# 获取干净输出
+# 获取干净输出（需要 enable_structured_log=true）
 content = read_log(
     "/project/logs/analysis.log",
-    is_beta=True,
     output_format="core",
 )
 ```

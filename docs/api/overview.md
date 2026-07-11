@@ -267,9 +267,8 @@ Read a Stata log file.
 def read_log(
     file_path: str,
     encoding: str = "utf-8",
-    is_beta: bool = False,
     *,
-    output_format: Literal["full", "core", "dict"] = "dict",
+    output_format: Literal["full", "core", "dict"] = "core",
     config_file: str | Path | None = None,
 ) -> str:
     ...
@@ -281,8 +280,7 @@ def read_log(
 |-----------|------|---------|-------------|
 | `file_path` | `str` | required | Path to log file (.log or .smcl) |
 | `encoding` | `str` | `"utf-8"` | File encoding |
-| `is_beta` | `bool` | `False` | Enable structured parsing |
-| `output_format` | `str` | `"dict"` | Output format: `full` / `core` / `dict` |
+| `output_format` | `str` | `"core"` | Output format: `full` / `core` / `dict` |
 | `config_file` | `str \| Path` | `None` | Custom config file path |
 
 **Returns**: `str`
@@ -292,16 +290,17 @@ def read_log(
 - `core`: Cleaned content without framework lines
 - `dict`: Structured command-result pairs (string representation)
 
+Structured parsing is enabled by the `[BETA] enable_structured_log` config switch. It is disabled by default.
+
 **Example**:
 
 ```python
 # Read log content
 content = read_log("/project/logs/analysis.log")
 
-# Get clean output
+# Get clean output (requires enable_structured_log=true)
 content = read_log(
     "/project/logs/analysis.log",
-    is_beta=True,
     output_format="core",
 )
 ```

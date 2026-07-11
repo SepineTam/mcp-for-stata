@@ -10,9 +10,11 @@ MAX_BYTES = 10_000_000
 BACKUP_COUNT = 5
 
 [BETA]
-ENABLE_WRITE_DOFILE = false
 IS_ASYNC_DO = false
 MAX_ASYNC_DO = 3
+enable_data_info_url_guard = false
+data_info_allowed_url_domains = []
+enable_structured_log = false
 
 [HELP]
 IS_CACHE = true
@@ -24,6 +26,8 @@ ADO_INSTALL_ALLOWED_GITHUB_REPOSITORIES = []
 # When true, GuardValidator scans dofiles for data-loading commands and
 # rejects paths/URLs that violate the same rules as get_data_info.
 enable_data_command_path_guard = false
+strict_data_info_local_boundary = false
+strict_read_log_boundary = false
 
 [PROJECT]
 WORKING_DIR = ""

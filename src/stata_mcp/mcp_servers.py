@@ -563,7 +563,7 @@ def read_log(
     file_path: str,
     encoding: str = "utf-8",
     *,
-    output_format: Literal["full", "core", "dict"] = "dict",
+    output_format: Literal["full", "core", "dict"] = "core",
     lines: int = 0,
 ) -> str:
     """
@@ -575,7 +575,7 @@ def read_log(
         output_format (Literal["full", "core", "dict"]): log information content output format.
             - full: all the original content;
             - core: remove useless information, saving content;
-            - dict (default): structure format to quickly match command and result.
+            - dict: structure format to quickly match command and result.
         lines (int): Content trimming control for output.
             - 0 (default): return all content.
             - > 0: return first N items (lines for full/core, entries for dict).
@@ -614,7 +614,7 @@ def read_log(
     if not path.exists():
         raise FileNotFoundError(f"The file at {file_path} does not exist.")
 
-    if config.ENABLE_STRUCTURED_LOG and config.IS_UNIX:
+    if config.ENABLE_STRUCTURED_LOG:
         from .stata import StataLog
 
         loger = StataLog.from_path(file_path, encoding=encoding)
@@ -631,7 +631,7 @@ def read_log(
             if lines > 0:
                 return str(dict_data[:lines])
             return str(dict_data[-abs(lines):])
-    # if structured log is disabled or Windows user using read file text directly.
+    # If structured log parsing is disabled, read the file directly.
     try:
         with open(path, "r", encoding=encoding) as file:
             log_content = file.read()

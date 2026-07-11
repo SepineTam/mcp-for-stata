@@ -188,6 +188,34 @@ def test_read_log_rejection_log_redacts_local_path(
     assert "allowed_directory" not in messages
 
 
+def test_read_log_structured_parsing_depends_only_on_config(
+    monkeypatch: pytest.MonkeyPatch,
+    stubbed_mcp_servers,
+    tmp_path: Path,
+) -> None:
+    """Structured MCP log parsing must not depend on the operating system."""
+    statamcp_dir = tmp_path / "statamcp"
+    log_dir = statamcp_dir / "stata-mcp-log"
+    log_dir.mkdir(parents=True)
+    log_file = log_dir / "test.log"
+    log_file.write_text(
+        "name: test\nlog: /path/to/test.log\n\n. sysuse auto\n. regress price mpg\n",
+        encoding="utf-8",
+    )
+
+    fake_folder = SimpleNamespace(path=statamcp_dir)
+    fake_config = SimpleNamespace(
+        STATA_MCP_FOLDER=fake_folder,
+        ENABLE_STRUCTURED_LOG=True,
+    )
+    monkeypatch.setattr(stubbed_mcp_servers, "config", fake_config)
+
+    result = stubbed_mcp_servers.read_log(log_file.as_posix())
+
+    assert "name: test" not in result
+    assert ". sysuse auto" in result
+
+
 def test_sync_stata_do_execution_failure_log_redacts_path(
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
