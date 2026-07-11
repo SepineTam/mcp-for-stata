@@ -131,9 +131,20 @@ macro 跟踪只匹配单 token 危险值。拼接式赋值如 `local cmd = "she"
 
 ## Guard 禁用警告
 
-`STATA_MCP__IS_GUARD=false`（或在 `~/.statamcp/config.toml` 中写入 `[SECURITY] IS_GUARD = false`）会禁用通用验证器。Guard 禁用后，其黑名单、模式与 macro 检查都会被跳过。每次 `stata_do` 调用都会向日志写入 `[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.`；server 启动读取配置时也会写入同样一行。
+`STATA_MCP__IS_GUARD=false`（或在 `~/.statamcp/config.toml` 中写入 `[SECURITY] IS_GUARD = false`）会禁用通用验证器。Guard 禁用后，会跳过 dofile 展开、黑名单、模式、macro 以及 data-path 审计检查。每次 `stata_do` 调用都会向日志写入 `[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.`；server 启动读取配置时也会写入同样一行。
 
 仅在受控环境中禁用 Guard，例如 Docker 沙箱安装或临时虚拟机，受控任务完成后立即恢复启用。即便通用 Guard 被禁用，上文所述的目录边界和包管理边界仍然生效。
+
+## dofile 展开与 data-path 审计
+
+当 Guard 启用时，`stata_do` 会先运行面向安全的 dofile 展开器。展开器会归一化缩写、保留诊断信息，并提供结构化 command，而不是直接依赖原始字符串检查。
+
+验证器随后按两步执行：
+
+1. 全局级 parser 失败，例如引号不闭合或展开预算耗尽，会直接让整个 dofile fail closed。
+2. 行级诊断只有在命中安全敏感命令时才阻断执行。
+
+如果设置 `[SECURITY] enable_data_command_path_guard = true`，验证器还会检查每个解析后的 command 的 `data_paths`，并沿用 `get_data_info` 的本地路径与 URL 边界规则。这覆盖直接加载命令、`using` 子句，以及 `cd` / `chdir` 这类带路径的命令。
 
 ## 第三方 Ado 安装边界
 

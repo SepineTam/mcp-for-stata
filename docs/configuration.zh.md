@@ -235,6 +235,20 @@ Beta 选项单独放在 [Beta 配置](beta.md) 中说明。
 
 更多详情请参阅[安全守卫文档](security.md)。
 
+#### `SECURITY.enable_data_command_path_guard`
+
+为 dofile 守卫启用数据加载命令的路径和 URL 审计。
+
+- **类型**：Boolean
+- **默认值**：`false`
+- **环境变量**：`STATA_MCP__ENABLE_DATA_COMMAND_PATH_GUARD`
+- **描述**：启用后，`GuardValidator` 会解析 dofile 命令，并使用与 `get_data_info` 相同的本地路径与 URL 边界规则检查 `data_paths`。
+- **示例**：
+  ```toml
+  [SECURITY]
+  enable_data_command_path_guard = true
+  ```
+
 #### `SECURITY.strict_read_log_boundary`
 
 限制直接调用 `read_log` 时只能读取配置的 stata-mcp 工作目录下的日志。

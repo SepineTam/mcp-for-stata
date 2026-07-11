@@ -131,9 +131,20 @@ The macro tracker matches single-token dangerous values only. Concatenated assig
 
 ## Guard Disable Warning
 
-`STATA_MCP__IS_GUARD=false` (or `[SECURITY] IS_GUARD = false` in `~/.statamcp/config.toml`) disables the general validator. Disabling the Guard skips its blacklist, pattern, and macro checks. Each `stata_do` call emits the warning `[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.` to the log; the same line is recorded at server startup when the configuration is read.
+`STATA_MCP__IS_GUARD=false` (or `[SECURITY] IS_GUARD = false` in `~/.statamcp/config.toml`) disables the general validator. Disabling the Guard skips dofile expansion, blacklist, pattern, macro, and data-path audit checks. Each `stata_do` call emits the warning `[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.` to the log; the same line is recorded at server startup when the configuration is read.
 
 Disable the Guard only inside controlled environments such as the Docker sandbox installation or an ephemeral VM, and re-enable it once the trusted task completes. The directory boundary and package-management boundary continue to apply even when the general Guard is disabled.
+
+## Dofile Expansion and Data Path Audit
+
+When the Guard is enabled, `stata_do` first runs the security-oriented dofile expander. The expander normalizes abbreviations, preserves diagnostics, and exposes structured commands instead of relying on raw string inspection.
+
+The validator then applies a two-step policy:
+
+1. Global parser failures, such as unbalanced quotes or expansion budget exhaustion, fail closed for the whole dofile.
+2. Line-scoped diagnostics only block execution when they intersect a security-sensitive command.
+
+If `[SECURITY] enable_data_command_path_guard = true`, the validator also inspects each parsed command's `data_paths` and applies the same local-path and URL boundary rules as `get_data_info`. That covers direct loaders, `using` clauses, and path-bearing commands such as `cd` and `chdir`.
 
 ## Third-Party Ado Installation Boundary
 

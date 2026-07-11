@@ -248,6 +248,20 @@ Enable security guard validation for Stata dofiles.
 
 For more details, see [Security Guard Documentation](security.md).
 
+#### `SECURITY.enable_data_command_path_guard`
+
+Enable path and URL auditing for data-loading commands inside the dofile guard.
+
+- **Type**: Boolean
+- **Default**: `false`
+- **Environment Variable**: `STATA_MCP__ENABLE_DATA_COMMAND_PATH_GUARD`
+- **Description**: When enabled, `GuardValidator` inspects parsed dofile commands and checks `data_paths` using the same local-path and URL boundary rules as `get_data_info`.
+- **Example**:
+  ```toml
+  [SECURITY]
+  enable_data_command_path_guard = true
+  ```
+
 #### `SECURITY.strict_read_log_boundary`
 
 Restrict direct `read_log` calls to logs under the configured stata-mcp working folder.
