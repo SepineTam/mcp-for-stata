@@ -383,6 +383,16 @@ class Config:
             validator=lambda x: isinstance(x, tuple),
         )
 
+    @cached_property
+    def ENABLE_STRUCTURED_LOG(self) -> bool:
+        return self._get_config_value(
+            config_keys=["BETA", "enable_structured_log"],
+            env_var="",
+            default=False,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool),
+        )
+
     @property
     def STATA_MCP_DIRECTORY(self) -> Path:
         base_dir = Path.home() / ".statamcp"

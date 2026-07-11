@@ -19,14 +19,11 @@ logger = logging.getLogger(__name__)
 def read_log(
     file_path: str,
     encoding: str = "utf-8",
-    is_beta: bool = False,
     *,
     output_format: Literal["full", "core", "dict"] = "core",
     config_file: str | Path | None = None,
 ) -> str:
     """Read a Stata log file as a direct one-shot utility."""
-    _ = is_beta
-
     from ._runtime import create_runtime_context
 
     runtime = create_runtime_context(config_file=config_file)
@@ -46,6 +43,9 @@ def read_log(
 
     if not path.exists():
         raise FileNotFoundError(f"The file at {file_path} does not exist.")
+
+    if not runtime.config.ENABLE_STRUCTURED_LOG:
+        return path.read_text(encoding=encoding)
 
     if path.suffix.lower() not in {".log", ".smcl"}:
         return path.read_text(encoding=encoding)

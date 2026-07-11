@@ -11,6 +11,7 @@ IS_ASYNC_DO = false
 MAX_ASYNC_DO = 3
 enable_data_info_url_guard = false
 data_info_allowed_url_domains = []
+enable_structured_log = false
 ```
 
 ## Parameters
@@ -22,6 +23,7 @@ data_info_allowed_url_domains = []
 | `MAX_ASYNC_DO` | Integer | `3` | `STATA_MCP__MAX_ASYNC_DO` | Limits concurrent async MCP `stata_do` executions. Extra MCP calls wait for an active slot. Applies only when `IS_ASYNC_DO=true`. |
 | `enable_data_info_url_guard` | Boolean | `false` | None | Enables URL validation and domain allowlist checks for URL data sources passed to `get_data_info`. |
 | `data_info_allowed_url_domains` | List[str] | `[]` | None | Allowed hostnames when the `get_data_info` URL guard is enabled. |
+| `enable_structured_log` | Boolean | `false` | None | Enables structured log parsing for the `read_log` tool and API. |
 
 ## `ENABLE_WRITE_DOFILE`
 
@@ -96,3 +98,16 @@ When this switch is `false`, URL sources keep the historical behavior and are pa
 `data_info_allowed_url_domains` is the hostname allowlist used when the `get_data_info` URL guard is enabled.
 
 Entries match the exact hostname and its subdomains. For example, `example.com` allows `example.com` and `data.example.com`. GitHub raw content is a separate hostname, so add `raw.githubusercontent.com` explicitly when you need to inspect raw GitHub-hosted datasets.
+
+## `enable_structured_log`
+
+`enable_structured_log` controls whether `read_log` uses the structured `StataLog` parser.
+
+```toml
+[BETA]
+enable_structured_log = true
+```
+
+When this switch is `false`, `read_log` returns raw file content. When it is `true`, supported logs are parsed into structured formats (`full`, `core`, or `dict`) via `StataLog`. The MCP-layer tool applies structured parsing only on macOS and Linux; the API path uses structured parsing whenever the switch is enabled.
+
+Boolean string values must be `true` or `false`. Values such as `on` and `off` are not accepted and fall back to the default.

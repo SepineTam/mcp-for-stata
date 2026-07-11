@@ -4,7 +4,7 @@ from pathlib import Path
 from stata_mcp.api.read_log import read_log
 
 
-def _write_config(tmp_path: Path, working_dir: Path, *, strict_boundary: bool) -> Path:
+def _write_config(tmp_path: Path, working_dir: Path, *, strict_boundary: bool, enable_structured_log: bool = False) -> Path:
     config_path = tmp_path / "config.toml"
     config_path.write_text(
         "\n".join(
@@ -14,6 +14,9 @@ def _write_config(tmp_path: Path, working_dir: Path, *, strict_boundary: bool) -
                 "",
                 "[SECURITY]",
                 f"strict_read_log_boundary = {str(strict_boundary).lower()}",
+                "",
+                "[BETA]",
+                f"enable_structured_log = {str(enable_structured_log).lower()}",
             ]
         ),
         encoding="utf-8",
@@ -114,3 +117,40 @@ def test_env_var_cannot_override_strict_read_log_boundary(tmp_path: Path, monkey
 
     assert result == "log content"
     assert os.getenv("STATA_MCP__STRICT_READ_LOG_BOUNDARY") == "true"
+
+
+def test_structured_log_disabled_returns_plain_text(tmp_path: Path) -> None:
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    log_file = working_dir / "test.log"
+    log_content = "name: test\nlog: /path/to/test.log\n\n. sysuse auto\n. regress price mpg\n"
+    log_file.write_text(log_content, encoding="utf-8")
+    config_path = _write_config(
+        tmp_path,
+        working_dir,
+        strict_boundary=False,
+        enable_structured_log=False,
+    )
+
+    result = read_log(log_file.as_posix(), config_file=config_path)
+
+    assert result == log_content
+
+
+def test_structured_log_enabled_returns_without_framework(tmp_path: Path) -> None:
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    log_file = working_dir / "test.log"
+    log_content = "name: test\nlog: /path/to/test.log\n\n. sysuse auto\n. regress price mpg\n"
+    log_file.write_text(log_content, encoding="utf-8")
+    config_path = _write_config(
+        tmp_path,
+        working_dir,
+        strict_boundary=False,
+        enable_structured_log=True,
+    )
+
+    result = read_log(log_file.as_posix(), config_file=config_path)
+
+    assert "name: test" not in result
+    assert ". sysuse auto" in result

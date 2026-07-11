@@ -447,3 +447,32 @@ MAX_ASYNC_DO = 4
 
     assert config.system_config_file is None
     assert config.MAX_ASYNC_DO == 5
+
+
+def test_enable_structured_log_config_defaults_to_disabled(tmp_path) -> None:
+    config = Config(config_file=tmp_path / "missing.toml")
+
+    assert config.ENABLE_STRUCTURED_LOG is False
+
+
+def test_enable_structured_log_config_ignores_environment(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    monkeypatch.setenv("STATA_MCP__ENABLE_STRUCTURED_LOG", "true")
+    config = Config(config_file=tmp_path / "missing.toml")
+
+    assert config.ENABLE_STRUCTURED_LOG is False
+
+
+def test_enable_structured_log_config_reads_toml(tmp_path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        """
+[BETA]
+enable_structured_log = true
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert Config(config_file=config_path).ENABLE_STRUCTURED_LOG is True

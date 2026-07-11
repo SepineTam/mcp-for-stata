@@ -188,7 +188,6 @@ The tool does not perform syntactic validation or semantic analysis of the Stata
 ```python
 def read_log(file_path: str,
              encoding: str = "utf-8",
-             is_beta: bool = False,
              lines: int = 0,
              *,
              output_format: Literal["full", "core", "dict"] = "dict") -> str:
@@ -200,21 +199,19 @@ def read_log(file_path: str,
   - MCP calls must read files under `<WORKING_DIR>/<FOLDER_TAG>/`
   - API and CLI calls default to the historical unrestricted path behavior; set `[SECURITY] strict_read_log_boundary=true` to enforce the same boundary there
 - `encoding`: Character encoding for text decoding (optional, defaults to UTF-8)
-- `is_beta`: Enable structured log parsing with StataLog module (optional, default: false)
-  - **macOS/Linux only** - Windows users should use default behavior
-  - Recommended for `.smcl` files with `dict` format
 - `lines`: Content trimming control (default: 0, no trimming)
   - `> 0`: return first N items (lines for full/core, entries for dict)
   - `< 0`: return last |N| items (lines for full/core, entries for dict)
   - `0`: return full content
-- `output_format`: Output format when `is_beta=true` (optional, default: "dict")
+- `output_format`: Output format when structured parsing is enabled (optional, default: "dict")
   - `full`: Raw log content without processing
   - `core`: Cleaned content with framework lines removed
   - `dict`: Structured command-result pairs (recommended)
+- Structured parsing is enabled by the `[BETA] enable_structured_log` config switch. It is `false` by default.
 
 **Return Structure**:
-- Default mode (`is_beta=false`): Raw string content of the file
-- Beta mode (`is_beta=true`): Depends on `output_format`:
+- Default mode (`enable_structured_log=false`): Raw string content of the file
+- Structured mode (`enable_structured_log=true`): Depends on `output_format`:
   - `full`: Plain text log content
   - `core`: Log content without framework (headers, footers, log commands)
   - `dict`: String representation of command-result list
@@ -224,14 +221,12 @@ def read_log(file_path: str,
 # Read log file (default mode)
 read_log("/Users/project/.statamcp/stata-mcp-log/20250104153045.log")
 
-# Read SMCL log with structured parsing (macOS/Linux)
+# Read SMCL log with structured parsing (requires enable_structured_log=true)
 read_log("/Users/project/.statamcp/stata-mcp-log/20250104153045.smcl",
-         is_beta=True,
          output_format="dict")
 
 # Get cleaned log content without framework
 read_log("/Users/project/.statamcp/stata-mcp-log/session.log",
-         is_beta=True,
          output_format="core")
 
 # Read a generated text artifact under the stata-mcp working folder
@@ -241,9 +236,9 @@ read_log("/Users/project/.statamcp/stata-mcp-log/results.txt", encoding="utf-8")
 **Implementation Architecture**:
 The tool implements dual-mode log reading: traditional file reading and structured parsing via the `StataLog` module.
 
-**Traditional Mode** (`is_beta=false`): Generic file reading via Python's `open()` function with mode `"r"`. Path validation checks file existence through `Path.exists()`. Content reading uses single `file.read()` operation for complete file retrieval.
+**Traditional Mode** (`enable_structured_log=false`): Generic file reading via Python's `open()` function with mode `"r"`. Path validation checks file existence through `Path.exists()`. Content reading uses single `file.read()` operation for complete file retrieval.
 
-**Structured Parsing Mode** (`is_beta=true`, Unix only): Leverages the `stata_log` module which provides:
+**Structured Parsing Mode** (`enable_structured_log=true`): Leverages the `stata_log` module which provides:
 - `StataLogTEXT`: Parser for `.log` (plain text) files
 - `StataLogSMCL`: Parser for `.smcl` (Stata Markup and Control Language) files
 - `StataLogInfo`: Dataclass containing `command_result_list` with structured command-output pairs
