@@ -365,14 +365,14 @@ uvx stata-mcp install -c cursor
 
 ## 自包含安装脚本
 
-项目根目录提供了一组自包含的安装脚本，适合机器上尚未安装 `uv` 或 `pip` 的用户使用。脚本会自动拉起所需的 Python 工具链，并以一键方式启动 `stata-mcp`。
+项目的 `scripts/` 目录提供了一组自包含的安装脚本，适合机器上尚未安装 `uv` 或 `pip` 的用户使用。脚本会自动拉起所需的 Python 工具链，并以一键方式启动 `stata-mcp`。
 
 | 脚本 | 适用平台 | 典型用法 |
 |------|----------|----------|
-| `install.sh` | Unix shell（Linux、macOS、WSL） | `bash install.sh` |
-| `install.command` | macOS Finder | 双击在终端中启动 |
-| `install.ps1` | Windows PowerShell | `powershell -ExecutionPolicy Bypass -File install.ps1` |
-| `install.bat` | Windows 命令行 | 双击或在 `cmd.exe` 中运行 |
+| `scripts/install.sh` | Unix shell（Linux、macOS、WSL） | `bash scripts/install.sh` |
+| `scripts/install.command` | macOS Finder | 双击在终端中启动 |
+| `scripts/install.ps1` | Windows PowerShell | `powershell -ExecutionPolicy Bypass -File scripts/install.ps1` |
+| `scripts/install.bat` | Windows 命令行 | 双击或在 `cmd.exe` 中运行 |
 
 这些脚本主要面向无 Python 包管理器的首次安装场景。对于已经装好 `uv` 或 `pip` 的机器，仍然推荐使用 `uv tool install stata-mcp` / `pip install stata-mcp` 的标准流程。
 

@@ -2,7 +2,7 @@
 
 **将 Stata 集成到你的智能体中。**
 
-> 针对处于中国大陆用户的提示：如果出现失败，大概率是因为网络问题，请考虑使用 THU 的镜像，具体配置详见 [包下载缓慢或失败](troubleshooting.zh.md#包下载缓慢或失败)。
+> 针对处于中国大陆用户的提示：如果出现失败，大概率是因为网络问题，请考虑使用 THU 的镜像，具体配置详见 [包下载缓慢或失败](troubleshooting.zh.md)。
 
 ## 🆕 MCP-for-Stata 现已支持 OpenClaw
 
@@ -24,7 +24,7 @@ Install `stata-skill` from ClawHub by @SepineTam.
 uvx stata-mcp doctor
 ```
 如果每项检查都通过，你就可以开始使用 stata-mcp 了。
-如果提示找不到 STATA_CLI，你可以查看 [StataFinder](core/stata/finder.md#not-found) 来解决。
+如果提示找不到 STATA_CLI，你可以查看 [StataFinder](core/stata/finder.md) 来解决。
 
 通用配置文件（json）
 ```json
@@ -78,14 +78,13 @@ claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --di
 
 ### 高级功能
 
-- **[Docker](docker.md)**：在容器化环境中运行 MCP-for-Stata
 - **[安全守卫](security.md)**：危险命令的安全验证系统
 - **[监控系统](monitoring.md)**：RAM 监控和资源限制
 - **[故障排查](troubleshooting.zh.md)**：常见问题与网络问题解决方案
 
 ### 核心组件
 
-- **[Stata 集成](core/stata/)**
+- **[Stata 集成](core/stata/do.md)**
   - [StataDo](core/stata/do.md)：Do 文件执行
   - [StataFinder](core/stata/finder.md)：Stata 可执行文件检测
   - [Stata Help](core/stata/help.md)：命令文档
@@ -102,7 +101,7 @@ claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --di
 
 ### 面向用户
 
-- [开始使用](#quickly-start)
+- [开始使用](index.md)
 - [配置指南](configuration.md)
 - [安全文档](security.md)
 - [监控设置](monitoring.md)
@@ -111,11 +110,11 @@ claude mcp add stata-mcp --env STATA_MCP__CWD=$(pwd) --scope project -- uvx --di
 
 - [架构概述](overview.md)
 - [MCP 工具参考](mcp/tools.md)
-- [核心组件](core/stata/)
+- [核心组件](core/stata/do.md)
 
 ### 配置
 
-- [基本配置](configuration.md#configuration-file)
-- [安全设置](configuration.md#security-section)
-- [监控设置](configuration.md#monitor-section)
-- [环境变量](configuration.md#environment-variables)
+- [基本配置](configuration.md)
+- [安全设置](configuration.md)
+- [监控设置](configuration.md)
+- [环境变量](configuration.md)

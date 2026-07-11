@@ -219,7 +219,6 @@ Claude Code automatically detects:
 **2. MCP Tools**
 The MCP-for-Stata server exposes tools that Claude can invoke:
 - `stata_do`: Execute Stata code
-- `write_dofile`: Create do-files
 - `get_data_info`: Analyze datasets
 - `help`: Get Stata command documentation
 - And more...
@@ -245,7 +244,7 @@ The Stata LSP provides advanced editor support:
 
 Claude:
 1. Uses get_data_info to understand dataset structure
-2. Creates do-file with write_dofile
+2. Creates a do-file with the client native file-writing capability
 3. Executes with stata_do
 4. Exports table to stata-mcp-result/
 ```

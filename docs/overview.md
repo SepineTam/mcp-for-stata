@@ -55,7 +55,6 @@ Operates as a stdio/HTTP/SSE server, responding to tool invocation requests from
 | Tool | Purpose |
 |------|---------|
 | `stata_do` | Execute do-files with log retrieval |
-| `write_dofile` | Create timestamped do-files (deprecated, controlled by BETA config) |
 | `get_data_info` | Analyze CSV/TSV/PSV, DTA, XLSX/XLS, and SPSS SAV/ZSAV files with statistical summaries |
 | `help` | Retrieve Stata command documentation (cached) (Unix only) |
 | `ado_package_install` | Install approved packages; GitHub requires an allowlist (unsafe profile only) |

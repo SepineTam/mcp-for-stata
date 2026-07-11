@@ -483,7 +483,6 @@ validator.dangerous_commands.add("another_command")
 安全守卫自动与以下工具集成：
 
 - `stata_do`：执行 Stata do 文件（默认验证）
-- `write_dofile`：创建 do 文件（执行时验证）
 
 ### 验证流程
 

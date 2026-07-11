@@ -369,14 +369,14 @@ uvx stata-mcp install -c cursor
 
 ## Self-contained Install Scripts
 
-The project root ships a set of self-contained installer scripts for users who do not already have `uv` or `pip` available. They bootstrap a Python toolchain and bring up `stata-mcp` in one step.
+The `scripts/` directory ships a set of self-contained installer scripts for users who do not already have `uv` or `pip` available. They bootstrap a Python toolchain and bring up `stata-mcp` in one step.
 
 | Script | Target platform | Typical use |
 |--------|-----------------|-------------|
-| `install.sh` | Unix shells (Linux, macOS, WSL) | `bash install.sh` |
-| `install.command` | macOS Finder | double-click to launch in Terminal |
-| `install.ps1` | Windows PowerShell | `powershell -ExecutionPolicy Bypass -File install.ps1` |
-| `install.bat` | Windows command line | double-click or run from `cmd.exe` |
+| `scripts/install.sh` | Unix shells (Linux, macOS, WSL) | `bash scripts/install.sh` |
+| `scripts/install.command` | macOS Finder | double-click to launch in Terminal |
+| `scripts/install.ps1` | Windows PowerShell | `powershell -ExecutionPolicy Bypass -File scripts/install.ps1` |
+| `scripts/install.bat` | Windows command line | double-click or run from `cmd.exe` |
 
 These scripts are intended for first-time bootstrap on machines without a Python package manager. On machines that already have `uv` or `pip`, the standard `uv tool install stata-mcp` / `pip install stata-mcp` flow is preferred.
 

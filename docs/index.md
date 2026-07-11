@@ -76,13 +76,12 @@ If you want to explore more [clients](clients.md), visit the clients documentati
 
 ### Advanced Features
 
-- **[Docker](docker.md)**: Run MCP-for-Stata in containerized environments
 - **[Security Guard](security.md)**: Security validation system for dangerous commands
 - **[Monitoring System](monitoring.md)**: RAM monitoring and resource limits
 
 ### Core Components
 
-- **[Stata Integration](core/stata/)**
+- **[Stata Integration](core/stata/do.md)**
   - [StataDo](core/stata/do.md): Do-file execution
   - [StataFinder](core/stata/finder.md): Stata executable detection
   - [Stata Help](core/stata/help.md): Command documentation
@@ -108,12 +107,12 @@ If you want to explore more [clients](clients.md), visit the clients documentati
 
 - [Architecture Overview](overview.md)
 - [MCP Tools Reference](mcp/tools.md)
-- [Core Components](core/stata/)
+- [Core Components](core/stata/do.md)
 
 ### Configuration
 
-- [Basic Configuration](configuration.md#configuration-file)
-- [Security Settings](configuration.md#security-section)
-- [Monitoring Settings](configuration.md#monitor-section)
-- [Environment Variables](configuration.md#environment-variables)
+- [Basic Configuration](configuration.md)
+- [Security Settings](configuration.md)
+- [Monitoring Settings](configuration.md)
+- [Environment Variables](configuration.md)
 

@@ -363,7 +363,7 @@ uvx stata-mcp doctor --verbose
 ## 其他资源
 
 - [概述](overview.md) - 架构和设计
-- [工具文档](tools.md) - 可用的 MCP 工具
+- [工具文档](mcp/tools.md) - 可用的 MCP 工具
 - [GitHub 仓库](https://github.com/sepinetam/mcp-for-stata) - 源代码和问题
 
 ## 贡献

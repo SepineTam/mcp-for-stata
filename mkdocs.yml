@@ -76,7 +76,6 @@ nav:
   - Overview: overview.md
   - CLI Reference: cli.md
   - Usage: usage.md
-  - Docker: docker.md
   - Claude Plugin: claude-plugin.md
   - Clients: clients.md
   - Configuration: configuration.md
@@ -90,7 +89,6 @@ nav:
   - API: api/overview.md
 
   - Agents:
-      - Summary: agents/index.md
       - Claude Code: agents/claude_code.md
       - Claude Science: agents/claude_science.md
       - Codex: agents/codex.md

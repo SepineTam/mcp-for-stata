@@ -219,7 +219,6 @@ Claude Code 自动检测：
 **2. MCP 工具**
 MCP-for-Stata 服务器暴露 Claude 可调用的工具：
 - `stata_do`：执行 Stata 代码
-- `write_dofile`：创建 do 文件
 - `get_data_info`：分析数据集
 - `help`：获取 Stata 命令文档
 - 以及更多...
@@ -245,7 +244,7 @@ Stata LSP 提供高级编辑器支持：
 
 Claude：
 1. 使用 get_data_info 了解数据集结构
-2. 使用 write_dofile 创建 do 文件
+2. 使用客户端原生文件写入能力创建 do 文件
 3. 使用 stata_do 执行
 4. 将表导出到 stata-mcp-result/
 ```

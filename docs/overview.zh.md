@@ -55,7 +55,6 @@ MCP-for-Stata 通过四个架构层运行：
 | 工具 | 用途 |
 |------|---------|
 | `stata_do` | 执行 do 文件并获取日志 |
-| `write_dofile` | 创建带时间戳的 do 文件（已弃用，由 BETA 配置控制） |
 | `get_data_info` | 分析 CSV/TSV/PSV、DTA、XLSX/XLS 和 SPSS SAV/ZSAV 文件并生成统计摘要 |
 | `help` | 检索 Stata 命令文档（缓存）（仅 Unix） |
 | `ado_package_install` | 安装已批准的包；GitHub 要求白名单（仅 unsafe profile） |
@@ -156,7 +155,7 @@ MCP 兼容客户端（Claude Code、Cline、Continue）在其配置中将 MCP-fo
 - 阻止 shell 执行（`!`、`shell`、`xshell` 等）
 - 防止文件删除操作（`erase`、`rm`）
 - 停止不受信任的代码执行（`run`、`do`、`include`）
-- 可通过[安全设置](configuration.md#security-section)配置
+- 可通过[安全设置](configuration.md)配置
 
 ### **RAM 监控** ✅
 实时监控 Stata 进程内存使用：
