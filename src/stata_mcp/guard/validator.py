@@ -18,6 +18,11 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, List
 
+from ..utils.parse_dofile import (
+    ExpansionResult,
+    ParsedCommand,
+    expand_code_for_security,
+)
 from .blacklist import (
     DANGEROUS_COMMANDS,
     DANGEROUS_PATTERNS,
@@ -25,11 +30,6 @@ from .blacklist import (
     STATA_PREFIXES,
 )
 from .data_path_auditor import DataPathAuditor
-from ..utils.parse_dofile import (
-    ExpansionResult,
-    ParsedCommand,
-    expand_code_for_security,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -174,16 +174,16 @@ class GuardValidator:
         while cleaned_line:
             version_match = version_prefix_pattern.match(cleaned_line)
             if version_match:
-                cleaned_line = cleaned_line[version_match.end() :]
+                cleaned_line = cleaned_line[version_match.end():]
                 continue
             frame_match = frame_prefix_pattern.match(cleaned_line)
             if frame_match:
-                cleaned_line = cleaned_line[frame_match.end() :]
+                cleaned_line = cleaned_line[frame_match.end():]
                 continue
             matched = prefix_pattern.match(cleaned_line)
             if not matched or matched.group(1).lower() not in prefixes:
                 break
-            cleaned_line = cleaned_line[matched.end() :]
+            cleaned_line = cleaned_line[matched.end():]
         return cleaned_line.strip()
 
     @staticmethod
@@ -571,7 +571,7 @@ class GuardValidator:
     ) -> List[RiskItem]:
         """Reject unauditable ``webuse`` loads and audit ``webuse set`` URLs."""
         line_num = self._command_origin_line(command)
-        remainder = command.text[len("webuse") :]
+        remainder = command.text[len("webuse"):]
         normalized = remainder.strip()
         if not normalized.lower().startswith("set"):
             logger.warning(

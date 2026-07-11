@@ -653,7 +653,7 @@ def _paren_contents(text: str, open_index: int) -> str:
             depth -= 1
         index += 1
     end = index - 1 if depth == 0 else index
-    return text[open_index + 1 : end]
+    return text[open_index + 1: end]
 
 
 def _brace_delta(line: str) -> int:
@@ -857,7 +857,7 @@ def _normalize_delimiter(
             if split_at == -1:
                 break
             command = " ".join(buffer_text[:split_at].split())
-            buffer_text = buffer_text[split_at + 1 :]
+            buffer_text = buffer_text[split_at + 1:]
             if command:
                 output.append(_Line(command, tuple(sorted(buffer_origins))))
             if not buffer_text.strip():
@@ -897,7 +897,7 @@ def _expand_abbreviations(line: str) -> str:
             parts.append(rest)
             break
         whitespace, token = matched.group(1), matched.group(2)
-        rest = rest[matched.end() :]
+        rest = rest[matched.end():]
 
         core = token
         trailer = ""
@@ -918,7 +918,7 @@ def _expand_abbreviations(line: str) -> str:
                 parts.append(whitespace + token + rest)
                 break
             parts.append(whitespace + token + rest[: colon + 1])
-            rest = rest[colon + 1 :]
+            rest = rest[colon + 1:]
             continue
 
         full_prefix = _match_abbreviation(core, _PREFIX_MIN_ABBREV)
@@ -1091,13 +1091,13 @@ def _split_items(spec: str) -> list[str]:
         if spec.startswith('`"', index):
             end = _skip_compound_string(spec, index)
             inner_end = end - 2 if spec.startswith("\"'", end - 2) else end
-            items.append(spec[index + 2 : max(inner_end, index + 2)])
+            items.append(spec[index + 2: max(inner_end, index + 2)])
             index = end
             continue
         if spec[index] == '"':
             end = _skip_simple_string(spec, index)
             inner_end = end - 1 if end > index + 1 and spec[end - 1] == '"' else end
-            items.append(spec[index + 1 : inner_end])
+            items.append(spec[index + 1: inner_end])
             index = end
             continue
         end = index
@@ -1313,7 +1313,7 @@ def _process_lines(
                 index += 1
                 continue
 
-            body = lines[index + 1 : close]
+            body = lines[index + 1: close]
             items = _resolve_loop_items(header, state)
             if (
                 items is not None
@@ -1412,12 +1412,12 @@ def _extract_string_literals(text: str) -> tuple[str, ...]:
         if text.startswith('`"', index):
             end = _skip_compound_string(text, index)
             inner_end = end - 2 if text.startswith("\"'", end - 2) else end
-            literals.append(text[index + 2 : max(inner_end, index + 2)])
+            literals.append(text[index + 2: max(inner_end, index + 2)])
             index = end
         elif text[index] == '"':
             end = _skip_simple_string(text, index)
             inner_end = end - 1 if end > index + 1 and text[end - 1] == '"' else end
-            literals.append(text[index + 1 : inner_end])
+            literals.append(text[index + 1: inner_end])
             index = end
         else:
             index += 1
@@ -1436,7 +1436,7 @@ def _extract_using_paths(text: str) -> tuple[str, ...]:
     tokens = _split_items(head)
     for position, token in enumerate(tokens):
         if token.lower() == "using":
-            for candidate in tokens[position + 1 :]:
+            for candidate in tokens[position + 1:]:
                 if candidate.startswith("("):
                     break
                 paths.append(candidate)
@@ -1511,7 +1511,7 @@ def _extract_direct_paths(name: str, text: str) -> list[str]:
     if not tokens:
         return []
     arguments = tokens[1:]
-    arguments = arguments[_SUBCOMMAND_SKIP.get(name, 0) :]
+    arguments = arguments[_SUBCOMMAND_SKIP.get(name, 0):]
     if name == "webuse" and arguments and arguments[0].lower() == "set":
         arguments = arguments[1:]
     for token in arguments:
@@ -1546,7 +1546,7 @@ def _extract_commands(out_lines: list[_Line]) -> tuple[ParsedCommand, ...]:
                 text=stripped,
                 line=number,
                 origins=entry.origins,
-                options=stripped[comma + 1 :].strip() if comma != -1 else "",
+                options=stripped[comma + 1:].strip() if comma != -1 else "",
                 string_literals=_extract_string_literals(stripped),
                 using_paths=using_paths,
                 data_paths=data_paths,

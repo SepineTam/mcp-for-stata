@@ -633,7 +633,7 @@ def read_log(
                 return str(dict_data)
             if lines > 0:
                 return str(dict_data[:lines])
-            return str(dict_data[-abs(lines) :])
+            return str(dict_data[-abs(lines):])
     # if not beta version and Windows user using read file text directly.
     try:
         with open(path, "r", encoding=encoding) as file:
@@ -654,7 +654,7 @@ def _trim_lines(content: str, lines: int) -> str:
     all_lines = content.splitlines()
     if lines > 0:
         return "\n".join(all_lines[:lines])
-    return "\n".join(all_lines[-abs(lines) :])
+    return "\n".join(all_lines[-abs(lines):])
 
 
 def _is_within_allowed_directories(target_path: Path, allowed_dirs: List[Path]) -> bool:
