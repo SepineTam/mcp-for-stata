@@ -329,18 +329,18 @@ Si usas MCP-for-Stata en tu investigacion y realmente te ayuda, puedes citar est
   title = {MCP-for-Stata: Integrate Stata into your agent},
   year = {2025},
   url = {https://github.com/sepinetam/mcp-for-stata},
-  version = {1.18.0}
+  version = {1.21.0}
 }
 ```
 
 ### APA
 ```
-Song Tan. (2025). MCP-for-Stata: Integrate Stata into your agent (Version 1.18.0) [Computer software]. https://github.com/sepinetam/mcp-for-stata
+Song Tan. (2025). MCP-for-Stata: Integrate Stata into your agent (Version 1.21.0) [Computer software]. https://github.com/sepinetam/mcp-for-stata
 ```
 
 ### Chicago
 ```
-Song Tan. 2025. "MCP-for-Stata: Integrate Stata into your agent." Version 1.18.0. https://github.com/sepinetam/mcp-for-stata.
+Song Tan. 2025. "MCP-for-Stata: Integrate Stata into your agent." Version 1.21.0. https://github.com/sepinetam/mcp-for-stata.
 ```
 
 ## 📬 Contacto
