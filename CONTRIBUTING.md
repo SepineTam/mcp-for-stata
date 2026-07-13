@@ -166,6 +166,18 @@ If you do not agree, do not submit contributions.
 
 ## Development Guidelines
 
+### Development Environment
+
+Set up a local development environment with uv:
+
+```bash
+# Create a virtual environment with Python 3.11
+uv venv --python 3.11
+
+# Install project dependencies including dev dependencies
+uv sync --dev
+```
+
 ### Code Style
 
 - All Python functions must have **type annotations**

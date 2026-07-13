@@ -10,6 +10,12 @@ wheels/
 # Virtual environments
 .venv
 
+# Python version
+.python-version
+
+# UV lock file
+uv.lock
+
 # Environment variables
 .env
 
