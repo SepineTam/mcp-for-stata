@@ -384,6 +384,16 @@ class Config:
         )
 
     @cached_property
+    def DATA_INFO_IS_CACHE(self) -> bool:
+        return self._get_config_value(
+            config_keys=["data_info", "is_cache"],
+            env_var="STATA_MCP__DATA_INFO_IS_CACHE",
+            default=True,
+            converter=self._to_bool,
+            validator=lambda x: isinstance(x, bool),
+        )
+
+    @cached_property
     def ENABLE_STRUCTURED_LOG(self) -> bool:
         return self._get_config_value(
             config_keys=["BETA", "enable_structured_log"],

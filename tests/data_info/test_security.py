@@ -50,12 +50,14 @@ class _FakeDataInfo:
         encoding: str = "utf-8",
         cache_dir=None,
         head: int = 0,
+        is_cache: bool = True,
     ):
         self.data_path = data_path
         self.vars_list = vars_list
         self.encoding = encoding
         self.cache_dir = cache_dir
         self.head = head
+        self.is_cache = is_cache
         self.calls.append(
             {
                 "data_path": data_path,
@@ -63,6 +65,7 @@ class _FakeDataInfo:
                 "encoding": encoding,
                 "cache_dir": cache_dir,
                 "head": head,
+                "is_cache": is_cache,
             }
         )
 

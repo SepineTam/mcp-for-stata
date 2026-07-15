@@ -57,6 +57,7 @@ def _get_data_info_impl(
         encoding=encoding,
         cache_dir=runtime.tmp_base_path,
         head=head,
+        is_cache=runtime.config.DATA_INFO_IS_CACHE,
     )
     try:
         return json.dumps(data_info.info, ensure_ascii=False)
