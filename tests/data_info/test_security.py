@@ -51,6 +51,7 @@ class _FakeDataInfo:
         cache_dir=None,
         head: int = 0,
         is_cache: bool = True,
+        request_id: str | None = None,
     ):
         self.data_path = data_path
         self.vars_list = vars_list
@@ -58,6 +59,7 @@ class _FakeDataInfo:
         self.cache_dir = cache_dir
         self.head = head
         self.is_cache = is_cache
+        self.request_id = request_id
         self.calls.append(
             {
                 "data_path": data_path,
@@ -66,6 +68,7 @@ class _FakeDataInfo:
                 "cache_dir": cache_dir,
                 "head": head,
                 "is_cache": is_cache,
+                "request_id": request_id,
             }
         )
 
