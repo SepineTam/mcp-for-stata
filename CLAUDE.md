@@ -1,412 +1,151 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when changing this repository. Keep this file concise and
+project-specific; derive volatile details such as dependency versions and complete
+file listings from the codebase.
 
-## Project Overview
+## Project
 
-Stata-MCP is an MCP (Model Context Protocol) server that enables LLMs to execute Stata commands and perform statistical/regression analysis. It supports:
-- **MCP server mode**: FastMCP-based server exposing Stata tools to LLMs
-- **CLI tools**: Direct command-line access to all Stata capabilities
+Stata-MCP is a Python 3.11+ MCP server and CLI for running Stata do-files and
+inspecting statistical data. It uses FastMCP and is licensed under AGPL-3.0.
 
-License: **AGPL-3.0** | Python: **>=3.11**
+## Essential commands
 
-## Common Development Commands
-
-### Environment Setup
 ```bash
-# Install dependencies and create virtual environment
+# Install/sync the development environment
 uv sync
 
-# Install the package in development mode
-uv pip install -e .
+# Run tests
+uv run pytest tests/
+uv run pytest tests/cli/test_server_registration.py
 
-# Verify installation
-stata-mcp --version
+# Inspect or run the CLI
+uv run stata-mcp --help
+uv run stata-mcp doctor
+uv run stata-mcp server --all
 
-# Run diagnostics to check system health
-stata-mcp doctor
-
-# NOTE: --usable is deprecated since v1.14.3, use "stata-mcp doctor" instead
-```
-
-### Running Tests
-```bash
-# Run all tests
-pytest
-
-# Run specific test file
-pytest tests/test_server_parser.py
-pytest tests/test_server_registration.py
-```
-
-### Building and Distribution
-```bash
-# Build source distribution and wheels
+# Build distributions
 uv build
-
-# Build specific formats
-uv build --sdist    # Source distribution only
-uv build --wheel    # Wheel only
-
-# Specify output directory
-uv build --out-dir dist/
 ```
 
-### Running the Application
-
-#### MCP Server Mode (default)
-```bash
-# Start MCP server with stdio transport (default)
-stata-mcp
-
-# Start with specific transport
-stata-mcp -t http    # HTTP transport
-stata-mcp -t sse     # SSE transport
-
-# Start with tool profile selection
-stata-mcp server                     # All tools, stdio (same as bare command)
-stata-mcp server --core              # Core tools only (stata_do, get_data_info, help)
-stata-mcp server --all -t http       # All tools, HTTP transport
-stata-mcp server --core -t http      # Core tools, HTTP transport
-```
-
-#### Utility Commands
-```bash
-# Run diagnostics to check system health (replaces deprecated --usable)
-stata-mcp doctor
-stata-mcp doctor --verbose          # Detailed output
-stata-mcp doctor --json             # JSON output
-stata-mcp doctor --check stata      # Run specific check(s)
-stata-mcp doctor --dry-run          # Preview cleanup actions without deleting files
-
-# Verify MCP client configuration (read-only)
-stata-mcp verify                    # Error: must specify -c or -f
-stata-mcp verify -c claude          # Check a supported client
-stata-mcp verify -f ~/.cursor/mcp.json
-stata-mcp verify -f ~/.codex/config.toml --index mcp_servers
-
-# Check version
-stata-mcp --version
-```
-
-### Development with uvx
-```bash
-# Run without local installation
-uvx stata-mcp --version
-uvx stata-mcp doctor
-```
-
-## Source Layout
-
-```
-src/stata_mcp/
-├── __init__.py              # Lazy-loading exports: stata_mcp (server), main (CLI)
-├── mcp_servers.py           # FastMCP server with _TOOL_REGISTRY and register_tools()
-├── config.py                # Unified config management (TOML + env vars)
-├── api/                     # Tool API wrappers (thin layer over core logic)
-│   ├── _runtime.py          # RuntimeContext dataclass for execution contexts
-│   ├── stata_do.py          # stata_do() with security guard + RAM monitor
-│   ├── get_data_info.py     # Data file analysis dispatcher
-│   ├── read_log.py          # Log file reader (text and SMCL formats)
-│   ├── stata_help.py        # Stata command documentation
-│   ├── ado_install.py       # Package installer (SSC/GitHub/net)
-│   └── write_dofile.py      # Do-file creator (deprecated)
-├── cli/                     # Command-line interface
-│   ├── _cli.py              # Entry point and subcommand routing
-│   ├── _parsers.py          # Argument parser definitions for all subcommands
-│   └── _handlers.py         # Command handler implementations
-├── stata/                   # Stata integration layer
-│   ├── stata_finder/        # Platform-specific Stata executable locator
-│   │   ├── finder.py        # Factory dispatcher
-│   │   ├── base.py          # Abstract base
-│   │   ├── macos.py         # macOS implementation
-│   │   ├── windows.py       # Windows implementation
-│   │   └── linux.py         # Linux implementation
-│   ├── stata_controller/    # Interactive pexpect-based Stata session
-│   ├── stata_do/            # Batch do-file execution with subprocess
-│   └── builtin_tools/
-│       ├── ado_install/     # SSC_Install, NET_Install, GITHUB_Install
-│       ├── help/            # StataHelp with disk caching
-│       │   └── stata_help.py  # Stata help command wrapper
-│       └── stata_log/       # Log readers: text and SMCL formats
-├── data_info/               # Data file analysis handlers
-│   ├── base.py              # DataInfoBase ABC, Series dataclasses
-│   ├── csv.py               # CSV handler
-│   ├── dta.py               # Stata .dta handler
-│   ├── xlsx.py              # Excel handler
-│   └── spss.py              # SPSS .sav handler
-├── guard/                   # Security validation
-│   ├── validator.py         # GuardValidator, RiskItem, SecurityReport
-│   ├── blacklist.py         # DANGEROUS_COMMANDS, DANGEROUS_PATTERNS
-│   └── input_validation.py  # Input guard and allowlist validation
-├── monitor/                 # Process monitoring
-│   ├── base.py              # MonitorBase ABC
-│   └── ram_monitor.py       # RAMMonitor (threading + psutil)
-├── evaluate/                # Evaluation and scoring (depends on OpenAI Agents SDK; kept for future reference)
-│   ├── _model.py            # OpenAI client config (DEFAULT/CHAT/THINKING models)
-│   ├── score_it.py          # Scoring module
-│   ├── advice.py            # Advice generation
-│   └── agent_runner.py      # Evaluation agent runner
-├── utils/                   # Utility modules
-│   ├── doctor.py            # Diagnostics: CheckStatus, DoctorReport
-│   ├── update.py            # Version checking and update orchestration
-│   ├── usable.py            # Legacy usability check (deprecated)
-│   ├── clean_log.py         # Log cleanup helpers
-│   └── installer/           # MCP client integration installer
-│       ├── installer.py     # Installer logic
-│       ├── output.py        # Installer output helpers
-│       └── verifier.py      # Installation verification
-└── core/
-    └── types/
-        └── _error.py        # Custom exceptions: StataCLINotFoundError, RAMLimitExceededError
-```
-
-## Architecture Overview
-
-### 1. MCP Server (`src/stata_mcp/mcp_servers.py`)
-
-FastMCP-based server. Key design points:
-- Tools are **not** registered at import time — `register_tools(server, profile)` must be called explicitly
-- `_TOOL_REGISTRY` dict maps tool names to metadata (description, func, profiles, flags)
-- Two profiles: `core` (3 tools) and `all` (6 tools)
-- Platform filters: `unix_only=True` for `help` tool
-- Deprecated flag: `write_dofile` is flagged deprecated
-- Profile lock-in: switching profiles after registration raises an error
-
-### 2. API Layer (`src/stata_mcp/api/`)
-
-Thin wrappers that compose core logic. Each function:
-- Accepts a `RuntimeContext` (config, paths, stata CLI info)
-- Validates inputs, runs security guard if enabled, invokes core logic
-- Returns structured results ready for MCP tool responses
-
-### 3. Stata Integration (`src/stata_mcp/stata/`)
-
-| Component | Description |
-|-----------|-------------|
-| `StataFinder` | Locates Stata executable per platform |
-| `StataController` | pexpect-based interactive Stata sessions |
-| `StataDo` | Subprocess batch do-file execution with monitor hooks |
-| `StataHelp` | Help text retrieval with optional disk caching |
-| `SSC_Install` / `NET_Install` / `GITHUB_Install` | Package installation from different sources |
-
-### 4. Data Processing (`src/stata_mcp/data_info/`)
-
-`get_data_handler()` auto-detects format and returns the appropriate handler:
-
-| Handler | Formats |
-|---------|---------|
-| `CsvDataInfo` | `.csv` |
-| `DtaDataInfo` | `.dta` (Stata) |
-| `ExcelDataInfo` | `.xlsx`, `.xls` |
-| `SpssDataInfo` | `.sav` (SPSS) |
-
-All handlers extend `DataInfoBase` and return `Series` dataclasses with typed numeric and string statistics.
-
-### 5. CLI Interface (`src/stata_mcp/cli/`)
-
-Modular architecture:
-- `_parsers.py` defines argument parsers for: `server`, `doctor`, `tool`, `config`, `install`, `update`, `verify`
-- `_handlers.py` implements the corresponding handler functions
-- `_cli.py` routes subcommands and serves as the package entry point
-
-#### Verify Subcommand
-
-`stata-mcp verify` is a read-only check that confirms whether `stata-mcp` is installed in a target MCP client or config file.
-
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--client` | `-c` | Target client key (e.g. `claude`, `cursor`, `codex`) |
-| `--file` | `-f` | Path to a custom JSON/TOML config file |
-| `--index` | | Dot-separated nested key path, used with `-f` (e.g. `mcp.servers`) |
-| `--key` | | Entry key inside the target dict (default: `stata-mcp`) |
-
-`-c` takes precedence over `-f` when both are provided.
-
-### 6. Configuration System (`src/stata_mcp/config.py`)
-
-Priority (highest to lowest): **environment variables > config file > defaults**
-
-`Config` class uses `@cached_property` for lazy directory creation. `StataMcpFolder` helper manages the working directory structure.
-
-Config file location: `~/.statamcp/config.toml`. See `src/stata_mcp/config.py` for the configuration schema.
-
-### data_info Configuration
-
-The `[data_info]` section controls the behavior of `get_data_info` and the `stata-mcp tool data-info` CLI command.
-
-For `string_keep_number`, `decimal_places`, and `hash_length`, values are read with priority: explicit argument > environment variable > config file > default.
-
-`metrics` is read from the config file only and does not support environment variables or explicit arguments.
-
-| Key | Default | Description |
-|-----|---------|-------------|
-| `metrics` | `["obs", "mean", "stderr", "min", "max"]` | Numeric statistics to include in summaries. Allowed additions: `q1`, `q3`, `skewness`, `kurtosis`. |
-| `string_keep_number` | `10` | Maximum number of unique string values to list for string variables. |
-| `decimal_places` | `3` | Number of decimal places for numeric statistics. |
-| `hash_length` | `12` | Length of the hash suffix used in cache file names. |
-
-Example `~/.statamcp/config.toml`:
-```toml
-[data_info]
-metrics = ["obs", "mean", "stderr", "min", "max", "q1", "q3", "skewness", "kurtosis"]
-string_keep_number = 10
-decimal_places = 3
-hash_length = 12
-```
-
-Equivalent environment variables:
-- `STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER`
-- `STATA_MCP_DATA_INFO_DECIMAL_PLACES`
-- `STATA_MCP_DATA_INFO_HASH_LENGTH`
-
-### 7. Security Guard (`src/stata_mcp/guard/`)
-
-`GuardValidator` scans do-files before execution:
-- `DANGEROUS_COMMANDS`: Prohibited Stata commands including minimum abbreviations (e.g., `shell`/`sh`, `erase`/`era`)
-- `DANGEROUS_PATTERNS`: Regex patterns for dangerous constructs (e.g., `! del`, `! rm`)
-- **Macro expansion detection**: Tracks `local` definitions that contain dangerous commands and flags later usages of `` `name' ``
-- Returns `SecurityReport` with a list of `RiskItem` objects
-- Configurable via `IS_GUARD` setting (default: `true`)
-- When disabled, a `[SECURITY]` warning is logged at startup/execution
-
-### 8. Monitoring System (`src/stata_mcp/monitor/`)
-
-`RAMMonitor` runs in a background thread:
-- Polls Stata process RAM usage via `psutil`
-- Terminates process when usage exceeds `MAX_RAM_MB`
-- Raises `RAMLimitExceededError` with usage details
-- Configurable via `IS_MONITOR` and `MAX_RAM_MB` settings
-
-### MCP Tools Provided
-
-Tools are registered based on profile selection (`--core` / `--all` / `--unsafe`):
-
-| Profile | Tool | Notes |
-|---------|------|-------|
-| core, all, unsafe | `stata_do` | Execute Stata do-files; package-management commands are always blocked |
-| core, all, unsafe | `get_data_info` | Analyze data files (CSV/TSV/PSV, DTA, XLSX/XLS, SPSS SAV/ZSAV) |
-| core, all, unsafe | `help` | Stata command documentation (Unix only) |
-| all, unsafe | `read_log` | Read log files; supports `lines` param and `full`/`core`/`dict` formats |
-| unsafe | `ado_package_install` | Install approved packages; GitHub repositories require an allowlist |
-| all, unsafe | `write_dofile` | Create do-files (deprecated) |
-
-## Testing
-
-Tests live in `tests/` and use **pytest**. The test suite uses `monkeypatch` and stub implementations to isolate modules from heavy dependencies (FastMCP, pexpect, etc.).
-
-| File | What it tests |
-|------|--------------|
-| `test_server_parser.py` | CLI argument parsing: transport flags, profile defaults, mutual exclusion |
-| `test_server_registration.py` | `register_tools()`: core/all profile filtering, platform/deprecated filters, profile lock-in |
-| `test_stata_do_boundary.py` | Dofile directory boundary validation: whitelist enforcement, symlinks, path traversal |
-| `test_guard_validator.py` | Guard security: abbreviation blocking, macro expansion bypass detection |
-
-Pattern for adding tests:
-- Stub out external dependencies with `monkeypatch.setitem(sys.modules, ...)`
-- Import the module under test after patching via `importlib.import_module()`
-- Use a dummy `FastMCP`-like server object to assert which tools get registered
-
-## Key Dependencies
-
-| Package | Purpose |
-|---------|---------|
-| `mcp[cli]>=1.23.0` | MCP protocol and FastMCP server |
-| `pandas>=3.0.0,<4.0.0` | Data processing (lazy-loaded) |
-| `pexpect>=4.9.0` | Interactive Stata sessions |
-| `openai>=1.109.1` | LLM API client |
-| `psutil>=6.0.0` | RAM monitoring |
-| `pyreadstat>=1.2.0` | SPSS file reading |
-| `openpyxl>=3.1.5` | Excel file reading |
-| `tomli-w>=1.2.0` | TOML config writing |
-| `pathvalidate>=3.3.1` | Path validation |
-
-## Git Commit Standards
-
-This project follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification. For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-**Key points:**
-- Format: `<type>[optional scope]: <description>`
-- Common types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`, `build`, `revert`
-- Subject under 50 characters, imperative mood, lowercase
-- Reference issues with `Closes #` or `Fixes #`
-- **No co-author information in commits**
-- Breaking changes: use `!` after type/scope or `BREAKING CHANGE:` footer
-
-**Commit message must be written by a SubAgent.** Do not write commit messages from memory or imagination. Instead, spawn a `commit-commands:commit` agent, provide the first line if specified by the user, and let the agent inspect `git diff --staged` to write the detailed body based solely on the actual changes.
-
-**Examples:**
-```
-feat: add spss data handler
-fix(api): resolve null response in get_data_info
-docs: update cli reference for server profiles
-perf: lazy-load pandas at import time
-```
-
-## Branch Protection Policy
-
-**All changes MUST be submitted via Pull Request.** Direct commits to `master` are NOT allowed.
-
-### Branch Naming
-
-- Feature: `feat/feature-name` or `dev/1.x.y`
-- Fix: `fix/bug-name`
-- Docs: `docs/doc-name`
-
-### Standard Workflow
-
-1. **Create branch** from the target development branch (e.g., `dev/1.x.y`):
-   ```bash
-   git checkout dev/1.x.y
-   git checkout -b feat/feature-name
-   ```
-2. **Lint code**: run pre-commit hooks
-3. **Stage files**: `git add <files>`
-4. **Review changes**: `git diff --staged`
-5. **Commit**: `git commit -m "type: description"`
-6. **Push branch**: `git push -u origin feat/feature-name`
-7. **Create PR** targeting the development branch (e.g., `dev/1.x.y`) via GitHub
-
-### Keeping Dev Branches in Sync
-
-When `master` receives updates, merge them into the development branch to reduce future conflicts:
-
-```bash
-git checkout dev/1.x.y
-git merge origin/master
-```
-
-## Code Conventions
-
-- All Python functions must have **type annotations** and **English docstrings**
-- Use descriptive variable names
-- Maintain proper code indentation (4 spaces)
-- Heavy dependencies (`pandas`, `numpy`, `requests`) must be **lazy-loaded** at function call time, not at module import
-- New data format handlers go in `src/stata_mcp/data_info/` and must register in the `DATA_INFO_REGISTRY`
-- New MCP tools go in `src/stata_mcp/api/` and must be added to `_TOOL_REGISTRY` in `mcp_servers.py`
-- Security-sensitive code paths must go through `GuardValidator` before execution
-- The project requires a valid Stata license to run Stata commands
-
-## Logging Conventions
-
-Security-sensitive and state-changing operations must leave an audit trail. Follow these rules when adding or modifying logs:
-
-| Event type | Minimum level | Examples |
-|---|---|---|
-| Fatal errors | `CRITICAL` | unsupported OS, unrecoverable startup failure |
-| Failures and exceptions | `ERROR` | dofile execution failed, JSON serialization failed, log read failed |
-| Security rejections and boundary violations | `WARNING` | guard rejection, `read_log` boundary violation, invalid install request, `WORKING_DIR` fallback |
-| State changes and lifecycle events | `INFO` | Stata process start/kill, config write, package install, tool registration, client config write |
-| Routine success paths | none | do not log; MCP framework already records tool calls |
-| Verbose diagnostics | `DEBUG` | path resolution, cache hits, temporary file lifecycle |
-
-Additional rules:
-- Never log raw do-file contents, full Stata command text, URL query/fragment, or unredacted user paths at `INFO` or above.
-- Use `logging.getLogger(__name__)` for new modules; keep existing root-logger usage in `mcp_servers.py` for consistency.
-- Security events should use the `[SECURITY VIOLATION]` prefix for easy alerting.
-
-## Important Notes
-
-- The `help` tool is Unix-only; it is filtered out on Windows during `register_tools()`
-- `write_dofile` has been removed from MCP tool registration and is no longer exposed to clients
-- `--usable` CLI flag is deprecated since v1.14.3; use `stata-mcp doctor` instead
+Use `stata-mcp doctor`, not the deprecated `--usable` flag. Run targeted tests
+while developing, then the full suite before handing off a substantive change.
+
+## Architecture
+
+- `src/stata_mcp/cli/`: argument parsing and command handlers. The CLI exposes
+  `doctor`, `server`, `tool`, `config`, `install`, `update`, and `verify`.
+- `src/stata_mcp/mcp_servers.py`: FastMCP server, tool wrappers, and
+  `_TOOL_REGISTRY`. Tools are registered explicitly by `register_tools()`.
+- `src/stata_mcp/api/`: one-shot Python APIs built around `RuntimeContext`.
+- `src/stata_mcp/stata/`: Stata discovery, execution, log parsing, help, and
+  controlled ado-package installation.
+- `src/stata_mcp/data_info/`: registered handlers for CSV/TSV/PSV, DTA,
+  XLSX/XLS, and SPSS SAV/ZSAV data.
+- `src/stata_mcp/guard/`: command validation, package-management blocking, and
+  local path/URL auditing.
+- `src/stata_mcp/monitor/`: process monitors such as the RAM limit monitor.
+- `src/stata_mcp/utils/`: diagnostics, installation, updates, and do-file parsing.
+- `src/stata_mcp/evaluate/`: optional evaluation code that requires the `agents`
+  dependency group; it is not part of the core runtime path.
+
+The package root lazily exposes the default server and CLI entry point. Preserve
+that lightweight import behavior.
+
+## MCP tool profiles
+
+| Profile | Tools |
+|---|---|
+| `core` | `stata_do`, `get_data_info`, `help` |
+| `all` (default) | all `core` tools plus `read_log` |
+| `unsafe` | all standard tools plus `ado_package_install` |
+
+`help` is filtered out on Windows. A process cannot switch profiles after tools
+have been registered; start a new process instead.
+
+`write_dofile` remains a direct Python API helper but is not registered as an MCP
+tool. Do not add it back to `_TOOL_REGISTRY` without an explicit security review.
+
+## Security invariants
+
+- Do-files may execute only from the configured working directory or the
+  Stata-MCP do-file directory.
+- `PackageManagementGuardValidator` blocks package-management commands in normal
+  `stata_do` calls even when the general guard is disabled. Installation must use
+  the controlled ado-install path.
+- `GuardValidator` scans do-files when `IS_GUARD` is enabled. Preserve fail-closed
+  behavior for unresolved or dangerous input.
+- `DataPathAuditor` is the shared authority for local dataset boundaries and URL
+  rules. Do not duplicate weaker checks in individual data handlers.
+- URL guarding requires HTTPS, rejects IP-literal hosts and URL user information,
+  and enforces the configured domain allowlist when enabled.
+- GitHub ado installation requires an allowlisted repository and explicit
+  confirmation. Treat it as third-party code execution.
+- `read_log` is restricted to the Stata-MCP folder when its strict boundary is
+  enabled.
+- Never log secrets, raw do-file contents, or unredacted URL user information,
+  query strings, or fragments. Use `[SECURITY VIOLATION]` for rejected security
+  events.
+
+Security checks must cover both the MCP wrappers and the direct APIs. Add or update
+tests whenever changing path handling, command parsing, package installation, or
+configuration security.
+
+## Configuration
+
+`src/stata_mcp/config.py` is the source of truth. Configuration can come from
+environment variables, the user file (`~/.statamcp/config.toml`), the project file
+(`.statamcp/config.toml`), and on Linux the system file
+(`/etc/statamcp/config.toml`). `--config`/`STATA_MCP_CONFIG_FILE` selects a
+debug-only file path.
+
+Do not restate the complete precedence rules here: security settings deliberately
+merge differently from ordinary settings. Use `Config` and its tests when changing
+or documenting precedence.
+
+## Change guidelines
+
+- Use type annotations and English docstrings for new or changed public Python
+  functions. Use descriptive English names and English code comments.
+- Add CLI behavior in `_parsers.py` and `_handlers.py`; keep dispatch in `_cli.py`
+  small.
+- Add MCP tools to `src/stata_mcp/api/` and register them explicitly in
+  `_TOOL_REGISTRY`, including their intended profiles and platform constraints.
+- Add data handlers under `src/stata_mcp/data_info/`, declare their extensions,
+  and ensure the module is imported so `DATA_INFO_REGISTRY` is populated.
+- Route do-file execution through the existing guard and monitor layers. Do not
+  bypass them for convenience.
+- Keep security rejection summaries useful without exposing sensitive content.
+- For new modules, prefer `logging.getLogger(__name__)`. Preserve intentional
+  root-logger use in `mcp_servers.py` unless performing a dedicated logging
+  refactor.
+- Follow `CONTRIBUTING.md` for branch, pull-request, and commit conventions. Do
+  not commit directly to `master`.
+
+## Tests
+
+Tests mirror the source layout:
+
+- `tests/cli/`: parsers, registration, installation, and verification
+- `tests/api/`: direct API security behavior
+- `tests/data_info/`: format handlers and data access security
+- `tests/guard/`: validators and path auditing
+- `tests/stata/`: execution, timeout, help, and log behavior
+- `tests/utils/`: do-file parsing and utilities
+
+Shared fixtures live in `tests/conftest.py`; dataset fixtures live in
+`tests/fixtures/dataset/` and may be downloaded/generated at runtime. See
+`tests/README.md` for fixture details.
+
+## Sources of truth
+
+When documentation and code disagree, verify against these files and update this
+document in the same change:
+
+| Concern | Source |
+|---|---|
+| Dependencies and Python versions | `pyproject.toml` |
+| CLI commands and flags | `src/stata_mcp/cli/_parsers.py` |
+| MCP tools and profiles | `src/stata_mcp/mcp_servers.py` |
+| Configuration behavior | `src/stata_mcp/config.py` |
+| Test organization | `tests/README.md` and `tests/` |
