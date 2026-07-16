@@ -106,6 +106,51 @@ class TestRuntimeSettings:
 
         assert data_info.metrics == DataInfoBase.DEFAULT_METRICS
 
+    def test_cache_is_isolated_by_output_settings(self, tmp_path):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        data_path = tmp_path / "sample.csv"
+        cache_dir = tmp_path / "cache"
+        data_path.write_text(
+            "value,label\n1.1234,alpha\n2.2345,beta\n",
+            encoding="utf-8",
+        )
+        first_handler = CsvDataInfo(
+            data_path,
+            cache_dir=cache_dir,
+            metrics=["mean"],
+            string_keep_number=1,
+            decimal_places=1,
+        )
+        second_handler = CsvDataInfo(
+            data_path,
+            cache_dir=cache_dir,
+            metrics=["mean"],
+            string_keep_number=2,
+            decimal_places=4,
+        )
+        different_metrics_handler = CsvDataInfo(
+            data_path,
+            cache_dir=cache_dir,
+            metrics=["max"],
+            string_keep_number=2,
+            decimal_places=4,
+        )
+
+        first_result = first_handler.info
+        second_result = second_handler.info
+
+        assert first_handler.cached_file != second_handler.cached_file
+        assert second_handler.cached_file != different_metrics_handler.cached_file
+        assert first_result["vars_detail"]["value"]["summary"]["mean"] == 1.7
+        assert second_result["vars_detail"]["value"]["summary"]["mean"] == 1.6789
+        assert second_result["vars_detail"]["label"]["summary"]["value_list"] == [
+            "alpha",
+            "beta",
+        ]
+        assert second_result["info_config"]["decimal_places"] == 4
+        assert len(list(cache_dir.glob("*.json"))) == 2
+
 
 class TestDetermineVariableType:
     """测试 _determine_variable_type 静态方法"""

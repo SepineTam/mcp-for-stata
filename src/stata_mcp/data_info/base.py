@@ -137,6 +137,8 @@ class DataInfoBase(ABC):
 
     # Registry of supported file extensions (to be overridden by subclasses)
     supported_extensions: List[str] = []
+    CACHE_SCHEMA_VERSION = 2
+    CACHE_SETTINGS_HASH_LENGTH = 16
 
     DEFAULT_METRICS: List[str] = [
         'obs', 'mean', 'stderr', 'min', 'max'
@@ -212,6 +214,7 @@ class DataInfoBase(ABC):
         self.HASH_LENGTH = int(hash_length) if hash_length is not None else 12
         self._metrics = self._normalize_metrics(metrics)
         self._head = head
+        self._cache_read_options = repr(kwargs)
 
         self.kwargs = kwargs  # Store additional keyword arguments for subclasses to use
 
@@ -308,7 +311,38 @@ class DataInfoBase(ABC):
 
     @property
     def cached_file(self) -> Path:
-        return self.cache_dir / f"data_info__{self.name}_{self.suffix.strip('.')}__hash_{self.hash[:self.HASH_LENGTH]}.json"
+        return self.cache_dir / (
+            f"data_info__{self.name}_{self.suffix.strip('.')}__"
+            f"hash_{self.hash[: self.HASH_LENGTH]}__"
+            f"settings_{self.cache_settings_hash}.json"
+        )
+
+    @cached_property
+    def cache_settings_hash(self) -> str:
+        """Return a stable identity for settings that can change cached output."""
+        source_identity = (
+            str(self.data_path) if self.is_url else self.data_path.resolve().as_posix()
+        )
+        cache_settings = {
+            "schema_version": self.CACHE_SCHEMA_VERSION,
+            "handler": f"{type(self).__module__}.{type(self).__qualname__}",
+            "source": source_identity,
+            "encoding": self.encoding,
+            "read_options": self._cache_read_options,
+            "metrics": self.metrics,
+            "string_keep_number": self.string_keep_number,
+            "decimal_places": self.decimal_places,
+            "hash_length": self.HASH_LENGTH,
+        }
+        serialized_settings = json.dumps(
+            cache_settings,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+        return hashlib.sha256(serialized_settings.encode("utf-8")).hexdigest()[
+            : self.CACHE_SETTINGS_HASH_LENGTH
+        ]
 
     @property
     def metrics(self) -> List[str]:
