@@ -12,6 +12,7 @@ import hashlib
 import json
 import logging
 import os
+import time
 import tomllib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -26,9 +27,18 @@ import numpy as np
 import pandas as pd
 import requests
 
+from .._diagnostic_logging import (
+    elapsed_ms,
+    log_event,
+    new_request_id,
+    source_reference,
+    utf8_size,
+)
+
 # Global registry for data info classes
 # Maps file extensions to their corresponding DataInfoBase subclass
 DATA_INFO_REGISTRY: Dict[str, type] = {}
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -167,8 +177,13 @@ class DataInfoBase(ABC):
         decimal_places: int = None,
         hash_length: int = None,
         head: int = 0,
+        request_id: str | None = None,
         **kwargs
     ):
+        self.request_id = request_id or new_request_id()
+        self.source_ref = source_reference(data_path)
+        self._dataframe_read_count = 0
+        self._hash_count = 0
         if isinstance(data_path, str):
             self.is_url = self._is_url(data_path)
             if not self.is_url:  # if it is a local file, convert it to a Path object
@@ -234,14 +249,63 @@ class DataInfoBase(ABC):
     # Properties
     @cached_property
     def bytes_io_data(self) -> BytesIO:
-        if self.is_url:
-            return self._fetch_data()
-        else:
-            return self._load_data()
+        started_at = time.perf_counter()
+        source_kind = "url" if self.is_url else "local"
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.source_read.started",
+            self.request_id,
+            source_kind=source_kind,
+            source_ref=self.source_ref,
+        )
+        try:
+            data = self._fetch_data() if self.is_url else self._load_data()
+        except Exception as error:
+            log_event(
+                logger,
+                logging.ERROR,
+                "get_data_info.source_read.failed",
+                self.request_id,
+                duration_ms=elapsed_ms(started_at),
+                error_type=type(error).__name__,
+                source_kind=source_kind,
+                source_ref=self.source_ref,
+            )
+            raise
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.source_read.completed",
+            self.request_id,
+            duration_ms=elapsed_ms(started_at),
+            source_bytes=data.getbuffer().nbytes,
+            source_kind=source_kind,
+            source_ref=self.source_ref,
+        )
+        return data
 
     @property
     def hash(self) -> str:
-        return hashlib.md5(self.bytes_io_data.getvalue()).hexdigest()
+        self._hash_count += 1
+        started_at = time.perf_counter()
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.hash.started",
+            self.request_id,
+            occurrence=self._hash_count,
+        )
+        digest = hashlib.md5(self.bytes_io_data.getvalue()).hexdigest()
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.hash.completed",
+            self.request_id,
+            duration_ms=elapsed_ms(started_at),
+            occurrence=self._hash_count,
+        )
+        return digest
 
     @property
     def name(self) -> str:
@@ -283,7 +347,46 @@ class DataInfoBase(ABC):
     @property
     def df(self) -> pd.DataFrame:
         """Get the data as a pandas DataFrame."""
-        return self._read_data()
+        self._dataframe_read_count += 1
+        read_occurrence = self._dataframe_read_count
+        started_at = time.perf_counter()
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.dataframe_read.started",
+            self.request_id,
+            occurrence=read_occurrence,
+            source_ref=self.source_ref,
+            suffix=self.suffix.lower(),
+        )
+        try:
+            data_frame = self._read_data()
+        except Exception as error:
+            log_event(
+                logger,
+                logging.ERROR,
+                "get_data_info.dataframe_read.failed",
+                self.request_id,
+                duration_ms=elapsed_ms(started_at),
+                error_type=type(error).__name__,
+                occurrence=read_occurrence,
+                source_ref=self.source_ref,
+                suffix=self.suffix.lower(),
+            )
+            raise
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.dataframe_read.completed",
+            self.request_id,
+            columns=len(data_frame.columns),
+            duration_ms=elapsed_ms(started_at),
+            occurrence=read_occurrence,
+            rows=len(data_frame),
+            source_ref=self.source_ref,
+            suffix=self.suffix.lower(),
+        )
+        return data_frame
 
     @property
     def vars_list(self) -> List[str]:
@@ -293,15 +396,64 @@ class DataInfoBase(ABC):
     @property
     def info(self) -> Dict[str, Any]:
         """Get comprehensive information about the data."""
+        started_at = time.perf_counter()
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.info_pipeline.started",
+            self.request_id,
+            cache_enabled=self.is_cache,
+            head=self._head,
+        )
         summary = self.summary()
+        stage_started_at = time.perf_counter()
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.variable_filter.started",
+            self.request_id,
+        )
         result = self._filter(self._filter_var(copy.deepcopy(summary)))
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.variable_filter.completed",
+            self.request_id,
+            duration_ms=elapsed_ms(stage_started_at),
+            selected_variables=len(result.get("vars_detail", {})),
+        )
+        stage_started_at = time.perf_counter()
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.preview.started",
+            self.request_id,
+            requested_rows=abs(self._head),
+        )
         head_data = self._get_head()
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.preview.completed",
+            self.request_id,
+            duration_ms=elapsed_ms(stage_started_at),
+            returned_rows=len(head_data) if head_data is not None else 0,
+        )
         if head_data is not None:
             result["head"] = head_data
             requested = abs(self._head)
             actual = len(head_data)
             if actual < requested:
                 result["head_warning"] = f"Requested {requested} rows but data has only {actual}"
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.info_pipeline.completed",
+            self.request_id,
+            dataframe_reads=self._dataframe_read_count,
+            duration_ms=elapsed_ms(started_at),
+            hash_operations=self._hash_count,
+        )
         return result
 
     @property
@@ -341,8 +493,14 @@ class DataInfoBase(ABC):
             timeout=request_timeout
         )
         response.raise_for_status()
-        safe_url = urlparse(str(self.data_path))._replace(query="", fragment="").geturl()
-        logging.info("Fetched data from URL: %s, status=%s", safe_url, response.status_code)
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.source_fetch.status",
+            self.request_id,
+            source_ref=self.source_ref,
+            status_code=response.status_code,
+        )
         return BytesIO(response.content)
 
     def _load_data(self) -> BytesIO:
@@ -444,9 +602,25 @@ class DataInfoBase(ABC):
                 "saved_path": "~/.statamcp/.cache/data_info__auto_dta__hash_c557a2db346b.json"
             }
         """
+        started_at = time.perf_counter()
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.summary.started",
+            self.request_id,
+            cache_enabled=self.is_cache,
+        )
         if self.is_cache:
             cached_summary = self.load_cached_summary()
             if cached_summary:
+                log_event(
+                    logger,
+                    logging.DEBUG,
+                    "get_data_info.summary.completed",
+                    self.request_id,
+                    cache_hit=True,
+                    duration_ms=elapsed_ms(started_at),
+                )
                 return cached_summary
         df = self.df
         all_vars = list(df.columns)
@@ -466,6 +640,14 @@ class DataInfoBase(ABC):
         }
         vars_detail = {}
 
+        stage_started_at = time.perf_counter()
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.summary.variables.started",
+            self.request_id,
+            variables=len(all_vars),
+        )
         for var_name in all_vars:
             var_series = df[var_name]
             series_obj = self._get_variable_info(var_series)
@@ -483,6 +665,14 @@ class DataInfoBase(ABC):
             var_info.update(self._get_var_extra_info(var_name))
 
             vars_detail[var_name] = var_info
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.summary.variables.completed",
+            self.request_id,
+            duration_ms=elapsed_ms(stage_started_at),
+            variables=len(all_vars),
+        )
 
         summary_result = {
             "overview": overview,
@@ -494,16 +684,50 @@ class DataInfoBase(ABC):
         if self.is_cache:
             self.save_to_json(summary_result)
 
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.summary.completed",
+            self.request_id,
+            cache_hit=False,
+            duration_ms=elapsed_ms(started_at),
+        )
         return summary_result
 
     def save_to_json(self, summary: Dict[str, Any]) -> bool:
         saved_path = self.cached_file
+        started_at = time.perf_counter()
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.cache_write.started",
+            self.request_id,
+            cache_ref=source_reference(saved_path),
+        )
         try:
+            serialized_summary = json.dumps(summary, ensure_ascii=False, indent=4)
             with open(saved_path, "w", encoding="utf-8") as f:
-                f.write(json.dumps(summary, ensure_ascii=False, indent=4))
+                f.write(serialized_summary)
+            log_event(
+                logger,
+                logging.DEBUG,
+                "get_data_info.cache_write.completed",
+                self.request_id,
+                cache_ref=source_reference(saved_path),
+                duration_ms=elapsed_ms(started_at),
+                output_utf8_bytes=utf8_size(serialized_summary),
+            )
             return True
         except Exception as e:
-            logging.error(f"Error saving summary to JSON: {str(e)}")
+            log_event(
+                logger,
+                logging.ERROR,
+                "get_data_info.cache_write.failed",
+                self.request_id,
+                cache_ref=source_reference(saved_path),
+                duration_ms=elapsed_ms(started_at),
+                error_type=type(e).__name__,
+            )
             return False
 
     def load_cached_summary(self) -> Dict[str, Any] | None:
@@ -513,20 +737,65 @@ class DataInfoBase(ABC):
         Returns:
             Dict[str, Any] | None: Full summary from cache or None when unavailable.
         """
-        if not self.cached_file.exists():
+        started_at = time.perf_counter()
+        cache_path = self.cached_file
+        cache_ref = source_reference(cache_path)
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.cache_lookup.started",
+            self.request_id,
+            cache_ref=cache_ref,
+        )
+        if not cache_path.exists():
+            log_event(
+                logger,
+                logging.DEBUG,
+                "get_data_info.cache_lookup.completed",
+                self.request_id,
+                cache_ref=cache_ref,
+                duration_ms=elapsed_ms(started_at),
+                outcome="miss_not_found",
+            )
             return None
 
         try:
-            with open(self.cached_file, "r", encoding="utf-8") as f:
+            with open(cache_path, "r", encoding="utf-8") as f:
                 cached_summary = json.load(f)
         except (OSError, json.JSONDecodeError) as e:
-            logging.error(f"Error loading cached summary: {str(e)}")
+            log_event(
+                logger,
+                logging.ERROR,
+                "get_data_info.cache_lookup.failed",
+                self.request_id,
+                cache_ref=cache_ref,
+                duration_ms=elapsed_ms(started_at),
+                error_type=type(e).__name__,
+            )
             return None
 
         cached_hash = cached_summary.get("overview", {}).get("hash")
         if cached_hash != self.hash:
+            log_event(
+                logger,
+                logging.DEBUG,
+                "get_data_info.cache_lookup.completed",
+                self.request_id,
+                cache_ref=cache_ref,
+                duration_ms=elapsed_ms(started_at),
+                outcome="miss_hash_mismatch",
+            )
             return None
 
+        log_event(
+            logger,
+            logging.DEBUG,
+            "get_data_info.cache_lookup.completed",
+            self.request_id,
+            cache_ref=cache_ref,
+            duration_ms=elapsed_ms(started_at),
+            outcome="hit",
+        )
         return cached_summary
 
     # Private helper methods

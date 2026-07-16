@@ -8,9 +8,14 @@
 # @File   : mcp_servers.py
 
 import asyncio
+import importlib.metadata
 import logging
 import logging.handlers
+import os
 import re
+import sys
+import threading
+import time
 import weakref
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Literal, NamedTuple
@@ -18,6 +23,18 @@ from typing import Any, Callable, Dict, List, Literal, NamedTuple
 from mcp.server.fastmcp import Context, FastMCP, Icon
 from pydantic import BaseModel, Field
 
+from ._diagnostic_logging import (
+    DIAGNOSTIC_BUILD_ID,
+    DIAGNOSTIC_SCHEMA_VERSION,
+    DiagnosticWatchdog,
+    elapsed_ms,
+    log_event,
+    new_request_id,
+    process_log_path,
+    safe_stack,
+    source_reference,
+    utf8_size,
+)
 from .config import Config
 
 # Init project config
@@ -43,6 +60,11 @@ if config.LOGGING_ON:
     if config.LOGGING_FILE_HANDLER_ON:
         # Add file-handler with rotation support if enabled.
         stata_mcp_dot_log_file_path = config.LOG_FILE
+        if config.IS_DEBUG:
+            stata_mcp_dot_log_file_path = process_log_path(
+                stata_mcp_dot_log_file_path,
+                pid=os.getpid(),
+            )
 
         # Use RotatingFileHandler to limit file size and implement log rotation
         # Single file max size: 10MB, backup count: 5 (total 6 files including current)
@@ -58,7 +80,10 @@ if config.LOGGING_ON:
 
     logging.basicConfig(
         level=logging.DEBUG,
-        format="%(asctime)s - %(levelname)s - %(message)s",
+        format=(
+            "%(asctime)s - %(levelname)s - %(name)s - "
+            "pid=%(process)d - thread=%(threadName)s - %(message)s"
+        ),
         handlers=logging_handlers,
     )
 else:
@@ -526,6 +551,7 @@ def get_data_info(
     vars_list: List[str] | None = None,
     encoding: str = "utf-8",
     head: int = 0,
+    ctx: Context | None = None,
 ) -> str:
     """
     Return descriptive statistics for a supported data file.
@@ -543,15 +569,114 @@ def get_data_info(
         >>> get_data_info("/Applications/Stata/auto.dta")
         >>> get_data_info("/Applications/Stata/auto.dta", vars_list=["price", "mpg"], head=5)
     """
-    from .api.get_data_info import _get_data_info_impl
+    request_id = new_request_id()
+    started_at = time.perf_counter()
+    requested_vars_count = len(vars_list) if vars_list is not None else 0
+    diagnostic_logger = logging.getLogger(__name__)
+    try:
+        mcp_request_id = ctx.request_id if ctx is not None else None
+    except Exception:
+        mcp_request_id = None
 
-    return _get_data_info_impl(
-        data_path=data_path,
-        vars_list=vars_list,
-        encoding=encoding,
-        config_file=None,
+    log_event(
+        diagnostic_logger,
+        logging.INFO,
+        "get_data_info.mcp_tool.started",
+        request_id,
+        diagnostic_build_id=DIAGNOSTIC_BUILD_ID,
+        diagnostic_schema_version=DIAGNOSTIC_SCHEMA_VERSION,
         head=head,
+        mcp_request_id=mcp_request_id,
+        pid=os.getpid(),
+        platform=sys.platform,
+        requested_vars_count=requested_vars_count,
+        source_ref=source_reference(data_path),
+        thread=threading.current_thread().name,
     )
+
+    watchdog = DiagnosticWatchdog(diagnostic_logger, request_id)
+    if config.IS_DEBUG:
+        watchdog.start()
+
+    try:
+        package_versions = {
+            package_name: _installed_package_version(package_name)
+            for package_name in ("mcp", "stata-mcp", "pandas", "numpy", "pyreadstat")
+        }
+        log_event(
+            diagnostic_logger,
+            logging.DEBUG,
+            "get_data_info.mcp_tool.environment",
+            request_id,
+            mcp_version=package_versions["mcp"],
+            numpy_version=package_versions["numpy"],
+            pandas_version=package_versions["pandas"],
+            pyreadstat_version=package_versions["pyreadstat"],
+            python_version=".".join(str(part) for part in sys.version_info[:3]),
+            stata_mcp_version=package_versions["stata-mcp"],
+        )
+        import_started_at = time.perf_counter()
+        log_event(
+            diagnostic_logger,
+            logging.DEBUG,
+            "get_data_info.mcp_tool.lazy_import.started",
+            request_id,
+        )
+        from .api.get_data_info import _get_data_info_impl
+
+        log_event(
+            diagnostic_logger,
+            logging.DEBUG,
+            "get_data_info.mcp_tool.lazy_import.completed",
+            request_id,
+            duration_ms=elapsed_ms(import_started_at),
+        )
+        result = _get_data_info_impl(
+            data_path=data_path,
+            vars_list=vars_list,
+            encoding=encoding,
+            config_file=None,
+            head=head,
+            request_id=request_id,
+        )
+        log_event(
+            diagnostic_logger,
+            logging.INFO,
+            "get_data_info.mcp_tool.completed",
+            request_id,
+            duration_ms=elapsed_ms(started_at),
+            result_chars=len(result),
+            structured_output_enabled=True,
+            tool_result_utf8_bytes=utf8_size(result),
+        )
+        return result
+    except BaseException as error:
+        log_event(
+            diagnostic_logger,
+            logging.ERROR,
+            "get_data_info.mcp_tool.failed",
+            request_id,
+            duration_ms=elapsed_ms(started_at),
+            error_type=type(error).__name__,
+        )
+        log_event(
+            diagnostic_logger,
+            logging.ERROR,
+            "get_data_info.mcp_tool.stack",
+            request_id,
+            stack=safe_stack(error),
+        )
+        raise
+    finally:
+        watchdog.cancel()
+
+
+def _installed_package_version(package_name: str) -> str:
+    """Return an installed package version without allowing diagnostics to fail."""
+    try:
+        return importlib.metadata.version(package_name)
+    except Exception:
+        return "unknown"
 
 
 # =============================================================================

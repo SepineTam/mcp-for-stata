@@ -11,6 +11,7 @@
 
 import logging
 import tempfile
+import time
 from pathlib import Path
 from typing import Any, Dict
 
@@ -18,6 +19,7 @@ import pandas as pd
 import pyreadstat
 import requests
 
+from .._diagnostic_logging import elapsed_ms, log_event
 from .base import DataInfoBase
 
 logger = logging.getLogger(__name__)
@@ -51,23 +53,80 @@ class SpssDataInfo(DataInfoBase):
 
         try:
             if self.is_url:
+                stage_started_at = time.perf_counter()
+                log_event(
+                    logger,
+                    logging.DEBUG,
+                    "get_data_info.spss_download.started",
+                    self.request_id,
+                    source_ref=self.source_ref,
+                )
                 resp = requests.get(str(self.data_path), timeout=self.DEFAULT_TIMEOUT)
                 resp.raise_for_status()
-                safe_url = parsed_url._replace(query="", fragment="").geturl()
-                logger.info("Fetched SPSS data from URL: %s, status=%s", safe_url, resp.status_code)
+                log_event(
+                    logger,
+                    logging.DEBUG,
+                    "get_data_info.spss_download.completed",
+                    self.request_id,
+                    duration_ms=elapsed_ms(stage_started_at),
+                    source_bytes=len(resp.content),
+                    source_ref=self.source_ref,
+                    status_code=resp.status_code,
+                )
                 suffix = Path(url_path).suffix
                 with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
                     tmp.write(resp.content)
                     tmp_path = tmp.name
                 try:
+                    stage_started_at = time.perf_counter()
+                    log_event(
+                        logger,
+                        logging.DEBUG,
+                        "get_data_info.spss_parse.started",
+                        self.request_id,
+                        source_kind="downloaded_temp_file",
+                        source_ref=self.source_ref,
+                    )
                     df, meta = pyreadstat.read_sav(tmp_path)
+                    log_event(
+                        logger,
+                        logging.DEBUG,
+                        "get_data_info.spss_parse.completed",
+                        self.request_id,
+                        columns=len(df.columns),
+                        duration_ms=elapsed_ms(stage_started_at),
+                        rows=len(df),
+                        source_kind="downloaded_temp_file",
+                        source_ref=self.source_ref,
+                    )
                 finally:
                     Path(tmp_path).unlink(missing_ok=True)
             else:
                 file_path = Path(self.data_path)
                 if not file_path.exists():
                     raise FileNotFoundError(f"SPSS file not found: {file_path}")
+                stage_started_at = time.perf_counter()
+                log_event(
+                    logger,
+                    logging.DEBUG,
+                    "get_data_info.spss_parse.started",
+                    self.request_id,
+                    source_bytes=file_path.stat().st_size,
+                    source_kind="local",
+                    source_ref=self.source_ref,
+                )
                 df, meta = pyreadstat.read_sav(file_path)
+                log_event(
+                    logger,
+                    logging.DEBUG,
+                    "get_data_info.spss_parse.completed",
+                    self.request_id,
+                    columns=len(df.columns),
+                    duration_ms=elapsed_ms(stage_started_at),
+                    rows=len(df),
+                    source_kind="local",
+                    source_ref=self.source_ref,
+                )
 
             # column_labels is a list, convert to dict mapping column name -> label
             if meta.column_labels:

@@ -216,6 +216,81 @@ def test_read_log_structured_parsing_depends_only_on_config(
     assert ". sysuse auto" in result
 
 
+def test_get_data_info_mcp_wrapper_logs_lazy_import_and_result_size(
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    stubbed_mcp_servers,
+    tmp_path: Path,
+) -> None:
+    """The MCP boundary should log cold-import timing and final result size."""
+    get_data_info_module = importlib.import_module("stata_mcp.api.get_data_info")
+
+    def _fake_impl(**kwargs) -> str:
+        assert kwargs["request_id"]
+        return '{"ok": true}'
+
+    monkeypatch.setattr(get_data_info_module, "_get_data_info_impl", _fake_impl)
+    monkeypatch.setattr(
+        stubbed_mcp_servers,
+        "config",
+        SimpleNamespace(IS_DEBUG=False),
+    )
+
+    sensitive_path = "/tmp/private/confidential.dta"
+    with caplog.at_level(logging.DEBUG):
+        result = stubbed_mcp_servers.get_data_info(sensitive_path)
+
+    messages = "\n".join(
+        message for message in caplog.messages if message.startswith("event=get_data_info")
+    )
+
+    assert result == '{"ok": true}'
+    assert "event=get_data_info.mcp_tool.started" in messages
+    assert "event=get_data_info.mcp_tool.lazy_import.started" in messages
+    assert "event=get_data_info.mcp_tool.lazy_import.completed" in messages
+    assert "event=get_data_info.mcp_tool.completed" in messages
+    assert "tool_result_utf8_bytes=12" in messages
+    assert sensitive_path not in messages
+    assert "confidential.dta" not in messages
+
+
+def test_get_data_info_mcp_wrapper_reraises_base_exception_and_cancels_watchdog(
+    monkeypatch: pytest.MonkeyPatch,
+    stubbed_mcp_servers,
+    tmp_path: Path,
+) -> None:
+    """Diagnostics must not swallow interrupts and must always finish the watchdog."""
+    get_data_info_module = importlib.import_module("stata_mcp.api.get_data_info")
+    watchdog_state = {"cancelled": False}
+
+    def _failing_impl(**kwargs) -> str:
+        raise KeyboardInterrupt
+
+    class _FakeWatchdog:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def start(self) -> None:
+            raise AssertionError("Debug watchdog should not start in this test")
+
+        def cancel(self) -> None:
+            watchdog_state["cancelled"] = True
+
+    monkeypatch.setattr(get_data_info_module, "_get_data_info_impl", _failing_impl)
+    monkeypatch.setattr(stubbed_mcp_servers, "DiagnosticWatchdog", _FakeWatchdog)
+    monkeypatch.setattr(
+        stubbed_mcp_servers,
+        "config",
+        SimpleNamespace(IS_DEBUG=False),
+    )
+
+    sensitive_path = "/tmp/private/confidential.dta"
+    with pytest.raises(KeyboardInterrupt):
+        stubbed_mcp_servers.get_data_info(sensitive_path)
+
+    assert watchdog_state["cancelled"] is True
+
+
 def test_sync_stata_do_execution_failure_log_redacts_path(
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
