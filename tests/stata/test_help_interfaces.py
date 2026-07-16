@@ -16,16 +16,24 @@ stata_help_api = importlib.import_module("stata_mcp.api.stata_help")
 
 def test_api_forwards_replace_to_help_reader(monkeypatch: pytest.MonkeyPatch) -> None:
     help_reader = Mock()
+    help_config = SimpleNamespace(is_cache=False, is_save=True)
     runtime = SimpleNamespace(
         stata_cli="stata",
         tmp_base_path="/tmp/project",
-        config=SimpleNamespace(HELP_CACHE_DIR="/tmp/cache"),
+        config=SimpleNamespace(
+            HELP_CACHE_DIR="/tmp/cache",
+            get_help_config=Mock(return_value=help_config),
+        ),
     )
     monkeypatch.setattr(stata_help_api, "create_runtime_context", lambda **kwargs: runtime)
-    monkeypatch.setattr(stata_help_api, "StataHelp", lambda **kwargs: help_reader)
+    help_factory = Mock(return_value=help_reader)
+    monkeypatch.setattr(stata_help_api, "StataHelp", help_factory)
 
-    stata_help_api.stata_help("regress", replace=True)
+    stata_help_api.stata_help("regress", replace=True, tool_context="cli")
 
+    runtime.config.get_help_config.assert_called_once_with("cli")
+    assert help_factory.call_args.kwargs["is_cache"] is False
+    assert help_factory.call_args.kwargs["is_save"] is True
     help_reader.help.assert_called_once_with("regress", replace=True)
 
 
@@ -68,4 +76,8 @@ def test_cli_help_handler_forwards_replace(monkeypatch: pytest.MonkeyPatch) -> N
     )
 
     assert handle_tool(args) == 0
-    stata_help.assert_called_once_with(cmd="regress", replace=True)
+    stata_help.assert_called_once_with(
+        cmd="regress",
+        replace=True,
+        tool_context="cli",
+    )

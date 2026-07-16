@@ -242,6 +242,17 @@ def add_tool_parser(subparsers: argparse._SubParsersAction) -> argparse.Argument
         default=None,
         help="Optional variable names to inspect",
     )
+    tool_data_info_parser.add_argument(
+        "--heads",
+        type=int,
+        default=None,
+        metavar="ROWS",
+        help=(
+            "Preview rows: positive values show the first rows, negative values "
+            "show the last rows, and 0 disables previews "
+            "(default: CLI.TOOLS.DATA_INFO.heads or 5)"
+        ),
+    )
 
     tool_read_log_parser = tool_subparsers.add_parser(
         "read-log",
