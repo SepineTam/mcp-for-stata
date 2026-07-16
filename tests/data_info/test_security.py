@@ -51,6 +51,10 @@ class _FakeDataInfo:
         cache_dir=None,
         head: int = 0,
         is_cache: bool = True,
+        metrics=None,
+        string_keep_number: int = 10,
+        decimal_places: int = 3,
+        hash_length: int = 12,
         request_id: str | None = None,
     ):
         self.data_path = data_path
@@ -59,6 +63,10 @@ class _FakeDataInfo:
         self.cache_dir = cache_dir
         self.head = head
         self.is_cache = is_cache
+        self.metrics = metrics
+        self.string_keep_number = string_keep_number
+        self.decimal_places = decimal_places
+        self.hash_length = hash_length
         self.request_id = request_id
         self.calls.append(
             {
@@ -68,6 +76,10 @@ class _FakeDataInfo:
                 "cache_dir": cache_dir,
                 "head": head,
                 "is_cache": is_cache,
+                "metrics": metrics,
+                "string_keep_number": string_keep_number,
+                "decimal_places": decimal_places,
+                "hash_length": hash_length,
                 "request_id": request_id,
             }
         )
@@ -117,6 +129,77 @@ def test_local_file_within_working_dir_is_allowed(tmp_path) -> None:
 
     payload = json.loads(result)
     assert payload["overview"]["source"] == data_path.resolve().as_posix()
+
+
+def test_contextual_data_info_settings_are_passed_to_handler(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    fake_data_info = _patch_fake_data_info(monkeypatch)
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    data_path = working_dir / "data.csv"
+    data_path.write_text("x,y\n1,2\n", encoding="utf-8")
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        f"""
+[PROJECT]
+WORKING_DIR = "{working_dir.as_posix()}"
+
+[data_info]
+heads = 2
+
+[MCP.TOOLS.DATA_INFO]
+is_cache = false
+metrics = ["obs", "med"]
+string_keep_number = 4
+decimal_places = 1
+hash_length = 8
+heads = 7
+""".strip(),
+        encoding="utf-8",
+    )
+
+    api_get_data_info(
+        data_path=data_path.as_posix(),
+        config_file=config_path,
+        tool_context="mcp",
+    )
+
+    assert fake_data_info.calls[-1]["is_cache"] is False
+    assert fake_data_info.calls[-1]["metrics"] == ("obs", "med")
+    assert fake_data_info.calls[-1]["string_keep_number"] == 4
+    assert fake_data_info.calls[-1]["decimal_places"] == 1
+    assert fake_data_info.calls[-1]["hash_length"] == 8
+    assert fake_data_info.calls[-1]["head"] == 7
+
+
+def test_explicit_head_overrides_contextual_default(monkeypatch, tmp_path) -> None:
+    fake_data_info = _patch_fake_data_info(monkeypatch)
+    working_dir = tmp_path / "work"
+    working_dir.mkdir()
+    data_path = working_dir / "data.csv"
+    data_path.write_text("x,y\n1,2\n", encoding="utf-8")
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        f"""
+[PROJECT]
+WORKING_DIR = "{working_dir.as_posix()}"
+
+[MCP.TOOLS.DATA_INFO]
+heads = 7
+""".strip(),
+        encoding="utf-8",
+    )
+
+    api_get_data_info(
+        data_path=data_path.as_posix(),
+        config_file=config_path,
+        head=0,
+        tool_context="mcp",
+    )
+
+    assert fake_data_info.calls[-1]["head"] == 0
 
 
 def test_local_file_outside_working_dir_is_allowed_by_default(tmp_path) -> None:

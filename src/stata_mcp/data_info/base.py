@@ -11,9 +11,7 @@ import copy
 import hashlib
 import json
 import logging
-import os
 import time
-import tomllib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
@@ -140,13 +138,12 @@ class DataInfoBase(ABC):
     # Registry of supported file extensions (to be overridden by subclasses)
     supported_extensions: List[str] = []
 
-    CFG_FILE = Path.home() / ".statamcp" / "config.toml"
     DEFAULT_METRICS: List[str] = [
         'obs', 'mean', 'stderr', 'min', 'max'
     ]
     ALLOWED_METRICS: List[str] = DEFAULT_METRICS + [
         # Additional metrics
-        'q1', 'q3', 'skewness', 'kurtosis'
+        'med', 'q1', 'q3', 'skewness', 'kurtosis'
     ]
 
     # Request timeout
@@ -176,6 +173,7 @@ class DataInfoBase(ABC):
         string_keep_number: int = None,
         decimal_places: int = None,
         hash_length: int = None,
+        metrics: List[str] | Tuple[str, ...] | None = None,
         head: int = 0,
         request_id: str | None = None,
         **kwargs
@@ -207,44 +205,31 @@ class DataInfoBase(ABC):
         self.cache_dir = Path(cache_dir) if cache_dir else Path.home() / ".statamcp" / ".cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        self.string_keep_number = self._resolve_data_info_value(
-            string_keep_number, "STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", "string_keep_number", 10
+        self.string_keep_number = (
+            int(string_keep_number) if string_keep_number is not None else 10
         )
-        self.decimal_places = self._resolve_data_info_value(
-            decimal_places, "STATA_MCP_DATA_INFO_DECIMAL_PLACES", "decimal_places", 3
-        )
-        self.HASH_LENGTH = self._resolve_data_info_value(
-            hash_length, "STATA_MCP_DATA_INFO_HASH_LENGTH", "hash_length", 12
-        )
+        self.decimal_places = int(decimal_places) if decimal_places is not None else 3
+        self.HASH_LENGTH = int(hash_length) if hash_length is not None else 12
+        self._metrics = self._normalize_metrics(metrics)
         self._head = head
 
         self.kwargs = kwargs  # Store additional keyword arguments for subclasses to use
 
-    def _resolve_data_info_value(
-        self,
-        explicit_value: int | None,
-        env_var: str,
-        config_key: str,
-        default: int,
-    ) -> int:
-        """Resolve a data_info config value with explicit > env > config > default priority."""
-        if explicit_value is not None:
-            return int(explicit_value)
-
-        env_value = os.getenv(env_var, None)
-        if env_value is not None:
-            return int(env_value)
-
-        try:
-            with open(self.CFG_FILE, "rb") as f:
-                config = tomllib.load(f)
-            config_value = config.get("data_info", {}).get(config_key, None)
-            if config_value is not None:
-                return int(config_value)
-        except (FileNotFoundError, OSError, Exception):
-            pass
-
-        return default
+    @classmethod
+    def _normalize_metrics(
+        cls,
+        metrics: List[str] | Tuple[str, ...] | None,
+    ) -> List[str]:
+        """Return supported metrics in caller order, or the legacy defaults."""
+        if metrics is None:
+            return list(cls.DEFAULT_METRICS)
+        normalized_metrics = [
+            str(metric).lower()
+            for metric in metrics
+            if str(metric).lower() in cls.ALLOWED_METRICS
+        ]
+        unique_metrics = list(dict.fromkeys(normalized_metrics))
+        return unique_metrics or list(cls.DEFAULT_METRICS)
 
     # Properties
     @cached_property
@@ -327,22 +312,7 @@ class DataInfoBase(ABC):
 
     @property
     def metrics(self) -> List[str]:
-        try:
-            with open(self.CFG_FILE, "rb") as f:
-                config = tomllib.load(f)
-
-            additional = config.get("data_info", {}).get("metrics", []) or []
-            if not isinstance(additional, list):
-                additional = [additional]
-
-            target = (set(self.DEFAULT_METRICS) | set(additional)) & set(self.ALLOWED_METRICS)
-
-            return list(dict.fromkeys(
-                [m for m in self.DEFAULT_METRICS if m in target] +
-                [m for m in self.ALLOWED_METRICS if m in target]
-            ))
-        except (FileNotFoundError, OSError, Exception):
-            return self.DEFAULT_METRICS
+        return list(self._metrics)
 
     @property
     def df(self) -> pd.DataFrame:

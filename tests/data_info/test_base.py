@@ -72,6 +72,41 @@ class TestFileValidation:
             CsvDataInfo([])  # type: ignore
 
 
+class TestRuntimeSettings:
+    """Test settings passed into a concrete data-info handler."""
+
+    def test_explicit_settings_replace_internal_config_reads(self, tmp_path):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        data_path = tmp_path / "sample.csv"
+        data_path.write_text("value,label\n1,a\n2,b\n", encoding="utf-8")
+
+        data_info = CsvDataInfo(
+            data_path,
+            is_cache=False,
+            metrics=["med", "q1", "med"],
+            string_keep_number=2,
+            decimal_places=1,
+            hash_length=6,
+        )
+
+        assert data_info.is_cache is False
+        assert data_info.metrics == ["med", "q1"]
+        assert data_info.string_keep_number == 2
+        assert data_info.decimal_places == 1
+        assert data_info.HASH_LENGTH == 6
+
+    def test_invalid_direct_metrics_fall_back_to_legacy_defaults(self, tmp_path):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        data_path = tmp_path / "sample.csv"
+        data_path.write_text("value\n1\n", encoding="utf-8")
+
+        data_info = CsvDataInfo(data_path, metrics=["unsupported"])
+
+        assert data_info.metrics == DataInfoBase.DEFAULT_METRICS
+
+
 class TestDetermineVariableType:
     """测试 _determine_variable_type 静态方法"""
 
