@@ -363,7 +363,10 @@ class Config:
             value = self._first_environment_value(env_vars)
 
         if value is None:
-            value = self._first_config_value(self.config, config_paths)
+            for runtime_config in self._runtime_config_sources(config_paths):
+                value = self._first_config_value(runtime_config, config_paths)
+                if value is not None:
+                    break
 
         if value is None:
             return default
@@ -378,6 +381,29 @@ class Config:
             return default
 
         return value
+
+    def _runtime_config_sources(
+        self,
+        config_paths: list[list[str]],
+    ) -> tuple[dict[str, Any], ...]:
+        """Return runtime TOML sources in authority order.
+
+        Context specificity must only compare keys from the same source.
+        Otherwise a specific user key could incorrectly outrank a generic
+        project key. Security keeps its deliberate user-before-project order.
+        """
+        if self.is_debug_config:
+            return (self._read_toml_file(self.config_file),)
+
+        is_security_value = all(
+            config_path and config_path[0] == self.SECURITY_SECTION
+            for config_path in config_paths
+        )
+        user_config = self._read_toml_file(self.user_config_file)
+        project_config = self._read_toml_file(self.project_config_file)
+        if is_security_value:
+            return user_config, project_config
+        return project_config, user_config
 
     def _first_config_value(
         self,

@@ -79,6 +79,58 @@ IS_CACHE = true
     assert settings.is_cache is False
 
 
+def test_project_generic_value_overrides_user_context_specific_value(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    home_dir = tmp_path / "home"
+    project_dir = tmp_path / "project"
+    user_config_dir = home_dir / ".statamcp"
+    project_config_dir = project_dir / ".statamcp"
+    user_config_dir.mkdir(parents=True)
+    project_config_dir.mkdir(parents=True)
+    monkeypatch.setattr("pathlib.Path.home", lambda: home_dir)
+    monkeypatch.chdir(project_dir)
+    (user_config_dir / "config.toml").write_text(
+        "[MCP.TOOLS.HELP]\nIS_CACHE = true",
+        encoding="utf-8",
+    )
+    (project_config_dir / "config.toml").write_text(
+        "[HELP]\nIS_CACHE = false",
+        encoding="utf-8",
+    )
+
+    settings = Config().get_help_config("mcp")
+
+    assert settings.is_cache is False
+
+
+def test_project_generic_data_info_value_overrides_user_context_value(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    home_dir = tmp_path / "home"
+    project_dir = tmp_path / "project"
+    user_config_dir = home_dir / ".statamcp"
+    project_config_dir = project_dir / ".statamcp"
+    user_config_dir.mkdir(parents=True)
+    project_config_dir.mkdir(parents=True)
+    monkeypatch.setattr("pathlib.Path.home", lambda: home_dir)
+    monkeypatch.chdir(project_dir)
+    (user_config_dir / "config.toml").write_text(
+        "[CLI.TOOLS.DATA_INFO]\nheads = 9",
+        encoding="utf-8",
+    )
+    (project_config_dir / "config.toml").write_text(
+        "[data_info]\nheads = 2",
+        encoding="utf-8",
+    )
+
+    settings = Config().get_data_info_config("cli")
+
+    assert settings.heads == 2
+
+
 def test_legacy_help_environment_alias_remains_supported(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
