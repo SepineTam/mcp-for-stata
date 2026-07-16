@@ -207,12 +207,44 @@ class DataInfoBase(ABC):
         self.cache_dir = Path(cache_dir) if cache_dir else Path.home() / ".statamcp" / ".cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        self.string_keep_number = (
-            int(string_keep_number) if string_keep_number is not None else 10
+        runtime_settings = None
+        if any(
+            value is None
+            for value in (
+                string_keep_number,
+                decimal_places,
+                hash_length,
+                metrics,
+            )
+        ):
+            runtime_settings = self._load_default_runtime_settings()
+
+        resolved_string_keep_number = (
+            string_keep_number
+            if string_keep_number is not None
+            else getattr(runtime_settings, "string_keep_number", 10)
         )
-        self.decimal_places = int(decimal_places) if decimal_places is not None else 3
-        self.HASH_LENGTH = int(hash_length) if hash_length is not None else 12
-        self._metrics = self._normalize_metrics(metrics)
+        resolved_decimal_places = (
+            decimal_places
+            if decimal_places is not None
+            else getattr(runtime_settings, "decimal_places", 3)
+        )
+        resolved_hash_length = (
+            hash_length
+            if hash_length is not None
+            else getattr(runtime_settings, "hash_length", 12)
+        )
+        resolved_metrics = (
+            metrics
+            if metrics is not None
+            else getattr(runtime_settings, "metrics", None)
+        )
+        self.string_keep_number = (
+            int(resolved_string_keep_number)
+        )
+        self.decimal_places = int(resolved_decimal_places)
+        self.HASH_LENGTH = int(resolved_hash_length)
+        self._metrics = self._normalize_metrics(resolved_metrics)
         self._head = head
         self._cache_read_options = repr(kwargs)
 
@@ -233,6 +265,20 @@ class DataInfoBase(ABC):
         ]
         unique_metrics = list(dict.fromkeys(normalized_metrics))
         return unique_metrics or list(cls.DEFAULT_METRICS)
+
+    @staticmethod
+    def _load_default_runtime_settings() -> Any | None:
+        """Resolve generic settings for callers that instantiate handlers directly."""
+        try:
+            from ..config import Config
+
+            return Config().get_data_info_config("api")
+        except Exception as error:
+            logger.warning(
+                "Could not resolve default data-info settings: %s",
+                error,
+            )
+            return None
 
     # Properties
     @cached_property

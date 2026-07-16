@@ -75,9 +75,16 @@ class TestFileValidation:
 class TestRuntimeSettings:
     """Test settings passed into a concrete data-info handler."""
 
-    def test_explicit_settings_replace_internal_config_reads(self, tmp_path):
+    def test_explicit_settings_replace_internal_config_reads(
+        self,
+        monkeypatch,
+        tmp_path,
+    ):
         from stata_mcp.data_info.csv import CsvDataInfo
 
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", "9")
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_DECIMAL_PLACES", "8")
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_HASH_LENGTH", "24")
         data_path = tmp_path / "sample.csv"
         data_path.write_text("value,label\n1,a\n2,b\n", encoding="utf-8")
 
@@ -95,6 +102,59 @@ class TestRuntimeSettings:
         assert data_info.string_keep_number == 2
         assert data_info.decimal_places == 1
         assert data_info.HASH_LENGTH == 6
+
+    def test_legacy_environment_settings_apply_to_direct_handler(
+        self,
+        monkeypatch,
+        tmp_path,
+    ):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", "4")
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_DECIMAL_PLACES", "1")
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_HASH_LENGTH", "6")
+        data_path = tmp_path / "sample.csv"
+        data_path.write_text("value,label\n1,a\n2,b\n", encoding="utf-8")
+
+        data_info = CsvDataInfo(data_path)
+
+        assert data_info.string_keep_number == 4
+        assert data_info.decimal_places == 1
+        assert data_info.HASH_LENGTH == 6
+
+    def test_user_toml_settings_apply_to_direct_handler(
+        self,
+        monkeypatch,
+        tmp_path,
+    ):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        home_dir = tmp_path / "home"
+        config_dir = home_dir / ".statamcp"
+        config_dir.mkdir(parents=True)
+        (config_dir / "config.toml").write_text(
+            "\n".join(
+                [
+                    "[DATA_INFO]",
+                    'metrics = ["obs", "med"]',
+                    "string_keep_number = 3",
+                    "decimal_places = 2",
+                    "hash_length = 8",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        monkeypatch.setattr("pathlib.Path.home", lambda: home_dir)
+        monkeypatch.chdir(tmp_path)
+        data_path = tmp_path / "sample.csv"
+        data_path.write_text("value,label\n1,a\n2,b\n", encoding="utf-8")
+
+        data_info = CsvDataInfo(data_path)
+
+        assert data_info.metrics == ["obs", "med"]
+        assert data_info.string_keep_number == 3
+        assert data_info.decimal_places == 2
+        assert data_info.HASH_LENGTH == 8
 
     def test_invalid_direct_metrics_fall_back_to_legacy_defaults(self, tmp_path):
         from stata_mcp.data_info.csv import CsvDataInfo
