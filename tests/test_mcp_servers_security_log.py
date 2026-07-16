@@ -220,6 +220,7 @@ def test_get_data_info_mcp_wrapper_logs_lazy_import_and_result_size(
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
     stubbed_mcp_servers,
+    tmp_path: Path,
 ) -> None:
     """The MCP boundary should log cold-import timing and final result size."""
     get_data_info_module = importlib.import_module("stata_mcp.api.get_data_info")
@@ -235,8 +236,9 @@ def test_get_data_info_mcp_wrapper_logs_lazy_import_and_result_size(
         SimpleNamespace(IS_DEBUG=False),
     )
 
+    sensitive_path = "/tmp/private/confidential.dta"
     with caplog.at_level(logging.DEBUG):
-        result = stubbed_mcp_servers.get_data_info("C:/private/confidential.dta")
+        result = stubbed_mcp_servers.get_data_info(sensitive_path)
 
     messages = "\n".join(
         message for message in caplog.messages if message.startswith("event=get_data_info")
@@ -248,13 +250,14 @@ def test_get_data_info_mcp_wrapper_logs_lazy_import_and_result_size(
     assert "event=get_data_info.mcp_tool.lazy_import.completed" in messages
     assert "event=get_data_info.mcp_tool.completed" in messages
     assert "tool_result_utf8_bytes=12" in messages
-    assert "C:/private/confidential.dta" not in messages
+    assert sensitive_path not in messages
     assert "confidential.dta" not in messages
 
 
 def test_get_data_info_mcp_wrapper_reraises_base_exception_and_cancels_watchdog(
     monkeypatch: pytest.MonkeyPatch,
     stubbed_mcp_servers,
+    tmp_path: Path,
 ) -> None:
     """Diagnostics must not swallow interrupts and must always finish the watchdog."""
     get_data_info_module = importlib.import_module("stata_mcp.api.get_data_info")
@@ -281,8 +284,9 @@ def test_get_data_info_mcp_wrapper_reraises_base_exception_and_cancels_watchdog(
         SimpleNamespace(IS_DEBUG=False),
     )
 
+    sensitive_path = "/tmp/private/confidential.dta"
     with pytest.raises(KeyboardInterrupt):
-        stubbed_mcp_servers.get_data_info("C:/private/confidential.dta")
+        stubbed_mcp_servers.get_data_info(sensitive_path)
 
     assert watchdog_state["cancelled"] is True
 

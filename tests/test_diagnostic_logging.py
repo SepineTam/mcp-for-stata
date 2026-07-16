@@ -19,8 +19,8 @@ def test_safe_stack_redacts_absolute_source_paths_and_exception_messages() -> No
     try:
         exec(
             compile(
-                'raise RuntimeError("dataset at C:/Users/private/data.dta")',
-                "C:/Users/private/site-packages/reader.py",
+                'raise RuntimeError("dataset at /tmp/private/data.dta")',
+                "/tmp/private/site-packages/reader.py",
                 "exec",
             )
         )
@@ -30,7 +30,7 @@ def test_safe_stack_redacts_absolute_source_paths_and_exception_messages() -> No
         raise AssertionError("Expected the compiled test code to fail")
 
     assert "reader.py:1:<module>" in stack
-    assert "C:/Users/private" not in stack
+    assert "/tmp/private" not in stack
     assert "data.dta" not in stack
 
 
@@ -47,8 +47,8 @@ def test_safe_stack_remains_private_in_fully_formatted_log() -> None:
     try:
         exec(
             compile(
-                'raise ValueError("secret C:/Users/private/data.dta")',
-                "C:/Users/private/site-packages/parser.py",
+                'raise ValueError("secret /tmp/private/data.dta")',
+                "/tmp/private/site-packages/parser.py",
                 "exec",
             )
         )
@@ -64,7 +64,7 @@ def test_safe_stack_remains_private_in_fully_formatted_log() -> None:
 
     output = stream.getvalue()
     assert "parser.py:1:<module>" in output
-    assert "C:/Users/private" not in output
+    assert "/tmp/private" not in output
     assert "data.dta" not in output
 
 
@@ -82,7 +82,7 @@ def test_watchdog_cancel_prevents_late_snapshot(caplog) -> None:
 
 def test_process_log_path_adds_pid_before_suffix() -> None:
     """Debug log files should be isolated by process before rotation."""
-    result = process_log_path("C:/logs/stata_mcp_debug.log", pid=4321)
+    result = process_log_path("/tmp/logs/stata_mcp_debug.log", pid=4321)
     assert result.as_posix().endswith("/stata_mcp_debug.4321.log")
 
 

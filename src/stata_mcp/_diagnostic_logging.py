@@ -1,3 +1,12 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2026 - Present Sepine Tam, Inc. All Rights Reserved
+#
+# @Author : Sepine Tam (谭淞)
+# @Email  : sepinetam@gmail.com
+# @File   : _diagnostic_logging.py
+
 """Shared helpers for privacy-safe diagnostic logging."""
 
 from __future__ import annotations
@@ -13,7 +22,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-DIAGNOSTIC_BUILD_ID = "windows-get-data-info-debug-v1"
+DIAGNOSTIC_BUILD_ID = "get-data-info-debug-v1"
 DIAGNOSTIC_SCHEMA_VERSION = 1
 
 
@@ -48,7 +57,7 @@ def utf8_size(value: str) -> int:
 
 
 def process_log_path(log_path: str | Path, *, pid: int) -> Path:
-    """Return a per-process log path so Windows processes do not rotate one file."""
+    """Return a per-process log path so concurrent processes do not rotate one file."""
     path = Path(log_path)
     return path.with_name(f"{path.stem}.{pid}{path.suffix}")
 
