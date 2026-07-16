@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import logging
+import os
 import stat
+import sys
 from pathlib import Path
 
 import pytest
@@ -43,6 +45,60 @@ def test_legacy_data_info_header_is_renamed_without_reformatting(
     assert config.get_data_info_config("api").is_cache is False
     assert config.get_data_info_config("api").metrics == ("obs", "med")
     assert "Migrated legacy [data_info] to [DATA_INFO]" in caplog.text
+
+
+@pytest.mark.skipif(not hasattr(os, "chown"), reason="Ownership is not POSIX metadata")
+def test_legacy_header_migration_reapplies_owner_and_group(
+    tmp_path: Path,
+) -> None:
+    config_file = _write_config(
+        tmp_path,
+        "[data_info]\nis_cache = false\n",
+    )
+    current_group_id = config_file.stat().st_gid
+    target_group_id = next(
+        (group_id for group_id in os.getgroups() if group_id != current_group_id),
+        None,
+    )
+    if target_group_id is None:
+        pytest.skip("No secondary group is available for an ownership test")
+    try:
+        os.chown(config_file, -1, target_group_id)
+    except OSError as error:
+        pytest.skip(f"Could not assign a secondary test group: {error}")
+    original_stat = config_file.stat()
+
+    Config(config_file=config_file)
+
+    migrated_stat = config_file.stat()
+    assert migrated_stat.st_uid == original_stat.st_uid
+    assert migrated_stat.st_gid == original_stat.st_gid
+
+
+@pytest.mark.skipif(
+    not all(hasattr(os, name) for name in ("setxattr", "getxattr")),
+    reason="Extended attributes are not supported",
+)
+def test_legacy_header_migration_preserves_extended_attributes(
+    tmp_path: Path,
+) -> None:
+    config_file = _write_config(
+        tmp_path,
+        "[data_info]\nis_cache = false\n",
+    )
+    attribute_name = (
+        "com.stata_mcp.test"
+        if sys.platform == "darwin"
+        else "user.stata_mcp_test"
+    )
+    try:
+        os.setxattr(config_file, attribute_name, b"preserve-me")
+    except OSError as error:
+        pytest.skip(f"Filesystem does not support test extended attributes: {error}")
+
+    Config(config_file=config_file)
+
+    assert os.getxattr(config_file, attribute_name) == b"preserve-me"
 
 
 def test_quoted_legacy_header_is_renamed(tmp_path: Path) -> None:
@@ -128,6 +184,32 @@ def test_permission_failure_is_logged_and_legacy_config_still_works(
     assert config.get_data_info_config("api").is_cache is False
     assert "permission denied" in caplog.text
     assert "read-only config" in caplog.text
+
+
+def test_metadata_copy_failure_is_logged_and_original_file_is_kept(
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    original_content = "[data_info]\nis_cache = false\n"
+    config_file = _write_config(tmp_path, original_content)
+
+    def deny_metadata_copy(*args, **kwargs) -> None:
+        raise PermissionError("metadata is protected")
+
+    monkeypatch.setattr(
+        "stata_mcp.config.shutil.copystat",
+        deny_metadata_copy,
+    )
+
+    with caplog.at_level(logging.WARNING):
+        config = Config(config_file=config_file)
+
+    assert config_file.read_text(encoding="utf-8") == original_content
+    assert config.get_data_info_config("api").is_cache is False
+    assert "permission denied" in caplog.text
+    assert "metadata is protected" in caplog.text
+    assert list(tmp_path.glob(".config.toml.*.tmp")) == []
 
 
 def test_other_filesystem_failure_is_logged_and_does_not_stop_loading(

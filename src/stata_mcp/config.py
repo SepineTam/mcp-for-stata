@@ -11,6 +11,7 @@ import logging
 import os
 import platform
 import re
+import shutil
 import stat
 import sys
 import tempfile
@@ -306,9 +307,10 @@ class Config:
 
     @staticmethod
     def _replace_config_text(config_file: Path, content: str) -> None:
-        """Atomically replace config text while preserving file permissions."""
+        """Atomically replace config text while preserving file metadata."""
         temporary_path: Path | None = None
         try:
+            original_stat = config_file.stat()
             with tempfile.NamedTemporaryFile(
                 mode="wb",
                 dir=config_file.parent,
@@ -321,8 +323,38 @@ class Config:
                 os.fsync(temporary_file.fileno())
                 temporary_path = Path(temporary_file.name)
 
-            file_mode = stat.S_IMODE(config_file.stat().st_mode)
-            temporary_path.chmod(file_mode)
+            if hasattr(os, "chown"):
+                temporary_stat = temporary_path.stat()
+                target_user_id = (
+                    original_stat.st_uid
+                    if temporary_stat.st_uid != original_stat.st_uid
+                    else -1
+                )
+                target_group_id = (
+                    original_stat.st_gid
+                    if temporary_stat.st_gid != original_stat.st_gid
+                    else -1
+                )
+                if target_user_id != -1 or target_group_id != -1:
+                    os.chown(
+                        temporary_path,
+                        target_user_id,
+                        target_group_id,
+                    )
+            shutil.copystat(config_file, temporary_path, follow_symlinks=True)
+
+            temporary_stat = temporary_path.stat()
+            if stat.S_IMODE(temporary_stat.st_mode) != stat.S_IMODE(
+                original_stat.st_mode
+            ):
+                raise OSError("temporary config file mode does not match the original")
+            if hasattr(os, "chown") and (
+                temporary_stat.st_uid != original_stat.st_uid
+                or temporary_stat.st_gid != original_stat.st_gid
+            ):
+                raise OSError(
+                    "temporary config file ownership does not match the original"
+                )
             os.replace(temporary_path, config_file)
         except Exception:
             if temporary_path is not None:
