@@ -135,11 +135,14 @@ def _load_help_cls():
     if _help_cls is None:
         from .stata import StataHelp
 
+        help_config = config.get_help_config("mcp")
         _help_cls = StataHelp(
             stata_cli=config.STATA_CLI,
             project_tmp_dir=config.STATA_MCP_FOLDER.TMP,
             cache_dir=config.HELP_CACHE_DIR,
             config=config,
+            is_cache=help_config.is_cache,
+            is_save=help_config.is_save,
         )
 
     return _help_cls
@@ -550,7 +553,7 @@ def get_data_info(
     data_path: str,
     vars_list: List[str] | None = None,
     encoding: str = "utf-8",
-    head: int = 0,
+    head: int | None = None,
     ctx: Context | None = None,
 ) -> str:
     """
@@ -637,6 +640,7 @@ def get_data_info(
             encoding=encoding,
             config_file=None,
             head=head,
+            tool_context="mcp",
             request_id=request_id,
         )
         log_event(
@@ -807,6 +811,7 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
             "or execute a do-file. "
         ),
         "func": stata_do,
+        "config_name": "STATA_DO",
         "profiles": {"core", "all"},
     },
     "get_data_info": {
@@ -817,6 +822,7 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
             "Use when you need to understand a dataset or have no prior knowledge of the data."
         ),
         "func": get_data_info,
+        "config_name": "DATA_INFO",
         "profiles": {"core", "all"},
     },
     "help": {
@@ -826,6 +832,7 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
             "or troubleshoot errors before running it."
         ),
         "func": help,
+        "config_name": "HELP",
         "profiles": {"core", "all"},
         "unix_only": True,
     },
@@ -836,6 +843,7 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
             "Use `lines` to return only the first/last N lines."
         ),
         "func": read_log,
+        "config_name": "READ_LOG",
         "profiles": {"all"},
     },
     "ado_package_install": {
@@ -845,6 +853,7 @@ _TOOL_REGISTRY: Dict[str, Dict[str, Any]] = {
             "per-call user confirmation."
         ),
         "func": ado_package_install,
+        "config_name": "ADO_INSTALL",
         "profiles": {"unsafe"},
     },
 }
@@ -872,6 +881,12 @@ def register_tools(server: FastMCP, profile: str = "all") -> None:
             continue
         eligible_profiles = {"all", "unsafe"} if profile == "unsafe" else {profile}
         if not eligible_profiles.intersection(meta["profiles"]):
+            continue
+        is_tool_enabled = getattr(config, "is_tool_enabled", None)
+        if callable(is_tool_enabled) and not is_tool_enabled(
+            "mcp",
+            meta.get("config_name", name),
+        ):
             continue
 
         tool_func: ToolFunc | None = meta.get("func")

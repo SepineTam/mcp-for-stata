@@ -9,6 +9,7 @@ import pytest
 
 from stata_mcp.cli._handlers import handle_tool
 from stata_mcp.cli._parsers import add_tool_parser, create_root_parser
+from stata_mcp.stata import StataHelp
 
 stata_help_api = importlib.import_module("stata_mcp.api.stata_help")
 
@@ -26,6 +27,16 @@ def test_api_forwards_replace_to_help_reader(monkeypatch: pytest.MonkeyPatch) ->
     stata_help_api.stata_help("regress", replace=True)
 
     help_reader.help.assert_called_once_with("regress", replace=True)
+
+
+def test_explicit_help_settings_override_generic_config() -> None:
+    help_reader = StataHelp.__new__(StataHelp)
+    help_reader._config = SimpleNamespace(IS_CACHE_HELP=False, IS_SAVE_HELP=False)
+    help_reader._is_cache = True
+    help_reader._is_save = True
+
+    assert help_reader.IS_CACHE is True
+    assert help_reader.IS_SAVE is True
 
 
 def test_cli_help_parser_exposes_replace_flag() -> None:
