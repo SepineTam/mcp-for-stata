@@ -10,7 +10,10 @@
 import logging
 import os
 import platform
+import re
+import stat
 import sys
+import tempfile
 import tomllib
 from dataclasses import dataclass
 from functools import cached_property
@@ -38,6 +41,13 @@ DATA_INFO_METRICS = (
     "kurtosis",
 )
 DEFAULT_DATA_INFO_METRICS = ("obs", "mean", "stderr", "min", "max")
+LEGACY_DATA_INFO_HEADER_PATTERN = re.compile(
+    r"^(?P<indent>[ \t]*)"
+    r"\[(?P<quote>[\"']?)data_info(?P=quote)\]"
+    r"(?P<suffix>[ \t]*(?:#[^\r\n]*)?)"
+    r"(?P<carriage_return>\r?)$",
+    re.MULTILINE,
+)
 
 
 @dataclass(frozen=True)
@@ -137,6 +147,113 @@ class Config:
                 )
                 if path is not None
             )
+
+        for active_config_file in dict.fromkeys(self.config_files):
+            self._migrate_legacy_data_info_section(active_config_file)
+
+    @classmethod
+    def _migrate_legacy_data_info_section(cls, config_file: Path) -> None:
+        """Rename `[data_info]` without making configuration loading fail."""
+        try:
+            target_file = config_file.resolve(strict=True)
+            content = target_file.read_bytes().decode("utf-8")
+            config_data = tomllib.loads(content)
+            legacy_section = config_data.get("data_info")
+            if not isinstance(legacy_section, dict):
+                return
+            if "DATA_INFO" in config_data:
+                logger.warning(
+                    "Could not automatically migrate legacy [data_info] in %s: "
+                    "both [data_info] and [DATA_INFO] exist; keeping both to "
+                    "avoid overwriting configuration.",
+                    config_file,
+                )
+                return
+
+            def replace_header(match: re.Match[str]) -> str:
+                quote = match.group("quote")
+                return (
+                    f"{match.group('indent')}[{quote}DATA_INFO{quote}]"
+                    f"{match.group('suffix')}{match.group('carriage_return')}"
+                )
+
+            migrated_content, replacement_count = (
+                LEGACY_DATA_INFO_HEADER_PATTERN.subn(
+                    replace_header,
+                    content,
+                    count=1,
+                )
+            )
+            if replacement_count != 1:
+                logger.warning(
+                    "Could not automatically migrate legacy [data_info] in %s: "
+                    "the section is not represented by a standalone TOML table "
+                    "header; keeping the compatibility fallback.",
+                    config_file,
+                )
+                return
+
+            cls._replace_config_text(target_file, migrated_content)
+            logger.info(
+                "Migrated legacy [data_info] to [DATA_INFO] in %s.",
+                config_file,
+            )
+        except FileNotFoundError:
+            return
+        except PermissionError as error:
+            logger.warning(
+                "Could not migrate legacy [data_info] to [DATA_INFO] in %s: "
+                "permission denied (%s). The legacy section remains supported.",
+                config_file,
+                error,
+            )
+        except (UnicodeDecodeError, tomllib.TOMLDecodeError) as error:
+            logger.warning(
+                "Could not migrate legacy [data_info] to [DATA_INFO] in %s: "
+                "the config file could not be parsed (%s).",
+                config_file,
+                error,
+            )
+        except OSError as error:
+            logger.warning(
+                "Could not migrate legacy [data_info] to [DATA_INFO] in %s: "
+                "filesystem error (%s). The legacy section remains supported.",
+                config_file,
+                error,
+            )
+        except Exception as error:
+            logger.warning(
+                "Could not migrate legacy [data_info] to [DATA_INFO] in %s: "
+                "unexpected error %s (%s). The legacy section remains supported.",
+                config_file,
+                type(error).__name__,
+                error,
+            )
+
+    @staticmethod
+    def _replace_config_text(config_file: Path, content: str) -> None:
+        """Atomically replace config text while preserving file permissions."""
+        temporary_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="wb",
+                dir=config_file.parent,
+                prefix=f".{config_file.name}.",
+                suffix=".tmp",
+                delete=False,
+            ) as temporary_file:
+                temporary_file.write(content.encode("utf-8"))
+                temporary_file.flush()
+                os.fsync(temporary_file.fileno())
+                temporary_path = Path(temporary_file.name)
+
+            file_mode = stat.S_IMODE(config_file.stat().st_mode)
+            temporary_path.chmod(file_mode)
+            os.replace(temporary_path, config_file)
+        except Exception:
+            if temporary_path is not None:
+                temporary_path.unlink(missing_ok=True)
+            raise
 
     @cached_property
     def config(self) -> dict[str, Any]:
