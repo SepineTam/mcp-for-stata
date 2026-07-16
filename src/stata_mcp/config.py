@@ -318,10 +318,10 @@ class Config:
                 suffix=".tmp",
                 delete=False,
             ) as temporary_file:
+                temporary_path = Path(temporary_file.name)
                 temporary_file.write(content.encode("utf-8"))
                 temporary_file.flush()
                 os.fsync(temporary_file.fileno())
-                temporary_path = Path(temporary_file.name)
 
             if hasattr(os, "chown"):
                 temporary_stat = temporary_path.stat()

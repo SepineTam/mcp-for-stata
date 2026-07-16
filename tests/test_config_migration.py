@@ -212,6 +212,29 @@ def test_metadata_copy_failure_is_logged_and_original_file_is_kept(
     assert list(tmp_path.glob(".config.toml.*.tmp")) == []
 
 
+def test_fsync_failure_removes_temporary_file_and_keeps_original(
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    original_content = "[data_info]\nis_cache = false\n"
+    config_file = _write_config(tmp_path, original_content)
+
+    def fail_fsync(file_descriptor: int) -> None:
+        raise OSError("disk flush failed")
+
+    monkeypatch.setattr("stata_mcp.config.os.fsync", fail_fsync)
+
+    with caplog.at_level(logging.WARNING):
+        config = Config(config_file=config_file)
+
+    assert config_file.read_text(encoding="utf-8") == original_content
+    assert config.get_data_info_config("api").is_cache is False
+    assert "filesystem error" in caplog.text
+    assert "disk flush failed" in caplog.text
+    assert list(tmp_path.glob(".config.toml.*.tmp")) == []
+
+
 def test_other_filesystem_failure_is_logged_and_does_not_stop_loading(
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
