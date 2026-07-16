@@ -31,6 +31,7 @@ def test_legacy_data_info_header_is_renamed_without_reformatting(
     )
     config_file = _write_config(tmp_path, original_content)
     config_file.chmod(0o640)
+    original_inode = config_file.stat().st_ino
 
     with caplog.at_level(logging.INFO):
         config = Config(config_file=config_file)
@@ -42,6 +43,7 @@ def test_legacy_data_info_header_is_renamed_without_reformatting(
         1,
     )
     assert stat.S_IMODE(config_file.stat().st_mode) == 0o640
+    assert config_file.stat().st_ino == original_inode
     assert config.get_data_info_config("api").is_cache is False
     assert config.get_data_info_config("api").metrics == ("obs", "med")
     assert "Migrated legacy [data_info] to [DATA_INFO]" in caplog.text
@@ -71,6 +73,7 @@ def test_legacy_header_migration_reapplies_owner_and_group(
     Config(config_file=config_file)
 
     migrated_stat = config_file.stat()
+    assert migrated_stat.st_ino == original_stat.st_ino
     assert migrated_stat.st_uid == original_stat.st_uid
     assert migrated_stat.st_gid == original_stat.st_gid
 
@@ -172,7 +175,7 @@ def test_permission_failure_is_logged_and_legacy_config_still_works(
         "[data_info]\nis_cache = false\n",
     )
 
-    def deny_write(config_file: Path, content: str) -> None:
+    def deny_write(config_file: Path, content: str, **kwargs) -> None:
         raise PermissionError("read-only config")
 
     monkeypatch.setattr(Config, "_replace_config_text", staticmethod(deny_write))
@@ -186,33 +189,25 @@ def test_permission_failure_is_logged_and_legacy_config_still_works(
     assert "read-only config" in caplog.text
 
 
-def test_metadata_copy_failure_is_logged_and_original_file_is_kept(
-    caplog: pytest.LogCaptureFixture,
-    monkeypatch: pytest.MonkeyPatch,
+def test_concurrent_config_change_is_not_overwritten(
     tmp_path: Path,
 ) -> None:
     original_content = "[data_info]\nis_cache = false\n"
     config_file = _write_config(tmp_path, original_content)
+    external_content = original_content + "# edited by another process\n"
+    config_file.write_text(external_content, encoding="utf-8")
 
-    def deny_metadata_copy(*args, **kwargs) -> None:
-        raise PermissionError("metadata is protected")
+    with pytest.raises(OSError, match="changed while migration"):
+        Config._replace_config_text(
+            config_file,
+            original_content.replace("[data_info]", "[DATA_INFO]"),
+            expected_content=original_content,
+        )
 
-    monkeypatch.setattr(
-        "stata_mcp.config.shutil.copystat",
-        deny_metadata_copy,
-    )
-
-    with caplog.at_level(logging.WARNING):
-        config = Config(config_file=config_file)
-
-    assert config_file.read_text(encoding="utf-8") == original_content
-    assert config.get_data_info_config("api").is_cache is False
-    assert "permission denied" in caplog.text
-    assert "metadata is protected" in caplog.text
-    assert list(tmp_path.glob(".config.toml.*.tmp")) == []
+    assert config_file.read_text(encoding="utf-8") == external_content
 
 
-def test_fsync_failure_removes_temporary_file_and_keeps_original(
+def test_fsync_failure_rolls_back_in_place_and_keeps_original(
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -245,7 +240,7 @@ def test_other_filesystem_failure_is_logged_and_does_not_stop_loading(
         "[data_info]\ndecimal_places = 2\n",
     )
 
-    def fail_write(config_file: Path, content: str) -> None:
+    def fail_write(config_file: Path, content: str, **kwargs) -> None:
         raise OSError("read-only file system")
 
     monkeypatch.setattr(Config, "_replace_config_text", staticmethod(fail_write))
@@ -268,7 +263,7 @@ def test_unexpected_write_failure_is_logged_and_does_not_stop_loading(
         "[data_info]\nhash_length = 8\n",
     )
 
-    def fail_write(config_file: Path, content: str) -> None:
+    def fail_write(config_file: Path, content: str, **kwargs) -> None:
         raise RuntimeError("unexpected storage adapter failure")
 
     monkeypatch.setattr(Config, "_replace_config_text", staticmethod(fail_write))

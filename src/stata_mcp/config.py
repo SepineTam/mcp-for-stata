@@ -11,10 +11,7 @@ import logging
 import os
 import platform
 import re
-import shutil
-import stat
 import sys
-import tempfile
 import tomllib
 from dataclasses import dataclass
 from functools import cached_property
@@ -183,7 +180,11 @@ class Config:
                 )
                 return
 
-            cls._replace_config_text(target_file, migrated_content)
+            cls._replace_config_text(
+                target_file,
+                migrated_content,
+                expected_content=content,
+            )
             logger.info(
                 "Migrated legacy [data_info] to [DATA_INFO] in %s.",
                 config_file,
@@ -306,60 +307,72 @@ class Config:
         return multiline_delimiter
 
     @staticmethod
-    def _replace_config_text(config_file: Path, content: str) -> None:
-        """Atomically replace config text while preserving file metadata."""
-        temporary_path: Path | None = None
-        try:
-            original_stat = config_file.stat()
-            with tempfile.NamedTemporaryFile(
-                mode="wb",
-                dir=config_file.parent,
-                prefix=f".{config_file.name}.",
-                suffix=".tmp",
-                delete=False,
-            ) as temporary_file:
-                temporary_path = Path(temporary_file.name)
-                temporary_file.write(content.encode("utf-8"))
-                temporary_file.flush()
-                os.fsync(temporary_file.fileno())
+    def _replace_config_text(
+        config_file: Path,
+        content: str,
+        *,
+        expected_content: str | None = None,
+    ) -> None:
+        """Patch equal-length text in place so all file metadata stays attached."""
+        replacement_bytes = content.encode("utf-8")
+        expected_bytes = (
+            config_file.read_bytes()
+            if expected_content is None
+            else expected_content.encode("utf-8")
+        )
+        if len(replacement_bytes) != len(expected_bytes):
+            raise ValueError("config migration must preserve the file length")
 
-            if hasattr(os, "chown"):
-                temporary_stat = temporary_path.stat()
-                target_user_id = (
-                    original_stat.st_uid
-                    if temporary_stat.st_uid != original_stat.st_uid
-                    else -1
-                )
-                target_group_id = (
-                    original_stat.st_gid
-                    if temporary_stat.st_gid != original_stat.st_gid
-                    else -1
-                )
-                if target_user_id != -1 or target_group_id != -1:
-                    os.chown(
-                        temporary_path,
-                        target_user_id,
-                        target_group_id,
-                    )
-            shutil.copystat(config_file, temporary_path, follow_symlinks=True)
+        difference_indices = [
+            index
+            for index, (original_byte, replacement_byte) in enumerate(
+                zip(expected_bytes, replacement_bytes)
+            )
+            if original_byte != replacement_byte
+        ]
+        if not difference_indices:
+            return
+        patch_start = difference_indices[0]
+        patch_end = difference_indices[-1] + 1
+        original_patch = expected_bytes[patch_start:patch_end]
+        replacement_patch = replacement_bytes[patch_start:patch_end]
+        if original_patch != b"data_info" or replacement_patch != b"DATA_INFO":
+            raise ValueError("config migration may only rename the data-info header")
 
-            temporary_stat = temporary_path.stat()
-            if stat.S_IMODE(temporary_stat.st_mode) != stat.S_IMODE(
-                original_stat.st_mode
-            ):
-                raise OSError("temporary config file mode does not match the original")
-            if hasattr(os, "chown") and (
-                temporary_stat.st_uid != original_stat.st_uid
-                or temporary_stat.st_gid != original_stat.st_gid
-            ):
-                raise OSError(
-                    "temporary config file ownership does not match the original"
-                )
-            os.replace(temporary_path, config_file)
-        except Exception:
-            if temporary_path is not None:
-                temporary_path.unlink(missing_ok=True)
-            raise
+        with open(config_file, "r+b") as config_stream:
+            current_bytes = config_stream.read()
+            if current_bytes == replacement_bytes:
+                return
+            if current_bytes != expected_bytes:
+                raise OSError("config file changed while migration was in progress")
+
+            try:
+                config_stream.seek(patch_start)
+                written_bytes = config_stream.write(replacement_patch)
+                if written_bytes != len(replacement_patch):
+                    raise OSError("config migration wrote an incomplete header")
+                config_stream.flush()
+                os.fsync(config_stream.fileno())
+                config_stream.seek(0)
+                if config_stream.read() != replacement_bytes:
+                    raise OSError("config migration verification failed")
+            except Exception as write_error:
+                try:
+                    config_stream.seek(patch_start)
+                    rollback_bytes = config_stream.write(original_patch)
+                    if rollback_bytes != len(original_patch):
+                        raise OSError("config migration rollback was incomplete")
+                    config_stream.flush()
+                    os.fsync(config_stream.fileno())
+                    config_stream.seek(0)
+                    if config_stream.read() != expected_bytes:
+                        raise OSError("config migration rollback verification failed")
+                except Exception as rollback_error:
+                    raise OSError(
+                        "config migration failed "
+                        f"({write_error}); rollback also failed ({rollback_error})"
+                    ) from write_error
+                raise
 
     @cached_property
     def config(self) -> dict[str, Any]:
