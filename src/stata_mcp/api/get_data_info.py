@@ -73,6 +73,11 @@ def _get_data_info_impl(
             strict_local_boundary=runtime.config.STRICT_DATA_INFO_LOCAL_BOUNDARY,
             enable_url_guard=runtime.config.ENABLE_DATA_INFO_URL_GUARD,
             allowed_url_domains=runtime.config.DATA_INFO_ALLOWED_URL_DOMAINS,
+            additional_allowed_dirs=getattr(
+                runtime.config,
+                "ADDITIONAL_ALLOWED_DIRS",
+                (),
+            ),
         )
 
         stage_started_at = time.perf_counter()

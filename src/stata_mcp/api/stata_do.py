@@ -82,6 +82,7 @@ def _stata_do(
     candidate_allowed_dirs = [
         runtime.config.STATA_MCP_FOLDER.DO,
         runtime.config.WORKING_DIR,
+        *getattr(runtime.config, "ADDITIONAL_ALLOWED_DIRS", ()),
     ]
     allowed_dirs: list[Path] = []
     for candidate_dir in candidate_allowed_dirs:

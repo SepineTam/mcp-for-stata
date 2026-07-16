@@ -186,6 +186,7 @@ def _prepare_stata_do_request(dofile_path: str) -> Dict[str, Any] | _StataDoRequ
     candidate_allowed_dirs = [
         config.STATA_MCP_FOLDER.DO,
         config.WORKING_DIR,
+        *getattr(config, "ADDITIONAL_ALLOWED_DIRS", ()),
     ]
     allowed_dirs: List[Path] = []
     for candidate_dir in candidate_allowed_dirs:
@@ -727,9 +728,14 @@ def read_log(
     path = Path(file_path).resolve()  # Resolve to handle symlinks and ..
 
     # Security check: ensure the file is within the allowed directory
-    try:
-        path.relative_to(config.STATA_MCP_FOLDER.path.resolve())
-    except ValueError:
+    allowed_dirs = [
+        config.STATA_MCP_FOLDER.path.resolve(),
+        *(
+            allowed_dir.resolve()
+            for allowed_dir in getattr(config, "ADDITIONAL_ALLOWED_DIRS", ())
+        ),
+    ]
+    if not _is_within_allowed_directories(path, allowed_dirs):
         # Log security violation for audit purposes.
         # If this security warning appears, it may indicate that the current model has been compromised/poisoned.
         logging.warning(

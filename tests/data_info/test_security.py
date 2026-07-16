@@ -14,6 +14,7 @@ def _write_config(
     enable_guard: bool | None = None,
     allowed_domains: list[str] | None = None,
     strict_local_boundary: bool | None = None,
+    additional_allowed_dirs: list[Path] | None = None,
 ) -> Path:
     config_path = tmp_path / "config.toml"
     lines = [
@@ -28,12 +29,19 @@ def _write_config(
         if allowed_domains is not None:
             domains = ", ".join(f'"{domain}"' for domain in allowed_domains)
             lines.append(f"data_info_allowed_url_domains = [{domains}]")
-    if strict_local_boundary is not None:
+    if strict_local_boundary is not None or additional_allowed_dirs is not None:
         lines.append("")
         lines.append("[SECURITY]")
-        lines.append(
-            f"strict_data_info_local_boundary = {str(strict_local_boundary).lower()}"
-        )
+        if strict_local_boundary is not None:
+            lines.append(
+                f"strict_data_info_local_boundary = {str(strict_local_boundary).lower()}"
+            )
+        if additional_allowed_dirs is not None:
+            allowed_dirs = ", ".join(
+                f'"{allowed_dir.as_posix()}"'
+                for allowed_dir in additional_allowed_dirs
+            )
+            lines.append(f"ADDITIONAL_ALLOWED_DIRS = [{allowed_dirs}]")
 
     config_path.write_text("\n".join(lines), encoding="utf-8")
     return config_path
@@ -218,6 +226,32 @@ def test_local_file_outside_working_dir_is_allowed_by_default(tmp_path) -> None:
 
     payload = json.loads(result)
     assert payload["overview"]["source"] == data_path.resolve().as_posix()
+
+
+def test_local_file_in_additional_allowed_dir_is_allowed_when_strict(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    fake_data_info = _patch_fake_data_info(monkeypatch)
+    working_dir = tmp_path / "work"
+    shared_dir = tmp_path / "shared"
+    working_dir.mkdir()
+    shared_dir.mkdir()
+    data_path = shared_dir / "data.csv"
+    data_path.write_text("x,y\n1,2\n", encoding="utf-8")
+    config_path = _write_config(
+        tmp_path,
+        working_dir,
+        strict_local_boundary=True,
+        additional_allowed_dirs=[shared_dir],
+    )
+
+    api_get_data_info(
+        data_path=data_path.as_posix(),
+        config_file=config_path,
+    )
+
+    assert fake_data_info.calls[-1]["data_path"] == data_path.resolve()
 
 
 def test_local_file_outside_working_dir_is_rejected_when_boundary_is_enabled(
