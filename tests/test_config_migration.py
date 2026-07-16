@@ -25,7 +25,7 @@ def test_legacy_data_info_header_is_renamed_without_reformatting(
         "# Keep this comment and formatting.\r\n"
         "[data_info] # legacy table\r\n"
         "is_cache = false\r\n"
-        "metrics = [\"obs\", \"med\"]\r\n"
+        'metrics = ["obs", "med"]\r\n'
     )
     config_file = _write_config(tmp_path, original_content)
     config_file.chmod(0o640)
@@ -54,6 +54,33 @@ def test_quoted_legacy_header_is_renamed(tmp_path: Path) -> None:
     Config(config_file=config_file)
 
     assert '["DATA_INFO"]' in config_file.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("delimiter", ['"""', "'''"])
+def test_legacy_header_migration_ignores_multiline_string_content(
+    delimiter: str,
+    tmp_path: Path,
+) -> None:
+    original_content = (
+        f"note = {delimiter}\n"
+        "[data_info]\n"
+        "This is documentation, not a table header.\n"
+        f"{delimiter}\n"
+        "\n"
+        "[data_info]\n"
+        "is_cache = false\n"
+    )
+    config_file = _write_config(tmp_path, original_content)
+
+    config = Config(config_file=config_file)
+
+    migrated_content = config_file.read_text(encoding="utf-8")
+    assert migrated_content == original_content.replace(
+        "\n[data_info]\nis_cache",
+        "\n[DATA_INFO]\nis_cache",
+        1,
+    )
+    assert config.get_data_info_config("api").is_cache is False
 
 
 def test_existing_uppercase_and_lowercase_sections_are_not_overwritten(

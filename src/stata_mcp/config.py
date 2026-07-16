@@ -170,19 +170,8 @@ class Config:
                 )
                 return
 
-            def replace_header(match: re.Match[str]) -> str:
-                quote = match.group("quote")
-                return (
-                    f"{match.group('indent')}[{quote}DATA_INFO{quote}]"
-                    f"{match.group('suffix')}{match.group('carriage_return')}"
-                )
-
-            migrated_content, replacement_count = (
-                LEGACY_DATA_INFO_HEADER_PATTERN.subn(
-                    replace_header,
-                    content,
-                    count=1,
-                )
+            migrated_content, replacement_count = cls._replace_legacy_data_info_header(
+                content
             )
             if replacement_count != 1:
                 logger.warning(
@@ -229,6 +218,91 @@ class Config:
                 type(error).__name__,
                 error,
             )
+
+    @classmethod
+    def _replace_legacy_data_info_header(cls, content: str) -> tuple[str, int]:
+        """Replace a real table header while ignoring TOML multiline strings."""
+        migrated_lines: list[str] = []
+        multiline_delimiter: str | None = None
+        replacement_count = 0
+
+        for line in content.splitlines(keepends=True):
+            line_body = line[:-1] if line.endswith("\n") else line
+            line_ending = "\n" if line.endswith("\n") else ""
+            migrated_line_body = line_body
+
+            if multiline_delimiter is None and replacement_count == 0:
+                match = LEGACY_DATA_INFO_HEADER_PATTERN.fullmatch(line_body)
+                if match is not None:
+                    quote = match.group("quote")
+                    migrated_line_body = (
+                        f"{match.group('indent')}[{quote}DATA_INFO{quote}]"
+                        f"{match.group('suffix')}"
+                        f"{match.group('carriage_return')}"
+                    )
+                    replacement_count = 1
+
+            multiline_delimiter = cls._toml_multiline_delimiter_after_line(
+                migrated_line_body,
+                multiline_delimiter,
+            )
+            migrated_lines.append(migrated_line_body + line_ending)
+
+        return "".join(migrated_lines), replacement_count
+
+    @staticmethod
+    def _toml_multiline_delimiter_after_line(
+        line: str,
+        multiline_delimiter: str | None,
+    ) -> str | None:
+        """Track whether the next TOML line starts inside a multiline string."""
+        index = 0
+        while index < len(line):
+            if multiline_delimiter is not None:
+                delimiter_index = line.find(multiline_delimiter, index)
+                if delimiter_index < 0:
+                    return multiline_delimiter
+                if multiline_delimiter == '"""':
+                    preceding_backslashes = 0
+                    cursor = delimiter_index - 1
+                    while cursor >= 0 and line[cursor] == "\\":
+                        preceding_backslashes += 1
+                        cursor -= 1
+                    if preceding_backslashes % 2 == 1:
+                        index = delimiter_index + len(multiline_delimiter)
+                        continue
+                index = delimiter_index + len(multiline_delimiter)
+                multiline_delimiter = None
+                continue
+
+            if line[index] == "#":
+                break
+            if line.startswith('"""', index):
+                multiline_delimiter = '"""'
+                index += 3
+                continue
+            if line.startswith("'''", index):
+                multiline_delimiter = "'''"
+                index += 3
+                continue
+            if line[index] == '"':
+                index += 1
+                while index < len(line):
+                    if line[index] == "\\":
+                        index += 2
+                        continue
+                    if line[index] == '"':
+                        index += 1
+                        break
+                    index += 1
+                continue
+            if line[index] == "'":
+                closing_quote = line.find("'", index + 1)
+                index = len(line) if closing_quote < 0 else closing_quote + 1
+                continue
+            index += 1
+
+        return multiline_delimiter
 
     @staticmethod
     def _replace_config_text(config_file: Path, content: str) -> None:
