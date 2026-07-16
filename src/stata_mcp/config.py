@@ -41,7 +41,8 @@ DATA_INFO_METRICS = (
 DEFAULT_DATA_INFO_METRICS = ("obs", "mean", "stderr", "min", "max")
 LEGACY_DATA_INFO_HEADER_PATTERN = re.compile(
     r"^(?P<indent>[ \t]*)"
-    r"\[(?P<quote>[\"']?)data_info(?P=quote)\]"
+    r"\[(?P<inner_leading>[ \t]*)(?P<quote>[\"']?)"
+    r"data_info(?P=quote)(?P<inner_trailing>[ \t]*)\]"
     r"(?P<suffix>[ \t]*(?:#[^\r\n]*)?)"
     r"(?P<carriage_return>\r?)$",
     re.MULTILINE,
@@ -238,7 +239,10 @@ class Config:
                 if match is not None:
                     quote = match.group("quote")
                     migrated_line_body = (
-                        f"{match.group('indent')}[{quote}DATA_INFO{quote}]"
+                        f"{match.group('indent')}["
+                        f"{match.group('inner_leading')}"
+                        f"{quote}DATA_INFO{quote}"
+                        f"{match.group('inner_trailing')}]"
                         f"{match.group('suffix')}"
                         f"{match.group('carriage_return')}"
                     )

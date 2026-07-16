@@ -115,6 +115,29 @@ def test_quoted_legacy_header_is_renamed(tmp_path: Path) -> None:
     assert '["DATA_INFO"]' in config_file.read_text(encoding="utf-8")
 
 
+@pytest.mark.parametrize(
+    ("legacy_header", "canonical_header"),
+    [
+        ("[ data_info ]", "[ DATA_INFO ]"),
+        ("[ 'data_info' ] # keep", "[ 'DATA_INFO' ] # keep"),
+    ],
+)
+def test_legacy_header_with_inner_whitespace_is_renamed(
+    legacy_header: str,
+    canonical_header: str,
+    tmp_path: Path,
+) -> None:
+    config_file = _write_config(
+        tmp_path,
+        f"{legacy_header}\nis_cache = false\n",
+    )
+
+    config = Config(config_file=config_file)
+
+    assert canonical_header in config_file.read_text(encoding="utf-8")
+    assert config.get_data_info_config("api").is_cache is False
+
+
 @pytest.mark.parametrize("delimiter", ['"""', "'''"])
 def test_legacy_header_migration_ignores_multiline_string_content(
     delimiter: str,
