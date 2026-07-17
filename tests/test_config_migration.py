@@ -27,7 +27,7 @@ def test_legacy_data_info_header_is_renamed_without_reformatting(
         "# Keep this comment and formatting.\r\n"
         "[data_info] # legacy table\r\n"
         "is_cache = false\r\n"
-        'metrics = ["obs", "med"]\r\n'
+        'metrics = ["med", "unknown", "med"]\r\n'
     )
     config_file = _write_config(tmp_path, original_content)
     config_file.chmod(0o640)
@@ -45,7 +45,14 @@ def test_legacy_data_info_header_is_renamed_without_reformatting(
     assert stat.S_IMODE(config_file.stat().st_mode) == 0o640
     assert config_file.stat().st_ino == original_inode
     assert config.get_data_info_config("api").is_cache is False
-    assert config.get_data_info_config("api").metrics == ("obs", "med")
+    assert config.get_data_info_config("api").metrics == (
+        "obs",
+        "mean",
+        "stderr",
+        "min",
+        "max",
+        "med",
+    )
     assert "Migrated legacy [data_info] to [DATA_INFO]" in caplog.text
 
 

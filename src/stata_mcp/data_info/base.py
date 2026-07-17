@@ -25,6 +25,11 @@ import numpy as np
 import pandas as pd
 import requests
 
+from .._data_info_metrics import (
+    DATA_INFO_METRICS,
+    DEFAULT_DATA_INFO_METRICS,
+    normalize_data_info_metrics,
+)
 from .._diagnostic_logging import (
     elapsed_ms,
     log_event,
@@ -140,13 +145,8 @@ class DataInfoBase(ABC):
     CACHE_SCHEMA_VERSION = 2
     CACHE_SETTINGS_HASH_LENGTH = 16
 
-    DEFAULT_METRICS: List[str] = [
-        'obs', 'mean', 'stderr', 'min', 'max'
-    ]
-    ALLOWED_METRICS: List[str] = DEFAULT_METRICS + [
-        # Additional metrics
-        'med', 'q1', 'q3', 'skewness', 'kurtosis'
-    ]
+    DEFAULT_METRICS: List[str] = list(DEFAULT_DATA_INFO_METRICS)
+    ALLOWED_METRICS: List[str] = list(DATA_INFO_METRICS)
 
     # Request timeout
     DEFAULT_TIMEOUT = (5, 30)
@@ -255,16 +255,8 @@ class DataInfoBase(ABC):
         cls,
         metrics: List[str] | Tuple[str, ...] | None,
     ) -> List[str]:
-        """Return supported metrics in caller order, or the legacy defaults."""
-        if metrics is None:
-            return list(cls.DEFAULT_METRICS)
-        normalized_metrics = [
-            str(metric).lower()
-            for metric in metrics
-            if str(metric).lower() in cls.ALLOWED_METRICS
-        ]
-        unique_metrics = list(dict.fromkeys(normalized_metrics))
-        return unique_metrics or list(cls.DEFAULT_METRICS)
+        """Keep mandatory metrics and append supported extras."""
+        return list(normalize_data_info_metrics(metrics))
 
     @staticmethod
     def _load_default_runtime_settings() -> Any | None:

@@ -98,7 +98,15 @@ class TestRuntimeSettings:
         )
 
         assert data_info.is_cache is False
-        assert data_info.metrics == ["med", "q1"]
+        assert data_info.metrics == [
+            "obs",
+            "mean",
+            "stderr",
+            "min",
+            "max",
+            "med",
+            "q1",
+        ]
         assert data_info.string_keep_number == 2
         assert data_info.decimal_places == 1
         assert data_info.HASH_LENGTH == 6
@@ -136,7 +144,7 @@ class TestRuntimeSettings:
             "\n".join(
                 [
                     "[DATA_INFO]",
-                    'metrics = ["obs", "med"]',
+                    'metrics = ["med"]',
                     "string_keep_number = 3",
                     "decimal_places = 2",
                     "hash_length = 8",
@@ -151,7 +159,14 @@ class TestRuntimeSettings:
 
         data_info = CsvDataInfo(data_path)
 
-        assert data_info.metrics == ["obs", "med"]
+        assert data_info.metrics == [
+            "obs",
+            "mean",
+            "stderr",
+            "min",
+            "max",
+            "med",
+        ]
         assert data_info.string_keep_number == 3
         assert data_info.decimal_places == 2
         assert data_info.HASH_LENGTH == 8
@@ -166,6 +181,39 @@ class TestRuntimeSettings:
 
         assert data_info.metrics == DataInfoBase.DEFAULT_METRICS
 
+    def test_direct_metrics_keep_defaults_and_ignore_unsupported_values(
+        self,
+        tmp_path,
+    ):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        data_path = tmp_path / "sample.csv"
+        data_path.write_text("value\n1\n2\n", encoding="utf-8")
+
+        data_info = CsvDataInfo(
+            data_path,
+            metrics=["Q1", "unsupported", "q1", "mean", "MED"],
+        )
+
+        assert data_info.metrics == [
+            "obs",
+            "mean",
+            "stderr",
+            "min",
+            "max",
+            "q1",
+            "med",
+        ]
+        assert set(data_info.info["vars_detail"]["value"]["summary"]) == {
+            "obs",
+            "mean",
+            "stderr",
+            "min",
+            "max",
+            "q1",
+            "med",
+        }
+
     def test_cache_is_isolated_by_output_settings(self, tmp_path):
         from stata_mcp.data_info.csv import CsvDataInfo
 
@@ -178,21 +226,21 @@ class TestRuntimeSettings:
         first_handler = CsvDataInfo(
             data_path,
             cache_dir=cache_dir,
-            metrics=["mean"],
+            metrics=["q1"],
             string_keep_number=1,
             decimal_places=1,
         )
         second_handler = CsvDataInfo(
             data_path,
             cache_dir=cache_dir,
-            metrics=["mean"],
+            metrics=["q1"],
             string_keep_number=2,
             decimal_places=4,
         )
         different_metrics_handler = CsvDataInfo(
             data_path,
             cache_dir=cache_dir,
-            metrics=["max"],
+            metrics=["q3"],
             string_keep_number=2,
             decimal_places=4,
         )

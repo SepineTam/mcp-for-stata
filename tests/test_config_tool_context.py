@@ -161,7 +161,7 @@ decimal_places = 4
 
 [MCP.TOOLS.DATA_INFO]
 is_cache = true
-metrics = ["obs", "med", "q1"]
+metrics = ["med", "unsupported", "q1", "med"]
 hash_length = 16
 """,
     )
@@ -169,7 +169,7 @@ hash_length = 16
     settings = Config(config_file=config_path).get_data_info_config("mcp")
 
     assert settings.is_cache is True
-    assert settings.metrics == ("obs", "med", "q1")
+    assert settings.metrics == DEFAULT_DATA_INFO_METRICS + ("med", "q1")
     assert settings.string_keep_number == 7
     assert settings.decimal_places == 4
     assert settings.hash_length == 16
@@ -182,6 +182,22 @@ def test_data_info_context_defaults_distinguish_cli_from_mcp(tmp_path: Path) -> 
     assert config.get_data_info_config("cli").heads == 5
     assert config.get_data_info_config("mcp").heads == 0
     assert config.get_data_info_config("api").metrics == DEFAULT_DATA_INFO_METRICS
+
+
+def test_data_info_metrics_always_keep_defaults_and_deduplicate_extras(
+    tmp_path: Path,
+) -> None:
+    config_path = _write_config(
+        tmp_path,
+        """
+[MCP.TOOLS.DATA_INFO]
+metrics = ["Q1", "mean", "unsupported", "q1", "MED"]
+""",
+    )
+
+    settings = Config(config_file=config_path).get_data_info_config("mcp")
+
+    assert settings.metrics == DEFAULT_DATA_INFO_METRICS + ("q1", "med")
 
 
 @pytest.mark.parametrize(

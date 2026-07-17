@@ -20,25 +20,16 @@ from typing import Any, Literal, Optional, Union
 
 import tomli_w
 
+from ._data_info_metrics import (
+    DEFAULT_DATA_INFO_METRICS,
+    normalize_data_info_metrics,
+)
 from .core.types import StataCLINotFoundError
 from .stata import StataFinder
 
 logger = logging.getLogger(__name__)
 
 ToolContext = Literal["api", "cli", "mcp"]
-DATA_INFO_METRICS = (
-    "obs",
-    "mean",
-    "stderr",
-    "min",
-    "max",
-    "med",
-    "q1",
-    "q3",
-    "skewness",
-    "kurtosis",
-)
-DEFAULT_DATA_INFO_METRICS = ("obs", "mean", "stderr", "min", "max")
 LEGACY_DATA_INFO_HEADER_PATTERN = re.compile(
     r"^(?P<indent>[ \t]*)"
     r"\[(?P<inner_leading>[ \t]*)(?P<quote>[\"']?)"
@@ -703,13 +694,7 @@ class Config:
 
     @staticmethod
     def _to_metrics(value) -> tuple[str, ...]:
-        metrics = Config._to_str_tuple(value)
-        normalized_metrics = tuple(metric.lower() for metric in metrics)
-        if not normalized_metrics:
-            raise ValueError("At least one data-info metric is required.")
-        if any(metric not in DATA_INFO_METRICS for metric in normalized_metrics):
-            raise ValueError("Unsupported data-info metric.")
-        return tuple(dict.fromkeys(normalized_metrics))
+        return normalize_data_info_metrics(value)
 
     @staticmethod
     def _normalize_tool_context(context: ToolContext | None) -> ToolContext:

@@ -159,7 +159,7 @@ heads = 2
 
 [MCP.TOOLS.DATA_INFO]
 is_cache = false
-metrics = ["obs", "med"]
+metrics = ["med"]
 string_keep_number = 4
 decimal_places = 1
 hash_length = 8
@@ -175,7 +175,14 @@ heads = 7
     )
 
     assert fake_data_info.calls[-1]["is_cache"] is False
-    assert fake_data_info.calls[-1]["metrics"] == ("obs", "med")
+    assert fake_data_info.calls[-1]["metrics"] == (
+        "obs",
+        "mean",
+        "stderr",
+        "min",
+        "max",
+        "med",
+    )
     assert fake_data_info.calls[-1]["string_keep_number"] == 4
     assert fake_data_info.calls[-1]["decimal_places"] == 1
     assert fake_data_info.calls[-1]["hash_length"] == 8
