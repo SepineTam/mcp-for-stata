@@ -15,10 +15,10 @@ def normalize_data_info_metrics(value: Any) -> tuple[str, ...]:
         return DEFAULT_DATA_INFO_METRICS
     if isinstance(value, str):
         values = value.split(",")
-    elif isinstance(value, (list, tuple, set)):
+    elif isinstance(value, (list, tuple)):
         values = value
     else:
-        raise TypeError("Expected a comma-separated string or string collection.")
+        raise TypeError("Expected a comma-separated string, list, or tuple.")
 
     additional_metrics: list[str] = []
     for item in values:

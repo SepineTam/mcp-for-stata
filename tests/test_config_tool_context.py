@@ -200,6 +200,11 @@ metrics = ["Q1", "mean", "unsupported", "q1", "MED"]
     assert settings.metrics == DEFAULT_DATA_INFO_METRICS + ("q1", "med")
 
 
+def test_data_info_metrics_reject_unordered_collections() -> None:
+    with pytest.raises(TypeError, match="string, list, or tuple"):
+        Config._to_metrics({"q1", "med"})
+
+
 @pytest.mark.parametrize(
     ("key", "value", "attribute", "default"),
     [
