@@ -1,0 +1,2378 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://sepinetam.github.io/mcp-for-stata/claude-plugin/">
+      
+      
+        <link rel="prev" href="../usage/">
+      
+      
+        <link rel="next" href="../clients/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../zh/claude-plugin/" hreflang="zh">
+        
+      
+      
+      <link rel="icon" href="https://r2.statamcp.com/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Claude Plugin - Stata-MCP Documents</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#claude-plugin-integration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Stata-MCP Documents" class="md-header__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Stata-MCP Documents
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Claude Plugin
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../zh/claude-plugin/" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SepineTam/mcp-for-stata" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mcp-for-stata
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Stata-MCP Documents" class="md-nav__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    Stata-MCP Documents
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SepineTam/mcp-for-stata" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mcp-for-stata
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Plugin
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-claude-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is Claude Plugin?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plugin-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin Structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plugin Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#marketplace-manifest-marketplacejson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Marketplace Manifest (marketplace.json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugin-configuration-pluginjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin Configuration (plugin.json)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plugin Configuration (plugin.json)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mcp-servers-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP Servers Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lsp-servers-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LSP Servers Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Example Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#paper-replication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper Replication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-hypothesis-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Hypothesis Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-plugin-vs-manual-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison: Plugin vs Manual Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comparison: Plugin vs Manual Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manual-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugin-based-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin-Based Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plugin-loading-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin Loading Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plugin-not-detected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin Not Detected
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-server-connection-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP Server Connection Failed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lsp-not-working" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LSP Not Working
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license-and-attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        License and Attribution
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clients/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clients
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../beta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Beta Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/claude_code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/claude_science/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Science
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/codex/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/openclaw/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenClaw
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoreTech
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CoreTech
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/finder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Finder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/do/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Runner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/help/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Help
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-claude-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is Claude Plugin?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plugin-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin Structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plugin Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#marketplace-manifest-marketplacejson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Marketplace Manifest (marketplace.json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugin-configuration-pluginjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin Configuration (plugin.json)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plugin Configuration (plugin.json)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mcp-servers-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP Servers Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lsp-servers-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LSP Servers Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Example Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#paper-replication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper Replication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-hypothesis-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Hypothesis Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-plugin-vs-manual-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison: Plugin vs Manual Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comparison: Plugin vs Manual Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manual-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugin-based-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin-Based Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plugin-loading-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin Loading Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plugin-not-detected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin Not Detected
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-server-connection-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP Server Connection Failed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lsp-not-working" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LSP Not Working
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license-and-attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        License and Attribution
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="claude-plugin-integration">Claude Plugin Integration</h1>
+<h2 id="overview">Overview</h2>
+<p>MCP-for-Stata provides official native plugin support for Claude Code, integrating two powerful components in <code>stata-toolbox@stata-plugin-lib</code> now:</p>
+<ol>
+<li><strong>MCP-for-Stata Server</strong>: Model Context Protocol server for Stata execution</li>
+<li><strong>Stata LSP (Language Server Protocol)</strong>: Advanced language support for Stata do-files</li>
+</ol>
+<p>This plugin package, named <strong>stata-toolbox</strong>, delivers a unified development environment for empirical research, combining the analytical power of Stata with AI assistance and advanced IDE features.</p>
+<h2 id="what-is-claude-plugin">What is Claude Plugin?</h2>
+<p>Claude Plugin is a plugin system introduced in Claude Code that allows developers to package and distribute:</p>
+<ul>
+<li><strong>MCP Servers</strong>: Model Context Protocol servers that expose tools to Claude</li>
+<li><strong>LSP Servers</strong>: Language Server Protocol servers for enhanced editor support</li>
+<li><strong>Skills</strong>: Skills for expand Claude agent abilities</li>
+<li><strong>Configuration</strong>: Pre-configured settings for optimal integration</li>
+</ul>
+<p>The plugin system enables one-command installation of complex development environments, replacing manual configuration with reproducible, version-controlled packages.</p>
+<h2 id="plugin-structure">Plugin Structure</h2>
+<blockquote>
+<p>More plugin config schema could be found in <a href="https://code.claude.com/docs/en/plugins-reference#plugin-manifest-schema">plugins-reference</a> from Claude. </p>
+</blockquote>
+<pre><code>.claude-plugin/
+├── marketplace.json          # Plugin registry manifest
+└── plugins/
+    └── stata-toolbox/       # Plugin package
+        └── plugin.json        # Plugin configuration
+</code></pre>
+<h3 id="marketplace-manifest-marketplacejson">Marketplace Manifest (<code>marketplace.json</code>)</h3>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;stata-plugin-lib&quot;,
+  &quot;owner&quot;: {
+    &quot;name&quot;: &quot;Song Tan&quot;,
+    &quot;email&quot;: &quot;sepinetam@gmail.com&quot;
+  },
+  &quot;plugins&quot;: [
+    {
+      &quot;name&quot;: &quot;stata-toolbox&quot;,
+      &quot;source&quot;: &quot;./plugins/stata-toolbox&quot;,
+      &quot;description&quot;: &quot;The official working package of MCP-for-Stata plugin, including mcp config and stata lsp.&quot;
+    }
+  ]
+}
+</code></pre>
+<p><strong>Fields:</strong>
+- <code>name</code> (string): Marketplace library identifier (kebab-case, no spaces)
+- <code>owner</code> (object): Author information
+  - <code>name</code> (string): Author name
+  - <code>email</code> (string): Contact email
+- <code>plugins</code> (array): List of plugin packages
+  - <code>name</code> (string): Plugin identifier
+  - <code>source</code> (string): Relative path to plugin directory
+  - <code>description</code> (string): Plugin functionality summary</p>
+<h3 id="plugin-configuration-pluginjson">Plugin Configuration (<code>plugin.json</code>)</h3>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;stata-toolbox&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;description&quot;: &quot;The official working package of MCP-for-Stata plugin, including mcp config and stata lsp.&quot;,
+  &quot;author&quot;: {
+    &quot;name&quot;: &quot;Song Tan&quot;,
+    &quot;email&quot;: &quot;sepinetam@gmail.com&quot;,
+    &quot;url&quot;: &quot;https://www.sepinetam.com&quot;
+  },
+  &quot;homepage&quot;: &quot;https://statamcp.com&quot;,
+  &quot;repository&quot;: &quot;https://github.com/sepinetam/mcp-for-stata&quot;,
+  &quot;license&quot;: &quot;AGPL-3.0&quot;,
+  &quot;keywords&quot;: [&quot;stata&quot;, &quot;econometrics&quot;, &quot;empirical analysis&quot;],
+  &quot;mcpServers&quot;: {
+    ...
+  },
+  &quot;lspServers&quot;: {
+    ...
+  }
+}
+</code></pre>
+<p><strong>Configuration Sections:</strong></p>
+<h4 id="mcp-servers-configuration">MCP Servers Configuration</h4>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;stata-mcp&quot;: {
+      &quot;command&quot;: &quot;uvx&quot;, 
+      &quot;args&quot;: [
+        &quot;stata-mcp&quot;
+      ]
+    }
+  }
+}
+</code></pre>
+<p><strong>command</strong>: The command to execute the MCP server. Using <code>uvx</code> allows running installed Python packages directly without activating a virtual environment.</p>
+<p><strong>args</strong>: Array of command-line arguments passed to the command. <code>["stata-mcp"]</code> specifies the package name to run.</p>
+<h4 id="lsp-servers-configuration">LSP Servers Configuration</h4>
+<pre><code class="language-json">&quot;lspServers&quot;: {
+  &quot;stata&quot;: {
+    &quot;command&quot;: &quot;stata-language-server&quot;,
+    &quot;args&quot;: [],
+    &quot;extensionToLanguage&quot;: {
+      &quot;.do&quot;: &quot;stata&quot;
+    },
+    &quot;settings&quot;: {
+      &quot;stata&quot;: {
+        &quot;setMaxLineLength&quot;: 120,
+        &quot;setIndentSpace&quot;: 4,
+        &quot;enableCompletion&quot;: true,
+        &quot;enableDocstring&quot;: true,
+        &quot;enableStyleChecking&quot;: true,
+        &quot;enableFormatting&quot;: true
+      }
+    }
+  }
+}
+</code></pre>
+<blockquote>
+<p><strong>Notes</strong>: You should install <code>stata-language-server</code> first via <code>pipx install "git+https://github.com/euglevi/stata-language-server.git"</code>. </p>
+</blockquote>
+<p><strong>command</strong>: The LSP server binary executable. Must be available in the system PATH.</p>
+<p><strong>args</strong>: Array of command-line arguments passed to the LSP server. Empty array means no additional arguments.</p>
+<p><strong>extensionToLanguage</strong>: Maps file extensions to language identifiers. <code>.do</code> files are mapped to the <code>stata</code> language for proper LSP support.</p>
+<p><strong>settings</strong>: LSP-specific configuration object. The <code>stata</code> key contains Stata language server settings for code completion, formatting, and style checking.</p>
+<h2 id="installation">Installation</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Before installing the plugin, ensure following requirements are met:</p>
+<ol>
+<li><strong>Claude Code</strong>: Install via official installer
+   ```bash
+   # macOS/Linux
+   curl -fsSL https://claude.ai/install.sh | bash</li>
+</ol>
+<p># Windows
+   irm https://claude.ai/install.ps1 | iex
+   ```</p>
+<ol>
+<li>
+<p><strong>Stata</strong>: Valid Stata 17+ license with Stata MP installed</p>
+</li>
+<li>
+<p><strong>Python Package</strong>: <code>stata-mcp</code> package available
+   <code>bash
+   # Verify installation
+   uvx stata-mcp doctor</code></p>
+</li>
+<li>
+<p><strong>Stata LSP</strong>: Language server installed
+   <code>bash
+   pipx install "git+https://github.com/euglevi/stata-language-server.git"</code></p>
+</li>
+<li>
+<p><strong>uv</strong>: Package runner (recommended)
+   ```bash
+   # Install via homebrew
+   brew install uv</p>
+</li>
+</ol>
+<p># Or via official installer
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```</p>
+<h3 id="installation-method">Installation Method</h3>
+<p>Add the marketplace registry and install the plugin:</p>
+<pre><code class="language-bash"># Add marketplace
+claude plugin marketplace add sepinetam/stata-mcp
+
+# Install plugin to user scope (default)
+claude plugin install stata-toolbox
+
+# Install to project scope (shared with team)
+claude plugin install stata-toolbox --scope project
+
+# Install to local scope (gitignored)
+claude plugin install stata-toolbox --scope local
+</code></pre>
+<p>The plugin automatically uses the current directory as the working directory for Stata operations.</p>
+<h3 id="verification">Verification</h3>
+<p>After installation, verify the plugin is loaded:</p>
+<pre><code class="language-bash"># List installed plugins
+claude plugin list
+</code></pre>
+<h3 id="how-it-works">How It Works</h3>
+<p>Once installed, the plugin provides seamless integration:</p>
+<p><strong>1. Automatic Loading</strong>
+Claude Code automatically detects:
+- <code>.claude-plugin/marketplace.json</code> → Plugin registry
+- <code>plugins/stata-toolbox/plugin.json</code> → Plugin configuration</p>
+<p><strong>2. MCP Tools</strong>
+The MCP-for-Stata server exposes tools that Claude can invoke:
+- <code>stata_do</code>: Execute Stata code
+- <code>get_data_info</code>: Analyze datasets
+- <code>help</code>: Get Stata command documentation
+- And more...</p>
+<p><strong>3. LSP Features</strong>
+The Stata LSP provides advanced editor support:
+- <strong>Syntax Highlighting</strong>: Enhanced .do file coloring
+- <strong>Completion</strong>: Auto-suggest Stata commands
+- <strong>Hover Documentation</strong>: Mouse over commands for help
+- <strong>Error Detection</strong>: Real-time syntax validation
+- <strong>Formatting</strong>: Auto-format .do files</p>
+<h3 id="example-workflows">Example Workflows</h3>
+<blockquote>
+<p>This part is generated by AI, please review before use. If you want to achieve the best results, you should edit your <code>~/.claude/CLAUDE.md</code> with your own preferences. </p>
+</blockquote>
+<h4 id="paper-replication">Paper Replication</h4>
+<pre><code class="language-markdown">&gt; Load the dataset from &quot;source/data/CPS_2018.dta&quot;
+&gt; Replicate Table 3 from Mincer (1974) using OLS regression
+&gt; Export the regression table to LaTeX format
+
+Claude:
+1. Uses get_data_info to understand dataset structure
+2. Creates a do-file with the client native file-writing capability
+3. Executes with stata_do
+4. Exports table to stata-mcp-result/
+</code></pre>
+<h4 id="quick-hypothesis-testing">Quick Hypothesis Testing</h4>
+<pre><code class="language-markdown">&gt; Test whether education returns have increased post-2008 financial crisis
+&gt; Use difference-in-differences with college enrollment as treatment
+
+Claude:
+1. Generates DiD specification
+2. Runs stata_do with event study design
+3. Presents results with economic interpretation
+</code></pre>
+<h2 id="comparison-plugin-vs-manual-configuration">Comparison: Plugin vs Manual Configuration</h2>
+<h3 id="manual-configuration">Manual Configuration</h3>
+<p>Traditional approach with command:</p>
+<pre><code class="language-bash">claude mcp add stata-mcp -- uvx stata-mcp
+</code></pre>
+<p>or requires manual <code>.mcp.json</code> editing:</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;stata-mcp&quot;: {
+      &quot;command&quot;: &quot;uvx&quot;,
+      &quot;args&quot;: [&quot;stata-mcp&quot;],
+      &quot;env&quot;: {
+        &quot;STATA_MCP__CWD&quot;: &quot;/absolute/path/to/project&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="plugin-based-configuration">Plugin-Based Configuration</h3>
+<p><strong>With Plugin:</strong></p>
+<pre><code class="language-bash"># Single command installation
+claude plugin marketplace add sepinetam/stata-mcp
+claude plugin install stata-toolbox
+</code></pre>
+<h3 id="comparison">Comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Manual Configuration</th>
+<th>Plugin Installation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Setup</strong></td>
+<td>Edit <code>.mcp.json</code> manually or command</td>
+<td>One-command installation</td>
+</tr>
+<tr>
+<td><strong>MCP Server</strong></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>LSP Server</strong></td>
+<td>❌ Separate installation</td>
+<td>✅ Included</td>
+</tr>
+<tr>
+<td><strong>Team Sharing</strong></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>Updates</strong></td>
+<td>Auto update the latest MCP</td>
+<td>Auto update MCP and manual update others</td>
+</tr>
+</tbody>
+</table>
+<h2 id="architecture">Architecture</h2>
+<h3 id="plugin-loading-process">Plugin Loading Process</h3>
+<pre><code>1. Claude Code Startup
+   ↓
+2. Scan for .claude-plugin/marketplace.json
+   ↓
+3. Parse plugin registry
+   ↓
+4. Load each plugin's plugin.json
+   ↓
+5. Register MCP servers
+   ↓
+6. Initialize LSP servers
+   ↓
+7. Apply plugin configurations
+   ↓
+8. Plugin ready for use
+</code></pre>
+<h3 id="component-interaction">Component Interaction</h3>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│                   Claude Code                       │
+└──────────────────────┬──────────────────────────────┘
+                       │
+         ┌─────────────┴────────────┐
+         │                          │
+    ┌────▼─────┐                ┌────▼─────┐
+    │   MCP    │                │   LSP    │
+    │  Server  │                │  Server  │
+    └────┬─────┘                └────┬─────┘
+         │                           │
+    ┌────▼───────────────────────────▼────┐
+    │         MCP-for-Stata Package           │
+    │  - stata_do tool                    │
+    │  - Data analysis tools              │
+    │  - Help system                      │
+    └─────────────────────────────────────┘
+         │
+    ┌────▼──────────┐
+    │     Stata     │
+    │  Executable   │
+    └───────────────┘
+</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="plugin-not-detected">Plugin Not Detected</h3>
+<p><strong>Symptom:</strong> Plugin installed but Claude Code doesn't show tools</p>
+<p><strong>Solutions:</strong>
+1. Restart Claude Code completely
+2. Verify JSON syntax in marketplace.json and plugin.json
+3. Check file permissions (must be readable)
+4. Ensure plugin is installed correctly
+5. Run <code>claude plugin list</code> to verify</p>
+<h3 id="mcp-server-connection-failed">MCP Server Connection Failed</h3>
+<p><strong>Symptom:</strong> Tools show error "Failed to connect to MCP server"</p>
+<p><strong>Diagnosis:</strong></p>
+<pre><code class="language-bash"># Test MCP server independently
+uvx stata-mcp doctor
+
+# Check if Stata is accessible
+stata-se --version
+
+# Verify uvx installation
+uvx --version
+</code></pre>
+<p><strong>Solutions:</strong>
+1. Install missing dependencies:
+   <code>bash
+   pip install stata-mcp</code></p>
+<ol>
+<li>
+<p>Verify Stata installation path</p>
+</li>
+<li>
+<p>Check environment variables are correctly set</p>
+</li>
+</ol>
+<h3 id="lsp-not-working">LSP Not Working</h3>
+<p><strong>Symptom:</strong> No syntax highlighting or completion in .do files</p>
+<p><strong>Diagnosis:</strong></p>
+<pre><code class="language-bash"># Check if stata-language-server is installed
+which stata-language-server
+
+# Test LSP server
+stata-language-server --help
+</code></pre>
+<p><strong>Solutions:</strong>
+1. Install stata-language-server:
+   <code>bash
+   npm install -g stata-language-server</code></p>
+<ol>
+<li>
+<p>Verify file extension mapping:
+   <code>json
+   {
+     "extensionToLanguage": {
+       ".do": "stata"
+     }
+   }</code></p>
+</li>
+<li>
+<p>Check LSP logs in Claude Code</p>
+</li>
+</ol>
+<h2 id="best-practices">Best Practices</h2>
+<ol>
+<li><strong>Verify Installation</strong>: Check system compatibility with <code>uvx stata-mcp doctor</code> before installing</li>
+<li><strong>Environment Variables</strong>: Use <code>.env</code> file or project settings for sensitive data</li>
+<li><strong>Documentation</strong>: Maintain project-specific CLAUDE.md with research instructions</li>
+<li><strong>Version Updates</strong>: Keep plugin updated for latest features and bug fixes</li>
+</ol>
+<h2 id="related-documentation">Related Documentation</h2>
+<ul>
+<li><a href="../configuration/">Configuration Guide</a> - Advanced configuration options</li>
+<li><a href="../security/">Security Documentation</a> - Security guard system</li>
+<li><a href="../monitoring/">Monitoring Guide</a> - Resource monitoring</li>
+<li><a href="../mcp/tools/">MCP Tools Reference</a> - Available tools</li>
+<li><a href="../usage/">Usage Examples</a> - Common workflows</li>
+<li><a href="../clients/">Client Configuration</a> - Alternative client setups</li>
+</ul>
+<h2 id="license-and-attribution">License and Attribution</h2>
+<p>stata-toolbox plugin is part of the MCP-for-Stata project.</p>
+<ul>
+<li><strong>License</strong>: AGPL-3.0</li>
+<li><strong>Copyright</strong>: (c) 2026 Song Tan (Sepine Tam), Inc.</li>
+<li><strong>Authors</strong>: Song Tan (sepinetam@gmail.com)</li>
+</ul>
+<p><strong>Stata LSP</strong>: Copyright by <a href="https://github.com/euglevi/stata-language-server">euglevi</a> with <a href="https://github.com/euglevi/stata-language-server/blob/main/LICENSE">MIT License</a></p>
+<p>The plugin integrates independently developed components:
+- <strong>MCP-for-Stata Server</strong>: <a href="https://github.com/sepinetam/mcp-for-stata">GitHub Repository</a>
+- <strong>Stata LSP</strong>: <a href="https://github.com/euglevi/stata-language-server">GitHub Repository</a></p>
+<hr />
+<p><strong>Document Version</strong>: 1.0.0
+<strong>Last Updated</strong>: 2025-02-12
+<strong>Maintainer</strong>: Song Tan (sepinetam@gmail.com)</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../usage/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Usage">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Usage
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../clients/" class="md-footer__link md-footer__link--next" aria-label="Next: Clients">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Clients
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 - present <a href="https://github.com/sepinetam">Sepine Tam</a>. All Right Reserved. 
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/sepinetam/stata-mcp" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="mailto:sepinetam@gmail.com" target="_blank" rel="noopener" title="E-mail" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m20 8-8 5-8-5V6l8 5 8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.code.select", "navigation.path", "navigation.sections", "navigation.expand", "content.code.annotate", "navigation.footer", "navigation.top"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

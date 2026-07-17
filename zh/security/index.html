@@ -1,0 +1,3472 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://sepinetam.github.io/mcp-for-stata/zh/security/">
+      
+      
+        <link rel="prev" href="../beta/">
+      
+      
+        <link rel="next" href="../monitoring/">
+      
+      
+        
+          <link rel="alternate" href="../../security/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="zh">
+        
+      
+      
+      <link rel="icon" href="https://r2.statamcp.com/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Security - Stata-MCP Documents</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../" title="Stata-MCP Documents" class="md-header__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Stata-MCP Documents
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Security
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../security/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SepineTam/mcp-for-stata" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mcp-for-stata
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="Stata-MCP Documents" class="md-nav__button md-logo" aria-label="Stata-MCP Documents" data-md-component="logo">
+      
+  <img src="https://example-data.statamcp.com/android-chrome-512x512.png" alt="logo">
+
+    </a>
+    Stata-MCP Documents
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SepineTam/mcp-for-stata" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mcp-for-stata
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../claude-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clients/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clients
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../beta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Beta Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概述
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="概述">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        关键功能
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        危险命令
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="危险命令">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell 执行命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        文件操作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        代码执行
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        包管理
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dofile 目录边界
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dofile 目录边界">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        允许的根目录
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        拒绝行为
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        操作建议
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Info 访问边界
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Info 访问边界">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本地数据文件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        URL 数据源
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#read-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read Log 边界开关
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-macro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Macro 展开检测
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local Macro 展开检测">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        检测逻辑
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        反例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        覆盖范围说明
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guard 禁用警告
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dofile-data-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dofile 展开与 data-path 审计
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第三方 Ado 安装边界
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        启用/禁用安全守卫
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="启用/禁用安全守卫">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        选项 1：配置文件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        选项 2：环境变量
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        默认行为
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        使用
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="使用">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        基本使用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安全验证示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编程使用
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安全报告
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="安全报告">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#securityreport" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecurityReport 对象
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#riskitem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RiskItem 对象
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例输出
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        危险模式
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="危险模式">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shell_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell 命令模式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        文件操作模式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        代码执行模式
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证流程
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="验证流程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        逐步验证
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        最佳实践
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="最佳实践">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 保持安全守卫启用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 审查安全报告
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 为允许的操作使用白名单
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 教育用户
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        故障排除
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="故障排除">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        误报
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_33" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        禁用安全守卫
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_34" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        自定义黑名单
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安全考虑
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="安全考虑">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_36" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        守卫防护的内容
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_37" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        限制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_38" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        纵深防御
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        与 MCP 工具的集成
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="与 MCP 工具的集成">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_39" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        自动集成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_40" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证流程
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_41" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        可扩展性
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="可扩展性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_42" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        创建自定义验证器
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_43" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        组合多个验证器
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_44" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="示例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例 1：安全代码执行
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例 2：危险代码检测
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例 3：多项违规
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_45" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        总结
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/claude_code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/claude_science/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Science
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/codex/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agents/openclaw/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenClaw
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CoreTech
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CoreTech
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/finder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Finder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/do/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Runner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/help/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata Help
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/stata/package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stata package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概述
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="概述">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        关键功能
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        危险命令
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="危险命令">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell 执行命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        文件操作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        代码执行
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        包管理
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dofile 目录边界
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dofile 目录边界">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        允许的根目录
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        拒绝行为
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        操作建议
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Info 访问边界
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Info 访问边界">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本地数据文件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        URL 数据源
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#read-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read Log 边界开关
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-macro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Macro 展开检测
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local Macro 展开检测">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        检测逻辑
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        反例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        覆盖范围说明
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guard 禁用警告
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dofile-data-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dofile 展开与 data-path 审计
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第三方 Ado 安装边界
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        启用/禁用安全守卫
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="启用/禁用安全守卫">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        选项 1：配置文件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        选项 2：环境变量
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        默认行为
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        使用
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="使用">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        基本使用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安全验证示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编程使用
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安全报告
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="安全报告">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#securityreport" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecurityReport 对象
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#riskitem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RiskItem 对象
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例输出
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        危险模式
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="危险模式">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shell_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell 命令模式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        文件操作模式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        代码执行模式
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证流程
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="验证流程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        逐步验证
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        最佳实践
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="最佳实践">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 保持安全守卫启用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 审查安全报告
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 为允许的操作使用白名单
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 教育用户
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        故障排除
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="故障排除">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        误报
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_33" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        禁用安全守卫
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_34" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        自定义黑名单
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安全考虑
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="安全考虑">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_36" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        守卫防护的内容
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_37" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        限制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_38" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        纵深防御
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        与 MCP 工具的集成
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="与 MCP 工具的集成">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_39" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        自动集成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_40" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证流程
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_41" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        可扩展性
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="可扩展性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_42" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        创建自定义验证器
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_43" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        组合多个验证器
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_44" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="示例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例 1：安全代码执行
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例 2：危险代码检测
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例 3：多项违规
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_45" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        总结
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="_1">安全守卫系统</h1>
+<p>安全守卫系统提供针对 Stata dofile 中危险命令和操作的保护。它充当 LLM 生成代码与实际执行之间的安全层。</p>
+<h2 id="_2">概述</h2>
+<p>安全守卫<strong>默认启用</strong>，以防止意外执行破坏性操作。它在执行前针对危险命令和模式黑名单验证所有 dofile 代码。</p>
+<h3 id="_3">关键功能</h3>
+<ul>
+<li><strong>基于黑名单的验证</strong>：阻止已知的危险命令</li>
+<li><strong>模式匹配</strong>：使用正则表达式检测潜在危险操作</li>
+<li><strong>逐行分析</strong>：提供带行号的详细风险报告</li>
+<li><strong>可配置</strong>：可根据需要禁用（不推荐）</li>
+<li><strong>安全代码零误报</strong>：仅标记真正危险的操作</li>
+</ul>
+<h2 id="_4">危险命令</h2>
+<p>安全守卫阻止以下危险命令。Stata 会将任何无歧义的前缀解析为完整命令（例如 <code>sh</code> 解析为 <code>shell</code>），因此黑名单同时枚举完整命令名和 Stata 接受的最短缩写形式，<code>GuardValidator</code> 在执行前对两种形式都进行匹配。</p>
+<h3 id="shell">Shell 执行命令</h3>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>缩写</th>
+<th>描述</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>!</code></td>
+<td>-</td>
+<td>Unix 风格 shell 转义</td>
+<td><code>! ls -la</code></td>
+</tr>
+<tr>
+<td><code>!!</code></td>
+<td>-</td>
+<td>扩展 shell 命令</td>
+<td><code>!! vi file.do</code></td>
+</tr>
+<tr>
+<td><code>shell</code></td>
+<td><code>sh</code></td>
+<td>Shell 命令执行</td>
+<td><code>shell dir</code></td>
+</tr>
+<tr>
+<td><code>xshell</code></td>
+<td><code>xsh</code></td>
+<td>Mac/Unix(GUI) 扩展 shell</td>
+<td><code>xshell vi file.do</code></td>
+</tr>
+<tr>
+<td><code>winexec</code></td>
+<td><code>winex</code></td>
+<td>Windows 程序执行</td>
+<td><code>winexec notepad.exe</code></td>
+</tr>
+<tr>
+<td><code>unixcmd</code></td>
+<td><code>unixc</code></td>
+<td>Unix 命令执行（macOS/Linux）</td>
+<td><code>unixcmd ls</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="_5">文件操作</h3>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>缩写</th>
+<th>描述</th>
+<th>风险</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>erase</code></td>
+<td><code>era</code></td>
+<td>文件删除</td>
+<td>数据丢失</td>
+</tr>
+<tr>
+<td><code>rm</code></td>
+<td>-</td>
+<td>文件删除（别名）</td>
+<td>数据丢失</td>
+</tr>
+<tr>
+<td><code>rmdir</code></td>
+<td><code>rmd</code></td>
+<td>目录删除</td>
+<td>数据丢失</td>
+</tr>
+<tr>
+<td><code>copy</code></td>
+<td>-</td>
+<td>文件复制</td>
+<td>可能覆盖文件</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_6">代码执行</h3>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+<th>风险</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>run</code></td>
+<td>运行另一个 do 文件</td>
+<td>不受信任的代码执行</td>
+</tr>
+<tr>
+<td><code>do</code></td>
+<td>执行 do 文件</td>
+<td>不受信任的代码执行</td>
+</tr>
+<tr>
+<td><code>include</code></td>
+<td>包含另一个 do 文件</td>
+<td>不受信任的代码执行</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">包管理</h3>
+<p>通过 <code>stata_do</code> 提交的直接包管理命令不能执行 <code>ssc</code>、<code>net</code>、<code>github</code>、
+<code>adoupdate</code> 或 <code>update</code>。这是一条始终生效的独立边界，即使通用 Guard 已禁用也
+不例外。已批准的第三方安装必须使用 <code>ado_package_install</code>。</p>
+<h2 id="dofile">Dofile 目录边界</h2>
+<p>自 v1.16.2 起，<code>stata_do</code> 会拒绝任何解析后位于受信任根目录之外的 dofile。边界校验在 Guard 验证器之前运行，对 MCP server 模式和 CLI <code>stata-mcp tool do</code> 入口同时生效。</p>
+<h3 id="_8">允许的根目录</h3>
+<p>dofile 的绝对解析路径必须位于以下目录之一，才会被接受：</p>
+<table>
+<thead>
+<tr>
+<th>根目录</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;WORKING_DIR&gt;/&lt;FOLDER_TAG&gt;/stata-mcp-dofile/</code></td>
+<td><code>STATA_MCP_FOLDER.DO</code></td>
+</tr>
+<tr>
+<td><code>&lt;WORKING_DIR&gt;</code></td>
+<td>配置的工作目录</td>
+</tr>
+</tbody>
+</table>
+<p><code>WORKING_DIR</code> 取自 <code>STATA_MCP__CWD</code>（或兼容旧版的 <code>STATA_MCP_CWD</code>），dofile 根目录是其下的 <code>stata-mcp-dofile/</code> 子目录。符号链接会先被解析再校验，因此指向白名单外的链接会被拒绝。</p>
+<h3 id="_9">拒绝行为</h3>
+<p>当解析后的路径位于允许根目录之外时，<code>stata_do</code> 返回 <code>Access denied: Dofile '&lt;path&gt;' is outside allowed directories.</code> 错误，并附带允许的根目录列表；同时日志会写入一条 <code>[SECURITY VIOLATION]</code> 警告，记录请求路径、解析路径以及当前配置的根目录。</p>
+<h3 id="_10">操作建议</h3>
+<p>将 dofile 放在配置的工作目录下，或让 MCP-for-Stata 自动生成到 <code>stata-mcp-dofile/</code>。若需要执行位于其他位置的 dofile，应通过把 <code>STATA_MCP__CWD</code> 指向其上级目录来纳入白名单，而不是放宽校验。</p>
+<h2 id="data-info">Data Info 访问边界</h2>
+<p><code>get_data_info</code> 接受本地路径和 URL 数据源。默认情况下，两者都保持历史的不限制行为；当部署环境需要更严格控制时，可以通过安全开关启用本地路径和 URL 边界。</p>
+<h3 id="_11">本地数据文件</h3>
+<p>默认情况下，本地数据文件会直接交给 data handler，不受 <code>WORKING_DIR</code> 边界限制。</p>
+<p>设置 <code>[SECURITY] strict_data_info_local_boundary=true</code> 后，本地数据文件的解析路径必须位于配置的 <code>WORKING_DIR</code> 之下。启用该开关时，相对路径会基于 <code>WORKING_DIR</code> 解析，因此当工作目录是项目根目录时，<code>./data/survey.dta</code> 这类示例是可移植的。位于 <code>WORKING_DIR</code> 之外的绝对路径会被拒绝，并向日志写入 <code>[SECURITY VIOLATION]</code> 警告。</p>
+<h3 id="url">URL 数据源</h3>
+<p>默认情况下，URL 数据源会直接交给 data handler，不校验 scheme、host、userinfo 或域名白名单。</p>
+<p>当 <code>[BETA] enable_data_info_url_guard=true</code> 时，URL 数据源会在发起请求前经过检查：</p>
+<ul>
+<li>协议必须是 <code>https</code></li>
+<li>拒绝 IP 地址主机</li>
+<li>
+<p>拒绝 <code>https://user:pass@example.com/file.csv</code> 这类 URL userinfo</p>
+</li>
+<li>
+<p>URL 主机名必须命中 <code>data_info_allowed_url_domains</code></p>
+</li>
+</ul>
+<p>白名单条目会匹配精确主机名及其子域名；如果需要读取 GitHub raw 内容，请显式加入 <code>raw.githubusercontent.com</code>。被拒绝的 URL 请求会返回 access-denied 消息，并写入包含脱敏 URL 和拒绝原因的 <code>[SECURITY VIOLATION]</code> 审计日志。</p>
+<h2 id="read-log">Read Log 边界开关</h2>
+<p>MCP 层 <code>read_log</code> 工具始终限制只能读取 <code>&lt;WORKING_DIR&gt;/&lt;FOLDER_TAG&gt;/</code> 下的文件，防止 MCP 客户端把日志读取工具当作通用文件读取器使用。</p>
+<p>直接 API 和 CLI 调用默认保留历史行为，可以读取 stata-mcp 工作目录之外的路径。设置 <code>[SECURITY] strict_read_log_boundary=true</code> 后，API 和 CLI 路径的 <code>read_log</code> 也会使用同样的 <code>&lt;WORKING_DIR&gt;/&lt;FOLDER_TAG&gt;/</code> 边界。</p>
+<h2 id="local-macro">Local Macro 展开检测</h2>
+<p>仅检查每行首个 token 的朴素黑名单可以被绕过：把危险命令藏进 local macro，稍后通过展开调用。自 v1.16.2 起 <code>GuardValidator</code> 通过两轮扫描堵上了这个缺口。</p>
+<h3 id="_12">检测逻辑</h3>
+<ol>
+<li>第一轮遍历所有 <code>local &lt;name&gt; "&lt;value&gt;"</code>（以及 <code>local &lt;name&gt; = "&lt;value&gt;"</code>）定义，若 value 去空格后整体落在 <code>DANGEROUS_COMMANDS</code> 中，则把 local 名加入污染集合。</li>
+<li>第二轮扫描所有非注释行，匹配任何污染 local 的 <code>`name'</code> 展开，并在 <code>SecurityReport</code> 中记录为 <code>macro</code> 风险。</li>
+</ol>
+<p>local 名称的匹配规则是 <code>\w+</code>，因此带后缀或前缀的写法如 <code>local cmd_x "shell"</code> 也会被跟踪。Stata 前缀（<code>capture</code>、<code>quietly</code>、<code>noisily</code> 等）在两轮扫描前都会被剥离，无法掩盖污染定义。</p>
+<h3 id="_13">反例</h3>
+<pre><code class="language-stata">local cmd_x &quot;shell&quot;
+`cmd_x' rm -rf /tmp/important
+</code></pre>
+<p>不开启 macro 跟踪时，第二行以反引号开头，会绕过首 token 检查。启用 macro 跟踪后，验证器会对第二行报告 <code>macro</code> 风险，<code>stata_do</code> 拒绝执行。</p>
+<h3 id="_14">覆盖范围说明</h3>
+<p>macro 跟踪只匹配单 token 危险值。拼接式赋值如 <code>local cmd = "she" + "ll"</code> 或运行时构造的内容超出静态校验范围，属于已知限制。当 dofile 内容来自外部输入时，请保持 Guard 启用并审查生成的代码。</p>
+<h2 id="guard">Guard 禁用警告</h2>
+<p><code>STATA_MCP__IS_GUARD=false</code>（或在 <code>~/.statamcp/config.toml</code> 中写入 <code>[SECURITY] IS_GUARD = false</code>）会禁用通用验证器。Guard 禁用后，会跳过 dofile 展开、黑名单、模式、macro 以及 data-path 审计检查。每次 <code>stata_do</code> 调用都会向日志写入 <code>[SECURITY] Guard is disabled. Dangerous dofile commands will not be blocked.</code>；server 启动读取配置时也会写入同样一行。</p>
+<p>仅在受控环境中禁用 Guard，例如 Docker 沙箱安装或临时虚拟机，受控任务完成后立即恢复启用。即便通用 Guard 被禁用，上文所述的目录边界和包管理边界仍然生效。</p>
+<h2 id="dofile-data-path">dofile 展开与 data-path 审计</h2>
+<p>当 Guard 启用时，<code>stata_do</code> 会先运行面向安全的 dofile 展开器。展开器会归一化缩写、保留诊断信息，并提供结构化 command，而不是直接依赖原始字符串检查。</p>
+<p>验证器随后按两步执行：</p>
+<ol>
+<li>全局级 parser 失败，例如引号不闭合或展开预算耗尽，会直接让整个 dofile fail closed。</li>
+<li>行级诊断只有在命中安全敏感命令时才阻断执行。</li>
+</ol>
+<p>如果设置 <code>[SECURITY] enable_data_command_path_guard = true</code>，验证器还会检查每个解析后的 command 的 <code>data_paths</code>，并沿用 <code>get_data_info</code> 的本地路径与 URL 边界规则。这覆盖直接加载命令、<code>using</code> 子句，以及 <code>cd</code> / <code>chdir</code> 这类带路径的命令。</p>
+<h2 id="ado">第三方 Ado 安装边界</h2>
+<p>安装 ado 包会在 Stata 中执行第三方代码，因此它使用独立于 dofile Guard 的安全边界：</p>
+<ol>
+<li>默认 <code>all</code> MCP profile 不暴露 <code>ado_package_install</code>；运维人员必须显式启动
+   <code>stata-mcp server --unsafe</code>。</li>
+<li>SSC 和 net 包名只能包含 ASCII 字母与数字。GitHub 仓库必须使用
+   <code>owner/repository</code> 格式并命中精确 GitHub 仓库白名单。net 来源必须使用经过
+   校验的 HTTPS URL。</li>
+<li>每次 MCP 调用必须通过客户端向用户发起批准请求。CLI 未传入 <code>-y</code> 或 <code>--yes</code>
+   时会进行交互确认。Python API 会执行输入校验，但不要求启用开关或确认。</li>
+<li>安装器在向 Stata 发送命令前再次校验；系统不会隐式安装 GitHub helper，
+   也不会隐式刷新 help 缓存。</li>
+<li>通过 <code>stata_do</code> 提交的直接包管理命令会被阻止，即使通用 dofile Guard 已关闭。</li>
+</ol>
+<p>这些 MCP 控制需要同时满足。即使禁用 dofile Guard，也不能绕过 unsafe profile、
+GitHub 白名单和逐次确认。禁用通用 Guard 后，其他危险执行路径仍可能可用，因此
+不能把 Guard 关闭后的环境视为安全边界。</p>
+<p>GitHub 白名单只校验仓库名称，不提供仓库内容层面的安全防护。安装前必须人工查验
+仓库。远端来源内容可能变化；当前安装器尚未锁定包版本，也不会校验哈希或签名。</p>
+<h2 id="_15">配置</h2>
+<h3 id="_16">启用/禁用安全守卫</h3>
+<h4 id="1">选项 1：配置文件</h4>
+<p>编辑 <code>~/.statamcp/config.toml</code>：</p>
+<pre><code class="language-toml">[SECURITY]
+IS_GUARD = true  # 默认：true
+</code></pre>
+<h4 id="2">选项 2：环境变量</h4>
+<pre><code class="language-bash"># 启用（默认）
+export STATA_MCP__IS_GUARD=true
+
+# 禁用（不推荐）
+export STATA_MCP__IS_GUARD=false
+</code></pre>
+<h3 id="_17">默认行为</h3>
+<ul>
+<li><strong>默认</strong>：启用（<code>IS_GUARD = true</code>）</li>
+<li><strong>推荐</strong>：生产使用时保持启用</li>
+<li><strong>开发</strong>：可禁用以进行测试（谨慎使用）</li>
+</ul>
+<h2 id="_18">使用</h2>
+<h3 id="_19">基本使用</h3>
+<p>使用 <code>stata_do</code> 工具时自动应用安全守卫：</p>
+<pre><code class="language-python"># 当 IS_GUARD 启用时（默认）
+result = stata_mcp.stata_do(&quot;./analysis.do&quot;)
+
+# 安全代码正常执行
+</code></pre>
+<h3 id="_20">安全验证示例</h3>
+<p>当检测到危险代码时，<code>stata_do</code> 会返回错误，不会执行该 do 文件：</p>
+<pre><code class="language-python">result = stata_mcp.stata_do(&quot;./dangerous_analysis.do&quot;)
+
+# Error: Security validation failed
+# ❌ Security validation failed. Found dangerous items:
+#   - Line 3: command '!'
+</code></pre>
+<h3 id="_21">编程使用</h3>
+<p>如果您将 MCP-for-Stata 作为库使用：</p>
+<pre><code class="language-python">from stata_mcp.guard import GuardValidator
+
+# 创建验证器
+validator = GuardValidator()
+
+# 验证代码
+code = &quot;&quot;&quot;
+sysuse auto
+regress price mpg weight
+&quot;&quot;&quot;
+
+report = validator.validate(code)
+
+if report.is_safe:
+    print(&quot;✅ Code is safe to execute&quot;)
+else:
+    print(f&quot;❌ Found {len(report.dangerous_items)} dangerous items:&quot;)
+    for item in report.dangerous_items:
+        print(f&quot;  {item}&quot;)
+</code></pre>
+<h2 id="_22">安全报告</h2>
+<h3 id="securityreport">SecurityReport 对象</h3>
+<pre><code class="language-python">@dataclass
+class SecurityReport:
+    is_safe: bool                              # True 表示未发现危险项
+    dangerous_items: List[RiskItem]            # 检测到的风险列表
+</code></pre>
+<h3 id="riskitem">RiskItem 对象</h3>
+<pre><code class="language-python">@dataclass
+class RiskItem:
+    type: str                                  # &quot;command&quot; 或 &quot;pattern&quot;
+    content: str                               # 危险内容
+    line: int                                  # 行号（从 1 开始）
+</code></pre>
+<h3 id="_23">示例输出</h3>
+<pre><code class="language-python"># 安全代码
+report = validator.validate(&quot;sysuse auto&quot;)
+print(report)
+# Output: ✅ Code passed security validation
+
+# 危险代码
+report = validator.validate(&quot;! rm file.txt&quot;)
+print(report)
+# Output:
+# ❌ Security validation failed. Found dangerous items:
+#   - Line 1: command '!'
+</code></pre>
+<h2 id="_24">危险模式</h2>
+<p>安全守卫使用正则表达式模式检测危险操作：</p>
+<h3 id="shell_1">Shell 命令模式</h3>
+<pre><code class="language-python">r&quot;!\s*\w+&quot;           # 带命令的 Shell 转义：! ls
+r&quot;!!\s*\w+&quot;          # 扩展 shell：!! vi file.do
+r&quot;shell\s+\w+&quot;       # Shell 命令：shell dir
+r&quot;xshell\s+\w+&quot;      # 扩展 shell：xshell vi file.do
+r&quot;winexec\s+\S+&quot;     # Windows 执行：winexec program.exe
+r&quot;unixcmd\s+\w+&quot;     # Unix 命令：unixcmd ls
+</code></pre>
+<h3 id="_25">文件操作模式</h3>
+<pre><code class="language-python">r&quot;erase\s+.*&quot;        # 文件删除：erase file.dta
+r&quot;rm\s+.*&quot;           # 文件删除：rm file.dta
+r&quot;rmdir\s+.*&quot;        # 目录删除：rmdir mydir
+r&quot;copy\s+.*&quot;         # 文件复制：copy file1.dta file2.dta
+</code></pre>
+<h3 id="_26">代码执行模式</h3>
+<pre><code class="language-python">r&quot;run\s+.*&quot;          # 运行 do 文件：run script.do
+r&quot;\bdo\s+.*&quot;         # 执行 do 文件：do script.do
+r&quot;include\s+.*&quot;      # 包含 do 文件：include setup.do
+</code></pre>
+<h2 id="_27">验证流程</h2>
+<h3 id="_28">逐步验证</h3>
+<ol>
+<li><strong>代码输入</strong>：接收 dofile 代码字符串</li>
+<li><strong>行分割</strong>：将代码分割成行以跟踪行号</li>
+<li><strong>过滤</strong>：跳过空行和注释（以 <code>*</code> 开头）</li>
+<li><strong>命令检查</strong>：针对危险命令检查每一行</li>
+<li><strong>模式检查</strong>：针对危险模式检查每一行</li>
+<li><strong>报告生成</strong>：创建包含所有发现的 SecurityReport</li>
+</ol>
+<h3 id="_29">验证示例</h3>
+<pre><code class="language-python">code = &quot;&quot;&quot;
+* This is a comment
+sysuse auto
+! rm dangerous.txt  # Line 3
+regress price mpg
+&quot;&quot;&quot;
+
+report = validator.validate(code)
+# Report:
+# ❌ Security validation failed. Found dangerous items:
+#   - Line 3: command '!'
+</code></pre>
+<h2 id="_30">最佳实践</h2>
+<h3 id="1_1">1. 保持安全守卫启用</h3>
+<pre><code class="language-toml">[SECURITY]
+IS_GUARD = true  # 始终保持启用
+</code></pre>
+<h3 id="2_1">2. 审查安全报告</h3>
+<p>始终审查安全验证报告：</p>
+<pre><code class="language-python">report = validator.validate(code)
+if not report.is_safe:
+    # 记录或通知危险项
+    for item in report.dangerous_items:
+        logger.warning(f&quot;Dangerous item found: {item}&quot;)
+</code></pre>
+<h3 id="3">3. 为允许的操作使用白名单</h3>
+<p>如果您需要执行某些危险操作：</p>
+<ol>
+<li>手动审查代码</li>
+<li>移除危险命令</li>
+<li>使用安全的替代方案</li>
+</ol>
+<p>示例：</p>
+<pre><code class="language-stata">* 代替：! rm tempfile.dta
+* 使用：erase tempfile.dta  （仍被阻止，但显示意图）
+
+* 更好的方法：使用 Stata 内置的安全操作
+capture erase tempfile.dta
+</code></pre>
+<h3 id="4">4. 教育用户</h3>
+<p>记录哪些命令被阻止及其原因：</p>
+<pre><code class="language-markdown">## 被阻止的命令
+
+以下命令因安全原因被阻止：
+- Shell 命令（!、shell、xshell 等）
+- 文件删除（erase、rm）
+- 外部代码执行（run、do、include）
+
+请使用安全的替代方案或联系管理员获取帮助。
+</code></pre>
+<h2 id="_31">故障排除</h2>
+<h3 id="_32">误报</h3>
+<p>如果您认为某个命令被错误标记：</p>
+<ol>
+<li><strong>审查该命令</strong>：它是否真的危险？</li>
+<li><strong>检查模式</strong>：它是否匹配危险模式？</li>
+<li><strong>考虑替代方案</strong>：是否有更安全的方法完成任务？</li>
+</ol>
+<h3 id="_33">禁用安全守卫</h3>
+<p><strong>⚠️ 警告</strong>：不推荐禁用安全守卫。</p>
+<p>仅在以下情况下禁用：
+- 您处于受信任的环境中
+- 所有代码都经过人工审查
+- 您了解风险</p>
+<pre><code class="language-bash"># 临时禁用（仅当前会话）
+export STATA_MCP__IS_GUARD=false
+stata-mcp
+
+# 永久禁用（添加到配置）
+# 编辑 ~/.statamcp/config.toml
+[SECURITY]
+IS_GUARD = false
+</code></pre>
+<h3 id="_34">自定义黑名单</h3>
+<p>您可以通过修改代码来扩展黑名单：</p>
+<pre><code class="language-python">from stata_mcp.guard.blacklist import DANGEROUS_COMMANDS
+
+# 添加自定义危险命令
+DANGEROUS_COMMANDS.add(&quot;my_dangerous_command&quot;)
+
+# 使用自定义验证器
+from stata_mcp.guard import GuardValidator
+validator = GuardValidator()
+validator.dangerous_commands.add(&quot;another_command&quot;)
+</code></pre>
+<h2 id="_35">安全考虑</h2>
+<h3 id="_36">守卫防护的内容</h3>
+<p>✅ <strong>防止</strong>：
+- Shell 命令执行
+- 文件删除操作
+- 不受信任的代码执行
+- 系统级操作</p>
+<p>❌ <strong>不能防止</strong>：
+- Stata 内的数据修改
+- 无限循环
+- 内存耗尽
+- Stata 崩溃</p>
+<h3 id="_37">限制</h3>
+<p>安全守卫：
+- 不分析数据流
+- 不跟踪变量值
+- 不防止资源耗尽
+- 不能替代适当的代码审查</p>
+<h3 id="_38">纵深防御</h3>
+<p>安全守卫是一层保护。结合以下措施：</p>
+<ol>
+<li><strong>监控</strong>：启用 RAM 监控（参见<a href="../monitoring/">监控文档</a>）</li>
+<li><strong>沙盒</strong>：对不受信任的代码使用隔离环境</li>
+<li><strong>代码审查</strong>：人工审查生成的代码</li>
+<li><strong>备份</strong>：定期备份重要数据</li>
+</ol>
+<h2 id="mcp">与 MCP 工具的集成</h2>
+<h3 id="_39">自动集成</h3>
+<p>安全守卫自动与以下工具集成：</p>
+<ul>
+<li><code>stata_do</code>：执行 Stata do 文件（默认验证）</li>
+</ul>
+<h3 id="_40">验证流程</h3>
+<pre><code>用户请求 → MCP 工具 → 安全守卫 → 验证
+                                      ↓
+                                 通过？ → 执行
+                                      ↓
+                                 失败？ → 返回错误
+</code></pre>
+<h2 id="_41">可扩展性</h2>
+<h3 id="_42">创建自定义验证器</h3>
+<p>您可以为特定用例创建自定义验证器：</p>
+<pre><code class="language-python">from stata_mcp.guard import GuardValidator, RiskItem, SecurityReport
+
+class CustomValidator(GuardValidator):
+    &quot;&quot;&quot;带附加规则的自定义验证器。&quot;&quot;&quot;
+
+    def validate(self, code: str) -&gt; SecurityReport:
+        # 获取基础验证结果
+        report = super().validate(code)
+
+        # 添加自定义验证逻辑
+        if &quot;custom_dangerous_thing&quot; in code:
+            report.dangerous_items.append(
+                RiskItem(
+                    type=&quot;custom&quot;,
+                    content=&quot;custom_dangerous_thing&quot;,
+                    line=code.find(&quot;custom_dangerous_thing&quot;)
+                )
+            )
+            report.is_safe = False
+
+        return report
+</code></pre>
+<h3 id="_43">组合多个验证器</h3>
+<pre><code class="language-python">from stata_mcp.guard import GuardValidator
+
+# 创建多个验证器
+basic_validator = GuardValidator()
+custom_validator = CustomValidator()
+
+# 使用两者进行验证
+code = &quot;some stata code&quot;
+report1 = basic_validator.validate(code)
+report2 = custom_validator.validate(code)
+
+# 合并结果
+if report1.is_safe and report2.is_safe:
+    print(&quot;✅ All validations passed&quot;)
+</code></pre>
+<h2 id="_44">示例</h2>
+<h3 id="1_2">示例 1：安全代码执行</h3>
+<pre><code class="language-python">from stata_mcp.guard import GuardValidator
+
+validator = GuardValidator()
+
+safe_code = &quot;&quot;&quot;
+* Load sample data
+sysuse auto
+
+* Run regression
+regress price mpg weight
+
+* Display results
+display &quot;R-squared: &quot; + string(e(r2))
+&quot;&quot;&quot;
+
+report = validator.validate(safe_code)
+print(report)
+# Output: ✅ Code passed security validation
+</code></pre>
+<h3 id="2_2">示例 2：危险代码检测</h3>
+<pre><code class="language-python">dangerous_code = &quot;&quot;&quot;
+sysuse auto
+
+* This will be blocked
+! rm -rf /important/data
+
+regress price mpg
+&quot;&quot;&quot;
+
+report = validator.validate(dangerous_code)
+print(report)
+# Output:
+# ❌ Security validation failed. Found dangerous items:
+#   - Line 5: command '!'
+</code></pre>
+<h3 id="3_1">示例 3：多项违规</h3>
+<pre><code class="language-python">multiple_violations = &quot;&quot;&quot;
+sysuse auto
+shell delete file.txt
+run untrusted_script.do
+&quot;&quot;&quot;
+
+report = validator.validate(multiple_violations)
+print(f&quot;Found {len(report.dangerous_items)} violations:&quot;)
+for item in report.dangerous_items:
+    print(f&quot;  {item}&quot;)
+# Output:
+# Found 2 violations:
+#   Line 3: command 'shell'
+#   Line 4: pattern 'run\s+.*'
+</code></pre>
+<h2 id="_45">总结</h2>
+<p>安全守卫系统为自动化 Stata 执行提供基本保护：</p>
+<ul>
+<li>✅ <strong>默认启用</strong>以确保安全</li>
+<li>✅ <strong>阻止危险命令</strong>（shell、文件删除等）</li>
+<li>✅ <strong>基于模式的检测</strong>实现全面覆盖</li>
+<li>✅ <strong>详细报告</strong>带行号</li>
+<li>✅ <strong>可配置</strong>以适应不同用例</li>
+<li>✅ <strong>禁用时零开销</strong>（不推荐）</li>
+</ul>
+<p>对于生产使用，始终保持安全守卫启用并定期审查验证报告。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+        
+          
+          <a href="../beta/" class="md-footer__link md-footer__link--prev" aria-label="上一页: Beta Configuration">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              <div class="md-ellipsis">
+                Beta Configuration
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../monitoring/" class="md-footer__link md-footer__link--next" aria-label="下一页: Monitoring">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              <div class="md-ellipsis">
+                Monitoring
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 - present <a href="https://github.com/sepinetam">Sepine Tam</a>. All Right Reserved. 
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/sepinetam/stata-mcp" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="mailto:sepinetam@gmail.com" target="_blank" rel="noopener" title="E-mail" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m20 8-8 5-8-5V6l8 5 8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.code.select", "navigation.path", "navigation.sections", "navigation.expand", "content.code.annotate", "navigation.footer", "navigation.top"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
