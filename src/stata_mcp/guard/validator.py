@@ -280,6 +280,11 @@ class GuardValidator:
                 strict_local_boundary=config.STRICT_DATA_INFO_LOCAL_BOUNDARY,
                 enable_url_guard=config.ENABLE_DATA_INFO_URL_GUARD,
                 allowed_url_domains=config.DATA_INFO_ALLOWED_URL_DOMAINS,
+                additional_allowed_dirs=getattr(
+                    config,
+                    "ADDITIONAL_ALLOWED_DIRS",
+                    (),
+                ),
             )
 
         for line_num, line in executable_lines:

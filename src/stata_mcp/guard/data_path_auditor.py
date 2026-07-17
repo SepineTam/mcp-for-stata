@@ -35,6 +35,7 @@ class DataPathAuditor:
         strict_local_boundary: bool,
         enable_url_guard: bool,
         allowed_url_domains: tuple[str, ...],
+        additional_allowed_dirs: tuple[Path, ...] = (),
     ) -> None:
         """Initialize the auditor.
 
@@ -45,11 +46,14 @@ class DataPathAuditor:
             enable_url_guard: When True, enforce HTTPS, host, and allowlist
                 restrictions on URLs.
             allowed_url_domains: Domains permitted when URL guard is enabled.
+            additional_allowed_dirs: Extra roots accepted by strict local
+                boundary checks.
         """
         self.working_dir = working_dir
         self.strict_local_boundary = strict_local_boundary
         self.enable_url_guard = enable_url_guard
         self.allowed_url_domains = allowed_url_domains
+        self.additional_allowed_dirs = additional_allowed_dirs
 
     @staticmethod
     def is_url(data_path: str) -> bool:
@@ -119,15 +123,17 @@ class DataPathAuditor:
         if not candidate_path.is_absolute():
             candidate_path = self.working_dir / candidate_path
         resolved_data_path = candidate_path.resolve()
-        resolved_working_dir = self.working_dir.resolve()
-        try:
-            resolved_data_path.relative_to(resolved_working_dir)
-        except ValueError:
-            logging.warning(
-                "[SECURITY VIOLATION] Attempted to access data file outside working directory."
-            )
-            return LOCAL_ACCESS_DENIED
-        return resolved_data_path
+        allowed_dirs = (self.working_dir, *self.additional_allowed_dirs)
+        for allowed_dir in allowed_dirs:
+            try:
+                resolved_data_path.relative_to(allowed_dir.resolve())
+                return resolved_data_path
+            except ValueError:
+                continue
+        logging.warning(
+            "[SECURITY VIOLATION] Attempted to access data file outside allowed directories."
+        )
+        return LOCAL_ACCESS_DENIED
 
     def validate_url(self, data_path: str) -> tuple[str, str] | str:
         """Validate a URL.

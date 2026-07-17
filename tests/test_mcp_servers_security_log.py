@@ -188,6 +188,30 @@ def test_read_log_rejection_log_redacts_local_path(
     assert "allowed_directory" not in messages
 
 
+def test_read_log_allows_additional_configured_directory(
+    monkeypatch: pytest.MonkeyPatch,
+    stubbed_mcp_servers,
+    tmp_path: Path,
+) -> None:
+    statamcp_dir = tmp_path / "statamcp"
+    shared_dir = tmp_path / "shared"
+    statamcp_dir.mkdir()
+    shared_dir.mkdir()
+    log_file = shared_dir / "shared.log"
+    log_file.write_text("shared content", encoding="utf-8")
+    fake_folder = SimpleNamespace(path=statamcp_dir)
+    fake_config = SimpleNamespace(
+        STATA_MCP_FOLDER=fake_folder,
+        ADDITIONAL_ALLOWED_DIRS=(shared_dir,),
+        ENABLE_STRUCTURED_LOG=False,
+    )
+    monkeypatch.setattr(stubbed_mcp_servers, "config", fake_config)
+
+    result = stubbed_mcp_servers.read_log(log_file.as_posix())
+
+    assert result == "shared content"
+
+
 def test_read_log_structured_parsing_depends_only_on_config(
     monkeypatch: pytest.MonkeyPatch,
     stubbed_mcp_servers,

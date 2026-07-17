@@ -50,6 +50,22 @@ def test_data_command_with_safe_local_path_passes(
     assert report.is_safe is True
 
 
+def test_data_command_with_additional_allowed_path_passes(
+    enabled_config,
+    tmp_path: Path,
+) -> None:
+    shared_dir = tmp_path / "shared"
+    shared_dir.mkdir()
+    data_file = shared_dir / "data.dta"
+    data_file.write_bytes(b"data")
+    enabled_config.ADDITIONAL_ALLOWED_DIRS = (shared_dir,)
+    code = f'use "{data_file.as_posix()}"'
+
+    report = GuardValidator().validate(code, config=enabled_config)
+
+    assert report.is_safe is True
+
+
 def test_data_command_with_prefixes_is_detected(
     enabled_config, working_dir: Path
 ) -> None:

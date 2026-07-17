@@ -55,6 +55,52 @@ def test_local_file_outside_working_dir_is_rejected(
     assert result == LOCAL_ACCESS_DENIED
 
 
+def test_local_file_within_additional_allowed_dir_is_allowed(
+    working_dir: Path,
+    tmp_path: Path,
+) -> None:
+    shared_dir = tmp_path / "shared"
+    shared_dir.mkdir()
+    data_file = shared_dir / "data.csv"
+    data_file.write_text("x,y\n1,2\n", encoding="utf-8")
+    shared_auditor = DataPathAuditor(
+        working_dir=working_dir,
+        strict_local_boundary=True,
+        enable_url_guard=False,
+        allowed_url_domains=(),
+        additional_allowed_dirs=(shared_dir,),
+    )
+
+    result = shared_auditor.validate_local_path(data_file.as_posix())
+
+    assert result == data_file.resolve()
+
+
+def test_symlink_in_additional_dir_cannot_escape_allowed_roots(
+    working_dir: Path,
+    tmp_path: Path,
+) -> None:
+    shared_dir = tmp_path / "shared"
+    outside_dir = tmp_path / "outside"
+    shared_dir.mkdir()
+    outside_dir.mkdir()
+    outside_file = outside_dir / "secret.csv"
+    outside_file.write_text("secret\n1\n", encoding="utf-8")
+    symlink_file = shared_dir / "linked.csv"
+    symlink_file.symlink_to(outside_file)
+    shared_auditor = DataPathAuditor(
+        working_dir=working_dir,
+        strict_local_boundary=True,
+        enable_url_guard=False,
+        allowed_url_domains=(),
+        additional_allowed_dirs=(shared_dir,),
+    )
+
+    result = shared_auditor.validate_local_path(symlink_file.as_posix())
+
+    assert result == LOCAL_ACCESS_DENIED
+
+
 def test_relative_local_file_resolved_from_working_dir(
     auditor: DataPathAuditor, working_dir: Path
 ) -> None:

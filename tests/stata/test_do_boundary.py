@@ -554,6 +554,31 @@ def test_stata_do_allows_dofile_in_do_directory(
     assert result["log_file_path"]["text"] == log_file.as_posix()
 
 
+def test_mcp_stata_do_allows_dofile_in_additional_allowed_dir(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_mcp_servers,
+    tmp_path: Path,
+):
+    do_dir = tmp_path / "do"
+    work_dir = tmp_path / "work"
+    shared_dir = tmp_path / "shared"
+    do_dir.mkdir()
+    work_dir.mkdir()
+    shared_dir.mkdir()
+    dofile = shared_dir / "ok.do"
+    dofile.write_text("display 1")
+    log_file = tmp_path / "run.log"
+    log_file.write_text("ok")
+    _configure_base(monkeypatch, loaded_mcp_servers, do_dir, work_dir, tmp_path)
+    loaded_mcp_servers.config.ADDITIONAL_ALLOWED_DIRS = (shared_dir,)
+    _patch_stata_module(monkeypatch, log_file)
+
+    result = loaded_mcp_servers.stata_do(dofile.as_posix())
+
+    assert "error" not in result
+    assert result["log_file_path"]["text"] == log_file.as_posix()
+
+
 def test_stata_do_rejects_when_allowed_directories_are_empty(
     monkeypatch: pytest.MonkeyPatch, loaded_mcp_servers, tmp_path: Path
 ):
@@ -651,6 +676,49 @@ def test_api_stata_do_rejects_package_management_when_guard_is_disabled(
 
     assert result["action"] == "Security check, dofile not executed"
     stata_executor.assert_not_called()
+
+
+def test_api_stata_do_allows_dofile_in_additional_allowed_dir(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    stata_do_api = importlib.import_module("stata_mcp.api.stata_do")
+    do_dir = tmp_path / "do"
+    work_dir = tmp_path / "work"
+    shared_dir = tmp_path / "shared"
+    do_dir.mkdir()
+    work_dir.mkdir()
+    shared_dir.mkdir()
+    dofile = shared_dir / "allowed.do"
+    dofile.write_text("display 1")
+    log_file = tmp_path / "run.log"
+    log_file.write_text("ok")
+    runtime = SimpleNamespace(
+        config=SimpleNamespace(
+            STATA_MCP_FOLDER=SimpleNamespace(DO=do_dir),
+            WORKING_DIR=work_dir,
+            ADDITIONAL_ALLOWED_DIRS=(shared_dir,),
+            IS_GUARD=False,
+            IS_MONITOR=False,
+        ),
+        stata_cli="stata",
+        log_base_path=tmp_path,
+        is_unix=True,
+        cwd=work_dir,
+    )
+    stata_executor = Mock()
+    stata_executor.execute_dofile.return_value = {"text": log_file}
+    monkeypatch.setattr(
+        stata_do_api,
+        "create_runtime_context",
+        lambda **kwargs: runtime,
+    )
+    monkeypatch.setattr(stata_do_api, "StataDo", Mock(return_value=stata_executor))
+
+    result = stata_do_api.stata_do(dofile.as_posix())
+
+    assert "error" not in result
+    assert result["log_file_path"]["text"] == log_file.as_posix()
 
 
 class TestApiStataDoSecurityLog:

@@ -10,18 +10,54 @@
 import logging
 import os
 import platform
+import re
 import sys
 import tomllib
+from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 import tomli_w
 
+from ._data_info_metrics import (
+    DEFAULT_DATA_INFO_METRICS,
+    normalize_data_info_metrics,
+)
 from .core.types import StataCLINotFoundError
 from .stata import StataFinder
 
 logger = logging.getLogger(__name__)
+
+ToolContext = Literal["api", "cli", "mcp"]
+LEGACY_DATA_INFO_HEADER_PATTERN = re.compile(
+    r"^(?P<indent>[ \t]*)"
+    r"\[(?P<inner_leading>[ \t]*)(?P<quote>[\"']?)"
+    r"data_info(?P=quote)(?P<inner_trailing>[ \t]*)\]"
+    r"(?P<suffix>[ \t]*(?:#[^\r\n]*)?)"
+    r"(?P<carriage_return>\r?)$",
+    re.MULTILINE,
+)
+
+
+@dataclass(frozen=True)
+class HelpToolConfig:
+    """Resolved help settings for one invocation context."""
+
+    is_cache: bool
+    is_save: bool
+
+
+@dataclass(frozen=True)
+class DataInfoToolConfig:
+    """Resolved data-info settings for one invocation context."""
+
+    is_cache: bool
+    metrics: tuple[str, ...]
+    string_keep_number: int
+    decimal_places: int
+    hash_length: int
+    heads: int
 
 
 class StataMcpFolder:
@@ -102,6 +138,237 @@ class Config:
                 if path is not None
             )
 
+        for active_config_file in dict.fromkeys(self.config_files):
+            self._migrate_legacy_data_info_section(active_config_file)
+
+    @classmethod
+    def _migrate_legacy_data_info_section(cls, config_file: Path) -> None:
+        """Rename `[data_info]` without making configuration loading fail."""
+        try:
+            target_file = config_file.resolve(strict=True)
+            content = target_file.read_bytes().decode("utf-8")
+            config_data = tomllib.loads(content)
+            legacy_section = config_data.get("data_info")
+            if not isinstance(legacy_section, dict):
+                return
+            if "DATA_INFO" in config_data:
+                logger.warning(
+                    "Could not automatically migrate legacy [data_info] in %s: "
+                    "both [data_info] and [DATA_INFO] exist; keeping both to "
+                    "avoid overwriting configuration.",
+                    config_file,
+                )
+                return
+
+            migrated_content, replacement_count = cls._replace_legacy_data_info_header(
+                content
+            )
+            if replacement_count != 1:
+                logger.warning(
+                    "Could not automatically migrate legacy [data_info] in %s: "
+                    "the section is not represented by a standalone TOML table "
+                    "header; keeping the compatibility fallback.",
+                    config_file,
+                )
+                return
+
+            cls._replace_config_text(
+                target_file,
+                migrated_content,
+                expected_content=content,
+            )
+            logger.info(
+                "Migrated legacy [data_info] to [DATA_INFO] in %s.",
+                config_file,
+            )
+        except FileNotFoundError:
+            return
+        except PermissionError as error:
+            logger.warning(
+                "Could not migrate legacy [data_info] to [DATA_INFO] in %s: "
+                "permission denied (%s). The legacy section remains supported.",
+                config_file,
+                error,
+            )
+        except (UnicodeDecodeError, tomllib.TOMLDecodeError) as error:
+            logger.warning(
+                "Could not migrate legacy [data_info] to [DATA_INFO] in %s: "
+                "the config file could not be parsed (%s).",
+                config_file,
+                error,
+            )
+        except OSError as error:
+            logger.warning(
+                "Could not migrate legacy [data_info] to [DATA_INFO] in %s: "
+                "filesystem error (%s). The legacy section remains supported.",
+                config_file,
+                error,
+            )
+        except Exception as error:
+            logger.warning(
+                "Could not migrate legacy [data_info] to [DATA_INFO] in %s: "
+                "unexpected error %s (%s). The legacy section remains supported.",
+                config_file,
+                type(error).__name__,
+                error,
+            )
+
+    @classmethod
+    def _replace_legacy_data_info_header(cls, content: str) -> tuple[str, int]:
+        """Replace a real table header while ignoring TOML multiline strings."""
+        migrated_lines: list[str] = []
+        multiline_delimiter: str | None = None
+        replacement_count = 0
+
+        for line in content.splitlines(keepends=True):
+            line_body = line[:-1] if line.endswith("\n") else line
+            line_ending = "\n" if line.endswith("\n") else ""
+            migrated_line_body = line_body
+
+            if multiline_delimiter is None and replacement_count == 0:
+                match = LEGACY_DATA_INFO_HEADER_PATTERN.fullmatch(line_body)
+                if match is not None:
+                    quote = match.group("quote")
+                    migrated_line_body = (
+                        f"{match.group('indent')}["
+                        f"{match.group('inner_leading')}"
+                        f"{quote}DATA_INFO{quote}"
+                        f"{match.group('inner_trailing')}]"
+                        f"{match.group('suffix')}"
+                        f"{match.group('carriage_return')}"
+                    )
+                    replacement_count = 1
+
+            multiline_delimiter = cls._toml_multiline_delimiter_after_line(
+                migrated_line_body,
+                multiline_delimiter,
+            )
+            migrated_lines.append(migrated_line_body + line_ending)
+
+        return "".join(migrated_lines), replacement_count
+
+    @staticmethod
+    def _toml_multiline_delimiter_after_line(
+        line: str,
+        multiline_delimiter: str | None,
+    ) -> str | None:
+        """Track whether the next TOML line starts inside a multiline string."""
+        index = 0
+        while index < len(line):
+            if multiline_delimiter is not None:
+                delimiter_index = line.find(multiline_delimiter, index)
+                if delimiter_index < 0:
+                    return multiline_delimiter
+                if multiline_delimiter == '"""':
+                    preceding_backslashes = 0
+                    cursor = delimiter_index - 1
+                    while cursor >= 0 and line[cursor] == "\\":
+                        preceding_backslashes += 1
+                        cursor -= 1
+                    if preceding_backslashes % 2 == 1:
+                        index = delimiter_index + len(multiline_delimiter)
+                        continue
+                index = delimiter_index + len(multiline_delimiter)
+                multiline_delimiter = None
+                continue
+
+            if line[index] == "#":
+                break
+            if line.startswith('"""', index):
+                multiline_delimiter = '"""'
+                index += 3
+                continue
+            if line.startswith("'''", index):
+                multiline_delimiter = "'''"
+                index += 3
+                continue
+            if line[index] == '"':
+                index += 1
+                while index < len(line):
+                    if line[index] == "\\":
+                        index += 2
+                        continue
+                    if line[index] == '"':
+                        index += 1
+                        break
+                    index += 1
+                continue
+            if line[index] == "'":
+                closing_quote = line.find("'", index + 1)
+                index = len(line) if closing_quote < 0 else closing_quote + 1
+                continue
+            index += 1
+
+        return multiline_delimiter
+
+    @staticmethod
+    def _replace_config_text(
+        config_file: Path,
+        content: str,
+        *,
+        expected_content: str | None = None,
+    ) -> None:
+        """Patch equal-length text in place so all file metadata stays attached."""
+        replacement_bytes = content.encode("utf-8")
+        expected_bytes = (
+            config_file.read_bytes()
+            if expected_content is None
+            else expected_content.encode("utf-8")
+        )
+        if len(replacement_bytes) != len(expected_bytes):
+            raise ValueError("config migration must preserve the file length")
+
+        difference_indices = [
+            index
+            for index, (original_byte, replacement_byte) in enumerate(
+                zip(expected_bytes, replacement_bytes)
+            )
+            if original_byte != replacement_byte
+        ]
+        if not difference_indices:
+            return
+        patch_start = difference_indices[0]
+        patch_end = difference_indices[-1] + 1
+        original_patch = expected_bytes[patch_start:patch_end]
+        replacement_patch = replacement_bytes[patch_start:patch_end]
+        if original_patch != b"data_info" or replacement_patch != b"DATA_INFO":
+            raise ValueError("config migration may only rename the data-info header")
+
+        with open(config_file, "r+b") as config_stream:
+            current_bytes = config_stream.read()
+            if current_bytes == replacement_bytes:
+                return
+            if current_bytes != expected_bytes:
+                raise OSError("config file changed while migration was in progress")
+
+            try:
+                config_stream.seek(patch_start)
+                written_bytes = config_stream.write(replacement_patch)
+                if written_bytes != len(replacement_patch):
+                    raise OSError("config migration wrote an incomplete header")
+                config_stream.flush()
+                os.fsync(config_stream.fileno())
+                config_stream.seek(0)
+                if config_stream.read() != replacement_bytes:
+                    raise OSError("config migration verification failed")
+            except Exception as write_error:
+                try:
+                    config_stream.seek(patch_start)
+                    rollback_bytes = config_stream.write(original_patch)
+                    if rollback_bytes != len(original_patch):
+                        raise OSError("config migration rollback was incomplete")
+                    config_stream.flush()
+                    os.fsync(config_stream.fileno())
+                    config_stream.seek(0)
+                    if config_stream.read() != expected_bytes:
+                        raise OSError("config migration rollback verification failed")
+                except Exception as rollback_error:
+                    raise OSError(
+                        "config migration failed "
+                        f"({write_error}); rollback also failed ({rollback_error})"
+                    ) from write_error
+                raise
+
     @cached_property
     def config(self) -> dict[str, Any]:
         system_config = self._read_toml_file(self.system_config_file)
@@ -178,7 +445,7 @@ class Config:
         return config_file.read_text(encoding="utf-8")
 
     def _get_raw_config_value(
-        self, config_data: dict[str, Any], config_keys: list
+        self, config_data: dict[str, Any], config_keys: list[str]
     ) -> Any | None:
         config_dict = config_data
         for key in config_keys[:-1]:
@@ -278,7 +545,12 @@ class Config:
         return value
 
     def _get_config_value(
-        self, config_keys: list, env_var: str, default, converter=None, validator=None
+        self,
+        config_keys: list[str],
+        env_var: str,
+        default,
+        converter=None,
+        validator=None,
     ):
         """
         Generic configuration reading method with priority: environment variable > toml config file > default value
@@ -293,37 +565,94 @@ class Config:
         Returns:
             Configuration value (processed by converter and validator)
         """
-        # 1. Read from system config first. Linux administrators can enforce values.
-        value = self._get_raw_config_value(
-            self._read_toml_file(self.system_config_file),
-            config_keys,
+        return self._get_config_value_from_paths(
+            config_paths=[config_keys],
+            env_vars=[env_var] if env_var else [],
+            default=default,
+            converter=converter,
+            validator=validator,
         )
 
-        # 2. Read from environment variable if system config does not enforce a value.
-        if value is None and env_var:
-            value = os.getenv(env_var, None)  # str | None
-        value = self._clean_string_value(value)
+    def _get_config_value_from_paths(
+        self,
+        config_paths: list[list[str]],
+        env_vars: list[str],
+        default,
+        converter=None,
+        validator=None,
+    ):
+        """Resolve ordered config paths without mixing source and specificity.
 
-        # 3. If no environment variable, read from config file
+        Source precedence is system configuration, environment, merged runtime
+        configuration, then the built-in default. Within each source, paths and
+        environment aliases are checked from most specific to least specific.
+        """
+        system_config = self._read_toml_file(self.system_config_file)
+        value = self._first_config_value(system_config, config_paths)
+
         if value is None:
-            value = self._get_raw_config_value(self.config, config_keys)
+            value = self._first_environment_value(env_vars)
 
-        # 4. If still no value, return default
+        if value is None:
+            for runtime_config in self._runtime_config_sources(config_paths):
+                value = self._first_config_value(runtime_config, config_paths)
+                if value is not None:
+                    break
+
         if value is None:
             return default
 
-        # 5. Convert value
         if converter is not None:
             try:
                 value = converter(value)
             except (ValueError, TypeError):
                 return default
 
-        # 6. Validate value
         if validator is not None and not validator(value):
             return default
 
         return value
+
+    def _runtime_config_sources(
+        self,
+        config_paths: list[list[str]],
+    ) -> tuple[dict[str, Any], ...]:
+        """Return runtime TOML sources in authority order.
+
+        Context specificity must only compare keys from the same source.
+        Otherwise a specific user key could incorrectly outrank a generic
+        project key. Security keeps its deliberate user-before-project order.
+        """
+        if self.is_debug_config:
+            return (self._read_toml_file(self.config_file),)
+
+        is_security_value = all(
+            config_path and config_path[0] == self.SECURITY_SECTION
+            for config_path in config_paths
+        )
+        user_config = self._read_toml_file(self.user_config_file)
+        project_config = self._read_toml_file(self.project_config_file)
+        if is_security_value:
+            return user_config, project_config
+        return project_config, user_config
+
+    def _first_config_value(
+        self,
+        config_data: dict[str, Any],
+        config_paths: list[list[str]],
+    ) -> Any | None:
+        for config_path in config_paths:
+            value = self._get_raw_config_value(config_data, config_path)
+            if value is not None:
+                return value
+        return None
+
+    def _first_environment_value(self, env_vars: list[str]) -> Any | None:
+        for env_var in env_vars:
+            value = self._clean_string_value(os.getenv(env_var))
+            if value is not None:
+                return value
+        return None
 
     @staticmethod
     def _to_bool(value):
@@ -363,6 +692,215 @@ class Config:
             raise TypeError("Expected a comma-separated string or string collection.")
         return tuple(str(item).strip() for item in values if str(item).strip())
 
+    @staticmethod
+    def _to_metrics(value) -> tuple[str, ...]:
+        return normalize_data_info_metrics(value)
+
+    @staticmethod
+    def _normalize_tool_context(context: ToolContext | None) -> ToolContext:
+        normalized_context = "api" if context is None else str(context).lower()
+        if normalized_context not in {"api", "cli", "mcp"}:
+            raise ValueError(f"Unsupported tool context: {context}")
+        return normalized_context  # type: ignore[return-value]
+
+    @classmethod
+    def _tool_config_paths(
+        cls,
+        context: ToolContext | None,
+        tool_name: str,
+        key: str,
+        generic_sections: tuple[str, ...],
+    ) -> list[list[str]]:
+        normalized_context = cls._normalize_tool_context(context)
+        config_paths: list[list[str]] = []
+        if normalized_context in {"mcp", "cli"}:
+            config_paths.append(
+                [normalized_context.upper(), "TOOLS", tool_name.upper(), key]
+            )
+        config_paths.extend([[section, key] for section in generic_sections])
+        return config_paths
+
+    @classmethod
+    def _tool_environment_vars(
+        cls,
+        context: ToolContext | None,
+        tool_name: str,
+        key: str,
+        legacy_aliases: tuple[str, ...] = (),
+    ) -> list[str]:
+        normalized_context = cls._normalize_tool_context(context)
+        env_vars: list[str] = []
+        if normalized_context in {"mcp", "cli"}:
+            env_vars.append(
+                f"STATA_MCP__{normalized_context.upper()}__TOOLS__"
+                f"{tool_name.upper()}__{key.upper()}"
+            )
+        env_vars.append(f"STATA_MCP__{tool_name.upper()}__{key.upper()}")
+        env_vars.extend(legacy_aliases)
+        return env_vars
+
+    def _get_tool_config_value(
+        self,
+        *,
+        context: ToolContext | None,
+        tool_name: str,
+        key: str,
+        generic_sections: tuple[str, ...],
+        default,
+        converter=None,
+        validator=None,
+        legacy_env_vars: tuple[str, ...] = (),
+    ):
+        return self._get_config_value_from_paths(
+            config_paths=self._tool_config_paths(
+                context,
+                tool_name,
+                key,
+                generic_sections,
+            ),
+            env_vars=self._tool_environment_vars(
+                context,
+                tool_name,
+                key,
+                legacy_env_vars,
+            ),
+            default=default,
+            converter=converter,
+            validator=validator,
+        )
+
+    def get_help_config(self, context: ToolContext | None = None) -> HelpToolConfig:
+        """Return help settings with context-specific values before `[HELP]`."""
+        is_cache = self._get_tool_config_value(
+            context=context,
+            tool_name="HELP",
+            key="IS_CACHE",
+            generic_sections=("HELP",),
+            legacy_env_vars=("STATA_MCP__CACHE_HELP",),
+            default=True,
+            converter=self._to_bool,
+            validator=lambda value: isinstance(value, bool),
+        )
+        is_save = self._get_tool_config_value(
+            context=context,
+            tool_name="HELP",
+            key="IS_SAVE",
+            generic_sections=("HELP",),
+            legacy_env_vars=("STATA_MCP__SAVE_HELP",),
+            default=True,
+            converter=self._to_bool,
+            validator=lambda value: isinstance(value, bool),
+        )
+        return HelpToolConfig(is_cache=is_cache, is_save=is_save)
+
+    def get_data_info_config(
+        self,
+        context: ToolContext | None = None,
+    ) -> DataInfoToolConfig:
+        """Return validated data-info settings for API, CLI, or MCP usage."""
+        normalized_context = self._normalize_tool_context(context)
+        generic_sections = ("DATA_INFO", "data_info")
+        default_heads = 5 if normalized_context == "cli" else 0
+
+        is_cache = self._get_tool_config_value(
+            context=normalized_context,
+            tool_name="DATA_INFO",
+            key="is_cache",
+            generic_sections=generic_sections,
+            legacy_env_vars=(
+                "STATA_MCP__DATA_INFO_IS_CACHE",
+                "STATA_MCP_DATA_INFO_IS_CACHE",
+            ),
+            default=True,
+            converter=self._to_bool,
+            validator=lambda value: isinstance(value, bool),
+        )
+        metrics = self._get_tool_config_value(
+            context=normalized_context,
+            tool_name="DATA_INFO",
+            key="metrics",
+            generic_sections=generic_sections,
+            default=DEFAULT_DATA_INFO_METRICS,
+            converter=self._to_metrics,
+            validator=lambda value: isinstance(value, tuple),
+        )
+        string_keep_number = self._get_tool_config_value(
+            context=normalized_context,
+            tool_name="DATA_INFO",
+            key="string_keep_number",
+            generic_sections=generic_sections,
+            legacy_env_vars=("STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER",),
+            default=10,
+            converter=self._to_int,
+            validator=lambda value: isinstance(value, int) and value >= 0,
+        )
+        decimal_places = self._get_tool_config_value(
+            context=normalized_context,
+            tool_name="DATA_INFO",
+            key="decimal_places",
+            generic_sections=generic_sections,
+            legacy_env_vars=("STATA_MCP_DATA_INFO_DECIMAL_PLACES",),
+            default=3,
+            converter=self._to_int,
+            validator=lambda value: isinstance(value, int) and value >= 0,
+        )
+        hash_length = self._get_tool_config_value(
+            context=normalized_context,
+            tool_name="DATA_INFO",
+            key="hash_length",
+            generic_sections=generic_sections,
+            legacy_env_vars=("STATA_MCP_DATA_INFO_HASH_LENGTH",),
+            default=12,
+            converter=self._to_int,
+            validator=lambda value: isinstance(value, int) and 1 <= value <= 32,
+        )
+        heads = self._get_tool_config_value(
+            context=normalized_context,
+            tool_name="DATA_INFO",
+            key="heads",
+            generic_sections=generic_sections,
+            default=default_heads,
+            converter=self._to_int,
+            validator=lambda value: isinstance(value, int),
+        )
+        return DataInfoToolConfig(
+            is_cache=is_cache,
+            metrics=metrics,
+            string_keep_number=string_keep_number,
+            decimal_places=decimal_places,
+            hash_length=hash_length,
+            heads=heads,
+        )
+
+    def is_tool_enabled(
+        self,
+        context: ToolContext,
+        tool_name: str,
+        *,
+        default: bool = True,
+    ) -> bool:
+        """Return a context tool switch without bypassing profile restrictions."""
+        normalized_context = self._normalize_tool_context(context)
+        if normalized_context == "api":
+            return default
+        normalized_tool_name = tool_name.upper()
+        return self._get_config_value_from_paths(
+            config_paths=[
+                [
+                    normalized_context.upper(),
+                    "TOOLS",
+                    f"ENABLE_{normalized_tool_name}",
+                ]
+            ],
+            env_vars=[
+                f"STATA_MCP__{normalized_context.upper()}__TOOLS__"
+                f"ENABLE_{normalized_tool_name}"
+            ],
+            default=default,
+            converter=self._to_bool,
+            validator=lambda value: isinstance(value, bool),
+        )
+
     @cached_property
     def ENABLE_DATA_INFO_URL_GUARD(self) -> bool:
         return self._get_config_value(
@@ -385,13 +923,7 @@ class Config:
 
     @cached_property
     def DATA_INFO_IS_CACHE(self) -> bool:
-        return self._get_config_value(
-            config_keys=["data_info", "is_cache"],
-            env_var="STATA_MCP__DATA_INFO_IS_CACHE",
-            default=True,
-            converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool),
-        )
+        return self.get_data_info_config("api").is_cache
 
     @cached_property
     def ENABLE_STRUCTURED_LOG(self) -> bool:
@@ -447,23 +979,11 @@ class Config:
 
     @property
     def IS_CACHE_HELP(self) -> bool:
-        return self._get_config_value(
-            config_keys=["HELP", "IS_CACHE"],
-            env_var="STATA_MCP__CACHE_HELP",
-            default=True,
-            converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool),
-        )
+        return self.get_help_config("api").is_cache
 
     @property
     def IS_SAVE_HELP(self) -> bool:
-        return self._get_config_value(
-            config_keys=["HELP", "IS_SAVE"],
-            env_var="STATA_MCP__SAVE_HELP",
-            default=True,
-            converter=self._to_bool,
-            validator=lambda x: isinstance(x, bool),
-        )
+        return self.get_help_config("api").is_save
 
     @property
     def LOGGING_ON(self) -> bool:
@@ -607,6 +1127,24 @@ class Config:
             converter=self._to_bool,
             validator=lambda x: isinstance(x, bool),
         )
+
+    @cached_property
+    def ADDITIONAL_ALLOWED_DIRS(self) -> tuple[Path, ...]:
+        """Return additional security roots resolved against `WORKING_DIR`."""
+        configured_paths = self._get_config_value(
+            config_keys=["SECURITY", "ADDITIONAL_ALLOWED_DIRS"],
+            env_var="STATA_MCP__ADDITIONAL_ALLOWED_DIRS",
+            default=(),
+            converter=self._to_str_tuple,
+            validator=lambda value: isinstance(value, tuple),
+        )
+        resolved_paths = []
+        for configured_path in configured_paths:
+            path = Path(configured_path).expanduser()
+            if not path.is_absolute():
+                path = self.WORKING_DIR / path
+            resolved_paths.append(path.resolve())
+        return tuple(dict.fromkeys(resolved_paths))
 
     @property
     def IS_MONITOR(self) -> bool:

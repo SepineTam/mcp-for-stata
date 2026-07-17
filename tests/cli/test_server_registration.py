@@ -163,6 +163,59 @@ def test_stata_do_tool_is_async_function_when_async_do_enabled(
     assert mcp_servers._TOOL_REGISTRY["stata_do"]["func"] is mcp_servers.stata_do
 
 
+def test_mcp_data_info_passes_mcp_context_when_head_is_omitted(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    mcp_servers, _ = loaded_modules
+    get_data_info_module = importlib.import_module("stata_mcp.api.get_data_info")
+    calls = {}
+
+    def fake_get_data_info_impl(**kwargs):
+        calls.update(kwargs)
+        return "ok"
+
+    monkeypatch.setattr(
+        get_data_info_module,
+        "_get_data_info_impl",
+        fake_get_data_info_impl,
+    )
+
+    assert mcp_servers.get_data_info("sample.csv") == "ok"
+    assert calls["tool_context"] == "mcp"
+    assert calls["head"] is None
+
+
+def test_mcp_help_uses_contextual_cache_settings(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    mcp_servers, _ = loaded_modules
+    stata_module = importlib.import_module("stata_mcp.stata")
+    captured_kwargs = {}
+    help_settings = SimpleNamespace(is_cache=False, is_save=True)
+    fake_config = SimpleNamespace(
+        IS_UNIX=True,
+        STATA_CLI="stata",
+        STATA_MCP_FOLDER=SimpleNamespace(TMP=Path("/tmp/project")),
+        HELP_CACHE_DIR=Path("/tmp/cache"),
+        get_help_config=lambda context: help_settings,
+    )
+
+    class _FakeStataHelp:
+        def __init__(self, **kwargs):
+            captured_kwargs.update(kwargs)
+
+    monkeypatch.setattr(mcp_servers, "config", fake_config)
+    monkeypatch.setattr(mcp_servers, "_help_cls", None)
+    monkeypatch.setattr(stata_module, "StataHelp", _FakeStataHelp)
+
+    mcp_servers._load_help_cls()
+
+    assert captured_kwargs["is_cache"] is False
+    assert captured_kwargs["is_save"] is True
+
+
 def test_register_tools_all_applies_platform_and_deprecated_filters(
     monkeypatch: pytest.MonkeyPatch,
     loaded_modules,
@@ -175,6 +228,44 @@ def test_register_tools_all_applies_platform_and_deprecated_filters(
 
     assert set(server.tools) == {"stata_do", "get_data_info", "read_log"}
     assert server.resources == []
+
+
+def test_register_tools_applies_config_switch_after_profile_filter(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    mcp_servers, _ = loaded_modules
+    _set_registry(monkeypatch, mcp_servers, unix=True)
+    monkeypatch.setattr(
+        mcp_servers.config,
+        "is_tool_enabled",
+        lambda context, tool_name: tool_name.upper() != "HELP",
+        raising=False,
+    )
+    server = _DummyServer()
+
+    mcp_servers.register_tools(server, profile="core")
+
+    assert set(server.tools) == {"stata_do", "get_data_info"}
+
+
+def test_tool_switch_cannot_add_tool_excluded_by_profile(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_modules,
+):
+    mcp_servers, _ = loaded_modules
+    _set_registry(monkeypatch, mcp_servers, unix=True)
+    monkeypatch.setattr(
+        mcp_servers.config,
+        "is_tool_enabled",
+        lambda context, tool_name: True,
+        raising=False,
+    )
+    server = _DummyServer()
+
+    mcp_servers.register_tools(server, profile="all")
+
+    assert "ado_package_install" not in server.tools
 
 
 def test_register_tools_unsafe_includes_standard_and_high_risk_tools(

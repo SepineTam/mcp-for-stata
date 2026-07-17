@@ -21,6 +21,7 @@ from .._diagnostic_logging import (
     source_reference,
     utf8_size,
 )
+from ..config import ToolContext
 from ..data_info import get_data_handler
 from ..guard.data_path_auditor import DataPathAuditor
 from ._runtime import create_runtime_context
@@ -34,7 +35,8 @@ def _get_data_info_impl(
     encoding: str = "utf-8",
     config_file: str | Path | None = None,
     *,
-    head: int = 0,
+    head: int | None = None,
+    tool_context: ToolContext = "api",
     request_id: str | None = None,
 ) -> str:
     """Return descriptive statistics for a supported dataset."""
@@ -56,12 +58,14 @@ def _get_data_info_impl(
     try:
         stage_started_at = time.perf_counter()
         runtime = create_runtime_context(config_file=config_file)
+        data_info_config = runtime.config.get_data_info_config(tool_context)
+        resolved_head = data_info_config.heads if head is None else head
         log_event(
             logger,
             logging.DEBUG,
             "get_data_info.runtime.ready",
             active_request_id,
-            cache_enabled=runtime.config.DATA_INFO_IS_CACHE,
+            cache_enabled=data_info_config.is_cache,
             duration_ms=elapsed_ms(stage_started_at),
         )
         auditor = DataPathAuditor(
@@ -69,6 +73,11 @@ def _get_data_info_impl(
             strict_local_boundary=runtime.config.STRICT_DATA_INFO_LOCAL_BOUNDARY,
             enable_url_guard=runtime.config.ENABLE_DATA_INFO_URL_GUARD,
             allowed_url_domains=runtime.config.DATA_INFO_ALLOWED_URL_DOMAINS,
+            additional_allowed_dirs=getattr(
+                runtime.config,
+                "ADDITIONAL_ALLOWED_DIRS",
+                (),
+            ),
         )
 
         stage_started_at = time.perf_counter()
@@ -155,8 +164,12 @@ def _get_data_info_impl(
             vars_list,
             encoding=encoding,
             cache_dir=runtime.tmp_base_path,
-            head=head,
-            is_cache=runtime.config.DATA_INFO_IS_CACHE,
+            head=resolved_head,
+            is_cache=data_info_config.is_cache,
+            metrics=data_info_config.metrics,
+            string_keep_number=data_info_config.string_keep_number,
+            decimal_places=data_info_config.decimal_places,
+            hash_length=data_info_config.hash_length,
             request_id=active_request_id,
         )
         log_event(
@@ -240,6 +253,9 @@ def get_data_info(
     vars_list: List[str] | None = None,
     encoding: str = "utf-8",
     config_file: str | Path | None = None,
+    *,
+    head: int | None = None,
+    tool_context: ToolContext = "api",
 ) -> str:
     """Return descriptive statistics for a supported dataset."""
     return _get_data_info_impl(
@@ -247,4 +263,6 @@ def get_data_info(
         vars_list=vars_list,
         encoding=encoding,
         config_file=config_file,
+        head=head,
+        tool_context=tool_context,
     )

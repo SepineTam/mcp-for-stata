@@ -4,8 +4,19 @@ from pathlib import Path
 from stata_mcp.api.read_log import read_log
 
 
-def _write_config(tmp_path: Path, working_dir: Path, *, strict_boundary: bool, enable_structured_log: bool = False) -> Path:
+def _write_config(
+    tmp_path: Path,
+    working_dir: Path,
+    *,
+    strict_boundary: bool,
+    enable_structured_log: bool = False,
+    additional_allowed_dirs: list[Path] | None = None,
+) -> Path:
     config_path = tmp_path / "config.toml"
+    additional_allowed_dirs = additional_allowed_dirs or []
+    allowed_dirs = ", ".join(
+        f'"{allowed_dir.as_posix()}"' for allowed_dir in additional_allowed_dirs
+    )
     config_path.write_text(
         "\n".join(
             [
@@ -14,6 +25,7 @@ def _write_config(tmp_path: Path, working_dir: Path, *, strict_boundary: bool, e
                 "",
                 "[SECURITY]",
                 f"strict_read_log_boundary = {str(strict_boundary).lower()}",
+                f"ADDITIONAL_ALLOWED_DIRS = [{allowed_dirs}]",
                 "",
                 "[BETA]",
                 f"enable_structured_log = {str(enable_structured_log).lower()}",
@@ -60,6 +72,25 @@ def test_strict_true_denies_file_outside_working_dir(tmp_path: Path) -> None:
     result = read_log(outside_file.as_posix(), config_file=config_path)
 
     assert result == "Access denied: log file must be within the stata-mcp folder."
+
+
+def test_strict_true_allows_file_in_additional_allowed_dir(tmp_path: Path) -> None:
+    working_dir = tmp_path / "work"
+    shared_dir = tmp_path / "shared"
+    working_dir.mkdir()
+    shared_dir.mkdir()
+    log_file = shared_dir / "test.log"
+    log_file.write_text("log content", encoding="utf-8")
+    config_path = _write_config(
+        tmp_path,
+        working_dir,
+        strict_boundary=True,
+        additional_allowed_dirs=[shared_dir],
+    )
+
+    result = read_log(log_file.as_posix(), config_file=config_path)
+
+    assert result == "log content"
 
 
 def test_strict_true_denies_parent_directory_escape(tmp_path: Path) -> None:

@@ -72,6 +72,194 @@ class TestFileValidation:
             CsvDataInfo([])  # type: ignore
 
 
+class TestRuntimeSettings:
+    """Test settings passed into a concrete data-info handler."""
+
+    def test_explicit_settings_replace_internal_config_reads(
+        self,
+        monkeypatch,
+        tmp_path,
+    ):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", "9")
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_DECIMAL_PLACES", "8")
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_HASH_LENGTH", "24")
+        data_path = tmp_path / "sample.csv"
+        data_path.write_text("value,label\n1,a\n2,b\n", encoding="utf-8")
+
+        data_info = CsvDataInfo(
+            data_path,
+            is_cache=False,
+            metrics=["med", "q1", "med"],
+            string_keep_number=2,
+            decimal_places=1,
+            hash_length=6,
+        )
+
+        assert data_info.is_cache is False
+        assert data_info.metrics == [
+            "obs",
+            "mean",
+            "stderr",
+            "min",
+            "max",
+            "med",
+            "q1",
+        ]
+        assert data_info.string_keep_number == 2
+        assert data_info.decimal_places == 1
+        assert data_info.HASH_LENGTH == 6
+
+    def test_legacy_environment_settings_apply_to_direct_handler(
+        self,
+        monkeypatch,
+        tmp_path,
+    ):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", "4")
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_DECIMAL_PLACES", "1")
+        monkeypatch.setenv("STATA_MCP_DATA_INFO_HASH_LENGTH", "6")
+        data_path = tmp_path / "sample.csv"
+        data_path.write_text("value,label\n1,a\n2,b\n", encoding="utf-8")
+
+        data_info = CsvDataInfo(data_path)
+
+        assert data_info.string_keep_number == 4
+        assert data_info.decimal_places == 1
+        assert data_info.HASH_LENGTH == 6
+
+    def test_user_toml_settings_apply_to_direct_handler(
+        self,
+        monkeypatch,
+        tmp_path,
+    ):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        home_dir = tmp_path / "home"
+        config_dir = home_dir / ".statamcp"
+        config_dir.mkdir(parents=True)
+        (config_dir / "config.toml").write_text(
+            "\n".join(
+                [
+                    "[DATA_INFO]",
+                    'metrics = ["med"]',
+                    "string_keep_number = 3",
+                    "decimal_places = 2",
+                    "hash_length = 8",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        monkeypatch.setattr("pathlib.Path.home", lambda: home_dir)
+        monkeypatch.chdir(tmp_path)
+        data_path = tmp_path / "sample.csv"
+        data_path.write_text("value,label\n1,a\n2,b\n", encoding="utf-8")
+
+        data_info = CsvDataInfo(data_path)
+
+        assert data_info.metrics == [
+            "obs",
+            "mean",
+            "stderr",
+            "min",
+            "max",
+            "med",
+        ]
+        assert data_info.string_keep_number == 3
+        assert data_info.decimal_places == 2
+        assert data_info.HASH_LENGTH == 8
+
+    def test_invalid_direct_metrics_fall_back_to_legacy_defaults(self, tmp_path):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        data_path = tmp_path / "sample.csv"
+        data_path.write_text("value\n1\n", encoding="utf-8")
+
+        data_info = CsvDataInfo(data_path, metrics=["unsupported"])
+
+        assert data_info.metrics == DataInfoBase.DEFAULT_METRICS
+
+    def test_direct_metrics_keep_defaults_and_ignore_unsupported_values(
+        self,
+        tmp_path,
+    ):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        data_path = tmp_path / "sample.csv"
+        data_path.write_text("value\n1\n2\n", encoding="utf-8")
+
+        data_info = CsvDataInfo(
+            data_path,
+            metrics=["Q1", "unsupported", "q1", "mean", "MED"],
+        )
+
+        assert data_info.metrics == [
+            "obs",
+            "mean",
+            "stderr",
+            "min",
+            "max",
+            "q1",
+            "med",
+        ]
+        assert set(data_info.info["vars_detail"]["value"]["summary"]) == {
+            "obs",
+            "mean",
+            "stderr",
+            "min",
+            "max",
+            "q1",
+            "med",
+        }
+
+    def test_cache_is_isolated_by_output_settings(self, tmp_path):
+        from stata_mcp.data_info.csv import CsvDataInfo
+
+        data_path = tmp_path / "sample.csv"
+        cache_dir = tmp_path / "cache"
+        data_path.write_text(
+            "value,label\n1.1234,alpha\n2.2345,beta\n",
+            encoding="utf-8",
+        )
+        first_handler = CsvDataInfo(
+            data_path,
+            cache_dir=cache_dir,
+            metrics=["q1"],
+            string_keep_number=1,
+            decimal_places=1,
+        )
+        second_handler = CsvDataInfo(
+            data_path,
+            cache_dir=cache_dir,
+            metrics=["q1"],
+            string_keep_number=2,
+            decimal_places=4,
+        )
+        different_metrics_handler = CsvDataInfo(
+            data_path,
+            cache_dir=cache_dir,
+            metrics=["q3"],
+            string_keep_number=2,
+            decimal_places=4,
+        )
+
+        first_result = first_handler.info
+        second_result = second_handler.info
+
+        assert first_handler.cached_file != second_handler.cached_file
+        assert second_handler.cached_file != different_metrics_handler.cached_file
+        assert first_result["vars_detail"]["value"]["summary"]["mean"] == 1.7
+        assert second_result["vars_detail"]["value"]["summary"]["mean"] == 1.6789
+        assert second_result["vars_detail"]["label"]["summary"]["value_list"] == [
+            "alpha",
+            "beta",
+        ]
+        assert second_result["info_config"]["decimal_places"] == 4
+        assert len(list(cache_dir.glob("*.json"))) == 2
+
+
 class TestDetermineVariableType:
     """测试 _determine_variable_type 静态方法"""
 

@@ -31,10 +31,19 @@ def read_log(
     path = Path(file_path).expanduser().resolve()
 
     if runtime.config.STRICT_READ_LOG_BOUNDARY:
-        allowed_base = runtime.config.STATA_MCP_FOLDER.path.resolve()
-        try:
-            path.relative_to(allowed_base)
-        except ValueError:
+        allowed_dirs = (
+            runtime.config.STATA_MCP_FOLDER.path,
+            *getattr(runtime.config, "ADDITIONAL_ALLOWED_DIRS", ()),
+        )
+        is_allowed = False
+        for allowed_dir in allowed_dirs:
+            try:
+                path.relative_to(allowed_dir.resolve())
+                is_allowed = True
+                break
+            except ValueError:
+                continue
+        if not is_allowed:
             logger.warning(
                 "[SECURITY VIOLATION] read_log outside allowed directory: %s",
                 path,

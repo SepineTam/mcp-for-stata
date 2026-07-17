@@ -27,8 +27,12 @@ class StataHelp:
         project_tmp_dir: Path | None = None,
         cache_dir: Path | None = None,
         config: "Config | None" = None,
+        is_cache: bool | None = None,
+        is_save: bool | None = None,
     ):
         self._config = config
+        self._is_cache = is_cache
+        self._is_save = is_save
         self.help_cache_dir = cache_dir or (
             config.HELP_CACHE_DIR if config else Path.home() / ".statamcp" / "help"
         )
@@ -40,12 +44,18 @@ class StataHelp:
 
     @property
     def IS_SAVE(self) -> bool:
+        explicit_is_save = getattr(self, "_is_save", None)
+        if explicit_is_save is not None:
+            return explicit_is_save
         if self._config:
             return self._config.IS_SAVE_HELP
         return True
 
     @property
     def IS_CACHE(self) -> bool:
+        explicit_is_cache = getattr(self, "_is_cache", None)
+        if explicit_is_cache is not None:
+            return explicit_is_cache
         if self._config:
             return self._config.IS_CACHE_HELP
         return False

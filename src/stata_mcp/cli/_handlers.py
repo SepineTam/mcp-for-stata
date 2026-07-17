@@ -114,6 +114,7 @@ def handle_tool(args: Namespace) -> int:
             result = stata_help(
                 cmd=args.stata_command,
                 replace=args.replace,
+                tool_context="cli",
                 **config_kwargs,
             )
         elif args.tool_action == "data-info":
@@ -121,6 +122,8 @@ def handle_tool(args: Namespace) -> int:
                 data_path=args.data_path,
                 vars_list=args.vars_list,
                 encoding=args.encoding,
+                head=getattr(args, "heads", None),
+                tool_context="cli",
                 **config_kwargs,
             )
         elif args.tool_action == "read-log":

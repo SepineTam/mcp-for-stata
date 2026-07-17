@@ -11,9 +11,7 @@ import copy
 import hashlib
 import json
 import logging
-import os
 import time
-import tomllib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
@@ -27,6 +25,11 @@ import numpy as np
 import pandas as pd
 import requests
 
+from .._data_info_metrics import (
+    DATA_INFO_METRICS,
+    DEFAULT_DATA_INFO_METRICS,
+    normalize_data_info_metrics,
+)
 from .._diagnostic_logging import (
     elapsed_ms,
     log_event,
@@ -139,15 +142,11 @@ class DataInfoBase(ABC):
 
     # Registry of supported file extensions (to be overridden by subclasses)
     supported_extensions: List[str] = []
+    CACHE_SCHEMA_VERSION = 2
+    CACHE_SETTINGS_HASH_LENGTH = 16
 
-    CFG_FILE = Path.home() / ".statamcp" / "config.toml"
-    DEFAULT_METRICS: List[str] = [
-        'obs', 'mean', 'stderr', 'min', 'max'
-    ]
-    ALLOWED_METRICS: List[str] = DEFAULT_METRICS + [
-        # Additional metrics
-        'q1', 'q3', 'skewness', 'kurtosis'
-    ]
+    DEFAULT_METRICS: List[str] = list(DEFAULT_DATA_INFO_METRICS)
+    ALLOWED_METRICS: List[str] = list(DATA_INFO_METRICS)
 
     # Request timeout
     DEFAULT_TIMEOUT = (5, 30)
@@ -176,6 +175,7 @@ class DataInfoBase(ABC):
         string_keep_number: int = None,
         decimal_places: int = None,
         hash_length: int = None,
+        metrics: List[str] | Tuple[str, ...] | None = None,
         head: int = 0,
         request_id: str | None = None,
         **kwargs
@@ -207,44 +207,70 @@ class DataInfoBase(ABC):
         self.cache_dir = Path(cache_dir) if cache_dir else Path.home() / ".statamcp" / ".cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        self.string_keep_number = self._resolve_data_info_value(
-            string_keep_number, "STATA_MCP_DATA_INFO_STRING_KEEP_NUMBER", "string_keep_number", 10
+        runtime_settings = None
+        if any(
+            value is None
+            for value in (
+                string_keep_number,
+                decimal_places,
+                hash_length,
+                metrics,
+            )
+        ):
+            runtime_settings = self._load_default_runtime_settings()
+
+        resolved_string_keep_number = (
+            string_keep_number
+            if string_keep_number is not None
+            else getattr(runtime_settings, "string_keep_number", 10)
         )
-        self.decimal_places = self._resolve_data_info_value(
-            decimal_places, "STATA_MCP_DATA_INFO_DECIMAL_PLACES", "decimal_places", 3
+        resolved_decimal_places = (
+            decimal_places
+            if decimal_places is not None
+            else getattr(runtime_settings, "decimal_places", 3)
         )
-        self.HASH_LENGTH = self._resolve_data_info_value(
-            hash_length, "STATA_MCP_DATA_INFO_HASH_LENGTH", "hash_length", 12
+        resolved_hash_length = (
+            hash_length
+            if hash_length is not None
+            else getattr(runtime_settings, "hash_length", 12)
         )
+        resolved_metrics = (
+            metrics
+            if metrics is not None
+            else getattr(runtime_settings, "metrics", None)
+        )
+        self.string_keep_number = (
+            int(resolved_string_keep_number)
+        )
+        self.decimal_places = int(resolved_decimal_places)
+        self.HASH_LENGTH = int(resolved_hash_length)
+        self._metrics = self._normalize_metrics(resolved_metrics)
         self._head = head
+        self._cache_read_options = repr(kwargs)
 
         self.kwargs = kwargs  # Store additional keyword arguments for subclasses to use
 
-    def _resolve_data_info_value(
-        self,
-        explicit_value: int | None,
-        env_var: str,
-        config_key: str,
-        default: int,
-    ) -> int:
-        """Resolve a data_info config value with explicit > env > config > default priority."""
-        if explicit_value is not None:
-            return int(explicit_value)
+    @classmethod
+    def _normalize_metrics(
+        cls,
+        metrics: List[str] | Tuple[str, ...] | None,
+    ) -> List[str]:
+        """Keep mandatory metrics and append supported extras."""
+        return list(normalize_data_info_metrics(metrics))
 
-        env_value = os.getenv(env_var, None)
-        if env_value is not None:
-            return int(env_value)
-
+    @staticmethod
+    def _load_default_runtime_settings() -> Any | None:
+        """Resolve generic settings for callers that instantiate handlers directly."""
         try:
-            with open(self.CFG_FILE, "rb") as f:
-                config = tomllib.load(f)
-            config_value = config.get("data_info", {}).get(config_key, None)
-            if config_value is not None:
-                return int(config_value)
-        except (FileNotFoundError, OSError, Exception):
-            pass
+            from ..config import Config
 
-        return default
+            return Config().get_data_info_config("api")
+        except Exception as error:
+            logger.warning(
+                "Could not resolve default data-info settings: %s",
+                error,
+            )
+            return None
 
     # Properties
     @cached_property
@@ -323,26 +349,42 @@ class DataInfoBase(ABC):
 
     @property
     def cached_file(self) -> Path:
-        return self.cache_dir / f"data_info__{self.name}_{self.suffix.strip('.')}__hash_{self.hash[:self.HASH_LENGTH]}.json"
+        return self.cache_dir / (
+            f"data_info__{self.name}_{self.suffix.strip('.')}__"
+            f"hash_{self.hash[: self.HASH_LENGTH]}__"
+            f"settings_{self.cache_settings_hash}.json"
+        )
+
+    @cached_property
+    def cache_settings_hash(self) -> str:
+        """Return a stable identity for settings that can change cached output."""
+        source_identity = (
+            str(self.data_path) if self.is_url else self.data_path.resolve().as_posix()
+        )
+        cache_settings = {
+            "schema_version": self.CACHE_SCHEMA_VERSION,
+            "handler": f"{type(self).__module__}.{type(self).__qualname__}",
+            "source": source_identity,
+            "encoding": self.encoding,
+            "read_options": self._cache_read_options,
+            "metrics": self.metrics,
+            "string_keep_number": self.string_keep_number,
+            "decimal_places": self.decimal_places,
+            "hash_length": self.HASH_LENGTH,
+        }
+        serialized_settings = json.dumps(
+            cache_settings,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+        return hashlib.sha256(serialized_settings.encode("utf-8")).hexdigest()[
+            : self.CACHE_SETTINGS_HASH_LENGTH
+        ]
 
     @property
     def metrics(self) -> List[str]:
-        try:
-            with open(self.CFG_FILE, "rb") as f:
-                config = tomllib.load(f)
-
-            additional = config.get("data_info", {}).get("metrics", []) or []
-            if not isinstance(additional, list):
-                additional = [additional]
-
-            target = (set(self.DEFAULT_METRICS) | set(additional)) & set(self.ALLOWED_METRICS)
-
-            return list(dict.fromkeys(
-                [m for m in self.DEFAULT_METRICS if m in target] +
-                [m for m in self.ALLOWED_METRICS if m in target]
-            ))
-        except (FileNotFoundError, OSError, Exception):
-            return self.DEFAULT_METRICS
+        return list(self._metrics)
 
     @property
     def df(self) -> pd.DataFrame:

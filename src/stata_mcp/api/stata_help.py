@@ -9,6 +9,7 @@
 
 from pathlib import Path
 
+from ..config import ToolContext
 from ..stata import StataHelp
 from ._runtime import create_runtime_context
 
@@ -17,13 +18,18 @@ def stata_help(
     cmd: str,
     config_file: str | Path | None = None,
     replace: bool = False,
+    *,
+    tool_context: ToolContext = "api",
 ) -> str:
     """Return help content for a Stata command through a one-shot helper."""
     runtime = create_runtime_context(config_file=config_file, require_stata=True)
+    help_config = runtime.config.get_help_config(tool_context)
     help_reader = StataHelp(
         stata_cli=runtime.stata_cli,
         project_tmp_dir=runtime.tmp_base_path,
         cache_dir=runtime.config.HELP_CACHE_DIR,
         config=runtime.config,
+        is_cache=help_config.is_cache,
+        is_save=help_config.is_save,
     )
     return help_reader.help(cmd, replace=replace)
