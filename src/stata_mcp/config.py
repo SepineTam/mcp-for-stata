@@ -106,6 +106,10 @@ class Config:
     PROJECT_CONFIG_PATH = Path(".statamcp") / "config.toml"
     SYSTEM_CONFIG_FILE = Path("/etc/statamcp/config.toml")
     SECURITY_SECTION = "SECURITY"
+    URL_SECURITY_BETA_KEYS = (
+        "enable_data_info_url_guard",
+        "data_info_allowed_url_domains",
+    )
 
     def __init__(self, config_file: Optional[Union[str, Path]] = None):
         env_config_file = self._clean_string_value(os.getenv(self.ENV_CONFIG_FILE))
@@ -409,6 +413,20 @@ class Config:
             merged[cls.SECURITY_SECTION] = cls._deep_merge(
                 project_security, user_security
             )
+
+        user_beta = user_config.get("BETA", {})
+        if isinstance(user_beta, dict):
+            user_url_security = {
+                key: user_beta[key]
+                for key in cls.URL_SECURITY_BETA_KEYS
+                if key in user_beta
+            }
+            if user_url_security:
+                merged_beta = merged.get("BETA", {})
+                merged["BETA"] = cls._deep_merge(
+                    merged_beta if isinstance(merged_beta, dict) else {},
+                    user_url_security,
+                )
         return cls._deep_merge(merged, system_config)
 
     @classmethod
@@ -621,13 +639,22 @@ class Config:
 
         Context specificity must only compare keys from the same source.
         Otherwise a specific user key could incorrectly outrank a generic
-        project key. Security keeps its deliberate user-before-project order.
+        project key. Security, including the URL guard keys kept under BETA,
+        follows the user-before-project order.
         """
         if self.is_debug_config:
             return (self._read_toml_file(self.config_file),)
 
         is_security_value = all(
-            config_path and config_path[0] == self.SECURITY_SECTION
+            config_path
+            and (
+                config_path[0] == self.SECURITY_SECTION
+                or (
+                    len(config_path) == 2
+                    and config_path[0] == "BETA"
+                    and config_path[1] in self.URL_SECURITY_BETA_KEYS
+                )
+            )
             for config_path in config_paths
         )
         user_config = self._read_toml_file(self.user_config_file)

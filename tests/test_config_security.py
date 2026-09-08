@@ -1,5 +1,8 @@
 """Tests for high-risk ado installation configuration."""
 
+import pytest
+import tomli_w
+
 from stata_mcp.config import Config
 
 
@@ -270,9 +273,110 @@ MAX_ASYNC_DO = 4
     assert config.MAX_ASYNC_DO == 4
 
 
-def test_data_info_url_guard_beta_config_merges_user_project_and_system(
+@pytest.mark.parametrize(
+    ("user_beta", "project_beta", "system_beta", "expected_guard", "expected_domains"),
+    [
+        pytest.param(
+            {"enable_data_info_url_guard": True},
+            {"enable_data_info_url_guard": False},
+            {},
+            True,
+            (),
+            id="project-cannot-disable-user-guard",
+        ),
+        pytest.param(
+            {
+                "enable_data_info_url_guard": True,
+                "data_info_allowed_url_domains": ["trusted.example.com"],
+            },
+            {
+                "enable_data_info_url_guard": True,
+                "data_info_allowed_url_domains": ["example.com"],
+            },
+            {},
+            True,
+            ("trusted.example.com",),
+            id="project-cannot-widen-user-allowlist",
+        ),
+        pytest.param(
+            {
+                "enable_data_info_url_guard": True,
+                "data_info_allowed_url_domains": [],
+            },
+            {"data_info_allowed_url_domains": ["project.example.com"]},
+            {},
+            True,
+            (),
+            id="empty-user-allowlist-is-authoritative",
+        ),
+        pytest.param(
+            {"enable_data_info_url_guard": False},
+            {"enable_data_info_url_guard": True},
+            {},
+            False,
+            (),
+            id="explicit-user-disable-is-authoritative",
+        ),
+        pytest.param(
+            {},
+            {
+                "enable_data_info_url_guard": True,
+                "data_info_allowed_url_domains": ["project.example.com"],
+            },
+            {},
+            True,
+            ("project.example.com",),
+            id="project-only-config-still-works",
+        ),
+        pytest.param(
+            {"enable_data_info_url_guard": True},
+            {"data_info_allowed_url_domains": ["project.example.com"]},
+            {},
+            True,
+            ("project.example.com",),
+            id="unset-user-key-falls-back-to-project",
+        ),
+        pytest.param(
+            {
+                "enable_data_info_url_guard": False,
+                "data_info_allowed_url_domains": ["user.example.com"],
+            },
+            {
+                "enable_data_info_url_guard": True,
+                "data_info_allowed_url_domains": ["project.example.com"],
+            },
+            {"data_info_allowed_url_domains": ["system.example.com"]},
+            False,
+            ("system.example.com",),
+            id="partial-system-policy-keeps-user-guard",
+        ),
+        pytest.param(
+            {
+                "enable_data_info_url_guard": True,
+                "data_info_allowed_url_domains": ["user.example.com"],
+            },
+            {
+                "enable_data_info_url_guard": True,
+                "data_info_allowed_url_domains": ["project.example.com"],
+            },
+            {
+                "enable_data_info_url_guard": False,
+                "data_info_allowed_url_domains": ["system.example.com"],
+            },
+            False,
+            ("system.example.com",),
+            id="system-policy-remains-highest-priority",
+        ),
+    ],
+)
+def test_data_info_url_security_uses_system_user_project_precedence(
     monkeypatch,
     tmp_path,
+    user_beta,
+    project_beta,
+    system_beta,
+    expected_guard,
+    expected_domains,
 ) -> None:
     home_dir = tmp_path / "home"
     project_dir = tmp_path / "project"
@@ -285,36 +389,31 @@ def test_data_info_url_guard_beta_config_merges_user_project_and_system(
     monkeypatch.setattr("pathlib.Path.home", lambda: home_dir)
     monkeypatch.setattr("platform.system", lambda: "Linux")
     monkeypatch.setattr(Config, "SYSTEM_CONFIG_FILE", system_config)
+    monkeypatch.delenv(Config.ENV_CONFIG_FILE, raising=False)
     monkeypatch.chdir(project_dir)
 
     (user_config_dir / "config.toml").write_text(
-        """
-[BETA]
-enable_data_info_url_guard = false
-data_info_allowed_url_domains = ["user.example.com"]
-""".strip(),
+        tomli_w.dumps({"BETA": {"MAX_ASYNC_DO": 2, **user_beta}}),
         encoding="utf-8",
     )
     (project_config_dir / "config.toml").write_text(
-        """
-[BETA]
-enable_data_info_url_guard = true
-data_info_allowed_url_domains = ["project.example.com"]
-""".strip(),
+        tomli_w.dumps({"BETA": {"MAX_ASYNC_DO": 5, **project_beta}}),
         encoding="utf-8",
     )
     system_config.write_text(
-        """
-[BETA]
-data_info_allowed_url_domains = ["system.example.com"]
-""".strip(),
+        tomli_w.dumps({"BETA": system_beta}),
         encoding="utf-8",
     )
 
     config = Config()
 
-    assert config.ENABLE_DATA_INFO_URL_GUARD is True
-    assert config.DATA_INFO_ALLOWED_URL_DOMAINS == ("system.example.com",)
+    assert config.ENABLE_DATA_INFO_URL_GUARD is expected_guard
+    assert config.DATA_INFO_ALLOWED_URL_DOMAINS == expected_domains
+    assert config.MAX_ASYNC_DO == 5
+    merged_beta = config.config["BETA"]
+    assert merged_beta["enable_data_info_url_guard"] is expected_guard
+    assert tuple(merged_beta.get("data_info_allowed_url_domains", [])) == expected_domains
+    assert merged_beta["MAX_ASYNC_DO"] == 5
 
 
 def test_data_info_local_boundary_config_defaults_to_disabled(tmp_path) -> None:

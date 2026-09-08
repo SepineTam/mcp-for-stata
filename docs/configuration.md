@@ -25,6 +25,11 @@ for most sections. The `SECURITY` section is the exception: user-level security
 settings override project-level security settings so a project cannot relax a
 stricter user safety policy.
 
+The same user-before-project rule applies to `BETA.enable_data_info_url_guard`
+and `BETA.data_info_allowed_url_domains`. These keys remain under `BETA` for
+compatibility; other `BETA` settings still use project-before-user precedence.
+Linux system configuration remains the highest-priority source for all of them.
+
 ## Configuration File
 
 ### Location

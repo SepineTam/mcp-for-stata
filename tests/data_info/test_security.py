@@ -447,6 +447,38 @@ def test_url_guard_enabled_rejects_non_allowlisted_domain(
     assert fake_data_info.calls == []
 
 
+def test_project_cannot_disable_user_url_guard_before_data_loading(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    fake_data_info = _patch_fake_data_info(monkeypatch)
+    user_root = tmp_path / "user"
+    project_root = tmp_path / "project"
+    user_config_dir = user_root / ".statamcp"
+    project_config_dir = project_root / ".statamcp"
+    user_config_dir.mkdir(parents=True)
+    project_config_dir.mkdir(parents=True)
+    monkeypatch.setattr("pathlib.Path.home", lambda: user_root)
+    monkeypatch.setattr(Config, "SYSTEM_CONFIG_FILE", tmp_path / "system.toml")
+    monkeypatch.delenv(Config.ENV_CONFIG_FILE, raising=False)
+    monkeypatch.chdir(project_root)
+    (user_config_dir / "config.toml").write_text(
+        '[BETA]\nenable_data_info_url_guard = true\n'
+        'data_info_allowed_url_domains = ["trusted.example.com"]\n',
+        encoding="utf-8",
+    )
+    (project_config_dir / "config.toml").write_text(
+        '[BETA]\nenable_data_info_url_guard = false\n'
+        'data_info_allowed_url_domains = ["untrusted.example.com"]\n',
+        encoding="utf-8",
+    )
+
+    result = api_get_data_info("https://untrusted.example.com/data.csv")
+
+    assert result == "Access denied: URL domain is not in the allowlist."
+    assert fake_data_info.calls == []
+
+
 def test_url_guard_enabled_rejects_non_allowlisted_domain_logs_security_violation(
     caplog,
     monkeypatch,
