@@ -1,6 +1,6 @@
 [project]
 name = "stata-mcp"
-version = "1.24.0"
+version = "1.25.0"
 description = "MCP-for-Stata: a stable, security-first MCP server and CLI for integrating local Stata into Claude Code, Codex, OpenClaw, and other AI research workflows."
 readme = "README.md"
 authors = [
