@@ -24,7 +24,7 @@ Convierte Claude Code, Codex y otros agentes de IA en un asistente de investigac
 [![Issue](https://img.shields.io/badge/Issue-report-green.svg)](https://github.com/sepinetam/mcp-for-stata/issues/new)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/SepineTam/mcp-for-stata)
 
-<!-- mcp-name: io.github.SepineTam/mcp-for-stata -->
+<!-- mcp-name: io.github.SepineTam/stata-mcp -->
 
 ---
 ## 💡 Inicio rápido
