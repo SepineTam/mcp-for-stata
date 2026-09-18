@@ -72,6 +72,10 @@ AGPL 3.0 License 是开源协议中的一种，它不会影响您的日常使用
 </details>
 
 ## 安装与客户端配置
+
+完整流程见 **[安装指南](docs/install.zh.md)**，包括安装方式选择、客户端接入、
+addon/extra 选项和安装验证。
+
 ### 🚀 一键安装所有客户端！
 无需配置，无需手动编辑 JSON。一条命令即可为 **所有受支持的 agent**（Claude Code、Codex、OpenClaw、Cursor、Gemini CLI 等）安装 MCP-for-Stata：
 

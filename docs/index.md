@@ -1,5 +1,7 @@
 # MCP-for-Stata
 
+New here? Start with the [Installation Guide](install.md) to choose a setup method and connect your client.
+
 **Integrate Stata into your agent.**
 
 ## 🆕 MCP-for-Stata Now Supports OpenClaw

@@ -80,6 +80,10 @@ Reason following:
 ---
 
 ## Installation and Client Configuration
+
+See the **[Installation Guide](docs/install.md)** for installation methods,
+client setup, addon/extra options, and verification.
+
 ### 🚀 One-click installation for all clients!
 No config, no manual JSON editing. Just one command installs MCP-for-Stata for **every supported agent** (Claude Code, Codex, OpenClaw, Cursor, Gemini CLI, and more):
 

@@ -70,10 +70,13 @@ plugins:
           default: true
         - locale: zh
           name: 简体中文
+          nav_translations:
+            Installation: 安装指南
 
 nav:
   - Home: index.md
   - Overview: overview.md
+  - Installation: install.md
   - CLI Reference: cli.md
   - Usage: usage.md
   - Claude Plugin: claude-plugin.md

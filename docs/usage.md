@@ -1,5 +1,7 @@
 # Usage Guide
 
+For first-time setup, follow the [Installation Guide](install.md).
+
 > **Hope no [Star War](https://www.aeaweb.org/articles?id=10.1257/app.20150044) future.** - Let's evolve from reg monkeys to causal thinkers.
 
 This guide covers how to integrate and use MCP-for-Stata across different environments and agents.

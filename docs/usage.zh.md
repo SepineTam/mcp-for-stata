@@ -1,5 +1,7 @@
 # 使用指南
 
+第一次配置环境和客户端，请先阅读 [安装指南](install.md)。
+
 > **希望未来不再有[star war](https://www.aeaweb.org/articles?id=10.1257/app.20150044)。** - 让科研从 reg monkeys 变成有价值的研究。
 
 本指南介绍如何在不同环境和智能体中集成和使用 MCP-for-Stata。

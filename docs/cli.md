@@ -1,5 +1,7 @@
 # CLI Reference
 
+For installation methods and a step-by-step setup, start with the [Installation Guide](install.md).
+
 MCP-for-Stata provides a command-line interface (CLI) for various operations including starting MCP servers and installing to different AI clients.
 
 ## Installation
