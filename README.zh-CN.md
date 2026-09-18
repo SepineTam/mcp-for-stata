@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://aidea-labs.com/mcp-for-stata">
+  <a href="https://aidea-labs.com/open/projects/mcp-for-stata">
     <img src="assets/mcp-for-stata-stata-ai-data-analysis.jpg" alt="MCP-for-Stata（Stata-MCP）：让 Claude Code、Codex 等 AI 智能体调用本地 Stata 进行回归分析和实证研究" width="300"/>
   </a>
 </div>
@@ -36,6 +36,7 @@ Install MCP-for-Stata for yourself globally following the instructions in the Gi
 ```
 
 ## 🆕 动态
+- 📖 **技能默认安装**：Stata 相关技能现在会随 MCP 一起安装，无需额外配置。详见[安装指南](docs/install.md#3-choose-optional-components)。
 - 🚀 **DeepSeek Harness Day 0 支持**：运行 `uvx stata-mcp install -c dsh` 即可将 MCP-for-Stata 安装至 DeepSeek Harness。详见 [DeepSeek Harness 指南](https://sepinetam.github.io/mcp-for-stata/agents/deepseek_harness/)。
 - 🧪 **Claude Science 支持**：MCP-for-Stata 现已支持 Claude Science，需配置沙箱放行路径。详见 [Claude Science 指南](https://sepinetam.github.io/mcp-for-stata/agents/claude_science)。
 - 更多内容请关注微信公众号：[Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ)，以及 [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
@@ -43,7 +44,7 @@ Install MCP-for-Stata for yourself globally following the instructions in the Gi
 - ✨ **Claude Code 插件支持**：官方插件包，包含 MCP 服务器和 Stata LSP 集成
 - 在 Claude Code 中使用 MCP-for-Stata，请查看 [Claude Code 高级用法](#advanced-claude-code)，或在 Codex 中使用请查看 [Codex 高级用法](#advanced-codex)
 
-> 想了解我们的**最新研究**？查看最新研究报告。
+> 想了解我们的**最新研究**？查看[最新研究报告](https://aidea-labs.com/open/projects/mcp-for-stata/reports)。
 
 <details>
 <summary>寻找其他资源？</summary>
@@ -297,7 +298,7 @@ Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 
 目前有多个与 Stata 相关的 MCP 项目。下表由 Claude Code 在直接分析每个代码库后生成。
 
-| 功能 | [MCP-for-Stata](https://aidea-labs.com/mcp-for-stata) (本项目) | [haoyu-haoyu/stata-ai-fusion](https://github.com/haoyu-haoyu/stata-ai-fusion) | [hanlulong/stata-mcp](https://github.com/hanlulong/stata-mcp) | [tmonk/mcp-stata](https://github.com/tmonk/mcp-stata) |
+| 功能 | [MCP-for-Stata](https://aidea-labs.com/open/projects/mcp-for-stata) (本项目) | [haoyu-haoyu/stata-ai-fusion](https://github.com/haoyu-haoyu/stata-ai-fusion) | [hanlulong/stata-mcp](https://github.com/hanlulong/stata-mcp) | [tmonk/mcp-stata](https://github.com/tmonk/mcp-stata) |
 |---|---|---|---|---|
 | **最佳适用** | 智能体驱动分析（Claude Code、Codex、OpenClaw） | 交互式会话、图表导出、精选 Stata 知识库 | 在 VSCode 中自行编写和运行 Stata 代码的用户 | 研究工作流（复现、稳健性检验、发表 QA） |
 | **智能体** | 全部支持 | 全部支持 | VSCode 窗口必须保持激活 | 全部支持 |

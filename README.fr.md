@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://aidea-labs.com/mcp-for-stata">
+  <a href="https://aidea-labs.com/open/projects/mcp-for-stata">
     <img src="assets/mcp-for-stata-stata-ai-data-analysis.jpg" alt="MCP-for-Stata (Stata-MCP) : permet à Claude Code, Codex et aux autres agents IA d'exécuter Stata localement pour l'analyse de régression et la recherche empirique" width="300"/>
   </a>
 </div>
@@ -36,6 +36,7 @@ Install MCP-for-Stata for yourself globally following the instructions in the Gi
 ```
 
 ## 🆕 Actualites
+- 📖 **Skills installees par defaut** : Les skills Stata sont desormais installees avec le MCP, sans configuration supplementaire. Consultez le [guide d'installation](docs/install.md#3-choose-optional-components).
 - 🚀 **Support Day 0 de DeepSeek Harness** : Installez MCP-for-Stata dans DeepSeek Harness avec `uvx stata-mcp install -c dsh`. Consultez le [guide DeepSeek Harness](https://sepinetam.github.io/mcp-for-stata/agents/deepseek_harness/).
 - 🧪 **Support Claude Science** : MCP-for-Stata fonctionne desormais dans Claude Science avec une liste d'autorisations de sandbox. Consultez le [guide Claude Science](https://sepinetam.github.io/mcp-for-stata/agents/claude_science).
 - Retrouvez-nous sur WeChat : [Why I made it?](https://mp.weixin.qq.com/s/VYkykdDgfPMa5KN0_1BeFQ), et [8 figures find out Stata-MCP](https://mp.weixin.qq.com/s/RKPKA4OWAM5SeZmGtbMRew)
@@ -43,7 +44,7 @@ Install MCP-for-Stata for yourself globally following the instructions in the Gi
 - ✨ **Support du plugin Claude Code** : Package officiel de plugin avec serveur MCP et integration Stata LSP
 - Utilisez MCP-for-Stata dans Claude Code, consultez [Claude Code avance](#advanced-claude-code), ou Codex [Codex avance](#advanced-codex)
 
-> Vous cherchez nos **dernieres recherches** ? Consultez les rapports de recherche.
+> Vous cherchez nos **dernieres recherches** ? Consultez les [rapports de recherche](https://aidea-labs.com/open/projects/mcp-for-stata/reports).
 
 <details>
 <summary>Vous cherchez d'autres outils ?</summary>
@@ -293,7 +294,7 @@ Summary: 12 passed, 0 failed, 0 warning(s), 0 skipped
 
 Il existe plusieurs projets MCP lies a Stata. Le tableau ci-dessous a ete genere par Claude Code apres analyse directe de chaque base de code.
 
-| Fonctionnalite | [MCP-for-Stata](https://aidea-labs.com/mcp-for-stata) (ceci) | [haoyu-haoyu/stata-ai-fusion](https://github.com/haoyu-haoyu/stata-ai-fusion) | [hanlulong/stata-mcp](https://github.com/hanlulong/stata-mcp) | [tmonk/mcp-stata](https://github.com/tmonk/mcp-stata) |
+| Fonctionnalite | [MCP-for-Stata](https://aidea-labs.com/open/projects/mcp-for-stata) (ceci) | [haoyu-haoyu/stata-ai-fusion](https://github.com/haoyu-haoyu/stata-ai-fusion) | [hanlulong/stata-mcp](https://github.com/hanlulong/stata-mcp) | [tmonk/mcp-stata](https://github.com/tmonk/mcp-stata) |
 |---|---|---|---|---|
 | **Ideal pour** | Analyse pilotee par agent (Claude Code, Codex, OpenClaw) | Sessions interactives, export de graphiques et connaissances Stata curatees | Utilisateurs qui ecrivent et executent du code Stata dans VSCode eux-memes | Flux de travail de recherche (replication, robustesse, QA publication) |
 | **Agents** | Tous | Tous | La fenetre VSCode doit rester active | Tous |
