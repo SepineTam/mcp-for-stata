@@ -257,6 +257,12 @@ stata-mcp install -c cursor
 # Install to all clients explicitly
 stata-mcp install --all
 
+# Only install the base Stata MCP configuration
+stata-mcp install -c codex --no-addon
+
+# Include optional research tools from plugins/external
+stata-mcp install -c codex --with-extra
+
 # Install into a custom JSON config file
 stata-mcp install --json-file /path/to/config.json
 
@@ -319,11 +325,109 @@ stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 | `--all` | `-a` | Install to all supported clients |
 | `--json-file` | | Custom target client config file path |
 | `--json-index` | | Dot-separated nested key path (e.g. `mcp.servers`); only valid together with `--json-file` |
+| `--with-addon` / `--no-addon` | | Install/skip supported components from GitHub `plugins/stata-toolbox` (default: on) |
+| `--with-extra` / `--no-extra` | | Install/skip supported components from GitHub `plugins/external` (default: off) |
+| `--addon-ref REF` | | Select a GitHub branch, tag or commit for both groups (default: `master`) |
+
+Addon and extra are independent: `--no-addon --with-extra` installs the base MCP
+plus external components. `--all` keeps these switches and processes each client
+once. An already configured Stata MCP does not prevent addon installation.
+
+Payloads come from `SepineTam/mcp-for-stata` on GitHub, not from the wheel or the
+local checkout. Each invocation resolves the chosen ref to one immutable commit,
+fetches both selected directories from that commit, and records its SHA plus
+file SHA-256 hashes in `~/.statamcp/addons-v1.json`. Re-running installation
+refreshes from GitHub; use `--addon-ref <commit>` to reproduce a particular snapshot.
+New external content must be pushed to the selected ref before it can be downloaded.
+
+Base MCP and external MCP configuration share the same path resolver, including
+`CODEX_HOME`, `CLAUDE_CONFIG_DIR` and OpenCode's `XDG_CONFIG_HOME` overrides.
+Configuration tests do not establish that an installed client version can load
+every component. In particular, older Gemini releases may not expose skills;
+check `gemini skills list` in a version that supports Agent Skills. Unsupported
+components remain skipped rather than being reported as active.
+
+**Component support:**
+
+| Client | Skill directory | Other components |
+|---|---|---|
+| Claude Code | `~/.claude/skills` | Rules, commands and agents in their corresponding user directories; LSP through a small managed native plugin |
+| Codex | `~/.agents/skills` | External MCP entries in TOML |
+| Gemini | `~/.gemini/skills` | External MCP entries in JSON |
+| OpenCode | `~/.config/opencode/skills` | External MCP entries translated to local/remote format |
+| Cursor | `~/.cursor/skills` | External MCP entries in JSON |
+| Copilot CLI | `~/.copilot/skills` | External MCP entries in JSON |
+| OpenClaw | `~/.openclaw/skills` | External MCP entries in JSON |
+| Pi (explicit target only) | `~/.pi/agent/skills` | External stdio MCP entries; HTTP entries are skipped |
+| Claude Desktop | Not installed | External stdio MCP entries; HTTP entries are skipped |
+| Cline, WorkBuddy | Not installed | External MCP entries in JSON |
+| Hermes, DSH | Not installed | Optional components currently skipped; base MCP still supported |
+
+Skills include their full directory (references, scripts and assets). Claude
+rules/commands/agents are namespaced under `addon/` or `extra/`; instruction files
+such as `CLAUDE.md` are not edited. `CLAUDE_CONFIG_DIR` and `XDG_CONFIG_HOME` are
+respected for the corresponding skill directories. A custom JSON destination
+receives external MCP entries at `--json-index`; skills require a named client.
+
+The Claude LSP adapter requires both `claude` and the declared language-server
+executable on PATH. It does not install the language-server executable. It uses
+a local, managed LSP-only plugin, preserving the base MCP configuration, and
+skips registration when an enabled native `stata-toolbox` already manages LSP.
+An explicitly disabled managed LSP plugin is left disabled. A native Stata
+toolbox does not suppress unrelated LSP definitions from the extra directory.
+Hooks and other unsupported component types are not automatically enabled.
+Downloaded scripts and external MCP commands are not run by the file installer;
+the client starts configured MCP servers when it loads them.
+
+Existing files or config entries are upgraded only if the ownership manifest
+proves that they have not been modified locally. A conflicting file leaves the
+whole skill unchanged. Identical pre-existing files are skipped without claiming
+ownership. Upstream file removals require manual review instead of automatic
+deletion. Config backups live under `~/.statamcp/addon-backups/`. Concurrent
+addon installs are refused while `~/.statamcp/addons.lock` is held. If an install
+was interrupted, first verify that no installation process is running before
+removing that lock and retrying.
+
+Downloads have time and size limits. Missing directories, network failures,
+conflicts and unsupported components produce visible warnings/skips without
+undoing the base MCP setup. Exit code 0 means base installation succeeded, not
+that every optional component was installed. Review the component messages;
+restart the client to load newly installed components. JSON settings may be
+reformatted; other entries are retained. Codex TOML updates preserve unrelated
+text and refuse unsupported layouts.
+
+Directory conventions follow the official [Claude memory](https://code.claude.com/docs/en/memory),
+[Codex skills](https://developers.openai.com/codex/skills/),
+[Gemini skills](https://geminicli.com/docs/cli/skills/),
+[OpenCode skills](https://opencode.ai/docs/skills/),
+[Cursor skills](https://cursor.com/docs/skills),
+[Copilot skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills),
+[OpenClaw skills](https://docs.openclaw.ai/tools/skills), and
+[Pi skills](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md) documentation.
+MCP serialization follows [OpenCode's environment field](https://opencode.ai/docs/mcp-servers/),
+[Cline's Streamable HTTP type](https://github.com/cline/cline/blob/main/docs/mcp/mcp-overview.mdx), and
+[OpenClaw's transport field](https://docs.openclaw.ai/gateway/config-extensions).
 
 Pi is excluded from `--all` because enabling MCP requires installing the third-party
 `pi-mcp-adapter` package. Run `stata-mcp install -c pi` explicitly. If Pi is not
 installed yet, the command prepares `~/.pi/agent/mcp.json` and prints the remaining
 adapter installation command instead of claiming that the integration is active.
+
+**Developer verification:**
+
+```bash
+# Offline configuration, parser, conflict and platform-path coverage
+uv run pytest tests/cli tests/utils tests/test_install_scripts.py -q
+
+# Optional native Codex/Claude configuration-read acceptance
+STATA_MCP_NATIVE_INSTALL_TESTS=1 uv run pytest tests/utils/test_installer_native_clients.py -q
+```
+
+Native tests use disposable homes and inert commands for client health checks;
+they do not run Stata, call a model, or start the external research services.
+They test default/custom configuration directories and repeated installation.
+Missing CLIs are skipped. Simulated platform-path tests are not Windows/Linux
+application acceptance, and third-party service login/setup remains separate.
 
 ### Doctor Options
 

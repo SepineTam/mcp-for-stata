@@ -251,6 +251,12 @@ stata-mcp install -c cursor
 # 显式安装到所有客户端
 stata-mcp install --all
 
+# 只安装基础 Stata MCP 配置
+stata-mcp install -c codex --no-addon
+
+# 同时安装 plugins/external 中的科研工具
+stata-mcp install -c codex --with-extra
+
 # 安装到自定义 JSON 配置文件
 stata-mcp install --json-file /path/to/config.json
 
@@ -313,10 +319,99 @@ stata-mcp install --json-file /path/to/config.json --json-index mcp.servers
 | `--all` | `-a` | 安装到所有支持的客户端 |
 | `--json-file` | | 自定义目标客户端配置文件路径 |
 | `--json-index` | | dot-notation 的嵌套键路径（如 `mcp.servers`），仅在与 `--json-file` 一起使用时有效 |
+| `--with-addon` / `--no-addon` | | 安装/跳过 GitHub `plugins/stata-toolbox` 中支持的组件，默认开启 |
+| `--with-extra` / `--no-extra` | | 安装/跳过 GitHub `plugins/external` 中支持的组件，默认关闭 |
+| `--addon-ref REF` | | 为两组组件指定 GitHub 分支、标签或提交，默认 `master` |
+
+两个开关相互独立：`--no-addon --with-extra` 安装基础 MCP 和 external 组件。
+`--all` 同样遵守这两个开关，每个客户端只处理一次。即使基础 Stata MCP
+已经配置好，也会继续安装附加组件。
+
+组件从 GitHub 的 `SepineTam/mcp-for-stata` 获取，不放进 wheel，也不从本地
+工作区读取。每次安装先把所选分支或标签解析为一个固定提交，再从同一提交下载
+两组内容；提交号与文件 SHA-256 记录在 `~/.statamcp/addons-v1.json`。
+重新运行安装命令会检查 GitHub 上的新内容；需要复现时可用
+`--addon-ref <提交号>` 固定版本。本地新增的 external 内容必须先推送到所选
+分支，在线安装才能获取。
+
+基础 MCP 和 external MCP 使用同一套路径解析规则，包括 `CODEX_HOME`、
+`CLAUDE_CONFIG_DIR` 与 OpenCode 的 `XDG_CONFIG_HOME`。配置测试通过不等于
+用户当前安装的客户端版本能够加载全部组件。尤其是较旧的 Gemini 可能没有
+Skill 功能，需要在支持 Agent Skills 的版本中用 `gemini skills list` 检查。
+尚未支持的组件仍按跳过处理，不应把写入文件当成已经生效。
+
+**组件支持范围：**
+
+| 客户端 | Skill 安装目录 | 其他组件 |
+|---|---|---|
+| Claude Code | `~/.claude/skills` | Rules、Commands、Agents 写入对应用户目录；LSP 通过专用原生插件挂接 |
+| Codex | `~/.agents/skills` | external MCP 写入 TOML |
+| Gemini | `~/.gemini/skills` | external MCP 写入 JSON |
+| OpenCode | `~/.config/opencode/skills` | external MCP 转换为 local/remote 格式 |
+| Cursor | `~/.cursor/skills` | external MCP 写入 JSON |
+| Copilot CLI | `~/.copilot/skills` | external MCP 写入 JSON |
+| OpenClaw | `~/.openclaw/skills` | external MCP 写入 JSON |
+| Pi（仅显式指定） | `~/.pi/agent/skills` | 支持 external stdio MCP，跳过 HTTP |
+| Claude Desktop | 暂不安装 | 支持 external stdio MCP，跳过 HTTP |
+| Cline、WorkBuddy | 暂不安装 | external MCP 写入 JSON |
+| Hermes、DSH | 暂不安装 | 当前跳过附加组件，基础 MCP 安装仍支持 |
+
+Skill 会完整下载，包括引用文件、脚本和素材。Claude 的 Rules、Commands、Agents
+分别放在对应目录下的 `addon/` 或 `extra/` 中，不改写 `CLAUDE.md` 等指令文件。
+相应 Skill 目录支持 `CLAUDE_CONFIG_DIR` 和 `XDG_CONFIG_HOME`。
+自定义 JSON 文件可在 `--json-index` 指定位置接收 external MCP；安装 Skill
+需要明确指定客户端。
+
+Claude LSP 挂接要求 PATH 中已有 `claude` 和配置中指定的语言服务器程序，
+安装器不会下载语言服务器程序本身。它生成仅含 LSP 的本地原生插件，基础 MCP
+继续使用原有配置；如果已启用原生 `stata-toolbox`，则由原插件管理 LSP。
+用户主动禁用的专用 LSP 插件保持禁用；原生 Stata 插件不会阻止 extra 中
+其他语言服务器的安装。
+Hooks 及其他尚未适配的组件不会自动启用。文件安装器不会执行下载的脚本或
+external MCP 命令；客户端加载配置时才会启动相应 MCP 服务。
+
+只有安装清单能证明“由我们安装且用户未修改”的文件或配置项，才允许自动升级。
+任一文件冲突会跳过整个 Skill。已有且内容相同的文件会跳过，不自动认领所有权。
+上游删除文件时提示人工检查，不自动删除本地文件。配置备份保存在
+`~/.statamcp/addon-backups/`。持有 `~/.statamcp/addons.lock` 时拒绝其他并发
+addon 安装；若安装异常中断，先确认没有安装进程运行，再移除遗留锁并重试。
+
+下载设有时间和大小上限。目录尚未发布、网络失败、本地冲突或组件不受支持时，
+会显示警告或跳过提示，基础 MCP 配置保留。退出码 0 表示基础安装成功，
+不代表所有可选组件均已安装，请查看各组件的消息并重启客户端加载新内容。
+JSON 配置可能重新排版，但保留其他配置项；Codex TOML 保留无关文本，遇到
+不能安全修改的写法会拒绝更新。
+
+目录约定参考官方 [Claude memory](https://code.claude.com/docs/en/memory)、
+[Codex skills](https://developers.openai.com/codex/skills/)、
+[Gemini skills](https://geminicli.com/docs/cli/skills/)、
+[OpenCode skills](https://opencode.ai/docs/skills/)、
+[Cursor skills](https://cursor.com/docs/skills)、
+[Copilot skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)、
+[OpenClaw skills](https://docs.openclaw.ai/tools/skills) 和
+[Pi skills](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md) 文档。
+MCP 格式另参考 [OpenCode 环境变量字段](https://opencode.ai/docs/mcp-servers/)、
+[Cline 的 Streamable HTTP 类型](https://github.com/cline/cline/blob/main/docs/mcp/mcp-overview.mdx) 和
+[OpenClaw 的 transport 字段](https://docs.openclaw.ai/gateway/config-extensions)。
 
 Pi 不包含在 `--all` 中，因为启用 MCP 需要安装第三方软件包
 `pi-mcp-adapter`。请显式运行 `stata-mcp install -c pi`。如果尚未安装 Pi，
 命令会先准备 `~/.pi/agent/mcp.json`，并提示后续 adapter 安装命令，不会声称集成已经生效。
+
+**开发验收命令：**
+
+```bash
+# 离线配置、参数、冲突保护与平台路径测试
+uv run pytest tests/cli tests/utils tests/test_install_scripts.py -q
+
+# 可选的真实 Codex/Claude 配置读取验收
+STATA_MCP_NATIVE_INSTALL_TESTS=1 uv run pytest tests/utils/test_installer_native_clients.py -q
+```
+
+真实客户端测试使用临时用户目录和空操作命令，应对客户端自动执行的健康检查；
+不运行 Stata、不调用模型、不启动 external 科研服务。覆盖默认目录、自定义
+目录和重复安装。未安装相应客户端时跳过。平台路径模拟测试不等于 Windows/Linux
+应用真机验收，第三方服务的登录及运行环境仍需单独配置。
 
 ### 诊断选项（doctor）
 
