@@ -234,8 +234,13 @@ def handle_config(args: Namespace) -> int:
 def handle_install(args: Namespace) -> int:
     """Handle the install subcommand."""
     from ..utils.installer import Installer, colored_stdout
+    from ..utils.installer.addons import AddonInstaller
 
     installer = Installer(sys_os=sys.platform)
+    installer.addons = AddonInstaller(
+        installer, addon=getattr(args, "addon", True), extra=getattr(args, "extra", False),
+        ref=getattr(args, "addon_ref", "master"),
+    )
 
     client = args.client
     json_file = args.json_file
@@ -245,12 +250,12 @@ def handle_install(args: Namespace) -> int:
     if not args.all and not client and not json_file and not json_index:
         args.all = True
 
-    # 2. --all wins, ignore everything else
+    # 2. --all selects clients; addon/extra switches still apply.
     if args.all:
         logging.info("CLI installing MCP config for all clients")
         with colored_stdout():
-            installer.install_all()
-        return 0
+            success = installer.install_all()
+        return 1 if success is False else 0
 
     # 3. --json-index requires --json-file
     if json_index and not json_file:
@@ -286,7 +291,8 @@ def handle_install(args: Namespace) -> int:
         if json_file:
             key = _parse_json_index(json_index) if json_index else Installer.CLIENT_DEFAULT_KEY[client]
             with colored_stdout():
-                installer.install_to_json_config(json_file, key=key)
+                installer.install_to_json_config(json_file, key=key, exit_if_exists=False)
+                installer.install_addons(client, json_file, key)
                 print(f"[DONE]\tStata-MCP has been installed to {json_file}.")
             return 0
         with colored_stdout():
@@ -298,7 +304,8 @@ def handle_install(args: Namespace) -> int:
     logging.info("CLI installing MCP config to %s", json_file)
     key = _parse_json_index(json_index) if json_index else "mcpServers"
     with colored_stdout():
-        installer.install_to_json_config(json_file, key=key)
+        installer.install_to_json_config(json_file, key=key, exit_if_exists=False)
+        installer.install_addons(None, json_file, key)
         print(f"[DONE]\tStata-MCP has been installed to {json_file}.")
     return 0
 

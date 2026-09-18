@@ -1,0 +1,14 @@
+{
+  "name": "research-toolbox",
+  "version": "0.1.0",
+  "description": "A curated collection of MCP servers commonly used in scientific research, shipped as the extra payload of the MCP-for-Stata installation.",
+  "author": {
+    "name": "Song Tan",
+    "email": "sepinetam@gmail.com",
+    "url": "https://www.sepinetam.com"
+  },
+  "homepage": "https://statamcp.com",
+  "repository": "https://github.com/sepinetam/mcp-for-stata",
+  "license": "AGPL-3.0",
+  "keywords": ["research", "literature", "zotero", "nber", "academic-tools"]
+}

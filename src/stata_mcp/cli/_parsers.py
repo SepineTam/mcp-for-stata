@@ -393,6 +393,21 @@ def add_install_parser(subparsers: argparse._SubParsersAction) -> argparse.Argum
         default=None,
         help="Dot-separated nested key path (e.g. 'mcp.servers'). Only valid with --json-file.",
     )
+    for name, default, directory in (
+        ("addon", True, "plugins/stata-toolbox"),
+        ("extra", False, "plugins/external"),
+    ):
+        switches = install_parser.add_mutually_exclusive_group()
+        switches.add_argument(
+            f"--with-{name}", dest=name, action="store_true",
+            help=f"Install supported components from GitHub {directory} (default: {'on' if default else 'off'})",
+        )
+        switches.add_argument(f"--no-{name}", dest=name, action="store_false", help=f"Skip {name} components")
+        install_parser.set_defaults(**{name: default})
+    install_parser.add_argument(
+        "--addon-ref", default="master", metavar="REF",
+        help="GitHub branch, tag or commit for addon/extra (default: master; resolved to one commit)",
+    )
     return install_parser
 
 

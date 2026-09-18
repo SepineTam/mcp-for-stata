@@ -8,6 +8,9 @@ import sys
 from typing import Iterator, TextIO
 
 TAG_COLORS = {
+    "[INSTALL]\t": "32",
+    "[UPGRADE]\t": "36",
+    "[SKIP]\t": "33",
     "[ERROR]\t": "31",
     "[DONE]\t": "32",
     "[WARN]\t": "33",

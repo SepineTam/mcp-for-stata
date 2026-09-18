@@ -18,6 +18,15 @@ class TtyStringIO(io.StringIO):
         return True
 
 
+@pytest.fixture(autouse=True)
+def isolate_addon_io(monkeypatch, tmp_path):
+    """Legacy dispatch tests do not download or install optional components."""
+    from stata_mcp.utils.installer.addons import AddonInstaller
+
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setattr(AddonInstaller, "install", MagicMock())
+
+
 # ---------- Parser tests ----------
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -223,7 +232,7 @@ def test_openclaw_with_json_file_uses_nested_key(installer_stub):
     rc = handle_install(args)
     assert rc == 0
     installer_stub.install_to_json_config.assert_called_once_with(
-        "/tmp/o.json", key=["mcp", "servers"]
+        "/tmp/o.json", key=["mcp", "servers"], exit_if_exists=False
     )
 
 
@@ -235,7 +244,7 @@ def test_workbuddy_with_json_file_uses_standard_key(client, installer_stub):
 
     assert rc == 0
     installer_stub.install_to_json_config.assert_called_once_with(
-        "/tmp/workbuddy.json", key="mcpServers"
+        "/tmp/workbuddy.json", key="mcpServers", exit_if_exists=False
     )
 
 
@@ -246,7 +255,7 @@ def test_client_with_json_index_overrides_default_key(installer_stub):
     rc = handle_install(args)
     assert rc == 0
     installer_stub.install_to_json_config.assert_called_once_with(
-        "/tmp/c.json", key=["custom", "path"]
+        "/tmp/c.json", key=["custom", "path"], exit_if_exists=False
     )
 
 
@@ -255,7 +264,7 @@ def test_only_json_file_uses_default_mcp_servers(installer_stub):
     rc = handle_install(args)
     assert rc == 0
     installer_stub.install_to_json_config.assert_called_once_with(
-        "/tmp/x.json", key="mcpServers"
+        "/tmp/x.json", key="mcpServers", exit_if_exists=False
     )
 
 
@@ -264,7 +273,7 @@ def test_only_json_file_with_index_uses_parsed_key(installer_stub):
     rc = handle_install(args)
     assert rc == 0
     installer_stub.install_to_json_config.assert_called_once_with(
-        "/tmp/x.json", key=["abc"]
+        "/tmp/x.json", key=["abc"], exit_if_exists=False
     )
 
 
@@ -296,6 +305,7 @@ def test_handle_install_colors_tagged_stdout_for_json_file(monkeypatch):
         config_path,
         key="mcpServers",
         custom_config=None,
+        exit_if_exists=True,
     ):
         print("[ERROR]\tinstall error")
         print("[DONE]\tinstall done")

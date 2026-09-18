@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "dip": {
+      "type": "http",
+      "url": "https://dip.aidea-labs.com/mcp"
+    },
+    "nber-mcp": {
+      "type":"stdio",
+      "command": "uvx",
+      "args": [
+        "nber-cli",
+        "mcp-server"
+      ]
+    },
+    "zotero-mcp": {
+      "type":"stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "zotero-mcp-server",
+        "zotero-mcp"
+      ]
+    }
+  }
+}

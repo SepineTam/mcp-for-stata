@@ -29,6 +29,8 @@ class Installer:
     INSTALL_ALL_EXCLUDED_CLIENTS = frozenset({"pi"})
 
     CLIENT_ALIASES = {
+        "cc": "claude-code",
+        "hermes": "hermes-agent",
         "deepseek-harness": "dsh",
         "wb": "workbuddy",
     }
@@ -36,6 +38,7 @@ class Installer:
     def __init__(self, sys_os: str = None, is_env: bool = True):
         self.sys_os = sys_os or sys.platform
         self.is_env = is_env
+        self.addons = None
 
         self._post_init()
 
@@ -96,20 +99,50 @@ class Installer:
     }
 
     def install_all(self):
-        for client, func in self.client_function_mapping.items():
+        seen = set()
+        success = True
+        for target in self.client_function_mapping:
+            client = self.CLIENT_ALIASES.get(target, target)
+            if client in seen:
+                continue
+            seen.add(client)
             if client in self.INSTALL_ALL_EXCLUDED_CLIENTS:
                 continue
-            func()
+            try:
+                self.install(client)
+            except SystemExit as error:
+                if error.code not in (None, 0):
+                    print(f"[ERROR]\tMCP installation failed for {client}; continuing with other clients")
+                    success = False
+            except (OSError, ValueError) as error:
+                print(f"[ERROR]\tMCP installation failed for {client}: {error}")
+                success = False
+        return success
 
     def install(self, to: str):
         client = self.CLIENT_ALIASES.get(to, to)
         install_func = self.client_function_mapping.get(client, None)
         if install_func:
-            install_func()
+            # A client-specific override must not leak into subsequent --all targets.
+            saved_args, saved_env = list(self.args), dict(self.env)
+            try:
+                try:
+                    install_func()
+                except SystemExit as error:
+                    if error.code not in (None, 0):
+                        raise
+                self.install_addons(client)
+            finally:
+                self.args, self.env = saved_args, saved_env
         else:
             print(f"{to} is not a valid client.")
             print(f"Please choose a valid client from {self.client_function_mapping.keys()}")
             sys.exit(1)
+
+    def install_addons(self, client=None, config_path=None, config_index=None):
+        """Install optional components only when enabled by the CLI."""
+        if self.addons is not None:
+            self.addons.install(client, config_path, config_index)
 
     def install_to_json_config(
         self,
@@ -329,12 +362,15 @@ class Installer:
                 ))
             if self.sys_os.lower() == "linux":
                 raise ValueError(f"There is not a Linux version of Claude yet: {client}")
-            if self.sys_os.lower() == "windows":
+            if self.sys_os.lower() in {"windows", "win32"}:
                 appdata = os.getenv("APPDATA", os.path.expanduser("~\\AppData\\Roaming"))
                 return Path(os.path.join(appdata, "Claude", "claude_desktop_config.json"))
             raise ValueError(f"Unsupported platform: {self.sys_os}")
 
         if client in {"cc", "claude-code"}:
+            config_directory = os.getenv("CLAUDE_CONFIG_DIR")
+            if config_directory:
+                return Path(config_directory).expanduser() / ".claude.json"
             return Path.home() / ".claude.json"
 
         if client == "gemini":
@@ -367,7 +403,7 @@ class Installer:
                     / "settings"
                     / "cline_mcp_settings.json"
                 )
-            if self.sys_os.lower() == "windows":
+            if self.sys_os.lower() in {"windows", "win32"}:
                 appdata = os.getenv("APPDATA", os.path.expanduser("~\\AppData\\Roaming"))
                 return (
                     Path(appdata)
@@ -381,10 +417,12 @@ class Installer:
             raise ValueError(f"Unsupported platform: {self.sys_os}")
 
         if client == "opencode":
-            return Path.home() / ".config" / "opencode" / "opencode.json"
+            config_directory = Path(os.getenv("XDG_CONFIG_HOME") or Path.home() / ".config")
+            return config_directory.expanduser() / "opencode" / "opencode.json"
 
         if client == "codex":
-            return Path.home() / ".codex" / "config.toml"
+            config_directory = Path(os.getenv("CODEX_HOME") or Path.home() / ".codex")
+            return config_directory.expanduser() / "config.toml"
 
         if client == "copilot":
             return Path.home() / ".copilot" / "mcp-config.json"
@@ -453,7 +491,7 @@ class Installer:
                      f"STATA_CLI={self.STATA_CLI}", "--", self.command, *self.args]
         ):
             return
-        cc_mcp_config_file = Path.home() / ".claude.json"
+        cc_mcp_config_file = self.find_config_path("claude-code")
         self.install_to_json_config(cc_mcp_config_file)
 
     def install_to_claude_desktop(self):
@@ -465,7 +503,7 @@ class Installer:
         elif self.sys_os.lower() == "linux":
             print("There is not a Linux version of Claude yet.")
             sys.exit(1)
-        elif self.sys_os.lower() == "windows":
+        elif self.sys_os.lower() in {"windows", "win32"}:
             appdata = os.getenv("APPDATA", os.path.expanduser("~\\AppData\\Roaming"))
             config_file_path = os.path.join(appdata, "Claude", "claude_desktop_config.json")
         else:
@@ -496,7 +534,7 @@ class Installer:
         elif self.sys_os.lower() == "linux":
             config_file = Path.home() / ".config" / "Code" / "User" / "globalStorage" / \
                 "saoudrizwan.claude-dev" / "settings" / "cline_mcp_settings.json"
-        elif self.sys_os.lower() == "windows":
+        elif self.sys_os.lower() in {"windows", "win32"}:
             appdata = os.getenv("APPDATA", os.path.expanduser("~\\AppData\\Roaming"))
             config_file = Path(appdata) / "Code" / "User" / "globalStorage" / \
                 "saoudrizwan.claude-dev" / "settings" / "cline_mcp_settings.json"
@@ -507,12 +545,12 @@ class Installer:
         self.install_to_json_config(config_file)
 
     def install_to_opencode(self):
-        config_file = Path.home() / ".config" / "opencode" / "opencode.json"
+        config_file = self.find_config_path("opencode")
         opencode_config = {
             "stata-mcp": {
                 "type": "local",
                 "command": [self.command] + self.args,
-                **({"env": self.env} if self.is_env and self.env else {})
+                **({"environment": self.env} if self.is_env and self.env else {})
             }
         }
         self.install_to_json_config(
@@ -527,7 +565,7 @@ class Installer:
             command=["mcp", "add", "--env", f"STATA_CLI={self.STATA_CLI}", "stata-mcp", "--", self.command, *self.args]
         ):
             return
-        config_file = Path.home() / ".codex" / "config.toml"
+        config_file = self.find_config_path("codex")
         self.install_to_toml_config(config_file, key="mcp_servers")
 
     def install_to_copilot(self):
