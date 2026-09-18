@@ -31,6 +31,9 @@ jobs:
     - name: Install dependencies
       run: uv sync
 
+    - name: Validate release metadata
+      run: uv run pytest tests/test_release_metadata.py -q
+
     - name: Build package
       run: uv build
 
