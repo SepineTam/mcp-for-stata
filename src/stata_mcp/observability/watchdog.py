@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import sys
 import os
+import sys
 import threading
 import traceback
 from datetime import datetime, timezone

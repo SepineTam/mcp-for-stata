@@ -13,8 +13,8 @@ import uuid
 from pathlib import Path
 from typing import Dict, Sequence
 
-from ...utils import get_nowtime
 from ...observability import debug_step
+from ...utils import get_nowtime
 from .do import StataDo
 
 

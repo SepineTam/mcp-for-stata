@@ -24,7 +24,6 @@ from typing import Any, Callable, Dict, List, Literal, NamedTuple
 from mcp.server import MCPServer
 from mcp.server.mcpserver import Context, Icon
 
-from .audit import AuditMiddleware, AuditStore, record_security_event
 from ._diagnostic_logging import (
     DIAGNOSTIC_BUILD_ID,
     DIAGNOSTIC_SCHEMA_VERSION,
@@ -37,6 +36,7 @@ from ._diagnostic_logging import (
     source_reference,
     utf8_size,
 )
+from .audit import AuditMiddleware, AuditStore, record_security_event
 from .config import Config
 from .observability import debug_step
 from .utils.update import get_current_version, get_latest_version

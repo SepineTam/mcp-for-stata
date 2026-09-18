@@ -21,9 +21,9 @@ from .._diagnostic_logging import (
     source_reference,
     utf8_size,
 )
+from ..audit import record_security_event
 from ..config import ToolContext
 from ..data_info import get_data_handler
-from ..audit import record_security_event
 from ..guard.data_path_auditor import (
     IP_URL_ACCESS_DENIED,
     LOCAL_ACCESS_DENIED,
