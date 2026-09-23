@@ -1,6 +1,6 @@
 ---
 paths:
-  - "*.do"
+  - "**/*.do"
 ---
 
 # Stata Do-file Rules
