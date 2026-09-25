@@ -3,7 +3,7 @@ name: stata-skill
 description: |
   A packaged Stata Runner skill via official MCP-for-Stata server including stata_do, ado_package_install, help, read_log and get_data_info tools. Use it when (1) need to execute Stata do-file; (2) missing ado-packages; (3) find code error caused by syntax in Stata; (4) want to read smcl and text format log file with rich text output; (5) first encounter a data file and want to understand its structure and content.
 metadata:
-  version: "1.0.9"
+  version: "1.1.0"
 ---
 
 # MCP-for-Stata
@@ -134,6 +134,25 @@ When the user asks to view a Stata execution log, analyze output results, or wan
 
 ---
 
+### 6. Export Tables and Figures → Output Defaults
+
+When the user has NOT specified how an output should be produced, apply these
+presets — do not ask, do not invent alternatives. An explicit user request
+always overrides them.
+
+| Output | Default | Detailed example |
+|---|---|---|
+| Regression | `reghdfe` with fixed effects in `absorb()` and `vce(cluster <id>)` at the treatment/assignment level; never `regress` when fixed effects are involved, never reflex `, robust` | `@examples/esttab-senior-guidance.md` (setup section also covers `reghdfe`/`ftools` installation) |
+| Regression tables | `esttab` (from `estout`), `.tex` with `label booktabs fragment` for papers, `.rtf`/`.csv` for quick sharing | `@examples/esttab-senior-guidance.md` |
+| Figures | `graph export name.png, width(2000) replace`; PDF only for LaTeX papers | `@examples/graph-export-guidance.md` |
+
+Package availability: `reghdfe` (+ `ftools`) and `estout` may not be installed.
+Check with `help(cmd=...)`; if missing, use `ado_package_install` per section 3
+— never `ssc install` inside a do-file. If installation is unavailable, tell
+the user exactly what to install manually.
+
+---
+
 ## Typical Workflow
 
 ### Scenario A: Full Data Analysis Pipeline
@@ -176,6 +195,8 @@ When the user asks to view a Stata execution log, analyze output results, or wan
 | help | `@references/help.md` | Detailed guide for the documentation tool |
 | read_log | `@references/read_log.md` | Detailed guide for the log reader tool |
 | ado_package_install | `@references/ado_package_install.md` | Detailed guide for the package installer tool |
+| esttab example | `@examples/esttab-senior-guidance.md` | Senior-level example for exporting regression tables |
+| graph export example | `@examples/graph-export-guidance.md` | Defaults and pitfalls example for exporting figures |
 | Documentation | [sepinetam.github.io/mcp-for-stata](https://sepinetam.github.io/mcp-for-stata) | Full user documentation |
 | Homepage | [statamcp.com](https://statamcp.com) | Project homepage |
 | Source Code | [github.com/sepinetam/mcp-for-stata](https://github.com/sepinetam/mcp-for-stata) | GitHub repository |
