@@ -549,6 +549,16 @@ class StataDo:
                 except Exception as e:
                     logging.warning(f"Failed to remove temporary batch file {batch_file}: {str(e)}")
 
+            batch_log_file = self.cwd / batch_file.with_suffix(".log").name
+            try:
+                batch_log_file.unlink(missing_ok=True)
+            except OSError as error:
+                logging.warning(
+                    "Failed to remove temporary batch log %s: %s",
+                    batch_log_file,
+                    error,
+                )
+
     def _execute_unix_like_with_monitors(
         self,
         dofile_path: Path,
@@ -715,6 +725,16 @@ class StataDo:
                     logging.debug(f"Temporary batch file removed: {batch_file}")
                 except Exception as e:
                     logging.warning(f"Failed to remove temporary batch file {batch_file}: {str(e)}")
+
+            batch_log_file = self.cwd / batch_file.with_suffix(".log").name
+            try:
+                batch_log_file.unlink(missing_ok=True)
+            except OSError as error:
+                logging.warning(
+                    "Failed to remove temporary batch log %s: %s",
+                    batch_log_file,
+                    error,
+                )
 
     @staticmethod
     def read_log(log_file_path, mode="r", encoding="utf-8") -> str:

@@ -205,3 +205,116 @@ class TestWindowsBatchCleanup:
 
         assert not captured["batch_file"].exists()
         process.terminate.assert_called_once_with()
+
+
+@pytest.mark.parametrize("monitored", [False, True])
+@pytest.mark.parametrize(
+    "outcome", ["success", "execution_error", "timeout", "launch_error", "no_log"]
+)
+def test_cleans_only_current_batch_log(
+    monkeypatch, executor, malicious_dofile, monitored, outcome
+):
+    captured = {}
+    managed_log = executor.log_file_path / "run.log"
+    managed_log.write_text("managed output")
+    unrelated_log = executor.cwd / "stata_batch__other_run.log"
+    unrelated_log.write_text("other run")
+
+    def fake_launch(cmd, **kwargs):
+        batch_file = Path(cmd[3])
+        batch_log = kwargs["cwd"] / batch_file.with_suffix(".log").name
+        captured.update(batch_file=batch_file, batch_log=batch_log)
+        assert batch_log.parent != batch_file.parent
+        if outcome == "launch_error":
+            raise OSError("launch failed")
+        if outcome != "no_log":
+            batch_log.write_text("automatic batch output")
+        if not monitored:
+            if outcome == "timeout":
+                raise subprocess.TimeoutExpired(cmd, 1)
+            return SimpleNamespace(
+                returncode=1 if outcome == "execution_error" else 0,
+                stderr="execution failed",
+            )
+        process = Mock()
+        process.returncode = 1 if outcome == "execution_error" else 0
+        process.poll.return_value = 0
+        process.communicate.return_value = ("", "execution failed")
+        if outcome == "timeout":
+            process.communicate.side_effect = subprocess.TimeoutExpired(cmd, 1)
+        return process
+
+    launcher = "Popen" if monitored else "run"
+    monkeypatch.setattr(
+        f"stata_mcp.stata.stata_do.do.subprocess.{launcher}", fake_launch
+    )
+    execute = (
+        executor._execute_windows_with_monitors
+        if monitored else executor._execute_windows
+    )
+    if outcome == "launch_error":
+        expected_error = RuntimeError if monitored else OSError
+        with pytest.raises(expected_error, match="launch failed"):
+            execute(malicious_dofile, managed_log, timeout=1)
+    elif outcome in {"execution_error", "timeout"}:
+        message = "execution failed" if outcome == "execution_error" else "timed out"
+        with pytest.raises(RuntimeError, match=message):
+            execute(malicious_dofile, managed_log, timeout=1)
+    else:
+        execute(malicious_dofile, managed_log, timeout=1)
+
+    assert not captured["batch_file"].exists()
+    assert not captured["batch_log"].exists()
+    assert managed_log.read_text() == "managed output"
+    assert unrelated_log.read_text() == "other run"
+
+
+@pytest.mark.parametrize("monitored", [False, True])
+@pytest.mark.parametrize("execution_error", [False, True])
+def test_batch_log_cleanup_failure_preserves_execution_result(
+    monkeypatch, executor, malicious_dofile, caplog, monitored, execution_error
+):
+    captured = {}
+    original_unlink = Path.unlink
+
+    def fake_launch(cmd, **kwargs):
+        batch_file = Path(cmd[3])
+        batch_log = kwargs["cwd"] / batch_file.with_suffix(".log").name
+        batch_log.write_text("automatic batch output")
+        captured.update(batch_file=batch_file, batch_log=batch_log)
+        if monitored:
+            process = Mock()
+            process.returncode = 1 if execution_error else 0
+            process.poll.return_value = 0
+            process.communicate.return_value = ("", "original execution error")
+            return process
+        return SimpleNamespace(
+            returncode=1 if execution_error else 0,
+            stderr="original execution error",
+        )
+
+    def fail_batch_log_unlink(file_path, *args, **kwargs):
+        if file_path == captured.get("batch_log"):
+            raise PermissionError("batch log is locked")
+        return original_unlink(file_path, *args, **kwargs)
+
+    launcher = "Popen" if monitored else "run"
+    monkeypatch.setattr(
+        f"stata_mcp.stata.stata_do.do.subprocess.{launcher}", fake_launch
+    )
+    monkeypatch.setattr(Path, "unlink", fail_batch_log_unlink)
+    execute = (
+        executor._execute_windows_with_monitors
+        if monitored else executor._execute_windows
+    )
+    managed_log = executor.log_file_path / "run.log"
+    if execution_error:
+        with pytest.raises(RuntimeError, match="original execution error"):
+            execute(malicious_dofile, managed_log)
+    else:
+        execute(malicious_dofile, managed_log)
+
+    assert not captured["batch_file"].exists()
+    assert captured["batch_log"].exists()
+    assert "Failed to remove temporary batch log" in caplog.text
+    assert "batch log is locked" in caplog.text
