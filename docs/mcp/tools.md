@@ -40,6 +40,21 @@ Serialized JSON string containing multi-layered metadata:
 }
 ```
 
+Variable `type` is `"str"`, `"float"`, or `"bool"`. Boolean columns use the
+same configurable statistics as numeric columns, computed on a temporary
+`True=1` / `False=0` copy after excluding missing values. `obs` counts non-missing
+values; `mean` is the proportion of those values that are `True`, and `stderr`
+uses the same sample standard error as a numeric 0/1 variable. Quartiles use
+the existing numeric interpolation, so they may lie between 0 and 1. Undefined
+statistics are `null` (all statistics except `obs` for an empty Boolean column;
+`stderr` for a single observation).
+
+The source file, parsed DataFrame, and preview retain their Boolean values
+(`true` / `false` in JSON). Numeric 0/1 columns remain `"float"`; they are not
+inferred to be Boolean. Missing values do not count as `False`. Clients that
+previously accepted only `"str"` / `"float"` must also accept `"bool"`; tool
+parameters and the surrounding JSON structure are unchanged.
+
 **Operational Examples**:
 ```python
 # Local file analysis from WORKING_DIR
@@ -73,7 +88,7 @@ again. An MCP call writes lifecycle evidence to
 the terminal event to `audit/security.jsonl`. See
 [Reading Audit Files](../audit/reading.md).
 
-Each cache file follows the versioned [get_data_info cache JSON Schema](https://raw.githubusercontent.com/sepinetam/mcp-for-stata/master/schemas/get-data-info-cache.schema.json). The cache retains the tool result's flat structure and adds only `$schema` and `schema_version` at the top level. Readers check these local metadata fields and the content hash, then regenerate caches with missing or unsupported versions. Schema validation never requires a network request, and the two cache-only metadata fields are removed before returning a cached result.
+Each cache file follows version 2 of the [get_data_info cache JSON Schema](https://raw.githubusercontent.com/sepinetam/mcp-for-stata/master/schemas/get-data-info-cache.schema.json), which explicitly supports `"bool"`. The cache retains the tool result's flat structure and adds only `$schema` and `schema_version` at the top level. Readers check these local metadata fields and the content hash, then regenerate caches with missing or unsupported versions. The version also contributes to cache identity: version 1 files are left untouched, and summaries are recomputed once under the new identity. No source-data migration or manual cache deletion is needed. Schema validation never requires a network request, and the two cache-only metadata fields are removed before returning a cached result.
 
 ---
 

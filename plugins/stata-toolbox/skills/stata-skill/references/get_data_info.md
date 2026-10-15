@@ -39,21 +39,38 @@ JSON string containing:
   },
   "vars_detail": {
     "income": {
-      "type": "numeric",
-      "obs": 998,
-      "mean": 45000.123,
-      "stderr": 1200.456,
-      "min": 10000.0,
-      "max": 120000.0
+      "type": "float",
+      "var": "income",
+      "summary": {
+        "obs": 998,
+        "mean": 45000.123,
+        "stderr": 1200.456,
+        "min": 10000.0,
+        "max": 120000.0
+      }
     },
     "gender": {
-      "type": "string",
-      "top_values": ["Male", "Female"]
+      "type": "str",
+      "var": "gender",
+      "summary": {"obs": 1000, "value_list": ["Female", "Male"]}
+    },
+    "eligible": {
+      "type": "bool",
+      "var": "eligible",
+      "summary": {"obs": 1000, "mean": 0.6, "stderr": 0.016, "min": 0.0, "max": 1.0}
     }
   },
   "saved_path": "/path/to/cache/file.json"
 }
 ```
+
+Types are `"str"`, `"float"`, and `"bool"`. Boolean statistics exclude missing
+values and temporarily use `True=1` / `False=0`, so `mean` is the proportion of
+non-missing observations that are True. Other metrics follow numeric 0/1 rules;
+interpolated quartiles may be fractional, and undefined statistics are `null`.
+Source files and previews retain Boolean values (`true` / `false` in JSON).
+Do not treat missing values as False or relabel numeric 0/1 columns as Boolean.
+Consumers must accept `"bool"` in addition to the existing types.
 
 ## When to Use
 
@@ -65,7 +82,7 @@ JSON string containing:
 
 Results are cached using content-addressable storage (MD5 hash of file content). Repeated queries on the same file return instantly from cache. The cache file path is returned in `saved_path`.
 
-Cache files retain the result structure shown above and add only top-level `$schema` and `schema_version` fields. Missing or unsupported schema versions are ignored and regenerated. These cache-only fields are removed before the tool returns a cached result, and validation is performed locally without fetching the schema URL.
+Cache files use schema version 2, retain the result structure shown above, and add only top-level `$schema` and `schema_version` fields. The version contributes to cache identity, so old version 1 files are left untouched and summaries are recomputed once. Missing or unsupported schema versions are ignored and regenerated. These cache-only fields are removed before the tool returns a cached result, and validation is performed locally without fetching the schema URL.
 
 ## Configurable Metrics
 

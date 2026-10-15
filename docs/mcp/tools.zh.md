@@ -39,6 +39,17 @@ def get_data_info(data_path: str | Path,
 }
 ```
 
+变量的 `type` 为 `"str"`、`"float"` 或 `"bool"`。布尔列使用与数值列相同的可配置
+统计指标：先排除缺失值，再仅在统计副本中按 `True=1`、`False=0` 计算。
+`obs` 是非缺失观测数，`mean` 是其中真值的比例，`stderr` 沿用数值 0/1 变量的
+样本均值标准误。四分位数沿用现有数值插值规则，可能介于 0 与 1 之间。
+无法定义的统计量返回 `null`，例如空布尔列中除 `obs` 外的指标，以及单条观测的 `stderr`。
+
+原文件、解析后的 DataFrame 和预览都保留布尔值（JSON 中为 `true` / `false`）。
+普通 0/1 数值列仍返回 `"float"`，不会自动归为布尔列；缺失值也不会被当作 `False`。
+原先仅接受 `"str"` / `"float"` 的客户端需要同时接受 `"bool"`。
+工具的调用参数及外围 JSON 结构不变。
+
 **操作示例**：
 ```python
 # 基于 WORKING_DIR 的本地文件分析
@@ -66,6 +77,11 @@ get_data_info("./data/legacy/latin1_data.csv", encoding="latin1")
 缓存策略采用内容可寻址存储，哈希计算决定缓存文件命名：`data_info__<name>_<ext>__hash_<suffix>.json`。缓存解析在调用时进行，当内容哈希分歧时自动重新生成。缓存目录默认为 `~/.statamcp/.cache/`，但可通过 `cache_dir` 参数覆盖为项目特定的 `stata-mcp-tmp/` 位置。
 
 同一个处理器调用中，解析后的 pandas DataFrame 会被过滤、统计和预览步骤复用，不会再次读取来源。MCP 调用会把生命周期证据写入 `.statamcp/audit/get_data_info.jsonl`；支持的路径或 URL Guard 拒绝会把结束事件关联到 `audit/security.jsonl`。参见[如何读取审计文件](../audit/reading.md)。
+
+缓存采用第 2 版 [get_data_info JSON Schema](https://raw.githubusercontent.com/sepinetam/mcp-for-stata/master/schemas/get-data-info-cache.schema.json)，明确支持 `"bool"` 类型。
+缓存保留工具结果的平铺结构，仅在顶层增加 `$schema` 和 `schema_version`。
+版本号也参与缓存文件的标识，因此第 1 版缓存会保留，新版本首次读取时重新生成摘要，
+无需迁移源数据或手动清理缓存。缓存处理不请求 Schema 地址，返回结果时会移除这两个缓存专用字段。
 
 ---
 

@@ -310,7 +310,8 @@ class TestRuntimeSettings:
         [
             ("$schema", None),
             ("schema_version", None),
-            ("schema_version", 2),
+            ("schema_version", 1),
+            ("schema_version", 3),
             ("overview.hash", "0" * 32),
         ],
     )

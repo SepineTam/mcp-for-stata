@@ -166,6 +166,11 @@ def get_data_info(
 
 **返回值**：`str`（JSON 字符串）
 
+`vars_detail` 的变量类型为 `"str"`、`"float"` 或 `"bool"`。布尔统计仅在临时副本中
+按 `True=1`、`False=0` 计算，并排除缺失观测，`mean` 即非缺失观测中真值的比例。
+原数据和预览保留布尔值，普通 0/1 数值列仍为 `"float"`。
+读取结果的程序需要接受新增的 `"bool"` 类型。详见[布尔统计和缓存规则](../mcp/tools.zh.md#get_data_info)。
+
 **支持格式**：
 - Stata：`.dta`
 - CSV/文本：`.csv`、`.tsv`、`.psv`

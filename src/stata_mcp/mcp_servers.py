@@ -652,6 +652,9 @@ def get_data_info(
 
     Returns:
         str: JSON string with overview, variable details, and config.
+            Variable types are "str", "float", or "bool". Boolean statistics
+            use True=1 and False=0; the mean is the non-missing True proportion.
+            Source data and preview values retain their original types.
 
     Examples:
         >>> get_data_info("/Applications/Stata/auto.dta")

@@ -6,12 +6,12 @@
     "url": "https://github.com/SepineTam/stata-mcp",
     "source": "github"
   },
-  "version": "1.25.1",
+  "version": "1.25.2",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "stata-mcp",
-      "version": "1.25.1",
+      "version": "1.25.2",
       "transport": {
         "type": "stdio"
       },
