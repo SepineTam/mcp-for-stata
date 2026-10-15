@@ -139,12 +139,26 @@ class NumericSeries(Series):
         return round(float(self.data.kurtosis()), self.max_decimal_places)
 
 
+@dataclass
+class BooleanSeries(NumericSeries):
+    """Compute numeric metrics on a private 0/1 copy of non-missing booleans."""
+
+    def __post_init__(self) -> None:
+        self.data = self.data.astype("int64")
+
+    @property
+    def stderr(self) -> float:
+        if self.obs < 2:
+            return float("nan")
+        return super().stderr
+
+
 class DataInfoBase(ABC):
     """Base class for data info handlers."""
 
     # Registry of supported file extensions (to be overridden by subclasses)
     supported_extensions: List[str] = []
-    CACHE_SCHEMA_VERSION = 1
+    CACHE_SCHEMA_VERSION = 2
     CACHE_SCHEMA_URI = (
         "https://raw.githubusercontent.com/sepinetam/mcp-for-stata/"
         "master/schemas/get-data-info-cache.schema.json"
@@ -717,7 +731,12 @@ class DataInfoBase(ABC):
             series_obj = self._get_variable_info(var_series)
 
             # Determine variable type for the info dict
-            var_type = "str" if isinstance(series_obj, StringSeries) else "float"
+            if isinstance(series_obj, StringSeries):
+                var_type = "str"
+            elif isinstance(series_obj, BooleanSeries):
+                var_type = "bool"
+            else:
+                var_type = "float"
 
             # Build variable info dictionary
             var_info = {
@@ -924,7 +943,7 @@ class DataInfoBase(ABC):
         Filter the summary result to the animation format.
 
         Key Points:
-            1. keep self.metrics for numerical vars;
+            1. keep self.metrics for numerical and boolean vars;
             2. keep self.string_keep_number values for string vars.
 
         Args:
@@ -936,7 +955,7 @@ class DataInfoBase(ABC):
         var_list = summary.get("vars_detail", {}).keys()
         for var_name in var_list:
             var_detail = summary.get("vars_detail", {}).get(var_name)
-            if var_detail.get("type") == "float":
+            if var_detail.get("type") in {"float", "bool"}:
                 # Filter numerical vars based on self.metrics
                 var_summary = var_detail["summary"]
                 filtered_summary = {k: var_summary[k] for k in self.metrics if k in var_summary}
@@ -996,13 +1015,13 @@ class DataInfoBase(ABC):
     # Helper methods for summary
     def _get_variable_info(self, var_series: pd.Series) -> Series:
         """
-        Create a Series object (StringSeries or NumericSeries) for a variable.
+        Create a string, numeric, or boolean summary object for a variable.
 
         Args:
             var_series: pandas Series containing the variable data
 
         Returns:
-            Series: StringSeries or NumericSeries object
+            Series: StringSeries, NumericSeries, or BooleanSeries object
         """
         # Remove NA values for analysis
         non_na_series = var_series.dropna()
@@ -1013,6 +1032,8 @@ class DataInfoBase(ABC):
         # Create appropriate Series object
         if var_type == "str":
             return StringSeries(data=non_na_series, max_display=self.string_keep_number)
+        elif var_type == "bool":
+            return BooleanSeries(data=non_na_series, max_decimal_places=self.decimal_places)
         else:  # float type
             numeric_series = pd.to_numeric(non_na_series, errors='raise')
             return NumericSeries(data=numeric_series, max_decimal_places=self.decimal_places)
@@ -1047,8 +1068,14 @@ class DataInfoBase(ABC):
             series: pandas Series with NA values removed
 
         Returns:
-            str: "str" for string variables, "float" for numeric variables
+            str: "str", "float", or "bool" according to the source values
         """
+        if pd.api.types.is_bool_dtype(series.dtype) or (
+            pd.api.types.is_object_dtype(series.dtype)
+            and pd.api.types.infer_dtype(series, skipna=True) == "boolean"
+        ):
+            return "bool"
+
         if len(series) == 0:
             return "float"  # Default to float for empty series
 

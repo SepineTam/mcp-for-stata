@@ -166,6 +166,12 @@ def get_data_info(
 
 **Returns**: `str` (JSON string)
 
+`vars_detail` reports `"str"`, `"float"`, or `"bool"` variable types. Boolean
+statistics temporarily use `True=1` / `False=0`, excluding missing observations;
+`mean` is the non-missing True proportion. Source and preview values stay Boolean,
+and numeric 0/1 columns remain `"float"`. Consumers must accept the added
+`"bool"` type. See [Boolean statistics and caching](../mcp/tools.md#get_data_info).
+
 **Supported Formats**:
 - Stata: `.dta`
 - CSV/Text: `.csv`, `.tsv`, `.psv`
