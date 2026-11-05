@@ -213,6 +213,7 @@ def _get_data_info_impl(
                 decimal_places=data_info_config.decimal_places,
                 hash_length=data_info_config.hash_length,
                 request_id=active_request_id,
+                data_path_auditor=auditor
             )
         log_event(
             logger,

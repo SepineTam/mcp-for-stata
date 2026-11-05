@@ -38,6 +38,7 @@ from .._diagnostic_logging import (
     source_reference,
     utf8_size,
 )
+from ..guard import DataPathAuditor
 from ..observability import debug_step
 
 # Global registry for data info classes
@@ -198,6 +199,7 @@ class DataInfoBase(ABC):
         metrics: List[str] | Tuple[str, ...] | None = None,
         head: int = 0,
         request_id: str | None = None,
+        data_path_auditor: DataPathAuditor | None = None,
         **kwargs
     ):
         self.request_id = request_id or new_request_id()
@@ -267,6 +269,8 @@ class DataInfoBase(ABC):
         self._metrics = self._normalize_metrics(resolved_metrics)
         self._head = head
         self._cache_read_options = repr(kwargs)
+
+        self.data_path_auditor = data_path_auditor
 
         self.kwargs = kwargs  # Store additional keyword arguments for subclasses to use
 
@@ -547,6 +551,17 @@ class DataInfoBase(ABC):
         """Read data from the source file. Must be implemented by subclasses."""
         ...
 
+    def _request_data(self, url: str, **kwargs) -> requests.Response:
+        if self.data_path_auditor is None or not self.data_path_auditor.enable_url_guard:
+            resp = requests.get(url, **kwargs)
+        else:
+            result = self.data_path_auditor.validate_url(url)
+            if isinstance(result, str):
+                raise ValueError(result)
+            url, _ = result
+            resp = requests.get(url, **kwargs, allow_redirects=False)
+        return resp
+
     def _fetch_data(
         self,
         timeout: Tuple[int, int] = None
@@ -566,7 +581,7 @@ class DataInfoBase(ABC):
         """
         request_timeout = timeout or self.DEFAULT_TIMEOUT
 
-        response = requests.get(
+        response = self._request_data(
             str(self.data_path),
             timeout=request_timeout
         )
