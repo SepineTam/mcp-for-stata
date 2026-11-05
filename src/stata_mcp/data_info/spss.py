@@ -61,7 +61,7 @@ class SpssDataInfo(DataInfoBase):
                     self.request_id,
                     source_ref=self.source_ref,
                 )
-                resp = requests.get(str(self.data_path), timeout=self.DEFAULT_TIMEOUT)
+                resp = self._request_data(str(self.data_path), timeout=self.DEFAULT_TIMEOUT)
                 resp.raise_for_status()
                 log_event(
                     logger,
