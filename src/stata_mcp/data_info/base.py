@@ -40,6 +40,7 @@ from .._diagnostic_logging import (
 )
 from ..guard import DataPathAuditor
 from ..observability import debug_step
+from ..utils.tools.url_tool import get_url_redirect_target
 
 # Global registry for data info classes
 # Maps file extensions to their corresponding DataInfoBase subclass
@@ -552,14 +553,25 @@ class DataInfoBase(ABC):
         ...
 
     def _request_data(self, url: str, **kwargs) -> requests.Response:
-        if self.data_path_auditor is None or not self.data_path_auditor.enable_url_guard:
-            resp = requests.get(url, **kwargs)
-        else:
-            result = self.data_path_auditor.validate_url(url)
+        auditor = self.data_path_auditor
+        if auditor is None or not auditor.enable_url_guard:
+            return requests.get(url, **kwargs)
+
+        # 接着这里主要是处理 URL 跳转问题
+        while True:
+            # TODO: 到时候加上最多跳转次数，默认为 6，新增加一个 error 类型叫做 `你这家伙太能跳了Error`
+            result = auditor.validate_url(url)
             if isinstance(result, str):
                 raise ValueError(result)
-            url, _ = result
+            url, _extension = result
             resp = requests.get(url, **kwargs, allow_redirects=False)
+            if not resp.is_redirect:
+                break
+            else:
+                # 这里只用单次跳转，来检查 URL 的安全性，
+                # TODO：到时候设计一个 zero-trust-domain 的防护
+                url = get_url_redirect_target(resp)
+
         return resp
 
     def _fetch_data(
