@@ -64,6 +64,7 @@ class _FakeDataInfo:
         decimal_places: int = 3,
         hash_length: int = 12,
         request_id: str | None = None,
+        data_path_auditor=None,
     ):
         self.data_path = data_path
         self.vars_list = vars_list

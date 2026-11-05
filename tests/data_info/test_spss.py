@@ -17,7 +17,7 @@ from stata_mcp.data_info.spss import SpssDataInfo
 class TestSpssDataInfoURLTimeout:
     """测试 URL 下载时是否传入超时参数"""
 
-    @patch("stata_mcp.data_info.spss.requests.get")
+    @patch("stata_mcp.data_info.base.requests.get")
     @patch("stata_mcp.data_info.spss.pyreadstat.read_sav")
     def test_url_fetch_uses_default_timeout(
         self,
@@ -47,7 +47,7 @@ class TestSpssDataInfoURLTimeout:
         _, kwargs = mock_requests_get.call_args
         assert kwargs.get("timeout") == SpssDataInfo.DEFAULT_TIMEOUT
 
-    @patch("stata_mcp.data_info.spss.requests.get")
+    @patch("stata_mcp.data_info.base.requests.get")
     @patch("stata_mcp.data_info.spss.pyreadstat.read_sav")
     def test_url_with_invalid_extension_raises(
         self,
