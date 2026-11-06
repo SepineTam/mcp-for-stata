@@ -17,7 +17,6 @@ from typing import Any, Dict
 
 import pandas as pd
 import pyreadstat
-import requests
 
 from .._diagnostic_logging import elapsed_ms, log_event
 from .base import DataInfoBase

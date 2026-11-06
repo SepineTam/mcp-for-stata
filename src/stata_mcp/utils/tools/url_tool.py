@@ -21,4 +21,3 @@ def get_url_redirect_target(resp: requests.Response) -> str:
         raise ValueError("Redirect response is missing a Location header.")
 
     return urljoin(resp.url, location)
-
