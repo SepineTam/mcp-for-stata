@@ -38,6 +38,7 @@ from .._diagnostic_logging import (
     source_reference,
     utf8_size,
 )
+from ..config import Config
 from ..guard import DataPathAuditor
 from ..observability import debug_step
 from ..utils.tools.url_tool import get_url_redirect_target
@@ -283,13 +284,14 @@ class DataInfoBase(ABC):
         """Keep mandatory metrics and append supported extras."""
         return list(normalize_data_info_metrics(metrics))
 
-    @staticmethod
-    def _load_default_runtime_settings() -> Any | None:
+    @cached_property
+    def config(self) -> Config:
+        return Config()
+
+    def _load_default_runtime_settings(self) -> Any | None:
         """Resolve generic settings for callers that instantiate handlers directly."""
         try:
-            from ..config import Config
-
-            return Config().get_data_info_config("api")
+            return self.config.get_data_info_config("api")
         except Exception as error:
             logger.warning(
                 "Could not resolve default data-info settings: %s",
@@ -558,21 +560,25 @@ class DataInfoBase(ABC):
             return requests.get(url, **kwargs)
 
         # 接着这里主要是处理 URL 跳转问题
+        redirect_count = 0
+        max_redirects = self.config.MAX_DATA_REDIRECTS
         while True:
-            # TODO: 到时候加上最多跳转次数，默认为 6，新增加一个 error 类型叫做 `你这家伙太能跳了Error`
             result = auditor.validate_url(url)
             if isinstance(result, str):
                 raise ValueError(result)
             url, _extension = result
             resp = requests.get(url, **kwargs, allow_redirects=False)
             if not resp.is_redirect:
-                break
-            else:
-                # 这里只用单次跳转，来检查 URL 的安全性，
-                # TODO：到时候设计一个 zero-trust-domain 的防护
-                url = get_url_redirect_target(resp)
+                return resp
 
-        return resp
+            if redirect_count >= max_redirects:
+                raise requests.TooManyRedirects(
+                    f"Data URL exceeded {max_redirects} redirects.",
+                    response=resp,
+                )
+            # TODO: Integrate the zero-trust domain guard.
+            url = get_url_redirect_target(resp)
+            redirect_count += 1
 
     def _fetch_data(
         self,

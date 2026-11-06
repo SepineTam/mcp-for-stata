@@ -14,6 +14,7 @@ IS_ASYNC_DO = false
 MAX_ASYNC_DO = 3
 enable_data_info_url_guard = false
 data_info_allowed_url_domains = []
+max_data_redirects = 6
 enable_structured_log = false
 # Windows only: re-enable the get_data_info MCP tool, which is hidden on
 # Windows by default due to a known Windows-only MCP-wrapper bug.

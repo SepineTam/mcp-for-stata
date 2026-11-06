@@ -109,6 +109,7 @@ class Config:
     URL_SECURITY_BETA_KEYS = (
         "enable_data_info_url_guard",
         "data_info_allowed_url_domains",
+        "max_data_redirects",
     )
 
     def __init__(self, config_file: Optional[Union[str, Path]] = None):
@@ -946,6 +947,15 @@ class Config:
             default=(),
             converter=self._to_str_tuple,
             validator=lambda x: isinstance(x, tuple),
+        )
+
+    @cached_property
+    def MAX_DATA_REDIRECTS(self) -> int:
+        return self._get_config_value(
+            config_keys=["BETA", "max_data_redirects"],
+            env_var="",
+            default=6,
+            validator=lambda value: type(value) is int and value >= 0,
         )
 
     @cached_property
